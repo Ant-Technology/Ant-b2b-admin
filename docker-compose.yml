@@ -1,0 +1,10 @@
+version: '3.6'
+
+services:
+
+  admin-dashboard:
+    restart: unless-stopped
+    build:
+      context: .
+    ports:
+      - "80:80"

@@ -1,0 +1,26 @@
+{
+  "i18n-ally.localesPaths": ["src/locales"],
+  "i18n-ally.keystyle": "flat",
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#00c6f6",
+    "activityBar.activeBorder": "#ffffff",
+    "activityBar.background": "#00c6f6",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#df00b4",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "statusBar.background": "#009dc3",
+    "statusBar.foreground": "#e7e7e7",
+    "statusBarItem.hoverBackground": "#00c6f6",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveForeground": "#e7e7e799",
+    "sash.hoverBorder": "#00c6f6",
+    "statusBarItem.remoteBackground": "#009dc3",
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "commandCenter.border": "#e7e7e799",
+    "titleBar.activeBackground": "#009dc3",
+    "titleBar.inactiveBackground": "#009dc399"
+  },
+  "peacock.color": "#009DC3",
+  "vue3snippets.enable-compile-vue-file-on-did-save-code": false
+}

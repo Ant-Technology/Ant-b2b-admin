@@ -1,0 +1,224 @@
+import { useMutation } from "@apollo/client";
+import {
+  Button,
+  Grid,
+  Group,
+  LoadingOverlay,
+  ScrollArea,
+  SimpleGrid,
+  Tabs,
+  Text,
+  TextInput,
+  useMantineTheme,
+} from "@mantine/core";
+import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
+import { useForm } from "@mantine/form";
+import { useViewportSize } from "@mantine/hooks";
+import { showNotification } from "@mantine/notifications";
+import { CREATE_VEHICLE_TYPE } from "apollo/mutuations";
+import { GET_VEHICLE_TYPES } from "apollo/queries";
+import { customLoader } from "components/utilities/loader";
+import { tabList } from "components/utilities/tablist";
+import React, { useState } from "react";
+import { Photo, PictureInPicture, Upload } from "tabler-icons-react";
+
+const VehicleTypeAddModal = ({
+  setOpened,
+  total,
+  setTotal,
+  activePage,
+  setActivePage,
+}) => {
+  // to control the current active tab
+  const [activeTab, setActiveTab] = useState(tabList[0].value);
+  const [files, setFiles] = useState([]);
+
+  const previews = files.map((file, index) => {
+    const imageUrl = URL.createObjectURL(file);
+    return (
+      <img
+        key={index}
+        src={imageUrl}
+        alt=""
+        width="130"
+        imageProps={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
+      />
+    );
+  });
+  
+  const theme = useMantineTheme();
+  //form initialization and validation
+  const form = useForm({
+    initialValues: {
+      title: { en: "", am: "" },
+    },
+  });
+
+  const [addVehicleType, { loading }] = useMutation(CREATE_VEHICLE_TYPE, {
+    update(cache, { data: { createVehicleType } }) {
+      cache.updateQuery(
+        {
+          query: GET_VEHICLE_TYPES,
+          variables: {
+            first: 10,
+            page: activePage,
+          },
+        },
+        (data) => {
+          if (data.vehicleTypes.data.length === 10) {
+            setTotal(total + 1);
+            setActivePage(total + 1);
+          } else {
+            return {
+              vehicleTypes: {
+                data: [createVehicleType, ...data.vehicleTypes.data],
+              },
+            };
+          }
+        }
+      );
+    },
+  });
+
+  const submit = () => {
+    if (activeTab === tabList[tabList.length - 1].value) {
+      addVehicleType({
+        variables: {
+          title: form.getInputProps("title").value,
+        },
+        onCompleted() {
+          showNotification({
+            color: "green",
+            title: "Success",
+            message: "Vehicle Type Created Successfully",
+          });
+          setOpened(false);
+        },
+        onError(error) {
+          showNotification({
+            color: "red",
+            title: "Error",
+            message: `${error}`,
+          });
+        },
+      });
+    } else {
+      setActiveTab(tabList[tabList.length - 1].value);
+    }
+  };
+
+  const { height } = useViewportSize();
+
+  return (
+    <Tabs color="blue" value={activeTab} onTabChange={setActiveTab}>
+      <LoadingOverlay
+        visible={loading}
+        color="blue"
+        overlayBlur={2}
+        loader={customLoader}
+      />
+      <Tabs.List>
+        {tabList.map((tab, i) => {
+          return (
+            <Tabs.Tab key={i} value={tab.value} icon={<Photo size={14} />}>
+              {tab.name}
+            </Tabs.Tab>
+          );
+        })}
+      </Tabs.List>
+      <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
+        <form onSubmit={form.onSubmit(() => submit())} noValidate>
+          {/* mapping the tablist */}
+          {tabList.map((tab, i) => {
+            return (
+              <Tabs.Panel key={i} value={tab.value} pt="xs">
+                <Grid grow>
+                  <Grid.Col span={6}>
+                    <Grid.Col span={4}>
+                      <TextInput
+                        required
+                        label={tab.label}
+                        placeholder={tab.placeHolder}
+                        {...form.getInputProps("title." + tab.shortHand)}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={4}>
+                    <ScrollArea style={{ height: 300 }}>
+                        <div style={{ marginTop: "25px" }}>
+                          <Dropzone accept={IMAGE_MIME_TYPE} onDrop={setFiles}>
+                            <Group
+                              position="center"
+                              spacing="xl"
+                              style={{ minHeight: 200, pointerEvents: "none" }}
+                            >
+                              <Dropzone.Accept>
+                                <Upload
+                                  size={50}
+                                  stroke={1.5}
+                                  color={
+                                    theme.colors[theme.primaryColor][
+                                      theme.colorScheme === "dark" ? 4 : 6
+                                    ]
+                                  }
+                                />
+                              </Dropzone.Accept>
+                              <Dropzone.Reject>
+                                <PictureInPicture
+                                  size={50}
+                                  stroke={1.5}
+                                  color={
+                                    theme.colors.red[
+                                      theme.colorScheme === "dark" ? 4 : 6
+                                    ]
+                                  }
+                                />
+                              </Dropzone.Reject>
+                              <Dropzone.Idle>
+                                <PictureInPicture size={50} stroke={1.5} />
+                              </Dropzone.Idle>
+
+                              <div>
+                                <Text size="xl" inline>
+                                  Drag images here or click to select files
+                                </Text>
+                                <Text size="sm" color="dimmed" inline mt={7}>
+                                  Attach as many files as you like, each file
+                                  should not exceed 5mb
+                                </Text>
+                              </div>
+                            </Group>
+                          </Dropzone>
+
+                          <SimpleGrid
+                            cols={4}
+                            breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                            mt={previews.length > 0 ? "xl" : 0}
+                          >
+                            {previews}
+                          </SimpleGrid>
+                        </div>
+                      </ScrollArea>
+                    </Grid.Col>
+                    <Grid.Col span={4}>
+                      <Button
+                        style={{ display: activeTab === 1 ? "none" : "" }}
+                        type="submit"
+                        color="blue"
+                        variant="outline"
+                        fullWidth
+                      >
+                        Submit
+                      </Button>
+                    </Grid.Col>
+                  </Grid.Col>
+                </Grid>
+              </Tabs.Panel>
+            );
+          })}
+        </form>
+      </ScrollArea>
+    </Tabs>
+  );
+};
+
+export default VehicleTypeAddModal;
