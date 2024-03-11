@@ -828,7 +828,7 @@ export const UPDATE_USER = gql`
     $name: String!
     $password: String!
     $password_confirmation: String!
-    $profile_image: Upload!
+    $profile_image: Upload
   ) {
     updateUser(
       id: $id
@@ -846,6 +846,7 @@ export const UPDATE_USER = gql`
     }
   }
 `;
+
 //ROles
 export const ATTACH_ROLE = gql`
   mutation ($user_id: ID!, $role: RoleEnum!) {

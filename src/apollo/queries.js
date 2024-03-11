@@ -357,7 +357,21 @@ export const GET_PRODUCT_SKUS = gql`
     }
   }
 `;
-
+// Analytics query
+export const GET_ANALYTICS = gql`
+  query GetAnalytics {
+    getAnalytics {
+      orders
+      ordersChange
+      shipments
+      shipmentsChange
+      totalSales
+      totalSalesChange
+      totalActiveProducts
+      totalActiveProductsChange
+    }
+  }
+`;
 //retailer
 export const GET_RETAILER = gql`
   query ($id: ID) {
