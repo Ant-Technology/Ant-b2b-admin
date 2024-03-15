@@ -160,6 +160,24 @@ const Categories = () => {
       },
     },
     {
+      label: "Product Sku",
+      key: "productSkusCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.productSkusCount}</span>;
+      },
+    },
+    {
+      label: "Products",
+      key: "productCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.productCount}</span>;
+      },
+    },
+    {
       label: "Actions",
       key: "actions",
       sortable: false,
@@ -170,6 +188,7 @@ const Categories = () => {
             <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
             <Edit
               size={24}
+              style={{ marginLeft: "10px" }}
               onClick={() => handleEditCategory(`${rowData.id}`)}
             />
           </>

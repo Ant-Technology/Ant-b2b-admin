@@ -8,14 +8,17 @@ import {
   TextInput,
   Stack,
   Select,
+  MultiSelect,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import { CREATE_DRIVER, CREATE_DROP_OFF } from "apollo/mutuations";
 import {
+  GET_DISTRIBUTORS,
   GET_DRIVERS,
   GET_DROPOFFS,
+  GET_ORDERS,
   GET_REGIONS,
   GET_VEHICLE_TYPES,
 } from "apollo/queries";
@@ -31,6 +34,8 @@ export const DropOffAddModal = ({
   setActivePage,
 }) => {
   const [vehicleTypesDropDownData, setVehicleTypesDropDownData] = useState([]);
+  const [distributorsDropDownData, setDistributorsDropDownData] = useState([]);
+  const [ordersDropDownData, setOrdersDropDownData] = useState([]);
   const form = useForm({
     initialValues: {
       vehicle_type: {
@@ -108,12 +113,72 @@ export const DropOffAddModal = ({
     },
   });
 
+  // graphql queries
+  const { loading: ordersLoading } = useQuery(GET_ORDERS, {
+    variables: {
+      first: 100000,
+      page: 1,
+    },
+    onCompleted(data) {
+      let orders = data.orders;
+      let ordersArray = [];
+
+      // loop over regions data to structure the data for the use of drop down
+      orders.data.forEach((order, index) => {
+        ordersArray.push({
+          label: order?.id,
+          value: order?.id,
+        });
+      });
+
+      // put it on the state
+      setOrdersDropDownData([...ordersArray]);
+    },
+    onError(err) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `${err}`,
+      });
+    },
+  });
+  // graphql queries
+  const { loading: distributorsLoading } = useQuery(GET_DISTRIBUTORS, {
+    variables: {
+      first: 100000,
+      page: 1,
+    },
+    onCompleted(data) {
+      let distributors = data.distributors;
+      let distributorsArray = [];
+
+      // loop over regions data to structure the data for the use of drop down
+      distributors.data.forEach((distributor, index) => {
+        distributorsArray.push({
+          label: distributor?.name,
+          value: distributor?.id,
+        });
+      });
+
+      // put it on the state
+      setDistributorsDropDownData([...distributorsArray]);
+    },
+    onError(err) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `${err}`,
+      });
+    },
+  });
   const { height } = useViewportSize();
 
   const submit = () => {
     addDropOff({
       variables: {
-        region: form.getInputProps("region").value,
+        vehicleType: form.getInputProps("vehicle_type").value,
+        orders: form.getInputProps("orders").value, // Pass selected order IDs
+        from: form.getInputProps("from").value,
       },
       onCompleted(data) {
         showNotification({
@@ -140,10 +205,19 @@ export const DropOffAddModal = ({
   const setVehicleTypeDropDownValue = (val) => {
     form.setFieldValue("vehicle_type.connect", val);
   };
+  const setDistributorDropDownValue = (val) => {
+    form.setFieldValue("from.connect.id", val);
+  };
+  const setOrdersDropDownValue = (values) => {
+    console.log(values);
+    const selectedOrderIds = values.map((order) => order);
+    form.setFieldValue("orders.ids", selectedOrderIds);
+  };
+
   return (
     <>
       <LoadingOverlay
-        visible={vehicleTypesLoading || dropOffLoading}
+        visible={vehicleTypesLoading || dropOffLoading || distributorsLoading}
         color="blue"
         overlayBlur={2}
         loader={customLoader}
@@ -163,19 +237,25 @@ export const DropOffAddModal = ({
                   label="Vehicle_Type"
                   placeholder="Pick a Vehicle Type belongs to"
                 />
-                <TextInput
-                  required
-                  label="Form"
-                  placeholder="Form"
-                  {...form.getInputProps("user.create.name")}
+                <Select
+                  data={distributorsDropDownData}
+                  value={form
+                    .getInputProps("from.connect.id")
+                    ?.value.toString()}
+                  onChange={setDistributorDropDownValue}
+                  label="Distributor"
+                  placeholder="Pick a Distributor belongs to"
                 />
               </Grid.Col>
               <Grid.Col span={6}>
-                <TextInput
-                  required
+                <MultiSelect
+                  data={ordersDropDownData}
+                  value={form.getInputProps("orders")?.value}
+                  onChange={setOrdersDropDownValue}
+                  clearable
                   label="Orders"
-                  placeholder="Orders"
-                  {...form.getInputProps("user.create.email")}
+                  placeholder="Pick one or more Orders"
+                  nothingFoundMessage="Nothing found..."
                 />
               </Grid.Col>
             </Grid>

@@ -18,12 +18,14 @@ export const GET_CATEGORIES = gql`
     categories(
       first: $first
       page: $page
-      parentOnly: true 
+      parentOnly: true
       orderBy: { column: UPDATED_AT, order: ASC }
     ) {
       data {
         id
         name
+        productCount
+        productSkusCount
         name_translations {
           en
           am
@@ -98,6 +100,25 @@ export const GET_WARE_HOUSES = gql`
       data {
         id
         name
+        stocks {
+          id
+          quantity
+          product_sku {
+            variants {
+              attribute {
+                id
+                name
+              }
+              attributeValue {
+                id
+                value
+              }
+            }
+            product {
+              name
+            }
+          }
+        }
         _geo {
           lat
           lng
@@ -269,6 +290,7 @@ export const GET_PRODUCT = gql`
     product(id: $id) {
       id
       name
+      description
       name_translations {
         en
         am
@@ -357,7 +379,21 @@ export const GET_PRODUCT_SKUS = gql`
     }
   }
 `;
-
+// Analytics query
+export const GET_ANALYTICS = gql`
+  query GetAnalytics {
+    getAnalytics {
+      orders
+      ordersChange
+      shipments
+      shipmentsChange
+      totalSales
+      totalSalesChange
+      totalActiveProducts
+      totalActiveProductsChange
+    }
+  }
+`;
 //retailer
 export const GET_RETAILER = gql`
   query ($id: ID) {
@@ -383,6 +419,7 @@ export const GET_RETAILERS = gql`
       data {
         id
         name
+        contact_email
         _geo {
           lat
           lng
@@ -406,7 +443,7 @@ export const GET_RETAILERS = gql`
 // stock
 export const GET_STOCKS = gql`
   query ($first: Int!, $page: Int) {
-    stocks (first: $first, page: $page) {
+    stocks(first: $first, page: $page) {
       data {
         id
         quantity
@@ -733,6 +770,7 @@ export const GET_VEHICLE_TYPES = gql`
       data {
         id
         title
+        image
         created_at
       }
       paginatorInfo {
@@ -770,6 +808,7 @@ export const GET_DRIVERS = gql`
         name
         city
         phone
+        email
       }
       paginatorInfo {
         count
@@ -791,6 +830,7 @@ export const GET_DRIVER = gql`
       name
       city
       phone
+      email
       address
     }
   }

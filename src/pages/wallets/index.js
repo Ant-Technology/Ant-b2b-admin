@@ -92,7 +92,7 @@ const Wallets = () => {
       sortable: false,
       searchable: false,
       render: (rowData) => {
-        return !rowData.confirmed_at_human ? (
+        return rowData.confirmed_at_human ? (
           <span>{rowData.confirmed_at_human} </span>
         ) : (
           <Badge color="yellow">Not Confirmed</Badge>

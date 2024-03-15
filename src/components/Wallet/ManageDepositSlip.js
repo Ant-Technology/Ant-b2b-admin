@@ -27,7 +27,7 @@ const ManageDepositSlip = ({
   //TODO: add button and confirm
   //TODO: close and cache update
   const { height } = useViewportSize();
-
+console.log(data?.depositSlip?.slip)
   return (
     <div>
       <ScrollArea style={{ height: height / 1.1 }}>

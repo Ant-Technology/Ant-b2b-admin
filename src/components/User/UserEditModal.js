@@ -162,18 +162,17 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
   const [editUser, { loading: updateUserLoading }] = useMutation(UPDATE_USER);
 
   const submit = () => {
-    console.log(form.values);
-    console.log(files[files.length - 1]);
-
+    const variables = {
+      id: editId,
+      name: form.getInputProps("name").value,
+      password: form.getInputProps("password").value,
+      password_confirmation: form.getInputProps("password_confirmation").value,
+    };
+    if (files.length > 0) {
+      variables.profile_image = files[files.length - 1];
+    }
     editUser({
-      variables: {
-        id: editId,
-        name: form.getInputProps("name").value,
-        password: form.getInputProps("password").value,
-        password_confirmation: form.getInputProps("password_confirmation")
-          .value,
-        profile_image: files[files.length - 1],
-      },
+      variables,
       onCompleted(data) {
         showNotification({
           color: "green",
@@ -194,6 +193,10 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
     });
   };
 
+  // Filter out roles that are not included in the current roles
+  const availableRoles = roles.filter((role) => {
+    return !currentRoles.some((currentRole) => currentRole.name === role.value);
+  });
   return (
     <>
       <LoadingOverlay
@@ -328,7 +331,7 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
               </>
 
               <Select
-                data={roles}
+                data={availableRoles}
                 value={form.getInputProps("role.connect")?.value}
                 onChange={setRoleDropDownValue}
                 label="Attach Role"
