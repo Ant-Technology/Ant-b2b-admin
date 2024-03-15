@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { DEL_PRODUCT_SKU } from "apollo/mutuations";
-import {  GET_PRODUCT_SKUS } from "apollo/queries";
+import { GET_PRODUCT_SKUS } from "apollo/queries";
 import ProductSkuAddModal from "components/ProductSku/ProductSkuAddModal";
 import ProductSkuEditModal from "components/ProductSku/ProductSkuEditModal";
 import B2bTable from "components/reusable/b2bTable";
@@ -60,7 +60,6 @@ const ProductSkus = () => {
     setActivePage(currentPage);
   };
 
-
   const headerData = [
     {
       label: "id",
@@ -69,6 +68,24 @@ const ProductSkus = () => {
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.id}</span>;
+      },
+    },
+    {
+      label: "SKU",
+      key: "sku",
+      sortable: true,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.sku}</span>;
+      },
+    },
+    {
+      label: "Variant",
+      key: "variant",
+      sortable: true,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.variants?.length}</span>;
       },
     },
 
@@ -82,26 +99,17 @@ const ProductSkus = () => {
       },
     },
     {
-      label: "SKU",
-      key: "sku",
+      label: "Category",
+      key: "product.name",
       sortable: true,
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.sku}</span>;
+        return <span>{rowData.product.name}</span>;
       },
     },
     {
       label: "Price",
       key: "price",
-      sortable: true,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.price}</span>;
-      },
-    },
-    {
-      label: "Variant",
-      key: "variant",
       sortable: true,
       searchable: false,
       render: (rowData) => {
@@ -115,15 +123,11 @@ const ProductSkus = () => {
       searchable: false,
       render: (rowData) => {
         return rowData.is_active ? (
-          <Badge
-            variant="light"
-            color="green"
-          >
+          <Badge variant="light" color="green">
             Active
           </Badge>
         ) : (
-          <Badge variant="light"
-          color="red">
+          <Badge variant="light" color="red">
             Not Active
           </Badge>
         );
@@ -137,7 +141,11 @@ const ProductSkus = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
+            <Trash
+              color="#ed522f"
+              size={24}
+              onClick={() => handleDelete(`${rowData.id}`)}
+            />
             <Edit
               size={24}
               onClick={() => handleEditProduct(`${rowData.id}`)}

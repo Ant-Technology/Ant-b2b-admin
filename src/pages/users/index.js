@@ -23,6 +23,8 @@ import { useState } from "react";
 import { Edit, Trash } from "tabler-icons-react";
 
 const Users = () => {
+  const [isTrashHovered, setIsTrashHovered] = useState(false);
+  const [isEditHovered, setIsEditHovered] = useState(false);
   const [size] = useState(10);
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
@@ -137,8 +139,33 @@ const Users = () => {
               color="#ed522f"
               size={24}
               onClick={() => handleDelete(`${rowData.id}`)}
+              onMouseEnter={() => setIsTrashHovered(true)}
+              onMouseLeave={() => setIsTrashHovered(false)}
+              style={{
+                cursor: "pointer",
+                transition: "opacity 0.3s, box-shadow 0.3s",
+                opacity: isTrashHovered ? 0.8 : 1,
+                boxShadow: isTrashHovered
+                  ? "0 0 10px rgba(0, 0, 0, 0.3)"
+                  : "none",
+              }}
             />
-            <Edit color="orange" size={24} onClick={() => handleEditUser(`${rowData.id}`)} />
+            <Edit
+              onMouseEnter={() => setIsEditHovered(true)}
+              onMouseLeave={() => setIsEditHovered(false)}
+              style={{
+                marginLeft: "10px",
+                cursor: "pointer",
+                transition: "opacity 0.3s, box-shadow 0.3s",
+                opacity: isEditHovered ? 0.8 : 1,
+                boxShadow: isEditHovered
+                  ? "0 0 10px rgba(0, 0, 0, 0.3)"
+                  : "none",
+              }}
+              color="orange"
+              size={24}
+              onClick={() => handleEditUser(`${rowData.id}`)}
+            />
           </>
         );
       },
@@ -244,7 +271,11 @@ const Users = () => {
         position="right"
         size="40%"
       >
-        <UserEditModal setOpenedEdit={setOpenedEdit} editId={editId}  data={data ? data.users.data : []} />
+        <UserEditModal
+          setOpenedEdit={setOpenedEdit}
+          editId={editId}
+          data={data ? data.users.data : []}
+        />
       </Drawer>
       <Modal
         opened={openedDelete}
