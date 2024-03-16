@@ -62,9 +62,9 @@ function ProductDetailModal({ Id }) {
             </thead>
             <tbody>
               <td>{product?.name}</td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td>{product?.category?.name}</td>
+              <td>{product?.orderCount}</td>
+              <td>{product?.variantCount}</td>
               <td>
                 {showFullDescription
                   ? product?.description

@@ -73,7 +73,7 @@ const ProductSkus = () => {
     {
       label: "SKU",
       key: "sku",
-      sortable: true,
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.sku}</span>;
@@ -82,7 +82,7 @@ const ProductSkus = () => {
     {
       label: "Variant",
       key: "variant",
-      sortable: true,
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.variants?.length}</span>;
@@ -91,8 +91,8 @@ const ProductSkus = () => {
 
     {
       label: "Product Name",
-      key: "product.name",
-      sortable: true,
+      key: "productname",
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.product.name}</span>;
@@ -100,7 +100,7 @@ const ProductSkus = () => {
     },
     {
       label: "Category",
-      key: "product.name",
+      key: "productname",
       sortable: true,
       searchable: false,
       render: (rowData) => {

@@ -1,4 +1,4 @@
-import {  useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import {
   LoadingOverlay,
   Modal,
@@ -42,37 +42,34 @@ const Categories = () => {
     },
   });
 
-  
-
   const [delCategory] = useMutation(DEL_CATEGORY, {
     update(cache, { data: { deleteCategory } }) {
-
-        cache.updateQuery(
-          {
-            query: GET_CATEGORIES,
-            variables: {
-              first: 10,
-              page: activePage,
-            },
+      cache.updateQuery(
+        {
+          query: GET_CATEGORIES,
+          variables: {
+            first: 10,
+            page: activePage,
           },
-          (data) => {
-            if (data.categories.data.length === 1) {
-              setTotal(total - 1);
-              setActivePage(activePage - 1);
-            } else {
-              return {
-                categories: {
-                  data: [
-                    ...data.categories.data.filter(
-                      (category) => category.id !== deleteCategory.id
-                    ),
-                  ],
-                },
-              };
-            }
+        },
+        (data) => {
+          if (data.categories.data.length === 1) {
+            setTotal(total - 1);
+            setActivePage(activePage - 1);
+          } else {
+            return {
+              categories: {
+                data: [
+                  ...data.categories.data.filter(
+                    (category) => category.id !== deleteCategory.id
+                  ),
+                ],
+              },
+            };
           }
-        );
-      }
+        }
+      );
+    },
   });
 
   const handleDelete = (id) => {
@@ -147,7 +144,7 @@ const Categories = () => {
       sortable: true,
       searchable: false,
       render: (rowData) => {
-        return <Avatar src={rowData.image} alt="avatar" />;
+        return <Avatar src={rowData.imageUrl} radius="xl" />;
       },
     },
     {
@@ -185,7 +182,11 @@ const Categories = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
+            <Trash
+              color="#ed522f"
+              size={24}
+              onClick={() => handleDelete(`${rowData.id}`)}
+            />
             <Edit
               size={24}
               style={{ marginLeft: "10px" }}
@@ -227,9 +228,9 @@ const Categories = () => {
         size="80%"
       >
         <CategoryEditModal
-        setOpenedEdit={setOpenedEdit}
-        editId={editId}
-        // loading={singleCategoryLoading}
+          setOpenedEdit={setOpenedEdit}
+          editId={editId}
+          // loading={singleCategoryLoading}
         />
       </Drawer>
 

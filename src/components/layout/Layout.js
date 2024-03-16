@@ -16,7 +16,7 @@ const Layout = ({ children }) => {
   const largeScreen = useMediaQuery("(min-width: 800px)");
 
   const theme = useMantineTheme();
-  const [opened, setOpened] = useState(false);
+  const [opened, setOpened] = useState(true);
   return (
     <AppShell
       styles={{

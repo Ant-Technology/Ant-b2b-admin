@@ -48,7 +48,6 @@ const Products = () => {
     },
   });
 
-
   const [delProduct] = useMutation(DEL_PRODUCT, {
     update(cache, { data: { deleteProduct } }) {
       cache.updateQuery(
@@ -138,20 +137,20 @@ const Products = () => {
     },
     {
       label: "Category",
-      key: "name",
+      key: "category",
       sortable: true,
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.name}</span>;
+        return <span>{rowData.category?.name}</span>;
       },
     },
     {
       label: "Product Variant",
-      key: "name",
+      key: "variantCount",
       sortable: true,
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.name}</span>;
+        return <span>{rowData.variantCount}</span>;
       },
     },
     {
@@ -162,12 +161,25 @@ const Products = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
+            <Trash
+              color="#ed522f"
+              size={24}
+              onClick={() => handleDelete(`${rowData.id}`)}
+            />
             <Edit
+              style={{
+                marginLeft: "10px",
+                cursor: "pointer",
+              }}
               size={24}
               onClick={() => handleEditProduct(`${rowData.id}`)}
             />
-             <ManualGearbox color="#1971C2"
+            <ManualGearbox
+              style={{
+                marginLeft: "10px",
+                cursor: "pointer",
+              }}
+              color="#1971C2"
               size={24}
               onClick={() => handleManageProduct(`${rowData.id}`)}
             />

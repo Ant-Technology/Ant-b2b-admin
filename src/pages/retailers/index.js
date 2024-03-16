@@ -155,20 +155,11 @@ const Retailers = () => {
     },
     {
       label: "Phone",
-      key: "city",
+      key: "contact_phone",
       sortable: false,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData.city}</span>;
-      },
-    },
-    {
-      label: "Email",
-      key: "email",
-      sortable: false,
-      searchable: true,
-      render: (rowData) => {
-        return <span>{rowData.contact_email}</span>;
+        return <span>{rowData.contact_phone}</span>;
       },
     },
     {
@@ -177,16 +168,16 @@ const Retailers = () => {
       sortable: true,
       searchable: true,
       render: (rowData) => {
-        return <span style={{ marginLeft: "25px" }}>{rowData.city}</span>;
+        return <span>{rowData.region?.name}</span>;
       },
     },
     {
       label: "Orders",
-      key: "city",
+      key: "orderCount",
       sortable: false,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData.city}</span>;
+        return <span>{rowData.orderCount}</span>;
       },
     },
     {
