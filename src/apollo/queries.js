@@ -31,7 +31,11 @@ export const GET_CATEGORIES = gql`
           am
         }
         isParent
-        image
+        imageUrl
+        image {
+          id
+          original_url
+        }
       }
       paginatorInfo {
         count
@@ -246,6 +250,11 @@ export const GET_PRODUCTS = gql`
         id
         name
         description
+        category {
+          id
+          name
+        }
+        variantCount
         short_description
         images {
           id
@@ -291,6 +300,12 @@ export const GET_PRODUCT = gql`
       id
       name
       description
+      category {
+        id
+        name
+      }
+      variantCount
+      orderCount
       name_translations {
         en
         am
@@ -425,6 +440,12 @@ export const GET_RETAILERS = gql`
           lng
         }
         city
+        region {
+          id
+          name
+        }
+        orderCount
+        contact_phone
         contact_name
       }
       paginatorInfo {
@@ -531,6 +552,16 @@ export const GET_ORDERS = gql`
         id
         total_price
         created_at_human
+        retailer {
+          id
+          name
+        }
+        state
+        productSkuCount
+        driver {
+          id
+          name
+        }
         items {
           id
           quantity
@@ -806,9 +837,6 @@ export const GET_DRIVERS = gql`
       data {
         id
         name
-        city
-        phone
-        email
       }
       paginatorInfo {
         count
