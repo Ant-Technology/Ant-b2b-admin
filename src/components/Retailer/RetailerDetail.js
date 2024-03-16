@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { ManualGearbox } from "tabler-icons-react";
 import { useForm } from "@mantine/form";
+import Map from "components/utilities/Map";
 import { useQuery, useMutation } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
 import { customLoader } from "components/utilities/loader";
@@ -22,6 +23,7 @@ import {
   GET_SHIPMENTS,
 } from "apollo/queries";
 import { SHIP_ITEM } from "apollo/mutuations";
+import { useViewportSize } from "@mantine/hooks";
 
 function RetailerDetailModal({ Id }) {
   // state variables
@@ -34,8 +36,11 @@ function RetailerDetailModal({ Id }) {
       setRetailer(retailer);
     },
   });
+  
+  const { height } = useViewportSize();
 
   return (
+    <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
     <div style={{ width: "98%", margin: "auto" }}>
       <LoadingOverlay
         visible={retailerLoading}
@@ -68,8 +73,18 @@ function RetailerDetailModal({ Id }) {
             </tbody>
           </Table>
         </ScrollArea>
+        <div style={{ marginTop: "60px" }}>
+        <Grid style={{ marginTop: "30px" }}>
+              <Grid.Col span={12}>
+                <ScrollArea style={{ height: "auto" }}>
+                  <Map location={retailer?._geo} />
+                </ScrollArea>
+              </Grid.Col>
+            </Grid>
+       </div>
       </Card>
     </div>
+    </ScrollArea>
   );
 }
 
