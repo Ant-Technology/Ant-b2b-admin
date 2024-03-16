@@ -100,17 +100,27 @@ const ProductSkus = () => {
     },
     {
       label: "Category",
-      key: "productname",
-      sortable: true,
+      key: "category",
+      sortable: false,
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.product.name}</span>;
+        return <span>{rowData.category?.name}</span>;
+      },
+    },
+    //orderCount
+    {
+      label: "OrderCount",
+      key: "orderCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.orderCount}</span>;
       },
     },
     {
       label: "Price",
       key: "price",
-      sortable: true,
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.price}</span>;

@@ -60,24 +60,7 @@ const Map = ({ location, setLocation }) => {
       setCenter({ lat: location.lat, lng: location.lng });
     }
   }, [location]);
-  useEffect(() => {
-    if (navigator.geolocation) {
-      // Get the current position
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          // setCenter({
-          //   lat: position.coords.latitude,
-          //   lng: position.coords.longitude,
-          // });
-          console.log(position.coords.latitude);
-          console.log(position.coords.longitude);
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
-    }
-  }, []);
+console.log("Center",center)
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: GOOGLE_API_KEY,

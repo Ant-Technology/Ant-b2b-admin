@@ -9,17 +9,58 @@ import {
   Grid,
   Stack,
   Select,
+  createStyles,
+  Group,
+  Paper,
+  SimpleGrid,
+  Text,
+  Image,
 } from "@mantine/core";
-import { ManualGearbox } from "tabler-icons-react";
-import { useForm } from "@mantine/form";
-import { useQuery, useMutation } from "@apollo/client";
-import { showNotification } from "@mantine/notifications";
+import { useQuery } from "@apollo/client";
 import { customLoader } from "components/utilities/loader";
-import { GET_ORDER, GET_PRODUCT, GET_SHIPMENTS } from "apollo/queries";
-import { SHIP_ITEM } from "apollo/mutuations";
+import { GET_PRODUCT, GET_SHIPMENTS } from "apollo/queries";
+import { UserPlus, Discount2, Receipt2, Coin } from "tabler-icons-react";
+
+const useStyles = createStyles((theme) => ({
+  root: {
+    padding: theme.spacing.xl * 1.5,
+  },
+
+  value: {
+    fontSize: 17,
+    fontWeight: 500,
+    lineHeight: 1,
+  },
+
+  diff: {
+    lineHeight: 1,
+    display: "flex",
+    alignItems: "center",
+  },
+
+  icon: {
+    color:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[3]
+        : theme.colors.gray[4],
+  },
+
+  title: {
+    fontWeight: 700,
+    textTransform: "uppercase",
+  },
+}));
+
+const icons = {
+  user: UserPlus,
+  discount: Discount2,
+  receipt: Receipt2,
+  coin: Coin,
+};
 
 function ProductDetailModal({ Id }) {
   // state variables
+  const { classes } = useStyles();
   const [product, setProduct] = useState();
   const [showFullDescription, setShowFullDescription] = useState(false);
 
@@ -44,7 +85,51 @@ function ProductDetailModal({ Id }) {
         overlayBlur={2}
         loader={customLoader}
       />
-      <Card shadow="sm" p="lg">
+      <Card style={{ width: "40%" }} shadow="sm" radius="md" withBorder>
+        <div style={{ paddingLeft: "20px" }}>
+          <Group align="flex-end" spacing="xs" mt={25}>
+            <Text size="sm" weight={500} className={classes.diff}>
+              <span>
+                Product Name<span style={{ marginLeft: "5px" }}>:</span>
+              </span>
+            </Text>
+            <Text className={classes.value}>{product?.name}</Text>
+          </Group>
+          <Group align="flex-end" spacing="xs" mt={25}>
+            <Text size="sm" weight={500} className={classes.diff}>
+              <span>
+                Category<span style={{ marginLeft: "5px" }}>:</span>
+              </span>
+            </Text>
+            <Text className={classes.value}>{product?.category?.name}</Text>
+          </Group>
+          <Group align="flex-end" spacing="xs" mt={25}>
+            <Text size="sm" weight={500} className={classes.diff}>
+              <span>
+                Description<span style={{ marginLeft: "5px" }}>:</span>
+              </span>
+            </Text>
+            <Text className={classes.value}>{product?.description}</Text>
+          </Group>
+          <Group align="flex-end" spacing="xs" mt={25}>
+            <Text size="sm" weight={500} className={classes.diff}>
+              <span>
+                Order Count<span style={{ marginLeft: "5px" }}>:</span>
+              </span>
+            </Text>
+            <Text className={classes.value}>{product?.orderCount}</Text>
+          </Group>
+          <Group align="flex-end" spacing="xs" mt={25}>
+            <Text size="sm" weight={500} className={classes.diff}>
+              <span>
+                Variant Count <span style={{ marginLeft: "5px" }}>:</span>
+              </span>
+            </Text>
+            <Text className={classes.value}>{product?.variantCount}</Text>
+          </Group>
+        </div>
+      </Card>
+      <Card style={{ marginTop: "30px" }} shadow="sm" p="lg">
         <ScrollArea>
           <Table
             horizontalSpacing="md"

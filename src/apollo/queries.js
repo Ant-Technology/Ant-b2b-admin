@@ -263,10 +263,7 @@ export const GET_PRODUCTS = gql`
         attributes {
           id
           name
-          values {
-            id
-            value
-          }
+          
         }
       }
       paginatorInfo {
@@ -306,34 +303,10 @@ export const GET_PRODUCT = gql`
       }
       variantCount
       orderCount
-      name_translations {
-        en
-        am
-      }
-      short_description_translations {
-        en
-        am
-      }
-      description_translations {
-        en
-        am
-      }
       is_active
       attributes {
         id
         name
-        name_translations {
-          am
-          en
-        }
-        values {
-          id
-          value
-          value_translations {
-            en
-            am
-          }
-        }
       }
       category {
         id
@@ -367,6 +340,11 @@ export const GET_PRODUCT_SKUS = gql`
         sku
         price
         is_active
+        orderCount
+        category {
+          id
+          name
+        }
         product {
           name
         }
@@ -418,6 +396,10 @@ export const GET_RETAILER = gql`
       contact_email
       contact_name
       contact_phone
+      _geo {
+        lat
+        lng
+      }
       address
       city
       _geo {
