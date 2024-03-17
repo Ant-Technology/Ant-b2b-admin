@@ -37,6 +37,6 @@ jobs:
               git checkout develop
               git pull origin develop
             fi
-            docker-compose down
-            docker-compose build
-            docker-compose up -d
+            docker compose down
+            docker compose build
+            docker compose up -d
