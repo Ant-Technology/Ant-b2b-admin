@@ -33,10 +33,10 @@ jobs:
               git checkout master
               git pull origin master
             elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-              # Deployment for stage branch
+              # Deployment for develop branch
               git checkout develop
               git pull origin develop
             fi
-            docker-compose build
             docker-compose down
+            docker-compose build
             docker-compose up -d
