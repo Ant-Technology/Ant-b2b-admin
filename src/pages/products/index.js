@@ -150,7 +150,7 @@ const Products = () => {
       sortable: true,
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.variantCount}</span>;
+        return <span>{rowData.productSkusCount}</span>;
       },
     },
     {

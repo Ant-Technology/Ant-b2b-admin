@@ -20,6 +20,7 @@ import { useQuery } from "@apollo/client";
 import { customLoader } from "components/utilities/loader";
 import { GET_PRODUCT, GET_SHIPMENTS } from "apollo/queries";
 import { UserPlus, Discount2, Receipt2, Coin } from "tabler-icons-react";
+import { useViewportSize } from "@mantine/hooks";
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -62,12 +63,6 @@ function ProductDetailModal({ Id }) {
   // state variables
   const { classes } = useStyles();
   const [product, setProduct] = useState();
-  const [showFullDescription, setShowFullDescription] = useState(false);
-
-  // mutation
-  const toggleDescription = () => {
-    setShowFullDescription(!showFullDescription);
-  };
 
   const { loading: productLoading } = useQuery(GET_PRODUCT, {
     variables: { id: Id },
@@ -76,8 +71,9 @@ function ProductDetailModal({ Id }) {
       setProduct(order);
     },
   });
-
+  const { height } = useViewportSize();
   return (
+    <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
     <div style={{ width: "98%", margin: "auto" }}>
       <LoadingOverlay
         visible={productLoading}
@@ -125,49 +121,43 @@ function ProductDetailModal({ Id }) {
                 Variant Count <span style={{ marginLeft: "5px" }}>:</span>
               </span>
             </Text>
-            <Text className={classes.value}>{product?.variantCount}</Text>
+            <Text className={classes.value}>{product?.skus.length}</Text>
           </Group>
         </div>
       </Card>
       <Card style={{ marginTop: "30px" }} shadow="sm" p="lg">
-        <ScrollArea>
-          <Table
-            horizontalSpacing="md"
-            verticalSpacing="xs"
-            sx={{ tableLayout: "fixed", minWidth: 700 }}
-          >
-            <thead>
-              <tr>
-                <th>Product Name</th>
-                <th>Category</th>
-                <th>Orders</th>
-                <th>Product Variants</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              <td>{product?.name}</td>
-              <td>{product?.category?.name}</td>
-              <td>{product?.orderCount}</td>
-              <td>{product?.variantCount}</td>
-              <td>
-                {showFullDescription
-                  ? product?.description
-                  : `${product?.description.substring(0, 50)}...`}
-                {product?.description.length > 50 && (
-                  <span
-                    style={{ color: "blue", cursor: "pointer" }}
-                    onClick={toggleDescription}
-                  >
-                    {showFullDescription ? "See Less" : "See More"}
-                  </span>
-                )}
-              </td>
-            </tbody>
-          </Table>
-        </ScrollArea>
+      <ScrollArea>
+      <Text size="md" weight={500} className={classes.diff}>
+              <span>
+               Product Variants
+              </span>
+            </Text>
+            <Table
+              horizontalSpacing="md"
+              verticalSpacing="xs"
+              sx={{ tableLayout: "fixed", minWidth: 600 }}
+            >
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {product?.skus?.map((sku) => (
+                  <tr key={sku.id}>
+                    <td>{sku.sku}</td>
+                    <td>{sku.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </ScrollArea>
+
+         
       </Card>
     </div>
+    </ScrollArea>
   );
 }
 

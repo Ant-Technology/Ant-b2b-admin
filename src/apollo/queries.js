@@ -206,6 +206,10 @@ export const GET_REGIONS = gql`
       data {
         id
         name
+        retailersCount
+        driversCount
+        warehousesCount
+        distributorsCount
         _geo {
           lat
           lng
@@ -254,7 +258,7 @@ export const GET_PRODUCTS = gql`
           id
           name
         }
-        variantCount
+        productSkusCount
         short_description
         images {
           id
@@ -263,7 +267,6 @@ export const GET_PRODUCTS = gql`
         attributes {
           id
           name
-          
         }
       }
       paginatorInfo {
@@ -301,7 +304,6 @@ export const GET_PRODUCT = gql`
         id
         name
       }
-      variantCount
       orderCount
       is_active
       attributes {
@@ -311,7 +313,12 @@ export const GET_PRODUCT = gql`
       category {
         id
       }
-
+      skus {
+        id
+        sku
+        price
+        is_active
+      }
       images {
         id
         original_url
@@ -784,6 +791,7 @@ export const GET_VEHICLE_TYPES = gql`
         id
         title
         image
+        vehicleCount
         created_at
       }
       paginatorInfo {
