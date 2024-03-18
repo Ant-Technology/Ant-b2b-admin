@@ -6,9 +6,11 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
     branches:
       - main
+      - develop
 
 # Authenticate to the the server via ssh
 # and run our deployment script
@@ -25,8 +27,16 @@ jobs:
           port: ${{ secrets.PROD_PORT }}
           key: ${{ secrets.PROD_SSHKEY }}
           script: |
-            cd b2b-admin-dashboard
-            git pull
-            docker-compose build
-            docker-compose down
-            docker-compose up -d
+            cd b2b-admin
+            if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+              # Deployment for master branch
+              git checkout master
+              git pull origin master
+            elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+              # Deployment for develop branch
+              git checkout develop
+              git pull origin develop
+            fi
+            docker compose down
+            docker compose build
+            docker compose up -d

@@ -8,6 +8,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "tabler-icons-react";
+import { useQuery } from "@apollo/client";
+import { GET_ANALYTICS } from "apollo/queries";
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -46,10 +48,20 @@ const icons = {
   coin: Coin,
 };
 
+export default function StatsGrid({ datas }) {
+  const { data, loading } = useQuery(GET_ANALYTICS);
 
-export default function StatsGrid({ data }) {
   const { classes } = useStyles();
-  const stats = data.map((stat) => {
+  const fieldMap = {
+    "Orders": "orders",
+    "Shipments": "shipments",
+    "Total Sales": "totalSales",
+    "Total Active Products": "totalActiveProducts"
+  };
+  const stats = datas.map((stat) => {
+    if (!loading && fieldMap[stat.title]) {
+      stat.value = data?.getAnalytics[fieldMap[stat.title]];
+    }
     const Icon = icons[stat.icon];
     const DiffIcon = stat.diff > 0 ? ArrowUpRight : ArrowDownRight;
 

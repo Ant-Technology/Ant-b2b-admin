@@ -6,19 +6,19 @@ const data = [
   {
     title: "Orders",
     icon: "receipt",
-    value: "1,456",
+    value: "",
     diff: 34,
   },
   {
     title: "Shipments",
     icon: "coin",
-    value: "4,145",
+    value: "",
     diff: 13,
   },
   {
     title: "Total Sales",
     icon: "discount",
-    value: "745,000 ETB",
+    value: "",
     diff: 18,
   },
   {
@@ -33,7 +33,7 @@ const Dashboard = () => {
   return (
     <>
       <div style={{}}>
-        <StatsGrid data={data} />
+        <StatsGrid datas={data} />
         <div style={{ width: "96%", marginLeft: 40 }}>
           <Card shadow="sm" p="lg">
             {/* <Calander /> */}

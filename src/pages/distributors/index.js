@@ -20,6 +20,8 @@ import { customLoader } from "components/utilities/loader";
 
 const Distributors = () => {
   //states
+  const [isTrashHovered, setIsTrashHovered] = useState(false);
+  const [isEditHovered, setIsEditHovered] = useState(false);
   const [size] = useState(10);
   const [opened, setOpened] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -170,10 +172,31 @@ const Distributors = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
+            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)}
+            onMouseEnter={() => setIsTrashHovered(true)}
+            onMouseLeave={() => setIsTrashHovered(false)}
+            style={{
+              cursor: "pointer",
+              transition: "opacity 0.3s, box-shadow 0.3s",
+              opacity: isTrashHovered ? 0.8 : 1,
+              boxShadow: isTrashHovered
+                ? "0 0 10px rgba(0, 0, 0, 0.3)"
+                : "none",
+            }} />
             <Edit
               size={24}
               onClick={() => handleEditDistributor(`${rowData.id}`)}
+              onMouseEnter={() => setIsEditHovered(true)}
+              onMouseLeave={() => setIsEditHovered(false)}
+              style={{
+                cursor: "pointer",
+                marginLeft: "10px",
+                transition: "opacity 0.3s, box-shadow 0.3s",
+                opacity: isEditHovered ? 0.8 : 1,
+                boxShadow: isEditHovered
+                  ? "0 0 10px rgba(0, 0, 0, 0.3)"
+                  : "none",
+              }}
             />
           </>
         );

@@ -48,6 +48,9 @@ const RetailerAddModal = ({
           email: "test@mail.com",
           password: "fafa",
           password_confirmation: "fafa",
+          role: {
+            connect: "3"
+          }
         },
       },
     },

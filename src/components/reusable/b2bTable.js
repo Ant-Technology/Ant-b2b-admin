@@ -13,7 +13,7 @@ import {
   Container,
   Pagination,
   Button,
-
+  Tooltip,
 } from "@mantine/core";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { customLoader } from "components/utilities/loader";
@@ -67,12 +67,14 @@ function Th({ children, reversed, sorted, onSort }) {
 }
 
 function filterData(data, search) {
-
   // console.log("data is ", data, search, data, Object.keys(data[0]))
   const query = search.toLowerCase().trim();
   return data.filter((item) =>
     Object.keys(item).some(
-      (key) => typeof item[key] === "string" && item[key] && item[key].toLowerCase().includes(query)
+      (key) =>
+        typeof item[key] === "string" &&
+        item[key] &&
+        item[key].toLowerCase().includes(query)
     )
   );
 }

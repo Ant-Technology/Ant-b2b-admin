@@ -5,6 +5,7 @@ import {
   TextInput,
   PasswordInput,
   Button,
+  Form,
   Title,
   LoadingOverlay,
 } from "@mantine/core";
@@ -58,7 +59,8 @@ const Login = () => {
   const [loginReq, { loading }] = useMutation(LOGIN);
   const [authdata, { loading: authLoading }] = useLazyQuery(AUTH);
   const navigate = useNavigate();
-  const login = () => {
+  const login = (e) => {
+    e.preventDefault();
     loginReq({
       fetchPolicy: "no-cache",
       variables: {
@@ -70,11 +72,11 @@ const Login = () => {
           localStorage.setItem("auth_token", data.login.token);
           const tok = localStorage.getItem("auth_token");
           authdata({
-            onCompleted(data){
-              console.log("ayuuuuu",data)
-              authDataVar(data)
-            }
-          })
+            onCompleted(data) {
+              console.log("ayuuuuu", data);
+              authDataVar(data);
+            },
+          });
           if (tok && authDataVar().auth) {
             navigate("/");
           }
@@ -90,6 +92,12 @@ const Login = () => {
     });
   };
 
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      login(event);
+    }
+  };
+
   return (
     <div className={classes.wrapper}>
       <LoadingOverlay visible={loading || authLoading} />
@@ -103,30 +111,33 @@ const Login = () => {
         >
           Welcome back to Act B2B!
         </Title>
+        <form onSubmit={login}>
+          <TextInput
+            label="Email address"
+            placeholder="hello@gmail.com"
+            size="md"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+          <PasswordInput
+            label="Password"
+            placeholder="Your password"
+            mt="md"
+            size="md"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+          {/* <Checkbox label="Keep me logged in" mt="xl" size="md" /> */}
+          <Button fullWidth mt="xl" size="md" onClick={login}>
+            Login
+          </Button>
 
-        <TextInput
-          label="Email address"
-          placeholder="hello@gmail.com"
-          size="md"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <PasswordInput
-          label="Password"
-          placeholder="Your password"
-          mt="md"
-          size="md"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {/* <Checkbox label="Keep me logged in" mt="xl" size="md" /> */}
-        <Button fullWidth mt="xl" size="md" onClick={login}>
-          Login
-        </Button>
-
-        {/* <Text align="center" mt="md">
+          {/* <Text align="center" mt="md">
           Don&apos;t have an account?{" "}
         </Text> */}
+        </form>
       </Paper>
     </div>
   );

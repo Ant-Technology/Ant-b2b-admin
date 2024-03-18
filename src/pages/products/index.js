@@ -13,12 +13,13 @@ import {
 import { showNotification } from "@mantine/notifications";
 import { DEL_PRODUCT } from "apollo/mutuations";
 import { GET_PRODUCTS } from "apollo/queries";
+import ProductDetailModal from "components/Product/ProductDetail";
 import ProductAddModal from "components/Product/productAddModal";
 import ProductEditModal from "components/Product/productEditModal";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import React, { useEffect, useState } from "react";
-import { Edit, Trash } from "tabler-icons-react";
+import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 
 const Products = () => {
   const [size] = useState(10);
@@ -26,6 +27,7 @@ const Products = () => {
   const [activePage, setActivePage] = useState(1);
   const [hasMounted, setHasMounted] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
+  const [openedDetail, setOpenedDetail] = useState(false);
   //
   const [opened, setOpened] = useState(false);
   const [editId, setEditId] = useState();
@@ -33,6 +35,10 @@ const Products = () => {
   const [openedDelete, setOpenedDelete] = useState(false);
 
   const theme = useMantineTheme();
+  const handleManageProduct = (id) => {
+    setEditId(id);
+    setOpenedDetail(true);
+  };
 
   const { data, loading, fetchMore } = useQuery(GET_PRODUCTS, {
     // fetchPolicy: "no-cache",
@@ -41,7 +47,6 @@ const Products = () => {
       page: activePage,
     },
   });
-
 
   const [delProduct] = useMutation(DEL_PRODUCT, {
     update(cache, { data: { deleteProduct } }) {
@@ -109,7 +114,7 @@ const Products = () => {
     {
       label: "Avatar",
       key: "avatar",
-      sortable: true,
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return (
@@ -131,12 +136,21 @@ const Products = () => {
       },
     },
     {
-      label: "Short Description",
-      key: "short_description",
+      label: "Category",
+      key: "category",
       sortable: true,
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.short_description}</span>;
+        return <span>{rowData.category?.name}</span>;
+      },
+    },
+    {
+      label: "Product Variant",
+      key: "variantCount",
+      sortable: true,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.productSkusCount}</span>;
       },
     },
     {
@@ -147,10 +161,27 @@ const Products = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
+            <Trash
+              color="#ed522f"
+              size={24}
+              onClick={() => handleDelete(`${rowData.id}`)}
+            />
             <Edit
+              style={{
+                marginLeft: "10px",
+                cursor: "pointer",
+              }}
               size={24}
               onClick={() => handleEditProduct(`${rowData.id}`)}
+            />
+            <ManualGearbox
+              style={{
+                marginLeft: "10px",
+                cursor: "pointer",
+              }}
+              color="#1971C2"
+              size={24}
+              onClick={() => handleManageProduct(`${rowData.id}`)}
             />
           </>
         );
@@ -219,6 +250,30 @@ const Products = () => {
           </Button>
         </Group>
       </Modal>
+      <Drawer
+        opened={openedDetail}
+        overlayColor={
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2]
+        }
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        title="Product Detail"
+        padding="xl"
+        onClose={() => setOpenedDetail(false)}
+        position="bottom"
+        size="80%"
+      >
+        <ProductDetailModal
+          total={total}
+          setTotal={setTotal}
+          activePage={activePage}
+          setActivePage={setActivePage}
+          setOpenedDetail={setOpenedDetail}
+          Id={editId}
+        />
+      </Drawer>
       <Drawer
         opened={opened}
         onClose={() => setOpened(false)}

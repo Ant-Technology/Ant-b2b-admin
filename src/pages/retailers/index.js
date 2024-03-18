@@ -13,11 +13,12 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { DEL_RETAILER } from "apollo/mutuations";
-import {  GET_RETAILERS } from "apollo/queries";
+import { GET_RETAILERS } from "apollo/queries";
 import RetailerAddModal from "components/Retailer/RetailerAddModal";
 import B2bTable from "components/reusable/b2bTable";
-import { Edit, Trash } from "tabler-icons-react";
+import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import RetailerEditModal from "components/Retailer/RetailerEditModal";
+import RetailerDetailModal from "components/Retailer/RetailerDetail";
 
 const Retailers = () => {
   const [size] = useState(10);
@@ -26,6 +27,7 @@ const Retailers = () => {
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
+  const [openedDetail, setOpenedDetail] = useState(false);
 
   //pagination states
   const [activePage, setActivePage] = useState(1);
@@ -119,7 +121,10 @@ const Retailers = () => {
     setActivePage(currentPage);
   };
   const theme = useMantineTheme();
-
+  const handleManageRetailer = (id)=>{
+    setEditId(id);
+    setOpenedDetail(true);
+  }
   const headerData = [
     {
       label: "id",
@@ -140,23 +145,41 @@ const Retailers = () => {
       },
     },
     {
-        label: "City",
-        key: "city",
-        sortable: false,
-        searchable: true,
-        render: (rowData) => {
-          return <span>{rowData.city}</span>;
-        },
+      label: "City",
+      key: "city",
+      sortable: false,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.city}</span>;
       },
-      {
-        label: "Contact Name",
-        key: "contact_name",
-        sortable: false,
-        searchable: false,
-        render: (rowData) => {
-          return <span>{rowData.contact_name}</span>;
-        },
+    },
+    {
+      label: "Phone",
+      key: "contact_phone",
+      sortable: false,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.contact_phone}</span>;
       },
+    },
+    {
+      label: "Region",
+      key: "city",
+      sortable: true,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.region?.name}</span>;
+      },
+    },
+    {
+      label: "Orders",
+      key: "orderCount",
+      sortable: false,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.orderCount}</span>;
+      },
+    },
     {
       label: "Actions",
       key: "actions",
@@ -165,8 +188,28 @@ const Retailers = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
-            <Edit size={24} onClick={() => handleEditRetailer(`${rowData.id}`)} />
+            <Trash
+              color="#ed522f"
+              size={24}
+              onClick={() => handleDelete(`${rowData.id}`)}
+            />
+            <Edit
+              style={{
+                cursor: "pointer",
+                marginLeft: "10px",
+              }}
+              size={24}
+              onClick={() => handleEditRetailer(`${rowData.id}`)}
+            />
+            <ManualGearbox
+              color="#1971C2"
+              style={{
+                cursor: "pointer",
+                marginLeft: "10px",
+              }}
+              size={24}
+              onClick={() => handleManageRetailer(`${rowData.id}`)}
+            />
           </>
         );
       },
@@ -202,9 +245,31 @@ const Retailers = () => {
         position="bottom"
         size="80%"
       >
-        <RetailerEditModal
-          setOpenedEdit={setOpenedEdit}
-          editId={editId}
+        <RetailerEditModal setOpenedEdit={setOpenedEdit} editId={editId} />
+      </Drawer>
+      
+      <Drawer
+        opened={openedDetail}
+        overlayColor={
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2]
+        }
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        title="Retailer Detail"
+        padding="xl"
+        onClose={() => setOpenedDetail(false)}
+        position="bottom"
+        size="80%"
+      >
+        <RetailerDetailModal
+          total={total}
+          setTotal={setTotal}
+          activePage={activePage}
+          setActivePage={setActivePage}
+          setOpenedDetail={setOpenedDetail}
+          Id={editId}
         />
       </Drawer>
 

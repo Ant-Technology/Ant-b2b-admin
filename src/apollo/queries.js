@@ -18,18 +18,24 @@ export const GET_CATEGORIES = gql`
     categories(
       first: $first
       page: $page
-      parentOnly: true 
+      parentOnly: true
       orderBy: { column: UPDATED_AT, order: ASC }
     ) {
       data {
         id
         name
+        productCount
+        productSkusCount
         name_translations {
           en
           am
         }
         isParent
-        image
+        imageUrl
+        image {
+          id
+          original_url
+        }
       }
       paginatorInfo {
         count
@@ -98,6 +104,25 @@ export const GET_WARE_HOUSES = gql`
       data {
         id
         name
+        stocks {
+          id
+          quantity
+          product_sku {
+            variants {
+              attribute {
+                id
+                name
+              }
+              attributeValue {
+                id
+                value
+              }
+            }
+            product {
+              name
+            }
+          }
+        }
         _geo {
           lat
           lng
@@ -181,6 +206,10 @@ export const GET_REGIONS = gql`
       data {
         id
         name
+        retailersCount
+        driversCount
+        warehousesCount
+        distributorsCount
         _geo {
           lat
           lng
@@ -225,6 +254,11 @@ export const GET_PRODUCTS = gql`
         id
         name
         description
+        category {
+          id
+          name
+        }
+        productSkusCount
         short_description
         images {
           id
@@ -233,10 +267,6 @@ export const GET_PRODUCTS = gql`
         attributes {
           id
           name
-          values {
-            id
-            value
-          }
         }
       }
       paginatorInfo {
@@ -269,39 +299,26 @@ export const GET_PRODUCT = gql`
     product(id: $id) {
       id
       name
-      name_translations {
-        en
-        am
+      description
+      category {
+        id
+        name
       }
-      short_description_translations {
-        en
-        am
-      }
-      description_translations {
-        en
-        am
-      }
+      orderCount
       is_active
       attributes {
         id
         name
-        name_translations {
-          am
-          en
-        }
-        values {
-          id
-          value
-          value_translations {
-            en
-            am
-          }
-        }
       }
       category {
         id
       }
-
+      skus {
+        id
+        sku
+        price
+        is_active
+      }
       images {
         id
         original_url
@@ -330,6 +347,11 @@ export const GET_PRODUCT_SKUS = gql`
         sku
         price
         is_active
+        orderCount
+        category {
+          id
+          name
+        }
         product {
           name
         }
@@ -357,7 +379,21 @@ export const GET_PRODUCT_SKUS = gql`
     }
   }
 `;
-
+// Analytics query
+export const GET_ANALYTICS = gql`
+  query GetAnalytics {
+    getAnalytics {
+      orders
+      ordersChange
+      shipments
+      shipmentsChange
+      totalSales
+      totalSalesChange
+      totalActiveProducts
+      totalActiveProductsChange
+    }
+  }
+`;
 //retailer
 export const GET_RETAILER = gql`
   query ($id: ID) {
@@ -367,6 +403,10 @@ export const GET_RETAILER = gql`
       contact_email
       contact_name
       contact_phone
+      _geo {
+        lat
+        lng
+      }
       address
       city
       _geo {
@@ -383,11 +423,18 @@ export const GET_RETAILERS = gql`
       data {
         id
         name
+        contact_email
         _geo {
           lat
           lng
         }
         city
+        region {
+          id
+          name
+        }
+        orderCount
+        contact_phone
         contact_name
       }
       paginatorInfo {
@@ -406,7 +453,7 @@ export const GET_RETAILERS = gql`
 // stock
 export const GET_STOCKS = gql`
   query ($first: Int!, $page: Int) {
-    stocks (first: $first, page: $page) {
+    stocks(first: $first, page: $page) {
       data {
         id
         quantity
@@ -494,6 +541,16 @@ export const GET_ORDERS = gql`
         id
         total_price
         created_at_human
+        retailer {
+          id
+          name
+        }
+        state
+        productSkuCount
+        driver {
+          id
+          name
+        }
         items {
           id
           quantity
@@ -733,6 +790,8 @@ export const GET_VEHICLE_TYPES = gql`
       data {
         id
         title
+        image
+        vehicleCount
         created_at
       }
       paginatorInfo {
@@ -768,8 +827,6 @@ export const GET_DRIVERS = gql`
       data {
         id
         name
-        city
-        phone
       }
       paginatorInfo {
         count
@@ -791,6 +848,7 @@ export const GET_DRIVER = gql`
       name
       city
       phone
+      email
       address
     }
   }

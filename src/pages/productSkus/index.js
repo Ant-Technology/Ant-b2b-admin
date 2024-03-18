@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { DEL_PRODUCT_SKU } from "apollo/mutuations";
-import {  GET_PRODUCT_SKUS } from "apollo/queries";
+import { GET_PRODUCT_SKUS } from "apollo/queries";
 import ProductSkuAddModal from "components/ProductSku/ProductSkuAddModal";
 import ProductSkuEditModal from "components/ProductSku/ProductSkuEditModal";
 import B2bTable from "components/reusable/b2bTable";
@@ -60,7 +60,6 @@ const ProductSkus = () => {
     setActivePage(currentPage);
   };
 
-
   const headerData = [
     {
       label: "id",
@@ -71,38 +70,57 @@ const ProductSkus = () => {
         return <span>{rowData.id}</span>;
       },
     },
-
-    {
-      label: "Product Name",
-      key: "product.name",
-      sortable: true,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.product.name}</span>;
-      },
-    },
     {
       label: "SKU",
       key: "sku",
-      sortable: true,
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.sku}</span>;
       },
     },
     {
-      label: "Price",
-      key: "price",
-      sortable: true,
+      label: "Variant",
+      key: "variant",
+      sortable: false,
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.price}</span>;
+        return <span>{rowData.variants?.length}</span>;
+      },
+    },
+
+    {
+      label: "Product Name",
+      key: "productname",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.product.name}</span>;
       },
     },
     {
-      label: "Variant",
-      key: "variant",
-      sortable: true,
+      label: "Category",
+      key: "category",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.category?.name}</span>;
+      },
+    },
+    //orderCount
+    {
+      label: "OrderCount",
+      key: "orderCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.orderCount}</span>;
+      },
+    },
+    {
+      label: "Price",
+      key: "price",
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.price}</span>;
@@ -115,15 +133,11 @@ const ProductSkus = () => {
       searchable: false,
       render: (rowData) => {
         return rowData.is_active ? (
-          <Badge
-            variant="light"
-            color="green"
-          >
+          <Badge variant="light" color="green">
             Active
           </Badge>
         ) : (
-          <Badge variant="light"
-          color="red">
+          <Badge variant="light" color="red">
             Not Active
           </Badge>
         );
@@ -137,7 +151,11 @@ const ProductSkus = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
+            <Trash
+              color="#ed522f"
+              size={24}
+              onClick={() => handleDelete(`${rowData.id}`)}
+            />
             <Edit
               size={24}
               onClick={() => handleEditProduct(`${rowData.id}`)}

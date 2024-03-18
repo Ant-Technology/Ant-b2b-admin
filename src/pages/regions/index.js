@@ -140,6 +140,42 @@ const Regions = () => {
         return <span>{rowData.name}</span>;
       },
     },
+    {
+      label: "Retailers",
+      key: "retailersCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.retailersCount}</span>;
+      },
+    },
+    {
+      label: "Drivers",
+      key: "driversCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.driversCount}</span>;
+      },
+    },
+    {
+      label: "Warehouse",
+      key: "warehousesCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.warehousesCount}</span>;
+      },
+    },
+    {
+      label: "Distributor",
+      key: "distributorsCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.distributorsCount}</span>;
+      },
+    },
    
     {
       label: "Actions",

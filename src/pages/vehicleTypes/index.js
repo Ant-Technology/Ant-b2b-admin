@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@apollo/client";
 import {
+  Avatar,
   Button,
   Card,
   Drawer,
@@ -138,6 +139,24 @@ const VehicleTypes = () => {
       searchable: true,
       render: (rowData) => {
         return <span>{rowData.title}</span>;
+      },
+    },
+    {
+      label: "Image",
+      key: "title",
+      sortable: true,
+      searchable: true,
+      render: (rowData) => {
+        return <Avatar src={rowData.image} alt="avatar" />;
+      },
+    },
+    {
+      label: "Vehicles",
+      key: "title",
+      sortable: false,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.vehicleCount}</span>;
       },
     },
     {

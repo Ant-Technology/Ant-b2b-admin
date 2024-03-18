@@ -112,21 +112,21 @@ const Warehouses = () => {
       },
     },
     {
-      label: "Avatar",
-      key: "image",
-      sortable: false,
-      searchable: false,
-      render: (rawData) => {
-        return <Avatar src={rawData.image} alt="avatar" />;
-      },
-    },
-    {
       label: "Name",
       key: "name",
       sortable: true,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.name}</span>;
+      },
+    },
+    {
+      label: "Stock count",
+      key: "name",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.stocks?.length}</span>;
       },
     },
     {
