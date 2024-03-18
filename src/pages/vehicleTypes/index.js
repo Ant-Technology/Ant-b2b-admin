@@ -153,10 +153,10 @@ const VehicleTypes = () => {
     {
       label: "Vehicles",
       key: "title",
-      sortable: true,
+      sortable: false,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData.title}</span>;
+        return <span>{rowData.vehicleCount}</span>;
       },
     },
     {
