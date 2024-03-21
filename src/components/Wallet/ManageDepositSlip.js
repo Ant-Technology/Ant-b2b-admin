@@ -4,7 +4,8 @@ import { useViewportSize } from "@mantine/hooks";
 import { CONFIRM_DEPOSIT_SLIP } from "apollo/mutuations";
 import { DEPOSIT_SLIP, DEPOSIT_SLIPS } from "apollo/queries";
 import { showNotification } from "@mantine/notifications";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const ManageDepositSlip = ({
   editId,
@@ -14,18 +15,35 @@ const ManageDepositSlip = ({
   activePage,
   setActivePage,
 }) => {
-  //TODO: fetch deposit info and image
-  const { data, loading } = useQuery(DEPOSIT_SLIP, {
-    variables: {
-      id: editId,
-    },
-    onCompleted(data) {
-      console.log("log from success", data);
-    },
-    onError(data) {
-      console.log("log from errrrrrrrr", data);
-    },
-  });
+ const[data, setData] = useState()
+ const[loading,setLoading]=useState(false)
+  useEffect(() => {
+    fetchDeposit();
+  }, [editId]);
+
+  const fetchDeposit = async () => {
+    setLoading(true)
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const {data} = await axios.get(
+        `http://157.230.102.54:8081/api/deposit-slips/${editId}`,
+        config
+      );
+      if (data) {
+        console.log("data",data)
+        setLoading(false)
+        setData(data.data);
+      }
+    } catch (error) {
+      setLoading(false)
+      console.error("Error fetching data:", error);
+    }
+  };
 
   // mutation
   const [confirmDeposit, { loading: confirmLoading }] = useMutation(
