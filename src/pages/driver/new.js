@@ -82,14 +82,14 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
   );
 }
 
-const Drivers = () => {
+const Wallets = () => {
   const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [drivers, setDrivers] = useState([]);
+  const [Wallets, setWallets] = useState([]);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
@@ -112,11 +112,11 @@ const Drivers = () => {
         },
       };
       const response = await axios.get(
-        `http://157.230.102.54:8081/api/drivers?page=${page}`,
+        `http://157.230.102.54:8081/api/deposit-slips?page=${page}`,
         config
       );
       if (response.data) {
-        setDrivers(response.data.data);
+        setWallets(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
@@ -130,7 +130,7 @@ const Drivers = () => {
     const { value } = event.currentTarget;
     setSearch(value);
     setSortedData(
-      sortData(drivers, {
+      sortData(Wallets, {
         sortBy,
         reversed: reverseSortDirection,
         search: value,
@@ -163,7 +163,7 @@ const Drivers = () => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
+    setSortedData(sortData(Wallets, { sortBy: field, reversed, search }));
   };
   const handleEditDriver = (id) => {
     setOpenedEdit(true);
@@ -195,9 +195,11 @@ const Drivers = () => {
     <Fragment key={row.id}>
       <tr>
         <td>{row.id}</td>
-        <td>{row.name}</td>
-        <td>{row.email}</td>
-        <td>{row.phone}</td>
+        <td>{row.reference_number}</td>
+        <td>{row.amount}</td>
+        <td>{row.confirmed_at?new Date(row.confirmed_at).toLocaleDateString():"Not Confirmed"}</td>
+        <td>{row.confirmed_by}</td>
+        <td>{row.retailer_id}</td>
         <td>
           <ManualGearbox
             style={{
@@ -276,13 +278,17 @@ const Drivers = () => {
                   sortable={false}
                   onSort={() => handleSort("reference_number")}
                 >
-                  Name
+                  Reference Number
                 </Th>
                 <Th sortable onSort={() => handleSort("amount")}>
-                  Email
+                  Amount
                 </Th>
                 <Th sortable onSort={() => handleSort("confirmed_at")}>
-                  Phone
+                  Confirmed At
+                </Th>
+                <Th>Confirmed By</Th>
+                <Th sortable onSort={() => handleSort("retailer_id")}>
+                  Retailer ID
                 </Th>
                 <Th sortable={false}>Actions</Th>
               </tr>
@@ -319,4 +325,4 @@ const Drivers = () => {
   );
 };
 
-export default Drivers;
+export default Wallets;

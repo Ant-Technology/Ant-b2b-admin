@@ -581,7 +581,6 @@ export const CONFIRM_DEPOSIT_SLIP = gql`
   mutation ($deposit_id: ID!) {
     confirmDepositSlip(deposit_id: $deposit_id) {
       id
-      amount
     }
   }
 `;

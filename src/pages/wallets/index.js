@@ -116,7 +116,7 @@ const Wallets = () => {
       );
       if (response.data) {
         setWallets(response.data.data);
-        handleSort(sortBy); // Ensure sorting is applied when data is fetched
+        setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
       }
@@ -181,21 +181,24 @@ const Wallets = () => {
     setOpenedEdit(true);
   };
   const theme = useMantineTheme();
-  const rows = sortedData.map((row) => (
+  const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
         <td>{row.id}</td>
         <td>{row.reference_number}</td>
         <td>{row.amount}</td>
-        <td>{new Date(row.confirmed_at).toLocaleDateString()}</td>
+        <td>{row.confirmed_at?new Date(row.confirmed_at).toLocaleDateString():"Not Confirmed"}</td>
         <td>{row.confirmed_by}</td>
         <td>{row.retailer_id}</td>
         <td>
-        <ManualGearbox  color="yellow"
-              size={24}
-              onClick={() => handleManageDepositSlip(`${row.id}`)}
-            />
-       
+          <ManualGearbox
+            style={{
+              cursor: "pointer",
+            }}
+            color="#1971C2"
+            size={24}
+            onClick={() => handleManageDepositSlip(`${row.id}`)}
+          />
         </td>
       </tr>
     </Fragment>
@@ -227,6 +230,7 @@ const Wallets = () => {
       >
         <ManageDepositSlip
           total={total}
+          fetchData={fetchData}
           setTotal={setTotal}
           activePage={activePage}
           setActivePage={setActivePage}
@@ -257,10 +261,13 @@ const Wallets = () => {
           >
             <thead>
               <tr>
-                <Th sortable = {false} onSort={() => handleSort("id")}>
+                <Th sortable={false} onSort={() => handleSort("id")}>
                   ID
                 </Th>
-                <Th sortable ={false} onSort={() => handleSort("reference_number")}>
+                <Th
+                  sortable={false}
+                  onSort={() => handleSort("reference_number")}
+                >
                   Reference Number
                 </Th>
                 <Th sortable onSort={() => handleSort("amount")}>
@@ -277,7 +284,7 @@ const Wallets = () => {
               </tr>
             </thead>
             <tbody>
-              {rows.length > 0 ? (
+              {rows?.length > 0 ? (
                 rows
               ) : (
                 <tr>

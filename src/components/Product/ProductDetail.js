@@ -118,7 +118,7 @@ function ProductDetailModal({ Id }) {
           <Group align="flex-end" spacing="xs" mt={25}>
             <Text size="sm" weight={500} className={classes.diff}>
               <span>
-                Variant Count <span style={{ marginLeft: "5px" }}>:</span>
+              Product Skus <span style={{ marginLeft: "5px" }}>:</span>
               </span>
             </Text>
             <Text className={classes.value}>{product?.skus.length}</Text>
@@ -141,6 +141,7 @@ function ProductDetailModal({ Id }) {
                 <tr>
                   <th>SKU</th>
                   <th>Price</th>
+                  <th>Stock Count</th>
                 </tr>
               </thead>
               <tbody>
@@ -148,6 +149,7 @@ function ProductDetailModal({ Id }) {
                   <tr key={sku.id}>
                     <td>{sku.sku}</td>
                     <td>{sku.price}</td>
+                    <td>{sku.stockCount}</td>
                   </tr>
                 ))}
               </tbody>

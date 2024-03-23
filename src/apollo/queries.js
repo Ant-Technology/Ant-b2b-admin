@@ -317,6 +317,7 @@ export const GET_PRODUCT = gql`
         id
         sku
         price
+        stockCount
         is_active
       }
       images {
