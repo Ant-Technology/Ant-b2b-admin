@@ -77,15 +77,20 @@ export const GET_CATEGORIES_ALL = gql`
 `;
 
 export const GET_CATEGORY = gql`
-  query GET_CATEGORY($id: ID!) {
+  query ($id: ID!) {
     category(id: $id) {
       id
-      image
-      children_count
+      name
       name_translations {
         en
         am
       }
+      imageUrl
+      image {
+        id
+        original_url
+      }
+      children_count
       children {
         id
         name_translations {
@@ -107,21 +112,6 @@ export const GET_WARE_HOUSES = gql`
         stocks {
           id
           quantity
-          product_sku {
-            variants {
-              attribute {
-                id
-                name
-              }
-              attributeValue {
-                id
-                value
-              }
-            }
-            product {
-              name
-            }
-          }
         }
         _geo {
           lat
@@ -300,17 +290,43 @@ export const GET_PRODUCT = gql`
       id
       name
       description
-      category {
-        id
-        name
+      short_description
+      name_translations {
+        en
+        am
       }
-      orderCount
+      short_description_translations {
+        en
+        am
+      }
+      description_translations {
+        en
+        am
+      }
       is_active
-      attributes {
+      category {
         id
         name
       }
-      category {
+      imageUrl
+      images {
+        id
+        original_url
+      }
+      attributes {
+        name
+        name_translations {
+          am
+          en
+        }
+        values {
+          id
+          value
+          value_translations {
+            en
+            am
+          }
+        }
         id
       }
       skus {
@@ -320,10 +336,20 @@ export const GET_PRODUCT = gql`
         stockCount
         is_active
       }
-      images {
+      allVariants {
         id
-        original_url
+        attribute {
+          id
+          name
+        }
+        attributeValue {
+          id
+          value
+        }
+        # productSkuPrice
       }
+      productSkusCount
+      orderCount
     }
   }
 `;
@@ -348,25 +374,6 @@ export const GET_PRODUCT_SKUS = gql`
         sku
         price
         is_active
-        orderCount
-        category {
-          id
-          name
-        }
-        product {
-          name
-        }
-        variants {
-          id
-          attribute {
-            id
-            name
-          }
-          attributeValue {
-            id
-            value
-          }
-        }
       }
       paginatorInfo {
         count
@@ -495,41 +502,46 @@ export const GET_ORDER = gql`
     order(id: $id) {
       id
       total_price
-
       items {
         id
         quantity
         product_sku {
-          price
-          product {
-            name
-            images {
-              original_url
-            }
-          }
-        }
-        shipment_items {
           id
-          shipment {
-            id
-            departure_time
-            arrival_time
-            status
-            from {
-              __typename
-              ... on Warehouse {
-                name
-              }
+          price
+          sku
+          is_active
+        }
+      }
+      shipment_items {
+        id
+        shipment {
+          id
+          departure_time
+          arrival_time
+          status
+          from {
+            __typename
+            ... on Warehouse {
+              name
             }
-            to {
-              __typename
-              ... on Distributor {
-                id
-                name
-              }
+          }
+          to {
+            __typename
+            ... on Distributor {
+              id
+              name
             }
           }
         }
+      }
+      retailer {
+        id
+        name
+        contact_phone
+      }
+      driver {
+        id
+        name
       }
     }
   }
@@ -560,9 +572,6 @@ export const GET_ORDERS = gql`
             id
             sku
             price
-            product {
-              name
-            }
           }
         }
       }
@@ -653,16 +662,6 @@ export const GET_SHIPMENTS = gql`
                   product_sku {
                     id
                     sku
-                    product {
-                      name
-                      images {
-                        original_url
-                      }
-                      name_translations {
-                        am
-                        en
-                      }
-                    }
                   }
                 }
               }

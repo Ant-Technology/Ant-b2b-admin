@@ -16,7 +16,7 @@ import { CREATE_DRIVER } from "apollo/mutuations";
 import { GET_DRIVERS, GET_REGIONS } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 // import Map from "components/utilities/Map";
-import  { useState } from "react";
+import { useState } from "react";
 
 export const DriverAddModal = ({
   setOpened,
@@ -24,12 +24,12 @@ export const DriverAddModal = ({
   setTotal,
   activePage,
   setActivePage,
+  fetchData,
 }) => {
   // state variables
   const [regionsDropDownData, setRegionsDropDownData] = useState([]);
   // state variable to handle map location
   // const [location, setLocation] = useState({});
-
 
   // form state
   const form = useForm({
@@ -55,29 +55,7 @@ export const DriverAddModal = ({
 
   // mutation
   const [addDriver, { loading: driverLoading }] = useMutation(CREATE_DRIVER, {
-    update(cache, { data: { createDriver } }) {
-      cache.updateQuery(
-        {
-          query: GET_DRIVERS,
-          variables: {
-            first: 10,
-            page: activePage,
-          },
-        },
-        (data) => {
-          if (data.drivers.data.length === 10) {
-            setTotal(total + 1);
-            setActivePage(total + 1);
-          } else {
-            return {
-              drivers: {
-                data: [createDriver, ...data.drivers.data],
-              },
-            };
-          }
-        }
-      );
-    },
+    update(cache, { data: { createDriver } }) {},
   });
 
   // graphql queries
@@ -113,7 +91,6 @@ export const DriverAddModal = ({
   const { height } = useViewportSize();
 
   const submit = () => {
-
     addDriver({
       variables: {
         name: form.getInputProps("name").value,
@@ -134,7 +111,7 @@ export const DriverAddModal = ({
           title: "Success",
           message: "Driver Created Successfully",
         });
-
+        fetchData(activePage);
         setOpened(false);
       },
       onError(error) {

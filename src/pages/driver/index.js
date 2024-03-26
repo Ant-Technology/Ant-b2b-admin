@@ -18,6 +18,7 @@ import {
   Pagination,
   Button,
   Tooltip,
+  Modal,
 } from "@mantine/core";
 import { Edit, Trash } from "tabler-icons-react";
 import axios from "axios";
@@ -28,6 +29,10 @@ import React, { Fragment, useEffect, useState } from "react";
 import { ManualGearbox } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
+import { showNotification } from "@mantine/notifications";
+import DriverDetailModal from "components/Driver/DriverDetail";
+import { DriverEditModal } from "components/Driver/DriverEditModal";
+import { DriverAddModal } from "components/Driver/DriverAddModal";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -90,14 +95,17 @@ const Drivers = () => {
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState([]);
+
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
+  const [editRow, setEditRow] = useState();
   const [deleteID, setDeleteID] = useState(false);
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState([]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
+  const [openedDelete, setOpenedDelete] = useState(false);
 
   useEffect(() => {
     fetchData(activePage);
@@ -165,9 +173,10 @@ const Drivers = () => {
     setSortBy(field);
     setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
   };
-  const handleEditDriver = (id) => {
+  const handleEditDriver = (id,row) => {
     setOpenedEdit(true);
     setEditId(id);
+    setEditRow(row)
   };
   const [isHovered, setIsHovered] = useState(false);
   const handleManageDriver = (id) => {
@@ -186,10 +195,45 @@ const Drivers = () => {
       )
     );
   };
-  const handleManageDepositSlip = (id) => {
-    setEditId(id);
-    setOpenedEdit(true);
+  const handleDelete = (id) => {
+    setOpenedDelete(true);
+    setDeleteID(id);
   };
+
+  const deleteDriver = async () => {
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.delete(
+        `http://157.230.102.54:8081/api/drivers/${deleteID}`,
+        config
+      );
+      if (response.data) {
+        fetchData(activePage);
+        setOpenedDelete(false);
+        setDeleteID(null);
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: "Driver Deleted Successfully",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setOpenedDelete(false);
+      setDeleteID(null);
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `Driver Not Deleted Successfully`,
+      });
+    }
+  };
+
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
@@ -199,13 +243,30 @@ const Drivers = () => {
         <td>{row.email}</td>
         <td>{row.phone}</td>
         <td>
-          <ManualGearbox
+          <Trash
+            color="#ed522f"
             style={{
               cursor: "pointer",
             }}
+            size={24}
+            onClick={() => handleDelete(`${row.id}`)}
+          />
+          <Edit
+            style={{
+              cursor: "pointer",
+              marginLeft: "10px",
+            }}
+            size={24}
+            onClick={() => handleEditDriver(row.id,row)}
+          />
+          <ManualGearbox
+            style={{
+              cursor: "pointer",
+              marginLeft: "10px",
+            }}
             color="#1971C2"
             size={24}
-            onClick={() => handleManageDepositSlip(`${row.id}`)}
+            onClick={() => handleManageDriver(`${row.id}`)}
           />
         </td>
       </tr>
@@ -221,7 +282,7 @@ const Drivers = () => {
     />
   ) : (
     <div style={{ width: "98%", margin: "auto" }}>
-      <Drawer
+         <Drawer
         opened={openedEdit}
         overlayColor={
           theme.colorScheme === "dark"
@@ -230,27 +291,69 @@ const Drivers = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Managing Wallet"
+        title="Editing a Driver"
         padding="xl"
         onClose={() => setOpenedEdit(false)}
-        position="right"
-        size="40%"
+        position="bottom"
+        size="80%"
       >
-        <ManageDepositSlip
+        <DriverEditModal activePage={activePage} fetchData={fetchData}  editRow={editRow}setOpenedEdit={setOpenedEdit} editId={editId} />
+      </Drawer>
+      <Drawer
+        opened={opened}
+        onClose={() => setOpened(false)}
+        title="Adding a Driver"
+        padding="xl"
+        size="80%"
+        position="bottom"
+      >
+        <DriverAddModal
           total={total}
-          fetchData={fetchData}
           setTotal={setTotal}
           activePage={activePage}
           setActivePage={setActivePage}
-          setOpenedEdit={setOpenedEdit}
-          editId={editId}
+          setOpened={setOpened}
+          fetchData={fetchData}
+        />
+      </Drawer>
+        <Drawer
+        opened={openedDetail}
+        overlayColor={
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2]
+        }
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        title="Driver Detail"
+        padding="xl"
+        onClose={() => setOpenedDetail(false)}
+        position="bottom"
+        size="80%"
+      >
+        <DriverDetailModal
+          total={total}
+          setTotal={setTotal}
+          activePage={activePage}
+          setActivePage={setActivePage}
+          setOpenedDetail={setOpenedDetail}
+          Id={editId}
         />
       </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
           <SimpleGrid cols={3}>
+            <div>
+            <Button
+              onClick={() => setOpened(true)}
+              variant="blue"
+              color="blue"
+              leftIcon={<Plus size={14} />}
+            >
+              Add Driver
+            </Button>
+            </div>
             <div></div>
-            <div> </div>
             <div>
               <TextInput
                 placeholder="Search by any field"
@@ -272,16 +375,13 @@ const Drivers = () => {
                 <Th sortable={false} onSort={() => handleSort("id")}>
                   ID
                 </Th>
-                <Th
-                  sortable={false}
-                  onSort={() => handleSort("reference_number")}
-                >
+                <Th sortable={false} onSort={() => handleSort("name")}>
                   Name
                 </Th>
-                <Th sortable onSort={() => handleSort("amount")}>
+                <Th sortable onSort={() => handleSort("email")}>
                   Email
                 </Th>
-                <Th sortable onSort={() => handleSort("confirmed_at")}>
+                <Th sortable onSort={() => handleSort("phone")}>
                   Phone
                 </Th>
                 <Th sortable={false}>Actions</Th>
@@ -314,6 +414,19 @@ const Drivers = () => {
             </div>
           </Center>
         </ScrollArea>
+        <Modal
+          opened={openedDelete}
+          onClose={() => setOpenedDelete(false)}
+          title="Warning"
+          centered
+        >
+          <p>Are you sure do you want to delete this Driver?</p>
+          <Group position="right">
+            <Button onClick={() => deleteDriver()} color="red">
+              Delete
+            </Button>
+          </Group>
+        </Modal>
       </Card>
     </div>
   );

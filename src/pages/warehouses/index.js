@@ -89,7 +89,7 @@ const Warehouses = () => {
         showNotification({
           color: "green",
           title: "Success",
-          message: "Category Deleted Successfully",
+          message: "Warehouse Deleted Successfully",
         });
         // refetch();
       },

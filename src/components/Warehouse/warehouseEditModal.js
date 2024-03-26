@@ -63,7 +63,7 @@ const CategoryEditModal = ({
         showNotification({
           color: "green",
           title: "Success",
-          message: "Category Edited Successfully",
+          message: "Warehouse Edited Successfully",
         });
         // refetch();
         form.reset();

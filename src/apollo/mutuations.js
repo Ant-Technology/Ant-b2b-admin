@@ -41,7 +41,6 @@ export const UPDATE_CATEGORY = gql`
     updateCategory(id: $id, input: { name: $name, children: $children }) {
       id
       name
-      image
       children_count
       name_translations {
         en
@@ -674,8 +673,6 @@ export const UPDATE_DRIVER = gql`
     ) {
       id
       name
-      phone
-      address
     }
   }
 `;

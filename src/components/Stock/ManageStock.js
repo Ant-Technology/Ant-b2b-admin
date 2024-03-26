@@ -21,6 +21,7 @@ const ManageStock = ({
   setTotal,
   activePage,
   setActivePage,
+  fetchData,
 }) => {
   const form = useForm({
     initialValues: {
@@ -30,34 +31,8 @@ const ManageStock = ({
     },
   });
 
-  const [manageStock, { loading: manageStockLoading }] = useMutation(
-    MANAGE_STOCK,
-    {
-      update(cache, { data: { stockManagementAction } }) {
-        cache.updateQuery(
-          {
-            query: GET_STOCKS,
-            variables: {
-              first: 10,
-              page: activePage,
-            },
-          },
-          (data) => {
-            if (data.stocks.data.length === 10) {
-              setTotal(total + 1);
-              setActivePage(total + 1);
-            } else {
-              return {
-                stocks: {
-                  data: [stockManagementAction, ...data.stocks.data],
-                },
-              };
-            }
-          }
-        );
-      },
-    }
-  );
+  const [manageStock, { loading: manageStockLoading }] =
+    useMutation(MANAGE_STOCK);
 
   const submit = () => {
     manageStock({
@@ -73,7 +48,7 @@ const ManageStock = ({
           title: "Success",
           message: "Stock Managed Successfully",
         });
-
+        fetchData(activePage);
         setOpenedEdit(false);
       },
       onError(error) {
