@@ -197,11 +197,10 @@ function ProductDetailModal({ Id }) {
                   >
                     <thead>
                       <tr>
-                        <th>From_type</th>
-                        <th>From_Id</th>
+                        <th>Departure Time</th>
+                        <th>Arrival Time</th>
                         <th>Status</th>
                         <th>Coast</th>
-                        <th>All Received</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -209,11 +208,10 @@ function ProductDetailModal({ Id }) {
                         <>
                           {data.shipments.map((item) => (
                             <tr key={item.id}>
-                              <td>{item.from_type}</td>
-                              <td>{item.from_id}</td>
+                              <td>{item.departure_time}</td>
+                              <td>{item.arrival_time}</td>
                               <td>{item.status}</td>
                               <td>{item.cost}</td>
-                              <td>{item.all_received ? "True" : "False"}</td>
                             </tr>
                           ))}
                         </>
