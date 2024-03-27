@@ -1,218 +1,219 @@
 import { useMutation, useQuery } from "@apollo/client";
 import {
   Badge,
-  ScrollArea,
-  Group,
-  useMantineTheme,
   Card,
   Drawer,
-  Button,
-  Modal,
   LoadingOverlay,
+  ScrollArea,
+  useMantineTheme,
+  createStyles,
+  Table,
+  UnstyledButton,
+  Group,
+  Text,
+  Center,
+  TextInput,
+  SimpleGrid,
+  Container,
+  Pagination,
+  Button,
+  Tooltip,
+  Modal,
 } from "@mantine/core";
-import { showNotification } from "@mantine/notifications";
-import { DEL_PRODUCT_SKU } from "apollo/mutuations";
-import { GET_PRODUCT_SKUS } from "apollo/queries";
-import ProductSkuAddModal from "components/ProductSku/ProductSkuAddModal";
-import ProductSkuEditModal from "components/ProductSku/ProductSkuEditModal";
+import { Edit, Trash } from "tabler-icons-react";
+import axios from "axios";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import { useState, useEffect } from "react";
-import { Edit, Trash } from "tabler-icons-react";
+import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
+import React, { Fragment, useEffect, useState } from "react";
+import { ManualGearbox } from "tabler-icons-react";
+import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
+import { Plus, Search } from "tabler-icons-react";
+import { showNotification } from "@mantine/notifications";
+import DriverDetailModal from "components/Driver/DriverDetail";
+import { DriverEditModal } from "components/Driver/DriverEditModal";
+import { DriverAddModal } from "components/Driver/DriverAddModal";
+import { DEL_PRODUCT_SKU, DEL_STOCK } from "apollo/mutuations";
+import StockAddModal from "components/Stock/StockAddModal";
+import ManageStock from "components/Stock/ManageStock";
+import ProductSkuAddModal from "components/ProductSku/ProductSkuAddModal";
+import ProductSkuEditModal from "components/ProductSku/ProductSkuEditModal";
 
-const ProductSkus = () => {
+const useStyles = createStyles((theme) => ({
+  th: {
+    padding: "0 !important",
+  },
+
+  control: {
+    width: "100%",
+    padding: `${theme.spacing.xs}px ${theme.spacing.md}px`,
+
+    "&:hover": {
+      backgroundColor:
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[6]
+          : theme.colors.gray[0],
+    },
+  },
+
+  icon: {
+    width: 21,
+    height: 21,
+    borderRadius: 21,
+  },
+}));
+
+function Th({ children, sortable, sorted, reversed, onSort }) {
+  const { classes } = useStyles();
+  const Icon = sorted
+    ? reversed
+      ? IconChevronUp
+      : IconChevronDown
+    : IconSelector;
+
+  return (
+    <th className={classes.th}>
+      <UnstyledButton
+        onClick={sortable ? onSort : null}
+        className={classes.control}
+      >
+        <Group position="apart">
+          <Text weight={500} size="sm">
+            {children}
+          </Text>
+          {sortable && (
+            <Center className={classes.icon}>
+              <Icon size={14} stroke={1.5} />
+            </Center>
+          )}
+        </Group>
+      </UnstyledButton>
+    </th>
+  );
+}
+
+const Drivers = () => {
   const [size] = useState(10);
-  const [total, setTotal] = useState(0);
   const [activePage, setActivePage] = useState(1);
-  const [hasMounted, setHasMounted] = useState(false);
-  const [openedEdit, setOpenedEdit] = useState(false);
-  //
+  const [total, setTotal] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   const [opened, setOpened] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [drivers, setDrivers] = useState([]);
+
+  const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
+  const [editRow, setEditRow] = useState();
   const [deleteID, setDeleteID] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sortedData, setSortedData] = useState([]);
+  const [sortBy, setSortBy] = useState(null);
+  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const [openedDetail, setOpenedDetail] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
 
-  const theme = useMantineTheme();
-
-  const { data, loading, fetchMore } = useQuery(GET_PRODUCT_SKUS, {
-    //   fetchPolicy: "no-cache",
-    variables: {
-      first: size,
-      page: activePage,
-    },
-  });
-
   useEffect(() => {
-    setHasMounted(true);
-  }, []);
+    fetchData(activePage);
+  }, [activePage]);
 
-  if (!total && data) {
-    setTotal(data.productSkus.paginatorInfo.lastPage);
-  }
-
-  const handleChange = (currentPage) => {
-    fetchMore({
-      variables: {
-        first: size,
-        page: currentPage,
-      },
-    });
-    setActivePage(currentPage);
-  };
-
-  const headerData = [
-    {
-      label: "id",
-      key: "id",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.id}</span>;
-      },
-    },
-    {
-      label: "SKU",
-      key: "sku",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.sku}</span>;
-      },
-    },
-    {
-      label: "Variant",
-      key: "variant",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.variants?.length}</span>;
-      },
-    },
-
-    {
-      label: "Product Name",
-      key: "productname",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.product.name}</span>;
-      },
-    },
-    {
-      label: "Category",
-      key: "category",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.category?.name}</span>;
-      },
-    },
-    //orderCount
-    {
-      label: "OrderCount",
-      key: "orderCount",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.orderCount}</span>;
-      },
-    },
-    {
-      label: "Price",
-      key: "price",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.price}</span>;
-      },
-    },
-    {
-      label: "Is Active",
-      key: "is_active",
-      sortable: true,
-      searchable: false,
-      render: (rowData) => {
-        return rowData.is_active ? (
-          <Badge variant="light" color="green">
-            Active
-          </Badge>
-        ) : (
-          <Badge variant="light" color="red">
-            Not Active
-          </Badge>
-        );
-      },
-    },
-    {
-      label: "Actions",
-      key: "actions",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return (
-          <>
-            <Trash
-              color="#ed522f"
-              size={24}
-              onClick={() => handleDelete(`${rowData.id}`)}
-            />
-            <Edit
-              size={24}
-              onClick={() => handleEditProduct(`${rowData.id}`)}
-            />
-          </>
-        );
-      },
-    },
-  ];
-
-  const optionsData = {
-    actionLabel: "Add Product Variant",
-    setAddModal: setOpened,
-  };
-
-  const [delProductSku, { loading: delLoading }] = useMutation(
-    DEL_PRODUCT_SKU,
-    {
-      update(cache, { data: { deleteProductSku } }) {
-        cache.updateQuery(
-          {
-            query: GET_PRODUCT_SKUS,
-            variables: {
-              first: 10,
-              page: activePage,
-            },
-          },
-          (data) => {
-            if (data.productSkus.data.length === 1) {
-              setTotal(total - 1);
-              setActivePage(activePage - 1);
-            } else {
-              return {
-                productSkus: {
-                  data: [
-                    ...data.productSkus.data.filter(
-                      (productsku) => productsku.id !== deleteProductSku.id
-                    ),
-                  ],
-                },
-              };
-            }
-          }
-        );
-      },
+  const fetchData = async (page) => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(
+        `http://157.230.102.54:8081/api/product-skus?page=${page}`,
+        config
+      );
+      if (response.data) {
+        setLoading(false);
+        setDrivers(response.data.data);
+        setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
+        setTotal(response.data?.links);
+        setTotalPages(response.data.last_page);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching data:", error);
     }
-  );
+  };
 
+  const handleSearchChange = (event) => {
+    const { value } = event.currentTarget;
+    setSearch(value);
+    setSortedData(
+      sortData(drivers, {
+        sortBy,
+        reversed: reverseSortDirection,
+        search: value,
+      })
+    );
+  };
+
+  const sortData = (data, payload) => {
+    if (!payload.sortBy) {
+      return filterData(data, payload.search);
+    }
+
+    return filterData(
+      [...data].sort((a, b) => {
+        if (payload.reversed) {
+          return b[payload.sortBy].localeCompare(a[payload.sortBy]);
+        }
+
+        return a[payload.sortBy].localeCompare(b[payload.sortBy]);
+      }),
+      payload.search
+    );
+  };
+
+  const handleChange = (page) => {
+    setActivePage(page);
+  };
+
+  const handleSort = (field) => {
+    const reversed = field === sortBy ? !reverseSortDirection : false;
+    setReverseSortDirection(reversed);
+    setSortBy(field);
+    setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
+  };
+  const handleEditDriver = (id, row) => {
+    setOpenedEdit(true);
+    setEditId(id);
+    setEditRow(row);
+  };
+  const [isHovered, setIsHovered] = useState(false);
+  const handleManageDriver = (id) => {
+    setEditId(id);
+    setOpenedDetail(true);
+  };
+
+  const filterData = (data, search) => {
+    const query = search.toLowerCase().trim();
+    return data.filter((item) =>
+      Object.keys(item).some(
+        (key) =>
+          typeof item[key] === "string" &&
+          item[key] &&
+          item[key].toLowerCase().includes(query)
+      )
+    );
+  };
   const handleDelete = (id) => {
     setOpenedDelete(true);
     setDeleteID(id);
   };
+  const [delProductSku, { loading: delLoading }] = useMutation(DEL_PRODUCT_SKU);
 
-  const deleteCategory = () => {
+  const deleteSku = () => {
     delProductSku({
       variables: { id: deleteID },
       onCompleted(data) {
+        fetchData(activePage);
         setOpenedDelete(false);
         setDeleteID(null);
         showNotification({
@@ -231,13 +232,54 @@ const ProductSkus = () => {
       },
     });
   };
-  const handleEditProduct = (id) => {
+  const handleEdit = (id) => {
     setOpenedEdit(true);
     setEditId(id);
   };
-  if (!hasMounted) {
-    return null;
-  }
+
+  const theme = useMantineTheme();
+  const rows = sortedData?.map((row) => (
+    <Fragment key={row.id}>
+      <tr>
+        <td>{row.id}</td>
+        <td>{row.sku}</td>
+        <td>{row.variants?.length}</td>
+        <td>{row.product?.name.en}</td>
+        <td>{row.product?.category?.name.en}</td>
+        <td>{row.order_items_count}</td>
+        <td>{row.price}</td>
+        <td>
+          {row.is_active === 1 ? (
+            <Badge variant="light" color="green">
+              Active
+            </Badge>
+          ) : (
+            <Badge variant="light" color="red">
+              Not Active
+            </Badge>
+          )}
+        </td>
+        <td>
+          <Trash
+            color="#ed522f"
+            style={{
+              cursor: "pointer",
+            }}
+            size={24}
+            onClick={() => handleDelete(`${row.id}`)}
+          />
+          <Edit
+            style={{
+              cursor: "pointer",
+              marginLeft: "10px",
+            }}
+            size={24}
+            onClick={() => handleEdit(row.id, row)}
+          />
+        </td>
+      </tr>
+    </Fragment>
+  ));
 
   return loading ? (
     <LoadingOverlay
@@ -248,6 +290,29 @@ const ProductSkus = () => {
     />
   ) : (
     <div style={{ width: "98%", margin: "auto" }}>
+      <Drawer
+        opened={openedEdit}
+        onClose={() => setOpenedEdit(false)}
+        title="Editing Product Variant"
+        padding="xl"
+        size="60%"
+        position="bottom"
+        overlayColor={
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2]
+        }
+        overlayOpacity={0.55}
+        overlayBlur={3}
+      >
+        <ProductSkuEditModal
+          setOpenedEdit={setOpenedEdit}
+          editId={editId}
+          fetchData={fetchData}
+          activePage={activePage}
+        />
+      </Drawer>
+
       <Drawer
         opened={opened}
         onClose={() => setOpened(false)}
@@ -268,53 +333,113 @@ const ProductSkus = () => {
           activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}
+          fetchData={fetchData}
+          totalPages={totalPages}
         />
       </Drawer>
-      <Drawer
-        opened={openedEdit}
-        onClose={() => setOpenedEdit(false)}
-        title="Editing Product Variant"
-        padding="xl"
-        size="60%"
-        position="bottom"
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-      >
-        <ProductSkuEditModal setOpenedEdit={setOpenedEdit} editId={editId} />
-      </Drawer>
-      <Modal
-        opened={openedDelete}
-        onClose={() => setOpenedDelete(false)}
-        title="Warning"
-        centered
-      >
-        <p>Are you sure do you want to delete this product Variant?</p>
-        <Group position="right">
-          <Button onClick={() => deleteCategory()} color="red">
-            Delete
-          </Button>
-        </Group>
-      </Modal>
+
       <Card shadow="sm" p="lg">
         <ScrollArea>
-          <B2bTable
-            total={total}
-            activePage={activePage}
-            handleChange={handleChange}
-            header={headerData}
-            optionsData={optionsData}
-            loading={loading}
-            data={data ? data.productSkus.data : []}
-          />
+          <SimpleGrid cols={3}>
+            <div>
+              <Button
+                onClick={() => setOpened(true)}
+                variant="blue"
+                color="blue"
+                leftIcon={<Plus size={14} />}
+              >
+                Add Stock
+              </Button>
+            </div>
+            <div></div>
+            <div>
+              <TextInput
+                placeholder="Search by any field"
+                mb="md"
+                icon={<Search size={14} />}
+                value={search}
+                onChange={handleSearchChange}
+              />
+            </div>
+          </SimpleGrid>
+          <Table
+            highlightOnHover
+            horizontalSpacing="md"
+            verticalSpacing="xs"
+            sx={{ tableLayout: "fixed", minWidth: 700 }}
+          >
+            <thead>
+              <tr>
+                <Th sortable={false} onSort={() => handleSort("id")}>
+                  ID
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("name")}>
+                  SKU
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("email")}>
+                  Variant
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("phone")}>
+                  Product Name
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("email")}>
+                  Category
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("phone")}>
+                  Order Count
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("email")}>
+                  Price
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("phone")}>
+                  Is Active
+                </Th>
+                <Th sortable={false}>Actions</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows?.length > 0 ? (
+                rows
+              ) : (
+                <tr>
+                  <td colSpan={8}>
+                    <Text weight={500} align="center">
+                      Nothing found
+                    </Text>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+          <Center>
+            <div style={{ paddingTop: "12px" }}>
+              <Container>
+                <Pagination
+                  color="blue"
+                  page={activePage}
+                  onChange={handleChange}
+                  total={totalPages}
+                />
+              </Container>
+            </div>
+          </Center>
         </ScrollArea>
+        <Modal
+          opened={openedDelete}
+          onClose={() => setOpenedDelete(false)}
+          title="Warning"
+          centered
+        >
+          <p>Are you sure do you want to delete this Product variant?</p>
+          <Group position="right">
+            <Button onClick={() => deleteSku()} color="red">
+              Delete
+            </Button>
+          </Group>
+        </Modal>
       </Card>
     </div>
   );
 };
 
-export default ProductSkus;
+export default Drivers;

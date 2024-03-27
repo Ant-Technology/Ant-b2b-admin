@@ -23,6 +23,8 @@ const ProductSkuAddModal = ({
   setTotal,
   activePage,
   setActivePage,
+  fetchData,
+  totalPages
 }) => {
   const [dropDownData, setDropDownData] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState();
@@ -73,32 +75,7 @@ const ProductSkuAddModal = ({
 
   const { height } = useViewportSize();
   const [addProductSku, { loading: addingSkuLoading }] = useMutation(
-    CREATE_PRODUCT_SKUS,
-    {
-      update(cache, { data: { createProductSku } }) {
-        cache.updateQuery(
-          {
-            query: GET_PRODUCT_SKUS,
-            variables: {
-              first: 10,
-              page: activePage,
-            },
-          },
-          (data) => {
-            if (data.productSkus.data.length === 10) {
-              setTotal(total + 1);
-              setActivePage(total + 1);
-            } else {
-              return {
-                productSkus: {
-                  data: [createProductSku, ...data.productSkus.data],
-                },
-              };
-            }
-          }
-        );
-      },
-    }
+    CREATE_PRODUCT_SKUS
   );
 
   const submit = () => {
@@ -116,6 +93,7 @@ const ProductSkuAddModal = ({
           title: "Success",
           message: "ProductSKU Created Successfully",
         });
+        fetchData(totalPages)
         setOpened(false);
       },
       onError(err) {

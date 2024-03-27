@@ -19,6 +19,7 @@ import { customLoader } from "components/utilities/loader";
 import { useState, useEffect } from "react";
 import { showNotification } from "@mantine/notifications";
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
+import CategoryDetailModal from "components/Category/categoryDetail";
 
 const Categories = () => {
   const [size] = useState(10);
@@ -31,6 +32,7 @@ const Categories = () => {
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
+  const [openedDetail, setOpenedDetail] = useState(false);
 
   const theme = useMantineTheme();
 
@@ -126,7 +128,10 @@ const Categories = () => {
   if (!hasMounted) {
     return null;
   }
-
+  const handleManageCategory = (id) => {
+    setEditId(id);
+    setOpenedDetail(true);
+  };
   const headerData = [
     {
       label: "id",
@@ -200,7 +205,7 @@ const Categories = () => {
                 marginLeft: "10px",
               }}
               size={24}
-              onClick={() => handleChange(`${rowData.id}`)}
+              onClick={() => handleManageCategory(`${rowData.id}`)}
             />
           </>
         );
@@ -241,6 +246,25 @@ const Categories = () => {
           setOpenedEdit={setOpenedEdit}
           editId={editId}
           // loading={singleCategoryLoading}
+        />
+      </Drawer>
+      <Drawer
+        opened={openedDetail}
+        overlayColor={
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2]
+        }
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        title="Driver Detail"
+        padding="xl"
+        onClose={() => setOpenedDetail(false)}
+        position="bottom"
+        size="80%"
+      >
+        <CategoryDetailModal
+          Id={editId}
         />
       </Drawer>
 

@@ -173,15 +173,27 @@ function ProductDetailModal({ Id }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {data?.dropoffs?.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.from?.name}</td>
-                        <td>{item.from?.contact_phone}</td>
-                        <td>{item.status}</td>
-                        <td>{item.cost}</td>
-                        <td>{item.all_received ? "True" : "False"}</td>
+                    {data?.dropoffs?.length > 0 ? (
+                      <>
+                        {data.dropoffs.map((item) => (
+                          <tr key={item.id}>
+                            <td>{item.from?.name}</td>
+                            <td>{item.from?.contact_phone}</td>
+                            <td>{item.status}</td>
+                            <td>{item.cost}</td>
+                            <td>{item.all_received ? "True" : "False"}</td>
+                          </tr>
+                        ))}
+                      </>
+                    ) : (
+                      <tr>
+                        <td colSpan={4}>
+                          <Text weight={500} align="center">
+                            Nothing Found dropoffs
+                          </Text>
+                        </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </Table>
                 <div style={{ marginTop: "60px" }}>

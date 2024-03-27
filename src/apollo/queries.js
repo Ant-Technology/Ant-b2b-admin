@@ -97,6 +97,16 @@ export const GET_CATEGORY = gql`
           en
           am
         }
+        products {
+          id
+          name
+          description
+          imageUrl
+          images{
+              id
+              original_url
+          }
+      }
       }
     }
   }
@@ -411,15 +421,19 @@ export const GET_RETAILER = gql`
       contact_email
       contact_name
       contact_phone
+      region {
+        id
+        name
+      }
       _geo {
         lat
         lng
       }
       address
       city
-      _geo {
-        lat
-        lng
+      orders {
+        id
+        state
       }
     }
   }
