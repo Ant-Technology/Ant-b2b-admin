@@ -5,11 +5,11 @@ name: Deploy
 on:
   push:
     branches:
-      - main
+      - master
       - develop
   pull_request:
     branches:
-      - main
+      - master
       - develop
 
 # Authenticate to the the server via ssh
