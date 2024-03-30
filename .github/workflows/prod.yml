@@ -5,11 +5,11 @@ name: Deploy
 on:
   push:
     branches:
-      - main
+      - master
       - develop
   pull_request:
     branches:
-      - main
+      - master
       - develop
 
 # Authenticate to the the server via ssh
@@ -17,6 +17,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' # Only deploy when pushing to or merging pull request to 'master' or 'develop' branches
     steps:
       - uses: actions/checkout@v2
       - name: Deploy to server
