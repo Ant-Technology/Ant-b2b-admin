@@ -188,8 +188,8 @@ const Wallets = () => {
         <td>{row.reference_number}</td>
         <td>{row.amount}</td>
         <td>{row.confirmed_at?new Date(row.confirmed_at).toLocaleDateString():"Not Confirmed"}</td>
-        <td>{row.confirmed_by}</td>
-        <td>{row.retailer_id}</td>
+        <td>{row.confirmed_by.name}</td>
+        <td>{row.retailer?.name}</td>
         <td>
           <ManualGearbox
             style={{
@@ -274,9 +274,9 @@ const Wallets = () => {
                   Amount
                 </Th>
                 <Th sortable onSort={() => handleSort("confirmed_at")}>
-                  Confirmed At
+                  Date
                 </Th>
-                <Th>Confirmed By</Th>
+                <Th>Approved By</Th>
                 <Th sortable onSort={() => handleSort("retailer_id")}>
                   Retailer ID
                 </Th>

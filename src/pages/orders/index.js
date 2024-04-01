@@ -47,27 +47,18 @@ const Orders = () => {
     },
     {
       label: "Order Date",
-      key: "created_at_human",
-      sortable: false,
+      key: "created_at",
+      sortable: true,
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.created_at_human}</span>;
-      },
-    },
-    {
-      label: "Driver",
-      key: "driver",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.driver?.name}</span>;
+        return <span>{rowData.created_at}</span>;
       },
     },
     {
       label: "Retailer",
       key: "retailer",
-      sortable: false,
-      searchable: false,
+      sortable: true,
+      searchable: true,
       render: (rowData) => {
         return <span>{rowData.retailer?.name}</span>;
       },
@@ -83,7 +74,7 @@ const Orders = () => {
     },
     //productSkuCount
     {
-      label: "ProductSku",
+      label: "Product Count",
       key: "productSkuCount",
       sortable: false,
       searchable: false,
@@ -94,8 +85,8 @@ const Orders = () => {
     {
       label: "Total Price",
       key: "total_price",
-      sortable: false,
-      searchable: false,
+      sortable: true,
+      searchable: true,
       render: (rowData) => {
         return <span>{rowData.total_price}</span>;
       },

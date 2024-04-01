@@ -176,9 +176,9 @@ function ManageOrderModal({
               <tr>
                 <th>ID</th>
                 <th>Quantity</th>
-                <th>Product SKU Price</th>
+                <th>Each Price</th>
+                <th>Total Price</th>
                 <th>Product Name</th>
-
                 <th>Actions</th>
               </tr>
             </thead>
@@ -189,6 +189,7 @@ function ManageOrderModal({
                     <tr key={row.id}>
                       <td>{index + 1}</td>
                       <td>{row.quantity}</td>
+                      <td>{row.product_sku ? row.product_sku.price / row.quantity : "-"}</td>
                       <td>{row.product_sku?.price}</td>
                       <td>{row.product_sku?.product?.name}</td>
                       <td>

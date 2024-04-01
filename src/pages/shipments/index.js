@@ -210,9 +210,9 @@ const Shipments = () => {
                 <Grid grow>
                   <Grid.Col span={4}>
                     <ScrollArea style={{ width: 300, height: 200 }}>
-                      {row.items.map((data, idx) => (
+                      {row?.items?.map((data, idx) => (
                         <div key={idx}>
-                          {data.shipment_itemable.order.items.map(
+                          {data.shipment_itemable?.order?.items?.map(
                             (data, idx) => (
                               <Flex key={idx}>
                                 <Card
@@ -223,7 +223,7 @@ const Shipments = () => {
                                   withBorder
                                 >
                                   <Avatar.Group>
-                                    {data.product_sku.product.images.map(
+                                    {data.product_sku.product?.images?.map(
                                       (data, idx) => (
                                         <Avatar
                                           key={idx}
@@ -241,7 +241,7 @@ const Shipments = () => {
                                   withBorder
                                 >
                                   <Text tt="capitalize">
-                                    {data.product_sku.product.name},
+                                    {data?.product_sku?.product?.name},
                                   </Text>
                                 </Card>
                               </Flex>

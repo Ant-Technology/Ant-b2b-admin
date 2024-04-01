@@ -53,7 +53,7 @@ const ManageDepositSlip = ({
         showNotification({
           color: "green",
           title: "Success",
-          message: "Confirmed Successfully",
+          message: "Approved Successfully",
         });
         // After confirming the deposit, call fetchData from Wallets component
         fetchData(activePage);
@@ -108,7 +108,7 @@ const ManageDepositSlip = ({
           variant="outline"
           onClick={submit}
         >
-          Confirm Deposit
+          Approve Deposit
         </Button>
       </ScrollArea>
     </div>

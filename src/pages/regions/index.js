@@ -185,8 +185,8 @@ const Regions = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
-            <Edit  size={24} onClick={() => handleEditRegion(`${rowData.id}`)} />
+            <Trash style={{cursor:"pointer"}} color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
+            <Edit style={{marginLeft:"10px", cursor:"pointer"}} size={24} onClick={() => handleEditRegion(`${rowData.id}`)} />
           </>
         );
       },

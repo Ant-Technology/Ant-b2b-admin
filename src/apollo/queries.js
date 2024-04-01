@@ -568,6 +568,7 @@ export const GET_ORDERS = gql`
         id
         total_price
         created_at_human
+        created_at
         retailer {
           id
           name

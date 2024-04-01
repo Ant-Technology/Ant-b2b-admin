@@ -257,7 +257,7 @@ const Categories = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Driver Detail"
+        title="Category Detail"
         padding="xl"
         onClose={() => setOpenedDetail(false)}
         position="bottom"
