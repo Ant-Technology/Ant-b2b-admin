@@ -30,6 +30,7 @@
     "@tiptap/react": "^2.0.0-beta.202",
     "@tiptap/starter-kit": "^2.0.0-beta.202",
     "apollo-upload-client": "^17.0.0",
+    "axios": "^1.6.8",
     "dayjs": "^1.11.6",
     "embla-carousel-react": "^7.0.5",
     "graphql": "^16.6.0",

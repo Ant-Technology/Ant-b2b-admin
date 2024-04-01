@@ -15,26 +15,27 @@ import { UPDATE_PRODUCT_SKUS } from "apollo/mutuations";
 import { GET_PRODUCT_SKU } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 
-const ProductSkuEditModal = ({ editId, setOpenedEdit }) => {
+const ProductSkuEditModal = ({
+  editId,
+  setOpenedEdit,
+  fetchData,
+  activePage,
+}) => {
   const form = useForm({});
 
-  const {  loading: skuGetLoading } = useQuery(
-    GET_PRODUCT_SKU,
-    {
-      variables: {
-        id: editId,
-      },
-      onCompleted(data) {
-        form.setValues({
-          sku: data.productSku.sku,
-          price: data.productSku.price,
-          is_active: data.productSku.is_active,
-        });
-      },
-      onError(data) {
-      },
-    }
-  );
+  const { loading: skuGetLoading } = useQuery(GET_PRODUCT_SKU, {
+    variables: {
+      id: editId,
+    },
+    onCompleted(data) {
+      form.setValues({
+        sku: data.productSku.sku,
+        price: data.productSku.price,
+        is_active: data.productSku.is_active,
+      });
+    },
+    onError(data) {},
+  });
 
   const [updateProductSku, { loading: skuEditLoading }] =
     useMutation(UPDATE_PRODUCT_SKUS);
@@ -54,7 +55,7 @@ const ProductSkuEditModal = ({ editId, setOpenedEdit }) => {
           title: "Success",
           message: "ProductSKU updated Successfully",
         });
-
+        fetchData(activePage);
         setOpenedEdit(false);
       },
       onError(data) {

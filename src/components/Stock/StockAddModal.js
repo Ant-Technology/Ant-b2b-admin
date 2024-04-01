@@ -22,11 +22,13 @@ const StockAddModal = ({
   setTotal,
   activePage,
   setActivePage,
+  fetchData,
+  totalPages,
 }) => {
   // state variables
   const [productSkusDropDownData, setProductSkusDropDownData] = useState([]);
   const [warehousesDropDownData, setWarehousesDropDownData] = useState([]);
-
+  console.log(totalPages);
   // form state
   const form = useForm({
     initialValues: {
@@ -41,31 +43,7 @@ const StockAddModal = ({
   });
 
   // mutation
-  const [addStock, { loading: stockLoading }] = useMutation(CREATE_STOCK, {
-    update(cache, { data: { createStock } }) {
-      cache.updateQuery(
-        {
-          query: GET_STOCKS,
-          variables: {
-            first: 10,
-            page: activePage,
-          },
-        },
-        (data) => {
-          if (data.stocks.data.length === 10) {
-            setTotal(total + 1);
-            setActivePage(total + 1);
-          } else {
-            return {
-              stocks: {
-                data: [createStock, ...data.stocks.data],
-              },
-            };
-          }
-        }
-      );
-    },
-  });
+  const [addStock, { loading: stockLoading }] = useMutation(CREATE_STOCK);
 
   // graphql queries
 
@@ -94,7 +72,8 @@ const StockAddModal = ({
         color: "red",
         title: "Error",
         message: `${err}`,
-      });    },
+      });
+    },
   });
 
   const { loading: warehouseLoading } = useQuery(GET_WARE_HOUSES, {
@@ -143,7 +122,7 @@ const StockAddModal = ({
           title: "Success",
           message: "Stock Created Successfully",
         });
-
+        fetchData(totalPages);
         setOpened(false);
       },
       onError(error) {

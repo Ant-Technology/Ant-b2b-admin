@@ -305,7 +305,18 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
                   Change Password
                 </Button> */}
               </Card>
-
+              <Grid>
+                <Grid.Col span={12}>
+                  <Button
+                    type="submit"
+                    color="blue"
+                    variant="outline"
+                    fullWidth
+                  >
+                    Submit
+                  </Button>
+                </Grid.Col>
+              </Grid>
               <>
                 <Text fz="sm">Current Roles: </Text>
                 <Flex
@@ -337,19 +348,6 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
                 label="Attach Role"
                 placeholder="Pick a role this user belongs to"
               />
-
-              <Grid>
-                <Grid.Col span={12}>
-                  <Button
-                    type="submit"
-                    color="blue"
-                    variant="outline"
-                    fullWidth
-                  >
-                    Submit
-                  </Button>
-                </Grid.Col>
-              </Grid>
             </Stack>
           </form>
         </ScrollArea>

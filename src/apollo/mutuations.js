@@ -41,7 +41,6 @@ export const UPDATE_CATEGORY = gql`
     updateCategory(id: $id, input: { name: $name, children: $children }) {
       id
       name
-      image
       children_count
       name_translations {
         en
@@ -60,16 +59,15 @@ export const UPDATE_CATEGORY = gql`
 
 // ware houses
 export const CREATE_WARE_HOUSE = gql`
-  mutation CREATE_WARE_HOUSE($input: CreateWarehouseInput!) {
-    createWarehouse(input: $input) {
-      id
-      name
-      _geo {
-        lat
-        lng
-      }
-    }
+mutation CREATE_WARE_HOUSE($name: String!, $_geo: GeoInput, $regionId: ID!) {
+  createWarehouse(input: {
+    name: $name,
+    _geo: $_geo,
+    region: { connect: $regionId }
+  }) {
+    id
   }
+}
 `;
 
 export const UPDATE_WARE_HOUSE = gql`
@@ -581,7 +579,6 @@ export const CONFIRM_DEPOSIT_SLIP = gql`
   mutation ($deposit_id: ID!) {
     confirmDepositSlip(deposit_id: $deposit_id) {
       id
-      amount
     }
   }
 `;
@@ -675,8 +672,6 @@ export const UPDATE_DRIVER = gql`
     ) {
       id
       name
-      phone
-      address
     }
   }
 `;

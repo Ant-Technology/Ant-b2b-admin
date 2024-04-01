@@ -89,7 +89,7 @@ const Warehouses = () => {
         showNotification({
           color: "green",
           title: "Success",
-          message: "Category Deleted Successfully",
+          message: "Warehouse Deleted Successfully",
         });
         // refetch();
       },
@@ -137,9 +137,10 @@ const Warehouses = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash size={24} color="#ed522f" onClick={() => handleDelete(`${rowData.id}`)} />
+            <Trash size={24} style={{cursor:"pointer"}} color="#ed522f" onClick={() => handleDelete(`${rowData.id}`)} />
             <Edit
               size={24}
+              style={{marginLeft:"10px",cursor:"pointer"}}
               onClick={() => handleEditCategory(`${rowData.id}`)}
             />
           </>

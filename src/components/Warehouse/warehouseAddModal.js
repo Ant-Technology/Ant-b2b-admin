@@ -4,16 +4,17 @@ import {
   Button,
   ScrollArea,
   LoadingOverlay,
+  Select,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import React, { useState } from "react";
 import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import Map from "components/utilities/Map";
 import { customLoader } from "components/utilities/loader";
 import { CREATE_WARE_HOUSE } from "../../apollo/mutuations";
-import { GET_WARE_HOUSES } from "../../apollo/queries";
+import { GET_REGIONS, GET_WARE_HOUSES } from "../../apollo/queries";
 
 export default function WarehouseAddModal({
   trigger,
@@ -33,9 +34,40 @@ export default function WarehouseAddModal({
         lat: "",
         lng: "",
       },
+      regionId: "", // Provide the default region ID here
     },
   });
+  const [regionsDropDownData, setRegionsDropDownData] = useState([]);
 
+  // graphql queries
+  const { loading: regionsLoading } = useQuery(GET_REGIONS, {
+    variables: {
+      first: 100000,
+      page: 1,
+    },
+    onCompleted(data) {
+      let regions = data.regions;
+      let regionsArray = [];
+
+      // loop over regions data to structure the data for the use of drop down
+      regions.data.forEach((region, index) => {
+        regionsArray.push({
+          label: region?.name,
+          value: region?.id,
+        });
+      });
+
+      // put it on the state
+      setRegionsDropDownData([...regionsArray]);
+    },
+    onError(err) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `${err}`,
+      });
+    },
+  });
   const [createWarehouse, { loading }] = useMutation(CREATE_WARE_HOUSE, {
     update(cache, { data: { createWarehouse } }) {
       cache.updateQuery(
@@ -61,26 +93,23 @@ export default function WarehouseAddModal({
       );
     },
   });
-
+  
   const submit = () => {
     createWarehouse({
       variables: {
-        input: {
-          name: form.getInputProps("name").value,
-          _geo: {
-            lat: +location.lat,
-            lng: +location.lng,
-          },
+        name: form.getInputProps("name").value,
+        regionId: form.getInputProps("regionId").value, // Provide the regionId variable
+        _geo: {
+          lat: +location.lat,
+          lng: +location.lng,
         },
       },
       onCompleted(data) {
-        // setActivePage(1);
         showNotification({
           color: "green",
           title: "Success",
-          message: "Category Created Successfully",
+          message: "Warehouse Created Successfully",
         });
-        // refetch();
         setOpened(false);
       },
       onError(error) {
@@ -94,7 +123,9 @@ export default function WarehouseAddModal({
   };
 
   const { height } = useViewportSize();
-
+  const setRegionDropDownValue = (val) => {
+    form.setFieldValue("regionId", val);
+  };
   return (
     <>
       <LoadingOverlay
@@ -105,26 +136,38 @@ export default function WarehouseAddModal({
       />
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
-          <Grid grow>
+          <Grid>
             <Grid.Col span={6}>
-              <Grid.Col span={4}>
-                <TextInput
-                  required
-                  label="name"
-                  placeholder="name"
-                  {...form.getInputProps("name")}
-                />
-              </Grid.Col>
-
-              <Grid.Col span={4}>
-                <Button type="submit" color="blue" variant="outline" fullWidth>
-                  Submit
-                </Button>
-              </Grid.Col>
+              <TextInput
+                required
+                label="name"
+                placeholder="name"
+                {...form.getInputProps("name")}
+              />
             </Grid.Col>
-
             <Grid.Col span={6}>
-              <Map setLocation={setLocation} />
+              {" "}
+              <Select
+                data={regionsDropDownData}
+                value={form.getInputProps("regionId")?.value}
+                onChange={setRegionDropDownValue}
+                label="Region"
+                placeholder="Pick a region this retailer belongs to"
+              />
+            </Grid.Col>
+          </Grid>
+          <Grid style={{ marginTop: "10px" }}>
+            <Grid.Col span={12}>
+              <ScrollArea style={{ height: "auto" }}>
+                <Map setLocation={setLocation} />
+              </ScrollArea>
+            </Grid.Col>
+          </Grid>
+          <Grid style={{ marginTop: "10px", marginBottom: "20px" }}>
+            <Grid.Col span={4}>
+              <Button type="submit" color="blue" variant="outline" fullWidth>
+                Submit
+              </Button>
             </Grid.Col>
           </Grid>
         </form>

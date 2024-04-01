@@ -13,7 +13,7 @@ import {
 import { useForm } from "@mantine/form";
 import { Photo, Trash } from "tabler-icons-react";
 import { useMutation, useQuery } from "@apollo/client";
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
@@ -28,47 +28,45 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
 
   // useEffect(() => {
   //   if (editId) {
-      
+
   //   }
   //   // eslint-disable-next-line
   // }, []);
 
   // mutation
   const [updateCategory] = useMutation(UPDATE_CATEGORY);
-  const {  loading  } =
-    useQuery(GET_CATEGORY, {   
-        variables: { id: editId },
-        onCompleted(data) {
-          const newUpdateArr = data.category.children.map(
-            ({ name_translations: name, ...rest }) => ({
-              name,
-              ...rest,
-            })
-          );
-          // newUpdateArr.forEach((obj, index) => {
-          //  if("__typename" in obj || "__typename" in obj[index].name ){
-          //    delete newUpdateArr[index].__typename;
-          //    delete newUpdateArr[index].name.__typename;
-          //   // alert("no yet")
-          //  }
-          //  })
-          form.setValues({
-            id: editId,
-            name_translations: {
-              am: data.category.name_translations.am,
-              en: data.category.name_translations.en,
-            },
-            image: data.category.image,
-            // children: [...data.category.children],
-            childrens: {
-              create: [],
-              update: [...newUpdateArr],
-              delete: [],
-            },
-          });
+  const { loading } = useQuery(GET_CATEGORY, {
+    variables: { id: editId },
+    onCompleted(data) {
+      const newUpdateArr = data.category.children.map(
+        ({ name_translations: name, ...rest }) => ({
+          name,
+          ...rest,
+        })
+      );
+      // newUpdateArr.forEach((obj, index) => {
+      //  if("__typename" in obj || "__typename" in obj[index].name ){
+      //    delete newUpdateArr[index].__typename;
+      //    delete newUpdateArr[index].name.__typename;
+      //   // alert("no yet")
+      //  }
+      //  })
+      form.setValues({
+        id: editId,
+        name_translations: {
+          am: data.category.name_translations.am,
+          en: data.category.name_translations.en,
         },
-    
-    });
+        image: data.category.imageUrl,
+        // children: [...data.category.children],
+        childrens: {
+          create: [],
+          update: [...newUpdateArr],
+          delete: [],
+        },
+      });
+    },
+  });
   // to control the current active tab
   const [activeTab, setActiveTab] = useState(tabList[0].value);
   const [file, setFile] = useState([]);
@@ -91,14 +89,14 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
             )}
           />
           <ActionIcon
-           color="#ed522f"
+            color="#ed522f"
             onClick={() => {
               form.removeListItem("childrens.update", index);
               form.insertListItem("childrens.delete", parseInt(item.id));
             }}
             style={{ marginTop: "30px", padding: "2px" }}
           >
-            <Trash  size={24} />
+            <Trash size={24} />
           </ActionIcon>
         </Group>
       );
@@ -130,7 +128,7 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
             }}
             style={{ marginTop: "30px", padding: "2px" }}
           >
-            <Trash  size={24} />
+            <Trash size={24} />
           </ActionIcon>
         </Group>
       );
@@ -162,9 +160,10 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
   };
 
   const submit = () => {
-    form.getInputProps("childrens.update").value.forEach((obj, index) => {
-      delete obj.__typename
-      delete obj.name.__typename
+    form.getInputProps("childrens.update")?.value?.forEach((obj, index) => {
+      delete obj.__typename;
+      delete obj.name.__typename;
+      
     });
     // return;
     if (activeTab === tabList[tabList.length - 1].value) {
@@ -175,6 +174,8 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
             am: form.getInputProps("name_translations.am").value,
             en: form.getInputProps("name_translations.en").value,
           },
+        //  image: form.getInputProps("image").value, // Pass the image value
+
           children: {
             create: form.getInputProps("childrens.create").value,
             update: form.getInputProps("childrens.update").value,

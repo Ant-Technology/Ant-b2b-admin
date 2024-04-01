@@ -46,56 +46,47 @@ const Orders = () => {
       },
     },
     {
-        label: "Order Date",
-        key: "created_at_human",
-        sortable: false,
-        searchable: false,
-        render: (rowData) => {
-          return <span>{rowData.created_at_human}</span>;
-        },
+      label: "Order Date",
+      key: "created_at",
+      sortable: true,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.created_at}</span>;
       },
-      {
-        label: "Driver",
-        key: "driver",
-        sortable: false,
-        searchable: false,
-        render: (rowData) => {
-          return <span>{rowData.driver?.name}</span>;
-        },
+    },
+    {
+      label: "Retailer",
+      key: "retailer",
+      sortable: true,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.retailer?.name}</span>;
       },
-      {
-        label: "Retailer",
-        key: "retailer",
-        sortable: false,
-        searchable: false,
-        render: (rowData) => {
-          return <span>{rowData.retailer?.name}</span>;
-        },
+    },
+    {
+      label: "Status",
+      key: "status",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.state}</span>;
       },
-      {
-        label: "Status",
-        key: "status",
-        sortable: false,
-        searchable: false,
-        render: (rowData) => {
-          return <span>{rowData.state}</span>;
-        },
+    },
+    //productSkuCount
+    {
+      label: "Product Count",
+      key: "productSkuCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.productSkuCount}</span>;
       },
-      //productSkuCount
-      {
-        label: "ProductSku",
-        key: "productSkuCount",
-        sortable: false,
-        searchable: false,
-        render: (rowData) => {
-          return <span>{rowData.productSkuCount}</span>;
-        },
-      },
+    },
     {
       label: "Total Price",
       key: "total_price",
-      sortable: false,
-      searchable: false,
+      sortable: true,
+      searchable: true,
       render: (rowData) => {
         return <span>{rowData.total_price}</span>;
       },
@@ -107,8 +98,12 @@ const Orders = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <ManualGearbox color="yellow"
+          <ManualGearbox
             size={24}
+            style={{
+              cursor: "pointer",
+            }}
+            color="#1971C2"
             onClick={() => ManageOrder(`${rowData.id}`)}
           />
         );
