@@ -59,13 +59,15 @@ export const UPDATE_CATEGORY = gql`
 
 // ware houses
 export const CREATE_WARE_HOUSE = gql`
-mutation CREATE_WARE_HOUSE($name: String!, $_geo: GeoInput, $regionId: ID!) {
+mutation CREATE_WARE_HOUSE($name: String!, $_geo: GeoInput, $regionId: ID!, $specific_area: String) {
   createWarehouse(input: {
     name: $name,
     _geo: $_geo,
-    region: { connect: $regionId }
+    region: { connect: $regionId },
+    specific_area:$specific_area
   }) {
     id
+    specific_area
   }
 }
 `;
