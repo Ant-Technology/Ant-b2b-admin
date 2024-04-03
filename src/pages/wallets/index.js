@@ -188,7 +188,7 @@ const Wallets = () => {
         <td>{row.reference_number}</td>
         <td>{row.amount}</td>
         <td>{row.confirmed_at?new Date(row.confirmed_at).toLocaleDateString():"Not Confirmed"}</td>
-        <td>{row.confirmed_by.name}</td>
+        <td>{row.confirmed_by?.name}</td>
         <td>{row.retailer?.name}</td>
         <td>
           <ManualGearbox

@@ -121,6 +121,15 @@ const Warehouses = () => {
       },
     },
     {
+      label: "Specific Area",
+      key: "specific_area",
+      sortable: true,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.specific_area}</span>;
+      },
+    },
+    {
       label: "Stock count",
       key: "name",
       sortable: false,

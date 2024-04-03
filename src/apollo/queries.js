@@ -119,6 +119,7 @@ export const GET_WARE_HOUSES = gql`
       data {
         id
         name
+        specific_area
         stocks {
           id
           quantity
