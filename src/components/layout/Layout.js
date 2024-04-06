@@ -11,7 +11,7 @@ import {
 import { useMediaQuery, useViewportSize } from "@mantine/hooks";
 import NavbarSimple from "../navigation";
 
-const Layout = ({ children }) => {
+const Layout = ({ children,setPosition }) => {
   const {  width } = useViewportSize();
   const largeScreen = useMediaQuery("(min-width: 800px)");
 
@@ -39,7 +39,7 @@ const Layout = ({ children }) => {
           // width={{ sm: 200, lg: 200 }}
           style={{ maxWidth: width / 14 }}
         >
-          <NavbarSimple opened={opened} setOpened={setOpened} />
+          <NavbarSimple opened={opened} setOpened={setOpened} setPosition={setPosition} />
         </Navbar>
       }
       // aside={

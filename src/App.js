@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   MantineProvider,
@@ -10,6 +10,7 @@ import {
   showNotification,
 } from "@mantine/notifications";
 import { useHotkeys, useLocalStorage } from "@mantine/hooks";
+import Pusher from 'pusher-js';
 import RoutesComp from "./routes";
 import Layout from "components/layout/Layout";
 import { useQuery } from "@apollo/client";
@@ -20,6 +21,7 @@ import { customLoader } from "components/utilities/loader";
 function App() {
   let location = useLocation();
   let navigate = useNavigate();
+  const[position,setPosition] = useState(null);
 
   const { loading } = useQuery(AUTH, {
     onCompleted(data) {
@@ -59,8 +61,7 @@ function App() {
   const toggleColorScheme = (value) =>
     setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
 
-  useHotkeys([["mod+J", () => toggleColorScheme()]]);
-
+  useHotkeys([["mod+J", () => toggleColorScheme()]]); 
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -88,15 +89,26 @@ function App() {
           },
         }}
       >
-        <NotificationsProvider>
+        {position?
+        <NotificationsProvider position={position} setPosition={setPosition} >
           {location.pathname !== "/login" ? (
-            <Layout>
+            <Layout setPosition={setPosition}>
+              <RoutesComp />
+            </Layout>
+          ) : (
+            <RoutesComp />
+          )}
+        </NotificationsProvider>:
+          <NotificationsProvider>
+          {location.pathname !== "/login" ? (
+            <Layout setPosition={setPosition}>
               <RoutesComp />
             </Layout>
           ) : (
             <RoutesComp />
           )}
         </NotificationsProvider>
+}
       </MantineProvider>
     </ColorSchemeProvider>
   );

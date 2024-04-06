@@ -120,6 +120,10 @@ export const GET_WARE_HOUSES = gql`
         id
         name
         specific_area
+        region{
+          id
+          name
+      }
         stocks {
           id
           quantity
@@ -144,6 +148,11 @@ export const GET_WARE_HOUSE = gql`
     warehouse(id: $id) {
       id
       name
+      specific_area
+      region{
+          id
+          name
+      }
       _geo {
         lat
         lng
