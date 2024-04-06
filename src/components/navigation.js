@@ -135,9 +135,16 @@ const useStyles = createStyles((theme, _params, getRef) => {
     },
   };
 });
-
 const data = [
   { link: "/", label: "Dashboard", icon: IconDashboard },
+  { link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading },
+  {
+    link: "/orders",
+    label: "Orders",
+    icon: IconShoppingCart,
+  },
+  { link: "/shipments", label: "Shipments", icon: IconShip },
+  { link: "/wallets", label: "Wallet", icon: IconWallet },
   { link: "/users", label: "User Management", icon: IconUsers },
   { link: "/categories", label: "Categories", icon: IconApps },
   { link: "/products", label: "Products", icon: IconShoppingCart },
@@ -148,21 +155,12 @@ const data = [
   { link: "/drivers", label: "Drivers", icon: IconUser },
   { link: "/vehicle_types", label: "Vehicle Types", icon: IconTruck },
   { link: "/vehicles", label: "Vehicles", icon: IconTruckDelivery },
-  { link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading },
   {
     link: "/distributors",
     label: "Distributers",
     icon: IconLayoutDistributeHorizontal,
   },
   { link: "/stocks", label: "Stocks", icon: IconBuildingStore },
-  {
-    link: "/orders",
-    label: "Orders",
-    icon: IconShoppingCart,
-    count: localStorage.getItem("orderCount"),
-  },
-  { link: "/shipments", label: "Shipments", icon: IconShip },
-  { link: "/wallets", label: "Wallet", icon: IconWallet },
 ];
 
 const NavbarSimple = ({ opened, setOpened, setPosition }) => {
@@ -206,7 +204,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       setDrppoffs(data.data.drop_offs);
     });
     notificationChannel.bind("new-item-created", function (data) {
-      setPosition("top-center");
+      setPosition("top-left");
       showNotification({
         color: data.type === "Error" ? "red" : "green",
         title: data.type,
@@ -216,7 +214,8 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
           left: "50%",
           transform: "translate(-50%, -50%)",
         },
-        autoClose: 8000, // Adjust the duration time here (in milliseconds)
+        autoClose: false, // Disable auto close
+        // Adjust the duration time here (in milliseconds)
       });
     });
     setPosition(null);
@@ -295,17 +294,17 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                   </Badge>
                 ) : null}
                 {item.link === "/wallets" &&
-                  wallets &&
-                  parseInt(wallets) > 0 ? (
-                    <Badge
-                      style={{ marginLeft: "15px" }}
-                      size="md"
-                      variant="danger"
-                      circle
-                    >
-                      {wallets}
-                    </Badge>):null
-                  }
+                wallets &&
+                parseInt(wallets) > 0 ? (
+                  <Badge
+                    style={{ marginLeft: "15px" }}
+                    size="md"
+                    variant="danger"
+                    circle
+                  >
+                    {wallets}
+                  </Badge>
+                ) : null}
                 {item.link === "/dropoffs" &&
                   dropoffs &&
                   parseInt(dropoffs) > 0 && (
