@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createStyles,
   ScrollArea,
@@ -9,7 +9,9 @@ import {
   Avatar,
   Tooltip,
   Popover,
+  Badge,
 } from "@mantine/core";
+import Pusher from "pusher-js";
 
 import { useMediaQuery, useViewportSize } from "@mantine/hooks";
 import {
@@ -37,7 +39,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { authDataVar } from "apollo/store";
 import { useMutation } from "@apollo/client";
 import { LOGOUT } from "apollo/mutuations";
-import { showNotification } from "@mantine/notifications";
+import {
+  NotificationsProvider,
+  showNotification,
+} from "@mantine/notifications";
+import NotificationExample from "./showNotification";
 
 const useStyles = createStyles((theme, _params, getRef) => {
   const icon = getRef("icon");
@@ -149,22 +155,76 @@ const data = [
     icon: IconLayoutDistributeHorizontal,
   },
   { link: "/stocks", label: "Stocks", icon: IconBuildingStore },
-  { link: "/orders", label: "Orders", icon: IconShoppingCart },
+  {
+    link: "/orders",
+    label: "Orders",
+    icon: IconShoppingCart,
+    count: localStorage.getItem("orderCount"),
+  },
   { link: "/shipments", label: "Shipments", icon: IconShip },
   { link: "/wallets", label: "Wallet", icon: IconWallet },
 ];
 
-const NavbarSimple = ({ opened, setOpened }) => {
+const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const { width } = useViewportSize();
 
   const { classes, cx, theme } = useStyles();
-  const [active, setActive] = useState("Billing");
+
   const mobScreen = useMediaQuery("(max-width: 500px)");
 
+  const [active, setActive] = useState("Billing");
+  const [orderCount, setOrderCount] = useState(
+    localStorage.getItem("orderCount") || 0
+  );
+  const [shipments, setShipments] = useState(
+    localStorage.getItem("shipments") || 0
+  );
+  const [wallets, setWallets] = useState(localStorage.getItem("wallets") || 0);
+  const [dropoffs, setDrppoffs] = useState(
+    localStorage.getItem("dropoffs") || 0
+  );
+
   const navigate = useNavigate();
-
   const [signout] = useMutation(LOGOUT);
+  useEffect(() => {
+    const pusher = new Pusher("83f49852817c6b52294f", {
+      cluster: "mt1",
+    });
+    const channel = pusher.subscribe("nav-counter");
+    const notificationChannel = pusher.subscribe("notification");
 
+    // Bind to a test event
+    channel.bind("nav-counter", function (data) {
+      localStorage.setItem("orderCount", data.data.orders);
+      localStorage.setItem("wallets", data.data.wallets);
+      localStorage.setItem("shipments", data.data.shipments);
+      localStorage.setItem("dropoffs", data.data.drop_offs);
+      console.log(data.data);
+      setOrderCount(data.data.orders);
+      setWallets(data.data.wallets);
+      setShipments(data.data.shipments);
+      setDrppoffs(data.data.drop_offs);
+    });
+    notificationChannel.bind("new-item-created", function (data) {
+      setPosition("top-center");
+      showNotification({
+        color: data.type === "Error" ? "red" : "green",
+        title: data.type,
+        message: data.message,
+        position: {
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        },
+        autoClose: 8000, // Adjust the duration time here (in milliseconds)
+      });
+    });
+    setPosition(null);
+    return () => {
+      // Unsubscribe from channels, disconnect, etc.
+      pusher.disconnect();
+    };
+  }, []); //notification
   const logout = () => {
     signout({
       onCompleted() {
@@ -207,7 +267,59 @@ const NavbarSimple = ({ opened, setOpened }) => {
             stroke={1.5}
           />
           <div style={{ overflow: "hidden" }}>
-            {opened ? <span>{item.label}</span> : null}
+            {opened ? (
+              <span>
+                {item.label}{" "}
+                {item.link === "/orders" &&
+                  orderCount &&
+                  parseInt(orderCount) > 0 && (
+                    <Badge
+                      style={{ marginLeft: "15px" }}
+                      size="md"
+                      variant="danger"
+                      circle
+                    >
+                      {orderCount}
+                    </Badge>
+                  )}
+                {item.link === "/shipments" &&
+                shipments &&
+                parseInt(shipments) > 0 ? (
+                  <Badge
+                    style={{ marginLeft: "15px" }}
+                    size="md"
+                    variant="danger"
+                    circle
+                  >
+                    {shipments}
+                  </Badge>
+                ) : null}
+                {item.link === "/wallets" &&
+                  wallets &&
+                  parseInt(wallets) > 0 ? (
+                    <Badge
+                      style={{ marginLeft: "15px" }}
+                      size="md"
+                      variant="danger"
+                      circle
+                    >
+                      {wallets}
+                    </Badge>):null
+                  }
+                {item.link === "/dropoffs" &&
+                  dropoffs &&
+                  parseInt(dropoffs) > 0 && (
+                    <Badge
+                      style={{ marginLeft: "15px" }}
+                      size="md"
+                      variant="danger"
+                      circle
+                    >
+                      {dropoffs}
+                    </Badge>
+                  )}
+              </span>
+            ) : null}
           </div>
         </Link>
       ) : (
@@ -281,16 +393,16 @@ const NavbarSimple = ({ opened, setOpened }) => {
       </Navbar.Section>
 
       <Navbar.Section
-          grow
-          style={{
-              overflowY: "auto",
-              maxHeight: "calc(100vh - 100px)",
-              scrollbarWidth: "thin",
-              scrollbarColor: "rgba(155, 155, 155, 0.5) rgba(255, 255, 255, 0.1)",
-              scrollbarTrackColor: "rgba(255, 255, 255, 0.1)",
-              scrollbarThumbColor: "rgba(155, 155, 155, 0.5)",
-              WebkitScrollbarWidth: "2px", // Adjust this value as needed
-          }}
+        grow
+        style={{
+          overflowY: "auto",
+          maxHeight: "calc(100vh - 100px)",
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(155, 155, 155, 0.5) rgba(255, 255, 255, 0.1)",
+          scrollbarTrackColor: "rgba(255, 255, 255, 0.1)",
+          scrollbarThumbColor: "rgba(155, 155, 155, 0.5)",
+          WebkitScrollbarWidth: "2px", // Adjust this value as needed
+        }}
       >
         {links}
       </Navbar.Section>

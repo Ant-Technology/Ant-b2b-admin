@@ -40,25 +40,6 @@ const containerStyle = {
   width: "100%",
   height: "400px",
 };
-
-const inputStyle = {
-  boxSizing: `border-box`,
-  border: `1px solid transparent`,
-  width: `40%`,
-  height: `32px`,
-  padding: `18px 12px`,
-  borderRadius: `3px`,
-  boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
-  fontSize: `14px`,
-  outline: `none`,
-  textOverflow: `ellipses`,
-  position: "absolute",
-  left: "50%",
-  marginTop: "320px",
-  marginLeft: "-120px",
-  backgroundColor: `#fff`,
-};
-
 //AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk
 const GOOGLE_API_KEY = "AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk";
 const libraries = ["places"];
@@ -256,6 +237,7 @@ export default function WarehouseAddModal({
                     required
                     label="Specific Area"
                     placeholder="Specific Area"
+                    {...form.getInputProps("specific_area")}
                   />
                 </Autocomplete>
               </Grid.Col>

@@ -73,17 +73,29 @@ mutation CREATE_WARE_HOUSE($name: String!, $_geo: GeoInput, $regionId: ID!, $spe
 `;
 
 export const UPDATE_WARE_HOUSE = gql`
-  mutation UPDATE_WARE_HOUSE($id: ID!, $input: UpdateWarehouseInput!) {
-    updateWarehouse(id: $id, input: $input) {
+mutation UpdateWarehouse($id: ID!, $name: String!, $_geo: GeoInput, $specific_area: String, $region: UpdateRegionBelongsTo!) {
+  updateWarehouse(
+    id: $id
+    name: $name
+    _geo: $_geo
+    specific_area: $specific_area
+    region: $region
+  ) {
+    id
+    name
+    _geo {
+      lat
+      lng
+    }
+    specific_area
+    region {
       id
       name
-      _geo {
-        lat
-        lng
-      }
     }
   }
+}
 `;
+
 
 export const DEL_WAREHOUSE = gql`
   mutation DEL_WAREHOUSE($id: ID!) {
