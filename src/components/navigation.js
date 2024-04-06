@@ -135,7 +135,6 @@ const useStyles = createStyles((theme, _params, getRef) => {
     },
   };
 });
-
 const data = [
   { link: "/", label: "Dashboard", icon: IconDashboard },
   { link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading },
