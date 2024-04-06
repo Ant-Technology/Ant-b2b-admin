@@ -204,7 +204,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       setDrppoffs(data.data.drop_offs);
     });
     notificationChannel.bind("new-item-created", function (data) {
-      setPosition("top-left");
+      setPosition("top-center");
       showNotification({
         color: data.type === "Error" ? "red" : "green",
         title: data.type,
