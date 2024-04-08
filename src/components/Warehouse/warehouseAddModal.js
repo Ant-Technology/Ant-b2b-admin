@@ -137,29 +137,39 @@ export default function WarehouseAddModal({
       });
     },
   });
+  
   const [createWarehouse, { loading }] = useMutation(CREATE_WARE_HOUSE, {
     update(cache, { data: { createWarehouse } }) {
-      cache.updateQuery(
-        {
-          query: GET_WARE_HOUSES,
-          variables: {
-            first: 10,
-            page: 1,
+      // Read the existing data from the cache
+      const { warehouses } = cache.readQuery({
+        query: GET_WARE_HOUSES,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+      });
+      if (!warehouses) {
+        return;
+      }
+      const updatedWarehouses = [createWarehouse, ...warehouses.data];
+
+      cache.writeQuery({
+        query: GET_WARE_HOUSES,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+        data: {
+          warehouses: {
+            ...warehouses,
+            data: updatedWarehouses,
           },
         },
-        (data) => {
-          if (data.warehouses.data.length === 10) {
-            setTotal(total + 1);
-            setActivePage(1);
-          } else {
-            return {
-              warehouses: {
-                data: [createWarehouse, ...data.warehouses.data],
-              },
-            };
-          }
-        }
-      );
+      });
+  
+      const newTotal = warehouses.paginatorInfo.total + 1;
+      setTotal(newTotal);
+      setActivePage(1);
     },
   });
   
