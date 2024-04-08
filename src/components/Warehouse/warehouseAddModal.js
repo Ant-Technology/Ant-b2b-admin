@@ -144,13 +144,13 @@ export default function WarehouseAddModal({
           query: GET_WARE_HOUSES,
           variables: {
             first: 10,
-            page: activePage,
+            page: 1,
           },
         },
         (data) => {
           if (data.warehouses.data.length === 10) {
             setTotal(total + 1);
-            setActivePage(total + 1);
+            setActivePage(1);
           } else {
             return {
               warehouses: {
@@ -162,7 +162,7 @@ export default function WarehouseAddModal({
       );
     },
   });
-
+  
   const submit = () => {
     createWarehouse({
       variables: {
@@ -181,6 +181,7 @@ export default function WarehouseAddModal({
           message: "Warehouse Created Successfully",
         });
         setOpened(false);
+      
       },
       onError(error) {
         showNotification({
@@ -199,7 +200,7 @@ export default function WarehouseAddModal({
   return (
     <>
       <LoadingOverlay
-        visible={loading}
+        visible={loading|| regionsLoading}
         color="blue"
         overlayBlur={2}
         loader={customLoader}

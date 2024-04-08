@@ -24,7 +24,7 @@ const Warehouses = () => {
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const { data, loading } = useQuery(GET_WARE_HOUSES, {
+  const { data, loading ,refetch} = useQuery(GET_WARE_HOUSES, {
     variables: {
       first: size,
       page: activePage,
@@ -234,6 +234,7 @@ const Warehouses = () => {
           activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}
+          refetch={refetch}
         />
       </Drawer>
 

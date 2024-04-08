@@ -59,43 +59,42 @@ export const UPDATE_CATEGORY = gql`
 
 // ware houses
 export const CREATE_WARE_HOUSE = gql`
-mutation CREATE_WARE_HOUSE($name: String!, $_geo: GeoInput, $regionId: ID!, $specific_area: String) {
-  createWarehouse(input: {
-    name: $name,
-    _geo: $_geo,
-    region: { connect: $regionId },
-    specific_area:$specific_area
-  }) {
-    id
-    specific_area
-  }
-}
-`;
-
-export const UPDATE_WARE_HOUSE = gql`
-mutation UpdateWarehouse($id: ID!, $name: String!, $_geo: GeoInput, $specific_area: String, $region: UpdateRegionBelongsTo!) {
-  updateWarehouse(
-    id: $id
-    name: $name
-    _geo: $_geo
-    specific_area: $specific_area
-    region: $region
+  mutation CREATE_WARE_HOUSE(
+    $name: String!
+    $_geo: GeoInput
+    $regionId: ID!
+    $specific_area: String
   ) {
-    id
-    name
-    _geo {
-      lat
-      lng
+    createWarehouse(
+      input: {
+        name: $name
+        _geo: $_geo
+        region: { connect: $regionId }
+        specific_area: $specific_area
+      }
+    ) {
+      id
+      specific_area
     }
-    specific_area
-    region {
+  }
+`;
+export const UPDATE_WARE_HOUSE = gql`
+  mutation UPDATE_WARE_HOUSE($id: ID!, $name: String!, $_geo: GeoInput!, $specific_area: String!, $region: UpdateRegionBelongsTo!) {
+    updateWarehouse(id: $id, name: $name, _geo: $_geo, specific_area: $specific_area, region: $region) {
       id
       name
+      _geo {
+        lat
+        lng
+      }
+      specific_area
+      region {
+        id
+        name
+      }
     }
   }
-}
 `;
-
 
 export const DEL_WAREHOUSE = gql`
   mutation DEL_WAREHOUSE($id: ID!) {
@@ -631,11 +630,7 @@ export const CREATE_DROP_OFF = gql`
     $orders: CreateDropoffOrdersInput!
   ) {
     createDropoff(
-      input: {
-        vehicle_type: $vehicleType
-        from: $from
-        orders: $orders
-      }
+      input: { vehicle_type: $vehicleType, from: $from, orders: $orders }
     ) {
       id
     }
