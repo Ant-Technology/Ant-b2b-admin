@@ -46,7 +46,6 @@ const CategoryEditModal = ({
   getWarehouse,
   loading,
 }) => {
-  
   const [location, setLocation] = useState({});
   const [center, setCenter] = useState({ lat: 8.9999645, lng: 38.7700539 });
   const [autocomplete, setAutocomplete] = useState();
@@ -73,7 +72,7 @@ const CategoryEditModal = ({
 
   const onPlaceChangedHandler = () => {
     if (autocomplete !== null) {
-      console.log(autocomplete.getPlace().name)
+      console.log(autocomplete.getPlace().name);
       form.setFieldValue("specific_area", autocomplete.getPlace().name);
       setCenter({
         lat: autocomplete.getPlace().geometry.location.lat(),
@@ -92,21 +91,21 @@ const CategoryEditModal = ({
   //form initialization and validation
   const form = useForm({
     name: "",
-    region:{ connect: "1" }, // Provide the default region ID here
-    specific_area:""
+    region: { connect: "1" }, // Provide the default region ID here
+    specific_area: "",
   });
 
   useEffect(() => {
     if (editId) {
       getWarehouse({
         variables: { id: editId },
-        
+
         onCompleted(data) {
-         // console.log(data)
+          // console.log(data)
           form.setValues({
             name: data.warehouse?.name,
-            specific_area:data.warehouse?.specific_area,
-            region:{connect:data.warehouse?.region?.id}
+            specific_area: data.warehouse?.specific_area,
+            region: { connect: data.warehouse?.region?.id },
           });
           setLocation({ ...data.warehouse?._geo });
         },
@@ -155,17 +154,15 @@ const CategoryEditModal = ({
     editWarehouse({
       variables: {
         id: editId,
-        input: {
-          name: form.getInputProps("name").value,
-          _geo: {
-            lat: +location.lat,
-            lng: +location.lng,
-          },
-          region: form.getInputProps("region").value, // Provide the regionId variable
-          specific_area:form.getInputProps("specific_area").value, 
+        name: form.values.name, // Use form.values to access form fields
+        _geo: {
+          lat: +location.lat,
+          lng: +location.lng,
         },
+        region: { connect: form.values.region.connect }, // Access the region value correctly
+        specific_area: form.values.specific_area,
       },
-   
+
       onCompleted(data) {
         showNotification({
           color: "green",
@@ -199,7 +196,7 @@ const CategoryEditModal = ({
       />
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
-        <Grid>
+          <Grid>
             <Grid.Col span={6}>
               <TextInput
                 required
@@ -208,9 +205,9 @@ const CategoryEditModal = ({
                 {...form.getInputProps("name")}
               />
             </Grid.Col>
-            </Grid>
+          </Grid>
           <Grid>
-          <Grid.Col span={6}>
+            <Grid.Col span={6}>
               {" "}
               <Select
                 data={regionsDropDownData}
@@ -272,7 +269,6 @@ const CategoryEditModal = ({
       </ScrollArea>
     </>
   );
-
 };
 
 export default CategoryEditModal;
