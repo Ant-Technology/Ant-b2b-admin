@@ -529,6 +529,7 @@ export const GET_ORDER = gql`
       items {
         id
         quantity
+        state
         product_sku {
           id
           price

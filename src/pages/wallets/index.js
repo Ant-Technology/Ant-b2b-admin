@@ -191,6 +191,17 @@ const Wallets = () => {
         <td>{row.confirmed_by?.name}</td>
         <td>{row.retailer?.name}</td>
         <td>
+          {row.confirmed_at ? (
+            <Badge variant="light" color="green">
+              Approved
+            </Badge>
+          ) : (
+            <Badge variant="light" color="red">
+              Not Approved
+            </Badge>
+          )}
+        </td>
+        <td>
           <ManualGearbox
             style={{
               cursor: "pointer",
@@ -278,7 +289,10 @@ const Wallets = () => {
                 </Th>
                 <Th>Approved By</Th>
                 <Th sortable onSort={() => handleSort("retailer_id")}>
-                  Retailer ID
+                  Retailer
+                </Th>
+                <Th sortable={false}>
+                  Status
                 </Th>
                 <Th sortable={false}>Actions</Th>
               </tr>
