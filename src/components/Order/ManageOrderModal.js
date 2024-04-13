@@ -9,20 +9,23 @@ import {
   Grid,
   Stack,
   Select,
+  Group,
 } from "@mantine/core";
-import {  ManualGearbox } from "tabler-icons-react";
+import { ManualGearbox, DotsCircleHorizontal } from "tabler-icons-react";
 import { useForm } from "@mantine/form";
 import { useQuery, useMutation } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
 import { customLoader } from "components/utilities/loader";
 import { GET_ORDER, GET_SHIPMENTS } from "apollo/queries";
 import { SHIP_ITEM } from "apollo/mutuations";
+import axios from "axios";
 
-function ManageOrderModal({
-  editId,
-}) {
+function ManageOrderModal({ editId }) {
   // state variables
   const [order, setOrder] = useState();
+  const [openedCancel, setOpenedCancel] = useState(false);
+  const [itemId, setItemId] = useState();
+  const [loading, setLoading] = useState(false);
   const [selectedOrderItem, setSelectedOrderItem] = useState();
   const [openModal, setOpenModal] = useState(false);
   const [shipmentsDropDownData, setShipmentsDropDownData] = useState([]);
@@ -37,7 +40,6 @@ function ManageOrderModal({
       let shipments = data.shipments;
       let shipmentsArray = [];
 
-
       // loop over shipments data to structure the data for the use of drop down
       shipments.data.forEach((shipment, index) => {
         shipmentsArray.push({
@@ -45,7 +47,6 @@ function ManageOrderModal({
           value: shipment.id,
         });
       });
-
 
       // put it on the state
       setShipmentsDropDownData([...shipmentsArray]);
@@ -59,12 +60,10 @@ function ManageOrderModal({
     },
   });
 
-
-
   // mutation
   const [shipItem, { loading: shipItemLoading }] = useMutation(SHIP_ITEM);
 
-  const  { loading: orderLoading } = useQuery(GET_ORDER,{
+  const { loading: orderLoading, refetch } = useQuery(GET_ORDER, {
     variables: { id: editId },
     onCompleted(data) {
       let order = data.order;
@@ -89,6 +88,44 @@ function ManageOrderModal({
   // set the selected item
   const setShipmentDropDownValue = (val) => {
     form.setFieldValue("shipment.connect", val);
+  };
+
+  const cancelItem = async () => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      //my-orders/3/cancel
+      const { data } = await axios.patch(
+        `http://157.230.102.54:8081/api/my-orders/${itemId}/cancel`,
+        {},
+        config
+      );
+      if (data) {
+        setLoading(false);
+        refetch();
+        setOpenedCancel(false);
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: "Order item has been canceled successfully",
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      setOpenedCancel(false);
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: error.response?.data?.message
+          ? error.response.data.message
+          : "Error Cancel Item ",
+      });
+    }
   };
 
   const submit = () => {
@@ -126,6 +163,10 @@ function ManageOrderModal({
     });
     // e.preventDefault();
   };
+  const handleCancel = (id) => {
+    setItemId(id);
+    setOpenedCancel(true);
+  };
 
   return (
     <div style={{ width: "98%", margin: "auto" }}>
@@ -160,7 +201,7 @@ function ManageOrderModal({
         </form>
       </Modal>
       <LoadingOverlay
-        visible={ shipmentLoading || shipItemLoading || orderLoading}
+        visible={shipmentLoading || shipItemLoading || orderLoading}
         color="blue"
         overlayBlur={2}
         loader={customLoader}
@@ -179,6 +220,7 @@ function ManageOrderModal({
                 <th>Each Price</th>
                 <th>Total Price</th>
                 <th>Product Name</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -189,14 +231,25 @@ function ManageOrderModal({
                     <tr key={row.id}>
                       <td>{index + 1}</td>
                       <td>{row.quantity}</td>
-                      <td>{row.product_sku ? row.product_sku.price / row.quantity : "-"}</td>
+                      <td>
+                        {row.product_sku
+                          ? row.product_sku.price / row.quantity
+                          : "-"}
+                      </td>
                       <td>{row.product_sku?.price}</td>
                       <td>{row.product_sku?.product?.name}</td>
+                      <td>{row.state}</td>
                       <td>
                         <ManualGearbox
-                       color="#1971C2"
+                          color="#1971C2"
                           size={24}
                           onClick={() => manageItem(`${row.id}`)}
+                        />
+                        <DotsCircleHorizontal
+                          style={{ marginLeft: "10px", cursor: "pointer" }}
+                          color="#1971C2"
+                          size={24}
+                          onClick={() => handleCancel(`${row.id}`)}
                         />
                       </td>
                     </tr>
@@ -213,6 +266,19 @@ function ManageOrderModal({
               )}
             </tbody>
           </Table>
+          <Modal
+            opened={openedCancel}
+            onClose={() => setOpenedCancel(false)}
+            title="Warning"
+            centered
+          >
+            <p>Are you sure do you want to Cancel this Item?</p>
+            <Group position="right">
+              <Button onClick={() => cancelItem()} color="red">
+                Cancel
+              </Button>
+            </Group>
+          </Modal>
         </ScrollArea>
       </Card>
     </div>

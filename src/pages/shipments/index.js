@@ -17,7 +17,7 @@ import {
   Text,
 } from "@mantine/core";
 import B2bTable from "components/reusable/b2bTable";
-import { Edit, Trash } from "tabler-icons-react";
+import { Edit, Trash, DotsCircleHorizontal } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
 import { ShipmentAddModal } from "components/Shipment/ShipmentAddModal";
 import ShipmentManageModal from "components/Shipment/ShipmentManageModal";
@@ -184,8 +184,18 @@ const Shipments = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
+            <Trash
+              color="#ed522f"
+              size={24}
+              onClick={() => handleDelete(`${rowData.id}`)}
+            />
             <Edit
+              style={{ marginLeft: "10px" }}
+              size={24}
+              onClick={() => handleManageShipment(`${rowData.id}`)}
+            />
+            <DotsCircleHorizontal
+              style={{ marginLeft: "10px" }}
               size={24}
               onClick={() => handleManageShipment(`${rowData.id}`)}
             />

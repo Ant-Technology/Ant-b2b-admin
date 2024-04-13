@@ -93,10 +93,10 @@ const ManageDepositSlip = ({
       <ScrollArea style={{ height: height / 1.1 }}>
         <Image
           height={height / 1.4}
-          src={data?.slip}
+          src={data?.slip ? data?.slip : ""}
           alt="With default placeholder"
           withPlaceholder
-  
+          placeholder={<Text align="center">No slip Found!</Text>}
         />
         <Skeleton height={8} visible={loading || confirmLoading}></Skeleton>
         <Button
