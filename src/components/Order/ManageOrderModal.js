@@ -63,7 +63,7 @@ function ManageOrderModal({ editId }) {
   // mutation
   const [shipItem, { loading: shipItemLoading }] = useMutation(SHIP_ITEM);
 
-  const { loading: orderLoading,refetch } = useQuery(GET_ORDER, {
+  const { loading: orderLoading, refetch } = useQuery(GET_ORDER, {
     variables: { id: editId },
     onCompleted(data) {
       let order = data.order;
@@ -107,8 +107,13 @@ function ManageOrderModal({ editId }) {
       );
       if (data) {
         setLoading(false);
-        refetch()
-        setOpenedCancel(false)
+        refetch();
+        setOpenedCancel(false);
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: "Order item has been canceled successfully",
+        });
       }
     } catch (error) {
       setLoading(false);
