@@ -50,7 +50,9 @@ const useStyles = createStyles((theme, _params, getRef) => {
   return {
     bg: {
       backgroundColor:
-        theme.colorScheme === "dark" ? theme.colors.gray : theme.colors.gray[2],
+        theme.colorScheme === "dark"
+          ? theme.colors.gray
+          : "rgba(255, 102, 0, 1)",
     },
     header: {
       paddingBottom: theme.spacing.md,
@@ -81,10 +83,10 @@ const useStyles = createStyles((theme, _params, getRef) => {
       color:
         theme.colorScheme === "dark"
           ? theme.colors.dark[1]
-          : theme.colors.gray[7],
+          : "#FFFFFF",
       padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
       borderRadius: theme.radius.sm,
-      fontWeight: 500,
+      fontWeight: 700,
 
       "&:hover": {
         backgroundColor:
@@ -104,7 +106,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
       color:
         theme.colorScheme === "dark"
           ? theme.colors.dark[2]
-          : theme.colors.gray[6],
+          : "#FFFFFF",
       marginRight: theme.spacing.sm,
     },
 
