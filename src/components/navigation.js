@@ -50,7 +50,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
   return {
     bg: {
       backgroundColor:
-        theme.colorScheme === "dark" ? theme.colors.gray : theme.colors.gray[2],
+        theme.colorScheme === "dark" ? theme.colors.gray : "#ffffff",
     },
     header: {
       paddingBottom: theme.spacing.md,
@@ -81,17 +81,17 @@ const useStyles = createStyles((theme, _params, getRef) => {
       color:
         theme.colorScheme === "dark"
           ? theme.colors.dark[1]
-          : theme.colors.gray[7],
+          : "rgba(244, 151, 3, 0.8)",
       padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
       borderRadius: theme.radius.sm,
-      fontWeight: 500,
+      fontWeight: 700,
 
       "&:hover": {
         backgroundColor:
           theme.colorScheme === "dark"
             ? theme.colors.dark[6]
-            : theme.colors.gray[0],
-        color: theme.colorScheme === "dark" ? theme.white : theme.black,
+            : "rgba(244, 151, 3, 0.8)",
+        color: theme.colorScheme === "dark" ? theme.white : "rgb(20, 61, 89)",
 
         [`& .${icon}`]: {
           color: theme.colorScheme === "dark" ? theme.white : theme.black,
@@ -104,7 +104,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
       color:
         theme.colorScheme === "dark"
           ? theme.colors.dark[2]
-          : theme.colors.gray[6],
+          : "rgba(244, 151, 3, 0.8)",
       marginRight: theme.spacing.sm,
     },
 
@@ -119,20 +119,13 @@ const useStyles = createStyles((theme, _params, getRef) => {
 
     linkActive: {
       "&, &:hover": {
-        backgroundColor: theme.fn.variant({
-          variant: "light",
-          color: theme.primaryColor,
-        }).background,
-        color: theme.fn.variant({ variant: "light", color: theme.primaryColor })
-          .color,
+        backgroundColor: "rgba(244, 151, 3, 0.8)", // Background color
+        color: "rgb(20, 61, 89)", // Text color
         [`& .${icon}`]: {
-          color: theme.fn.variant({
-            variant: "light",
-            color: theme.primaryColor,
-          }).color,
+          color: "rgb(20, 61, 89)", // Icon color
         },
       },
-    },
+    },    
   };
 });
 const data = [

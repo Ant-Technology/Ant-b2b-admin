@@ -190,11 +190,15 @@ export const DropOffAddModal = ({
         setOpened(false);
       },
       onError(error) {
+        let errorMessage = "DropOff Not Created!";
+        if (error && error.message) {
+          errorMessage = error.message;
+        }
         setOpened(false);
         showNotification({
           color: "red",
           title: "Error",
-          message: "DropOff Not Created!",
+          message: errorMessage
         });
       },
     });

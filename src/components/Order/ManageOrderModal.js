@@ -274,7 +274,7 @@ function ManageOrderModal({ editId }) {
           >
             <p>Are you sure do you want to Cancel this Item?</p>
             <Group position="right">
-              <Button onClick={() => cancelItem()} color="red">
+              <Button onClick={() => cancelItem()} color="blue" variant="outline">
                 Cancel
               </Button>
             </Group>
