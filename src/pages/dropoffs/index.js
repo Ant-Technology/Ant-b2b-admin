@@ -91,8 +91,9 @@ const DropOffs = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24} />
+            <Trash color="#ed522f" size={24}   style={{cursor:"pointer"}} />
             <ManualGearbox color="#1971C2"
+            style={{marginLeft:"10px",cursor:"pointer"}}
               size={24}
               onClick={() => handleManageDropOff(`${rowData.id}`)}
             />

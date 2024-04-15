@@ -1,16 +1,20 @@
 import {
   TextInput,
   Grid,
+  Text,
   Stack,
   ScrollArea,
   Button,
+  ActionIcon,
   Tabs,
   LoadingOverlay,
+  Group,
 } from "@mantine/core";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useMutation } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
 import { useForm } from "@mantine/form";
+import { Trash } from "tabler-icons-react";
 import { useViewportSize } from "@mantine/hooks";
 import { Photo } from "tabler-icons-react";
 import { tabList } from "components/utilities/tablist";
@@ -18,34 +22,6 @@ import { customLoader } from "components/utilities/loader";
 import Map from "components/utilities/Map";
 import { CREATE_REGIONS } from "apollo/mutuations";
 import { GET_REGIONS } from "apollo/queries";
-import {
-  useLoadScript,
-  GoogleMap,
-  MarkerF,
-  Autocomplete,
-} from "@react-google-maps/api";
-import ContentLoader from "react-content-loader";
-
-// TODO: change map key env variable
-
-const Loader = () => (
-  <ContentLoader
-    width="100%"
-    height={400}
-    backgroundColor="#f0f0f0"
-    foregroundColor="#dedede"
-  >
-    <rect width="100%" height="400px" />
-  </ContentLoader>
-);
-
-const containerStyle = {
-  width: "100%",
-  height: "400px",
-};
-//AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk
-const GOOGLE_API_KEY = "AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk";
-const libraries = ["places"];
 
 const RegionsAddModal = ({
   setOpened,
@@ -54,51 +30,6 @@ const RegionsAddModal = ({
   activePage,
   setActivePage,
 }) => {
-  const [center, setCenter] = useState({ lat: 8.9999645, lng: 38.7700539 });
-  const [autocomplete, setAutocomplete] = useState();
-  const [mapRef, setMapRef] = useState(null);
-  const [location, setLocation] = useState({});
-  useEffect(() => {
-    if (
-      location &&
-      Object.keys(location) &&
-      Object.keys(location)?.length > 0
-    ) {
-      setCenter({ lat: location.lat, lng: location.lng });
-    }
-  }, [location]);
-  console.log("Center", center);
-
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: GOOGLE_API_KEY,
-    libraries,
-  });
-
-  const mapLoadHandler = (map) => {
-    setMapRef(map);
-  };
-
-  const onPlaceChangedHandler = () => {
-    if (autocomplete) {
-      const place = autocomplete.getPlace();
-      console.log(place);
-      if (place?.geometry && place?.geometry.location) {
-        const { lat, lng } = place.geometry.location;
-        setCenter({ lat: lat(), lng: lng() });
-        setLocation({ lat: lat(), lng: lng() });
-        // Set the form values
-        form.setValues({
-          ...form.values,
-          name: { en: place.name, am: "" }, // English name from place.name, Amharic name is empty
-        });
-      }
-    }
-  };
-
-  const autocompleteLoadHandler = (autocomplete) => {
-    console.log(autocomplete.getPlace());
-    setAutocomplete(autocomplete);
-  };
   // mutation
   const [addRegion, { loading: regionLoading }] = useMutation(CREATE_REGIONS, {
     update(cache, { data: { createRegion } }) {
@@ -130,16 +61,45 @@ const RegionsAddModal = ({
   const [activeTab, setActiveTab] = useState(tabList[0].value);
 
   // state variable to handle map location
+  const [location, setLocation] = useState({});
 
   // form state
   const form = useForm({
     initialValues: {
       name: { en: "", am: "" },
       _geo: { lat: "", lng: "" },
+      children: [],
     },
   });
 
   const { height } = useViewportSize();
+  const handleFields = (value) => {
+    let fields = form.values.children.map((item, index) => {
+      return (
+        <Group key={item.key} mt="xs">
+          <TextInput
+            required
+            label={`Specific  Area ${index + 1}`}
+            sx={{ flex: 1 }}
+            {...form.getInputProps(
+              value === "am"
+                ? `children.${index}.name.am`
+                : `children.${index}.name.en`
+            )}
+          />
+          <ActionIcon
+            color="#ed522f"
+            onClick={() => form.removeListItem("children", index)}
+            style={{ marginTop: "30px", padding: "2px" }}
+          >
+            <Trash size={24} />
+          </ActionIcon>
+        </Group>
+      );
+    });
+
+    return fields;
+  };
 
   const submit = () => {
     if (activeTab === tabList[tabList.length - 1].value) {
@@ -177,92 +137,95 @@ const RegionsAddModal = ({
   };
 
   return (
-    <>
-      <Tabs color="blue" value={activeTab} onTabChange={setActiveTab}>
-        <LoadingOverlay
-          visible={regionLoading}
-          color="blue"
-          overlayBlur={2}
-          loader={customLoader}
-        />
-        <Tabs.List>
+    //mapping the header icon and title
+    <Tabs color="blue" value={activeTab} onTabChange={setActiveTab}>
+      <LoadingOverlay
+        visible={regionLoading}
+        color="blue"
+        overlayBlur={2}
+        loader={customLoader}
+      />
+      <Tabs.List>
+        {tabList.map((tab, i) => {
+          return (
+            <Tabs.Tab key={i} value={tab.value} icon={<Photo size={14} />}>
+              {tab.name}
+            </Tabs.Tab>
+          );
+        })}
+      </Tabs.List>
+      <ScrollArea>
+        <form onSubmit={form.onSubmit(() => submit())} noValidate>
+          {/* mapping the tablist */}
           {tabList.map((tab, i) => {
             return (
-              <Tabs.Tab key={i} value={tab.value} icon={<Photo size={14} />}>
-                {tab.name}
-              </Tabs.Tab>
-            );
-          })}
-        </Tabs.List>
-        <ScrollArea
-          style={{ height: height / 1.5 }}
-          type="auto"
-          offsetScrollbars
-        >
-          <form onSubmit={form.onSubmit(() => submit())} noValidate>
-            <Stack>
-              <Grid>
-                {isLoaded && (
+              <Tabs.Panel style={{marginRight:"20px"}} key={i} value={tab.value} pt="xs">
+                <Grid grow>
                   <Grid.Col span={6}>
-                    <Autocomplete
-                      onLoad={autocompleteLoadHandler}
-                      onPlaceChanged={onPlaceChangedHandler}
-                    >
+                    <Grid.Col span={4}>
                       <TextInput
                         required
-                        label="Name"
-                        placeholder="Region Name"
-                        //  {...form.getInputProps("name." + tab.shortHand)}
+                        label={tab.label}
+                        placeholder={tab.placeHolder}
+                        {...form.getInputProps("name." + tab.shortHand)}
                       />
-                    </Autocomplete>
-                  </Grid.Col>
-                )}
-                <Grid.Col span={6}></Grid.Col>
-              </Grid>
-            </Stack>
+                    </Grid.Col>
 
-            <Grid style={{ marginTop: "10px" }}>
-              <Grid.Col span={12}>
-                <ScrollArea style={{ height: "auto" }}>
-                  {isLoaded ? (
-                    <GoogleMap
-                      center={center}
-                      zoom={14}
-                      mapContainerStyle={containerStyle}
-                      onLoad={mapLoadHandler}
-                      onClick={() =>
-                        mapRef && setCenter(mapRef.getCenter().toJSON())
-                      }
+                    <Grid.Col span={4}>
+                      <Button
+                        style={{
+                          display: activeTab === 1 ? "none" : "",
+                          marginTop: "15px",
+                          width: "25%",
+                          backgroundColor: "rgba(244, 151, 3, 0.8)",
+                          color: "rgb(20, 61, 89)",
+                        }}
+                        type="submit"
+                      >
+                        Submit
+                      </Button>
+                    </Grid.Col>
+                  </Grid.Col>
+
+                  <Grid.Col span={6}>
+                  <ScrollArea
+                      style={{ height: height / 1.8 }}
+                      type="auto"
+                      offsetScrollbars
                     >
-                      <MarkerF
-                        position={center}
-                        draggable
-                        onDragEnd={(a) => setLocation(a.latLng.toJSON())}
-                      />
-                    </GoogleMap>
-                  ) : (
-                    <Loader />
-                  )}
-                </ScrollArea>
-              </Grid.Col>
-            </Grid>
-            <Grid style={{ marginTop: "10px", marginBottom: "20px" }}>
-              <Grid.Col span={4}>
-                <Button
-                  style={{ display: activeTab === 1 ? "none" : "" }}
-                  type="submit"
-                  color="blue"
-                  variant="outline"
-                  fullWidth
-                >
-                  Submit
-                </Button>
-              </Grid.Col>
-            </Grid>
-          </form>
-        </ScrollArea>
-      </Tabs>
-    </>
+                      {handleFields(tab.shortHand).length > 0 ? (
+                        <Group mb="xs"></Group>
+                      ) : (
+                        <Text color="dimmed" align="center">
+                          No specific Added Yet...
+                        </Text>
+                      )}
+
+                      {handleFields(tab.shortHand)}
+
+                      <Group position="center" mt="md">
+                        <Button
+                          color="blue"
+                          variant="outline"
+                          fullWidth
+                          onClick={() =>
+                            form.insertListItem("children", {
+                              name: { en: "", am: "" },
+                            })
+                          }
+                        >
+                          Add New Specific Area
+                        </Button>
+                      </Group>
+                  </ScrollArea>
+                  </Grid.Col>
+                </Grid>
+              </Tabs.Panel>
+            );
+          })}
+        </form>
+      </ScrollArea>
+    </Tabs>
   );
 };
 
