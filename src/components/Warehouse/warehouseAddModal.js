@@ -178,7 +178,7 @@ export default function WarehouseAddModal({
   const submit = () => {
     createWarehouse({
       variables: {
-        name: form.getInputProps("name").value,
+        name: form.getInputProps("specific_area").value,
         regionId: form.getInputProps("regionId").value, // Provide the regionId variable
         _geo: {
           lat: +location.lat,
@@ -224,7 +224,7 @@ export default function WarehouseAddModal({
         overlayBlur={2}
         loader={customLoader}
       />
-      <ScrollArea style={{ height: height / 1.2 }} type="auto" offsetScrollbars>
+      <ScrollArea style={{ height: height / 1.6 }} type="auto" offsetScrollbars>
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
           <Grid>
             <Grid.Col span={6}>
