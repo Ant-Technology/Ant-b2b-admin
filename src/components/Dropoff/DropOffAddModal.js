@@ -67,12 +67,12 @@ export const DropOffAddModal = ({
             },
           },
           (data) => {
-            if (data.drivers.data.length === 10) {
+            if (data.dropoffs.data.length === 10) {
               setTotal(total + 1);
               setActivePage(total + 1);
             } else {
               return {
-                drivers: {
+                dropoffs: {
                   data: [createDriver, ...data.dropoffs.data],
                 },
               };
