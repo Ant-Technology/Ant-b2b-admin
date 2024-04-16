@@ -135,7 +135,7 @@ const B2bTable = ({
     <Fragment key={row.id}>
       <tr>
         {header.map((data, index) => (
-          <td key={index}>{data?.render(row)}</td>
+          <td key={index} style={{ width: "20%" }}>{data?.render(row)}</td>
         ))}
       </tr>
       {row.id === selectedCollapse && collapsible && content(row)}

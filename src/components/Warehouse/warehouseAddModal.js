@@ -78,8 +78,6 @@ export default function WarehouseAddModal({
 
   const onPlaceChangedHandler = () => {
     if (autocomplete !== null) {
-      console.log(autocomplete.getPlace().name)
-      form.setFieldValue("specific_area", autocomplete.getPlace().name);
       setCenter({
         lat: autocomplete.getPlace().geometry.location.lat(),
         lng: autocomplete.getPlace().geometry.location.lng(),
@@ -102,11 +100,14 @@ export default function WarehouseAddModal({
         lat: "",
         lng: "",
       },
+      location: "",
       regionId: "", // Provide the default region ID here
-      specific_area:""
+      specific_area: "",
     },
   });
   const [regionsDropDownData, setRegionsDropDownData] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [areasDropDownData, setAreasDropDownData] = useState([]);
 
   // graphql queries
   const { loading: regionsLoading } = useQuery(GET_REGIONS, {
@@ -128,6 +129,7 @@ export default function WarehouseAddModal({
 
       // put it on the state
       setRegionsDropDownData([...regionsArray]);
+      setRegions(regions.data);
     },
     onError(err) {
       showNotification({
@@ -137,7 +139,7 @@ export default function WarehouseAddModal({
       });
     },
   });
-  
+
   const [createWarehouse, { loading }] = useMutation(CREATE_WARE_HOUSE, {
     update(cache, { data: { createWarehouse } }) {
       // Read the existing data from the cache
@@ -166,13 +168,13 @@ export default function WarehouseAddModal({
           },
         },
       });
-  
+
       const newTotal = warehouses.paginatorInfo.total + 1;
       setTotal(newTotal);
       setActivePage(1);
     },
   });
-  
+
   const submit = () => {
     createWarehouse({
       variables: {
@@ -182,7 +184,7 @@ export default function WarehouseAddModal({
           lat: +location.lat,
           lng: +location.lng,
         },
-        specific_area:form.getInputProps("specific_area").value, 
+        specific_area: form.getInputProps("specific_area").value,
       },
       onCompleted(data) {
         showNotification({
@@ -191,7 +193,6 @@ export default function WarehouseAddModal({
           message: "Warehouse Created Successfully",
         });
         setOpened(false);
-      
       },
       onError(error) {
         showNotification({
@@ -206,38 +207,49 @@ export default function WarehouseAddModal({
   const { height } = useViewportSize();
   const setRegionDropDownValue = (val) => {
     form.setFieldValue("regionId", val);
+    const region = regions.find((item) => item.id === val);
+    const parsedSpecificAreas = JSON.parse(region.specific_areas);
+    setAreasDropDownData(parsedSpecificAreas);
+  };
+  const setAreasDropDownValue = (val) => {
+    //
+    form.setFieldValue("specific_area", val);
+    form.setFieldValue("location", val);
   };
   return (
     <>
       <LoadingOverlay
-        visible={loading|| regionsLoading}
+        visible={loading || regionsLoading}
         color="blue"
         overlayBlur={2}
         loader={customLoader}
       />
-      <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
+      <ScrollArea style={{ height: height / 1.2 }} type="auto" offsetScrollbars>
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
-        <Grid>
-            <Grid.Col span={6}>
-              <TextInput
-                required
-                label="Name"
-                placeholder="Name"
-                {...form.getInputProps("name")}
-              />
-            </Grid.Col>
-            </Grid>
           <Grid>
-          <Grid.Col span={6}>
+            <Grid.Col span={6}>
               {" "}
               <Select
+                required
                 data={regionsDropDownData}
                 value={form.getInputProps("regionId")?.value}
                 onChange={setRegionDropDownValue}
                 label="Region"
-                placeholder="Pick a region this retailer belongs to"
+                placeholder="Pick a region this Warehouse belongs to"
               />
             </Grid.Col>
+            <Grid.Col span={6}>
+              <Select
+                required
+                data={areasDropDownData}
+                value={form.getInputProps("specific_area")?.value}
+                onChange={setAreasDropDownValue}
+                label="Specific Area"
+                placeholder="Pick a Specific Area this Warehouse belongs to"
+              />
+            </Grid.Col>
+          </Grid>
+          <Grid>
             {isLoaded && (
               <Grid.Col span={6}>
                 <Autocomplete
@@ -246,9 +258,9 @@ export default function WarehouseAddModal({
                 >
                   <TextInput
                     required
-                    label="Specific Area"
-                    placeholder="Specific Area"
-                    {...form.getInputProps("specific_area")}
+                    label="Location"
+                    placeholder="Location"
+                    {...form.getInputProps("location")}
                   />
                 </Autocomplete>
               </Grid.Col>

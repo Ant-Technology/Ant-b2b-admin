@@ -126,9 +126,10 @@ const Regions = () => {
       label: "id",
       key: "id",
       sortable: false,
+    
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.id}</span>;
+        return <span style={{ width: "5%" ,marginRight:"80px"}}>{rowData.id}</span>;
       },
     },
     {
@@ -137,43 +138,21 @@ const Regions = () => {
       sortable: false,
       searchable: false,
       render: (rowData) => {
-        return <span>{rowData.name}</span>;
+        return <span style={{ width: "20px"}}>{rowData.name}</span>;
       },
     },
     {
-      label: "Retailers",
-      key: "retailersCount",
+      label: "Specific Areas",
+      key: "specific_areas",
       sortable: false,
       searchable: false,
+  
       render: (rowData) => {
-        return <span>{rowData.retailersCount}</span>;
-      },
-    },
-    {
-      label: "Drivers",
-      key: "driversCount",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.driversCount}</span>;
-      },
-    },
-    {
-      label: "Warehouse",
-      key: "warehousesCount",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.warehousesCount}</span>;
-      },
-    },
-    {
-      label: "Distributor",
-      key: "distributorsCount",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.distributorsCount}</span>;
+        // Parse specific_areas string into an array
+        const specificAreas = JSON.parse(rowData.specific_areas);
+        // Join specific areas into a comma-separated string with spaces
+        const specificAreasString = specificAreas.join(", ");
+        return <span>{specificAreasString}</span>;
       },
     },
    

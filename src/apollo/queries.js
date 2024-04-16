@@ -216,14 +216,11 @@ export const GET_REGIONS = gql`
       data {
         id
         name
+        specific_areas
         retailersCount
         driversCount
         warehousesCount
         distributorsCount
-        _geo {
-          lat
-          lng
-        }
       }
       paginatorInfo {
         count
