@@ -207,7 +207,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
           left: "50%",
           transform: "translate(-50%, -50%)",
         },
-        autoClose: false, // Disable auto close
+        autoClose: 5000, // Disable auto close
         // Adjust the duration time here (in milliseconds)
       });
     });
