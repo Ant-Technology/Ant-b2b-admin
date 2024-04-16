@@ -8,16 +8,17 @@ import {
   Group,
   Card,
 } from "@mantine/core";
-import {  useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
 import { DEL_REGION } from "apollo/mutuations";
-import {  GET_REGIONS } from "apollo/queries";
+import { GET_REGIONS } from "apollo/queries";
 import React, { useState } from "react";
-import { Edit, Trash } from "tabler-icons-react";
+import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import { customLoader } from "components/utilities/loader";
 import B2bTable from "components/reusable/b2bTable";
 import RegionEditModal from "components/Region/regionEditModal";
 import RegionsAddModal from "components/Region/regionsAddModal";
+import RegionDetailModal from "components/Region/regionDetail";
 
 const Regions = () => {
   const [size] = useState(10);
@@ -26,6 +27,8 @@ const Regions = () => {
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
+  const [openedDetail, setOpenedDetail] = useState(false);
+  const [region, setRegion] = useState();
 
   //pagination states
   const [activePage, setActivePage] = useState(1);
@@ -121,24 +124,19 @@ const Regions = () => {
     setOpenedEdit(true);
     setEditId(id);
   };
+  const handleManageRegion = (item) => {
+    setRegion(item);
+    setOpenedDetail(true);
+  };
+
   const headerData = [
-    {
-      label: "id",
-      key: "id",
-      sortable: false,
-    
-      searchable: false,
-      render: (rowData) => {
-        return <span style={{ width: "5%" ,marginRight:"80px"}}>{rowData.id}</span>;
-      },
-    },
     {
       label: "Name",
       key: "name",
       sortable: false,
       searchable: false,
       render: (rowData) => {
-        return <span style={{ width: "20px"}}>{rowData.name}</span>;
+        return <span style={{ width: "20px" }}>{rowData.name}</span>;
       },
     },
     {
@@ -146,16 +144,49 @@ const Regions = () => {
       key: "specific_areas",
       sortable: false,
       searchable: false,
-  
+
       render: (rowData) => {
-        // Parse specific_areas string into an array
         const specificAreas = JSON.parse(rowData.specific_areas);
-        // Join specific areas into a comma-separated string with spaces
-        const specificAreasString = specificAreas.join(", ");
-        return <span>{specificAreasString}</span>;
+        return <span>{specificAreas[0]}</span>;
       },
     },
-   
+    {
+      label: "Retailers",
+      key: "retailersCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.retailersCount}</span>;
+      },
+    },
+    {
+      label: "Drivers",
+      key: "driversCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.driversCount}</span>;
+      },
+    },
+    {
+      label: "Warehouse",
+      key: "warehousesCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.warehousesCount}</span>;
+      },
+    },
+    {
+      label: "Distributor",
+      key: "distributorsCount",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <span>{rowData.distributorsCount}</span>;
+      },
+    },
+
     {
       label: "Actions",
       key: "actions",
@@ -164,8 +195,26 @@ const Regions = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash style={{cursor:"pointer"}} color="#ed522f" size={24} onClick={() => handleDelete(`${rowData.id}`)} />
-            <Edit style={{marginLeft:"10px", cursor:"pointer"}} size={24} onClick={() => handleEditRegion(`${rowData.id}`)} />
+            <Trash
+              style={{ cursor: "pointer" }}
+              color="#ed522f"
+              size={24}
+              onClick={() => handleDelete(`${rowData.id}`)}
+            />
+            <Edit
+              style={{ marginLeft: "10px", cursor: "pointer" }}
+              size={24}
+              onClick={() => handleEditRegion(`${rowData.id}`)}
+            />
+            <ManualGearbox
+              color="#1971C2"
+              style={{
+                cursor: "pointer",
+                marginLeft: "10px",
+              }}
+              size={24}
+              onClick={() => handleManageRegion(rowData)}
+            />
           </>
         );
       },
@@ -210,6 +259,24 @@ const Regions = () => {
           // loading={singleWarehouseLoading}
           // getWarehouse={getWarehouse}
         />
+      </Drawer>
+
+      <Drawer
+        opened={openedDetail}
+        overlayColor={
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2]
+        }
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        title="Region Detail"
+        padding="xl"
+        onClose={() => setOpenedDetail(false)}
+        position="bottom"
+        size="80%"
+      >
+        <RegionDetailModal region={region} />
       </Drawer>
 
       <Modal
