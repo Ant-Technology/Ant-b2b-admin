@@ -57,7 +57,7 @@ export const DropOffAddModal = ({
   const [addDropOff, { loading: dropOffLoading }] = useMutation(
     CREATE_DROP_OFF,
     {
-      update(cache, { data: { createDriver } }) {
+      update(cache, { data: { createDropoff } }) {
         cache.updateQuery(
           {
             query: GET_DROPOFFS,
@@ -73,7 +73,7 @@ export const DropOffAddModal = ({
             } else {
               return {
                 dropoffs: {
-                  data: [createDriver, ...data.dropoffs.data],
+                  data: [createDropoff, ...data.dropoffs.data],
                 },
               };
             }
