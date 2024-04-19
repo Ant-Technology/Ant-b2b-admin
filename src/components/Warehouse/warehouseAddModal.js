@@ -238,18 +238,6 @@ export default function WarehouseAddModal({
                 placeholder="Pick a region this Warehouse belongs to"
               />
             </Grid.Col>
-            <Grid.Col span={6}>
-              <Select
-                required
-                data={areasDropDownData}
-                value={form.getInputProps("specific_area")?.value}
-                onChange={setAreasDropDownValue}
-                label="Specific Area"
-                placeholder="Pick a Specific Area this Warehouse belongs to"
-              />
-            </Grid.Col>
-          </Grid>
-          <Grid>
             {isLoaded && (
               <Grid.Col span={6}>
                 <Autocomplete
@@ -265,6 +253,18 @@ export default function WarehouseAddModal({
                 </Autocomplete>
               </Grid.Col>
             )}
+          </Grid>
+          <Grid>
+            <Grid.Col span={6}>
+              <Select
+                required
+                data={areasDropDownData}
+                value={form.getInputProps("specific_area")?.value}
+                onChange={setAreasDropDownValue}
+                label="Specific Area"
+                placeholder="Pick a Specific Area this Warehouse belongs to"
+              />
+            </Grid.Col>
           </Grid>
           <Grid style={{ marginTop: "10px" }}>
             <Grid.Col span={12}>

@@ -22,7 +22,7 @@ const Loader = () => (
 
 const containerStyle = {
   width: "100%",
-  height: "400px",
+  height: "700px",
 };
 
 const inputStyle = {
@@ -38,7 +38,7 @@ const inputStyle = {
   textOverflow: `ellipses`,
   position: "absolute",
   left: "50%",
-  marginTop: "320px",
+  marginTop: "370px",
   marginLeft: "-120px",
   backgroundColor: `#fff`,
 };

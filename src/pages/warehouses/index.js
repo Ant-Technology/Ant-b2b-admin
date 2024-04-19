@@ -11,6 +11,7 @@ import { customLoader } from "components/utilities/loader";
 import { GET_WARE_HOUSE, GET_WARE_HOUSES } from "apollo/queries";
 import { DEL_WAREHOUSE } from "apollo/mutuations";
 import B2bTable from "components/reusable/b2bTable";
+import ShowWarehouseLocation from "components/Warehouse/showWarehouseLocation";
 
 const Warehouses = () => {
   const [size] = useState(10);
@@ -19,6 +20,8 @@ const Warehouses = () => {
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
+  const[openedLocation, setOpenedLocation] = useState(false)
+  const [location, setLocation] = useState({});
 
   //pagination states
   const [activePage, setActivePage] = useState(1);
@@ -39,7 +42,14 @@ const Warehouses = () => {
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
   };
+const handleGeoLocationClick=(lat,lng)=>{
+  setLocation({
+    lat: lat,
+    lng: lng
+  });
+  setOpenedLocation(true)
 
+}
   const [getWarehouse, { loading: singleWarehouseLoading }] =
     useLazyQuery(GET_WARE_HOUSE);
 
@@ -112,15 +122,6 @@ const Warehouses = () => {
       },
     },
     {
-      label: "Name",
-      key: "name",
-      sortable: true,
-      searchable: true,
-      render: (rowData) => {
-        return <span>{rowData.name}</span>;
-      },
-    },
-    {
       label: "Region",
       key: "region",
       sortable: true,
@@ -136,6 +137,17 @@ const Warehouses = () => {
       searchable: true,
       render: (rowData) => {
         return <span>{rowData.specific_area}</span>;
+      },
+    },
+    {
+      label: "Location",
+      key: "geo",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        const { lat, lng } = rowData._geo;
+        return <span   style={{ cursor: "pointer", textDecoration: "underline" }}
+        onClick={() => handleGeoLocationClick(lat, lng)}>[{lat}, {lng}]</span>;
       },
     },
     {
@@ -235,6 +247,20 @@ const Warehouses = () => {
           setActivePage={setActivePage}
           setOpened={setOpened}
           refetch={refetch}
+        />
+      </Drawer>
+
+      
+      <Drawer
+        opened={openedLocation}
+        onClose={() => setOpenedLocation(false)}
+        title="Warehouse Location"
+        padding="xl"
+        size="80%"
+        position="bottom"
+      >
+        <ShowWarehouseLocation
+          location={location}
         />
       </Drawer>
 
