@@ -58,27 +58,36 @@ export const DropOffAddModal = ({
     CREATE_DROP_OFF,
     {
       update(cache, { data: { createDropoff } }) {
-        cache.updateQuery(
-          {
-            query: GET_DROPOFFS,
-            variables: {
-              first: 10,
-              page: activePage,
+        // Read the existing data from the cache
+        const { dropoffs } = cache.readQuery({
+          query: GET_DROPOFFS,
+          variables: {
+            first: 10,
+            page: 1,
+          },
+        });
+        if (!dropoffs) {
+          return;
+        }
+        const updatedDropoffs = [createDropoff, ...dropoffs.data];
+  
+        cache.writeQuery({
+          query: GET_DROPOFFS,
+          variables: {
+            first: 10,
+            page: 1,
+          },
+          data: {
+            dropoffs: {
+              ...dropoffs,
+              data: updatedDropoffs,
             },
           },
-          (data) => {
-            if (data.dropoffs.data.length === 10) {
-              setTotal(total + 1);
-              setActivePage(total + 1);
-            } else {
-              return {
-                dropoffs: {
-                  data: [createDropoff, ...data.dropoffs.data],
-                },
-              };
-            }
-          }
-        );
+        });
+  
+        const newTotal = dropoffs.paginatorInfo.total + 1;
+        setTotal(newTotal);
+        setActivePage(1);
       },
     }
   );

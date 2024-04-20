@@ -20,14 +20,14 @@ const Warehouses = () => {
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
-  const[openedLocation, setOpenedLocation] = useState(false)
+  const [openedLocation, setOpenedLocation] = useState(false);
   const [location, setLocation] = useState({});
 
   //pagination states
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const { data, loading ,refetch} = useQuery(GET_WARE_HOUSES, {
+  const { data, loading, refetch } = useQuery(GET_WARE_HOUSES, {
     variables: {
       first: size,
       page: activePage,
@@ -38,24 +38,21 @@ const Warehouses = () => {
     setTotal(data.warehouses.paginatorInfo.lastPage);
   }
 
-
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
   };
-const handleGeoLocationClick=(lat,lng)=>{
-  setLocation({
-    lat: lat,
-    lng: lng
-  });
-  setOpenedLocation(true)
-
-}
+  const handleGeoLocationClick = (lat, lng) => {
+    setLocation({
+      lat: lat,
+      lng: lng,
+    });
+    setOpenedLocation(true);
+  };
   const [getWarehouse, { loading: singleWarehouseLoading }] =
     useLazyQuery(GET_WARE_HOUSE);
 
   const [delWarehouse] = useMutation(DEL_WAREHOUSE, {
     update(cache, { data: { deleteWarehouse } }) {
-
       cache.updateQuery(
         {
           query: GET_WARE_HOUSES,
@@ -139,17 +136,7 @@ const handleGeoLocationClick=(lat,lng)=>{
         return <span>{rowData.specific_area}</span>;
       },
     },
-    {
-      label: "Location",
-      key: "geo",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        const { lat, lng } = rowData._geo;
-        return <span   style={{ cursor: "pointer", textDecoration: "underline" }}
-        onClick={() => handleGeoLocationClick(lat, lng)}>[{lat}, {lng}]</span>;
-      },
-    },
+
     {
       label: "Stock count",
       key: "name",
@@ -160,6 +147,26 @@ const handleGeoLocationClick=(lat,lng)=>{
       },
     },
     {
+      label: "Location",
+      key: "geo",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        const { lat, lng } = rowData._geo;
+        return (
+          <span style={{ cursor: "pointer" }}>
+            [{lat}, {lng}]
+            <div
+              onClick={() => handleGeoLocationClick(lat, lng)}
+              style={{ cursor: "pointer", color:"rgb(20, 61, 93)"}}
+            >
+             View Map
+            </div>
+          </span>
+        );
+      },
+    },
+    {
       label: "Actions",
       key: "actions",
       sortable: false,
@@ -167,10 +174,15 @@ const handleGeoLocationClick=(lat,lng)=>{
       render: (rowData) => {
         return (
           <>
-            <Trash size={24} style={{cursor:"pointer"}} color="#ed522f" onClick={() => handleDelete(`${rowData.id}`)} />
+            <Trash
+              size={24}
+              style={{ cursor: "pointer" }}
+              color="#ed522f"
+              onClick={() => handleDelete(`${rowData.id}`)}
+            />
             <Edit
               size={24}
-              style={{marginLeft:"10px",cursor:"pointer"}}
+              style={{ marginLeft: "10px", cursor: "pointer" }}
               onClick={() => handleEditCategory(`${rowData.id}`)}
             />
           </>
@@ -250,7 +262,6 @@ const handleGeoLocationClick=(lat,lng)=>{
         />
       </Drawer>
 
-      
       <Drawer
         opened={openedLocation}
         onClose={() => setOpenedLocation(false)}
@@ -259,9 +270,7 @@ const handleGeoLocationClick=(lat,lng)=>{
         size="80%"
         position="bottom"
       >
-        <ShowWarehouseLocation
-          location={location}
-        />
+        <ShowWarehouseLocation location={location} />
       </Drawer>
 
       <Card shadow="sm" p="lg">

@@ -53,6 +53,15 @@ const DropOffs = () => {
       },
     },
     {
+      label: "Cost",
+      key: "cost",
+      sortable: true,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.cost}</span>;
+      },
+    },
+    {
       label: "Status",
       key: "status",
       sortable: true,
