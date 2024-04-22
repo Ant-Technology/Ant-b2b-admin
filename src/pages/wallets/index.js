@@ -32,6 +32,7 @@ import { Plus, Search } from "tabler-icons-react";
 const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
+    color: "rgb(20, 61, 89)",
   },
 
   control: {
@@ -50,6 +51,9 @@ const useStyles = createStyles((theme) => ({
     width: 21,
     height: 21,
     borderRadius: 21,
+  },
+  thh: {
+    color: "rgb(20, 61, 89)",
   },
 }));
 
@@ -83,6 +87,7 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const Wallets = () => {
+  const { classes } = useStyles();
   const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
@@ -187,7 +192,11 @@ const Wallets = () => {
         <td>{row.id}</td>
         <td>{row.reference_number}</td>
         <td>{row.amount}</td>
-        <td>{row.confirmed_at?new Date(row.confirmed_at).toLocaleDateString():"Not Confirmed"}</td>
+        <td>
+          {row.confirmed_at
+            ? new Date(row.confirmed_at).toLocaleDateString()
+            : "Not Confirmed"}
+        </td>
         <td>{row.confirmed_by?.name}</td>
         <td>{row.retailer?.name}</td>
         <td>
@@ -271,30 +280,44 @@ const Wallets = () => {
             sx={{ tableLayout: "fixed", minWidth: 700 }}
           >
             <thead>
-              <tr>
-                <Th sortable={false} onSort={() => handleSort("id")}>
+              <tr
+                style={{
+                  backgroundColor: "rgba(244, 151, 3, 0.8)",
+                }}
+              >
+                <Th
+                  style={{ color: "rgb(20, 61, 89)" }}
+                  sortable={false}
+                  onSort={() => handleSort("id")}
+                >
                   ID
                 </Th>
                 <Th
                   sortable={false}
                   onSort={() => handleSort("reference_number")}
                 >
-                  Reference Number
+                  <span style={{ color: "rgb(20, 61, 89)" }}>
+                    Reference Number
+                  </span>
                 </Th>
                 <Th sortable onSort={() => handleSort("amount")}>
-                  Amount
+                  <span className={classes.th}>Amount</span>
                 </Th>
                 <Th sortable onSort={() => handleSort("confirmed_at")}>
-                  Date
+                  <span className={classes.th}>Date</span>
                 </Th>
-                <Th>Approved By</Th>
+                <Th>
+                  <span className={classes.th}>Approved By</span>
+                </Th>
                 <Th sortable onSort={() => handleSort("retailer_id")}>
-                  Retailer
+                  <span className={classes.th}> Retailer</span>
                 </Th>
                 <Th sortable={false}>
-                  Status
+                  <span className={classes.th}>Status</span>
                 </Th>
-                <Th sortable={false}>Actions</Th>
+                <Th sortable={false}>
+                  <span className={classes.th}>Actions</span>
+                </Th>
               </tr>
             </thead>
             <tbody>

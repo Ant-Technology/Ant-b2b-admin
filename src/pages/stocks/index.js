@@ -59,6 +59,9 @@ const useStyles = createStyles((theme) => ({
     height: 21,
     borderRadius: 21,
   },
+  thh: {
+    color: "rgb(20, 61, 89)",
+  },
 }));
 
 function Th({ children, sortable, sorted, reversed, onSort }) {
@@ -91,6 +94,7 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const Drivers = () => {
+  const { classes } = useStyles();
   const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
@@ -344,7 +348,10 @@ const Drivers = () => {
               <Button
                 onClick={() => setOpened(true)}
                 variant="blue"
-                color="blue"
+                style={{
+                  backgroundColor: "rgba(244, 151, 3, 0.8)",
+                  color: "rgb(20, 61, 89)",
+                }}
                 leftIcon={<Plus size={14} />}
               >
                 Add Stock
@@ -368,20 +375,22 @@ const Drivers = () => {
             sx={{ tableLayout: "fixed", minWidth: 700 }}
           >
             <thead>
-              <tr>
+              <tr  style={{
+                  backgroundColor: "rgba(244, 151, 3, 0.8)",
+                }}>
                 <Th sortable={false} onSort={() => handleSort("id")}>
-                  ID
+                 <span className={classes.thh}>ID</span>
                 </Th>
                 <Th sortable={false} onSort={() => handleSort("name")}>
-                  Warehouse
+                <span className={classes.thh}>Warehouse</span>
                 </Th>
                 <Th sortable onSort={() => handleSort("email")}>
-                  Product Sku
+                <span className={classes.thh}> Product Sku</span>
                 </Th>
                 <Th sortable onSort={() => handleSort("phone")}>
-                  Quantity
+                <span className={classes.thh}>  Quantity </span>
                 </Th>
-                <Th sortable={false}>Actions</Th>
+                <Th sortable={false}>  <span className={classes.thh}>Actions</span></Th>
               </tr>
             </thead>
             <tbody>
