@@ -18,7 +18,7 @@ import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import { useState, useEffect } from "react";
 import { showNotification } from "@mantine/notifications";
-import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
+import { Edit, ManualGearbox, Trash, } from "tabler-icons-react";
 import CategoryDetailModal from "components/Category/categoryDetail";
 
 const Categories = () => {

@@ -195,7 +195,7 @@ const B2bTable = ({
                   reversed={reverseSortDirection}
                   onSort={() => setSorting(th.key)}
                 >
-                  {th.label}
+                  <span style={{color:"rgb(20, 61, 89)"}}>{th.label}</span>
                 </Th>
               ) : (
                 <th key={th.label}>{th.label}</th>
