@@ -11,7 +11,7 @@ import {
   Select,
   Group,
 } from "@mantine/core";
-import { ManualGearbox, DotsCircleHorizontal } from "tabler-icons-react";
+import { ManualGearbox, DotsCircleHorizontal,CircleX } from "tabler-icons-react";
 import { useForm } from "@mantine/form";
 import { useQuery, useMutation } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
@@ -48,7 +48,6 @@ function ManageOrderModal({ editId }) {
         });
       });
 
-      // put it on the state
       setShipmentsDropDownData([...shipmentsArray]);
     },
     onError(err) {
@@ -99,7 +98,6 @@ function ManageOrderModal({ editId }) {
           Authorization: `Bearer ${token}`,
         },
       };
-      //my-orders/3/cancel
       const { data } = await axios.patch(
         `http://157.230.102.54:8081/api/my-orders/${itemId}/cancel`,
         {},
@@ -245,7 +243,7 @@ function ManageOrderModal({ editId }) {
                           size={24}
                           onClick={() => manageItem(`${row.id}`)}
                         />
-                        <DotsCircleHorizontal
+                        <CircleX
                           style={{ marginLeft: "10px", cursor: "pointer" }}
                           color="#1971C2"
                           size={24}

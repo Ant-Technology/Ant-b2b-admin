@@ -50,7 +50,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
   return {
     bg: {
       backgroundColor:
-        theme.colorScheme === "dark" ? theme.colors.gray : "#ffffff",
+        theme.colorScheme === "dark" ? theme.colors.gray : '#ffffff',
     },
     header: {
       paddingBottom: theme.spacing.md,
@@ -81,10 +81,10 @@ const useStyles = createStyles((theme, _params, getRef) => {
       color:
         theme.colorScheme === "dark"
           ? theme.colors.dark[1]
-          : "rgba(244, 151, 3, 0.8)",
+          : "rgb(20, 61, 89)",
       padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
       borderRadius: theme.radius.sm,
-      fontWeight: 700,
+      fontWeight: 750,
 
       "&:hover": {
         backgroundColor:
@@ -104,7 +104,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
       color:
         theme.colorScheme === "dark"
           ? theme.colors.dark[2]
-          : "rgba(244, 151, 3, 0.8)",
+          : "rgb(20, 61, 89)",
       marginRight: theme.spacing.sm,
     },
 
@@ -266,7 +266,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                   orderCount &&
                   parseInt(orderCount) > 0 && (
                     <Badge
-                      style={{ marginLeft: "15px" }}
+                      style={{backgroundColor:"rgba(244, 151, 3, 0.8)", marginLeft: "15px",color:"rgb(20, 61, 89)"}}
                       size="md"
                       variant="danger"
                       circle
@@ -278,7 +278,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 shipments &&
                 parseInt(shipments) > 0 ? (
                   <Badge
-                    style={{ marginLeft: "15px" }}
+                  style={{backgroundColor:"rgba(244, 151, 3, 0.8)", marginLeft: "15px",color:"rgb(20, 61, 89)"}}
                     size="md"
                     variant="danger"
                     circle
@@ -290,7 +290,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 wallets &&
                 parseInt(wallets) > 0 ? (
                   <Badge
-                    style={{ marginLeft: "15px" }}
+                  style={{backgroundColor:"rgba(244, 151, 3, 0.8)", marginLeft: "15px",color:"rgb(20, 61, 89)"}}
                     size="md"
                     variant="danger"
                     circle
@@ -302,7 +302,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                   dropoffs &&
                   parseInt(dropoffs) > 0 && (
                     <Badge
-                      style={{ marginLeft: "15px" }}
+                    style={{backgroundColor:"rgba(244, 151, 3, 0.8)", marginLeft: "15px",color:"rgb(20, 61, 89)"}}
                       size="md"
                       variant="danger"
                       circle
