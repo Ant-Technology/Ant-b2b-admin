@@ -56,6 +56,9 @@ const useStyles = createStyles((theme) => ({
     height: 21,
     borderRadius: 21,
   },
+  thh: {
+    color: "rgb(20, 61, 89)",
+  },
 }));
 
 function Th({ children, sortable, sorted, reversed, onSort }) {
@@ -88,6 +91,7 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const Drivers = () => {
+  const { classes } = useStyles();
   const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
@@ -173,10 +177,10 @@ const Drivers = () => {
     setSortBy(field);
     setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
   };
-  const handleEditDriver = (id,row) => {
+  const handleEditDriver = (id, row) => {
     setOpenedEdit(true);
     setEditId(id);
-    setEditRow(row)
+    setEditRow(row);
   };
   const [isHovered, setIsHovered] = useState(false);
   const handleManageDriver = (id) => {
@@ -257,7 +261,7 @@ const Drivers = () => {
               marginLeft: "10px",
             }}
             size={24}
-            onClick={() => handleEditDriver(row.id,row)}
+            onClick={() => handleEditDriver(row.id, row)}
           />
           <ManualGearbox
             style={{
@@ -282,7 +286,7 @@ const Drivers = () => {
     />
   ) : (
     <div style={{ width: "98%", margin: "auto" }}>
-         <Drawer
+      <Drawer
         opened={openedEdit}
         overlayColor={
           theme.colorScheme === "dark"
@@ -297,7 +301,13 @@ const Drivers = () => {
         position="bottom"
         size="80%"
       >
-        <DriverEditModal activePage={activePage} fetchData={fetchData}  editRow={editRow}setOpenedEdit={setOpenedEdit} editId={editId} />
+        <DriverEditModal
+          activePage={activePage}
+          fetchData={fetchData}
+          editRow={editRow}
+          setOpenedEdit={setOpenedEdit}
+          editId={editId}
+        />
       </Drawer>
       <Drawer
         opened={opened}
@@ -316,7 +326,7 @@ const Drivers = () => {
           fetchData={fetchData}
         />
       </Drawer>
-        <Drawer
+      <Drawer
         opened={openedDetail}
         overlayColor={
           theme.colorScheme === "dark"
@@ -344,14 +354,17 @@ const Drivers = () => {
         <ScrollArea>
           <SimpleGrid cols={3}>
             <div>
-            <Button
-              onClick={() => setOpened(true)}
-              variant="blue"
-              color="blue"
-              leftIcon={<Plus size={14} />}
-            >
-              Add Driver
-            </Button>
+              <Button
+                onClick={() => setOpened(true)}
+                variant="blue"
+                style={{
+                  backgroundColor: "rgba(244, 151, 3, 0.8)",
+                  color: "rgb(20, 61, 89)",
+                }}
+                leftIcon={<Plus size={14} />}
+              >
+                Add Driver
+              </Button>
             </div>
             <div></div>
             <div>
@@ -371,20 +384,24 @@ const Drivers = () => {
             sx={{ tableLayout: "fixed", minWidth: 700 }}
           >
             <thead>
-              <tr>
+              <tr
+                style={{
+                  backgroundColor: "rgba(244, 151, 3, 0.8)",
+                }}
+              >
                 <Th sortable={false} onSort={() => handleSort("id")}>
-                  ID
+                 <span className={classes.thh}>ID</span>
                 </Th>
                 <Th sortable={false} onSort={() => handleSort("name")}>
-                  Name
+                <span className={classes.thh}> Name </span>
                 </Th>
                 <Th sortable onSort={() => handleSort("email")}>
-                  Email
+                <span className={classes.thh}> Email</span>
                 </Th>
                 <Th sortable onSort={() => handleSort("phone")}>
-                  Phone
+                 <span className={classes.thh}> Phone</span>
                 </Th>
-                <Th sortable={false}>Actions</Th>
+                <Th sortable={false}> <span className={classes.thh}>Actions</span></Th>
               </tr>
             </thead>
             <tbody>
