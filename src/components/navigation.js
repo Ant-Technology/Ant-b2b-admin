@@ -154,6 +154,7 @@ const data = [
     icon: IconLayoutDistributeHorizontal,
   },
   { link: "/stocks", label: "Stocks", icon: IconBuildingStore },
+  { link: "/sales", label: "Sales", icon: IconUser },
 ];
 
 const NavbarSimple = ({ opened, setOpened, setPosition }) => {
