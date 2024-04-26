@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import {
   Badge,
   Card,
@@ -31,11 +31,9 @@ import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
 import DriverDetailModal from "components/Driver/DriverDetail";
-import { DriverEditModal } from "components/Driver/DriverEditModal";
-import { DriverAddModal } from "components/Driver/DriverAddModal";
-import { DEL_STOCK } from "apollo/mutuations";
-import StockAddModal from "components/Stock/StockAddModal";
-import ManageStock from "components/Stock/ManageStock";
+import { SalesEditModal } from "components/Sales/SalesUpdateModal";
+import { SalesAddModal } from "components/Sales/SalesAddModal";
+import { API } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -119,7 +117,6 @@ const Drivers = () => {
   }, [activePage]);
 
   const fetchData = async (page) => {
-    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -128,18 +125,16 @@ const Drivers = () => {
         },
       };
       const response = await axios.get(
-        `http://157.230.102.54:8081/api/stocks?page=${page}`,
+        `${API}/sales?page=${page}`,
         config
       );
       if (response.data) {
-        setLoading(false);
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
       }
     } catch (error) {
-      setLoading(false);
       console.error("Error fetching data:", error);
     }
   };
@@ -183,7 +178,7 @@ const Drivers = () => {
     setSortBy(field);
     setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
   };
-  const handleEditDriver = (id, row) => {
+  const handleEditSales = (id, row) => {
     setOpenedEdit(true);
     setEditId(id);
     setEditRow(row);
@@ -209,40 +204,49 @@ const Drivers = () => {
     setOpenedDelete(true);
     setDeleteID(id);
   };
-  const [delStock] = useMutation(DEL_STOCK);
-  const deleteStock = () => {
-    delStock({
-      variables: { id: deleteID },
 
-      onCompleted(data) {
+  const deleteSales = async () => {
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.delete(
+        `${API}/sales/${deleteID}`,
+        config
+      );
+      if (response.data) {
         fetchData(activePage);
         setOpenedDelete(false);
         setDeleteID(null);
         showNotification({
           color: "green",
           title: "Success",
-          message: "Stock Deleted Successfully",
+          message: "Sales Deleted Successfully",
         });
-      },
-      onError(error) {
-        setOpenedDelete(false);
-        setDeleteID(null);
-        showNotification({
-          color: "red",
-          title: "Error",
-          message: `${error}`,
-        });
-      },
-    });
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setOpenedDelete(false);
+      setDeleteID(null);
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `Sales Not Deleted Successfully`,
+      });
+    }
   };
+
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
         <td>{row.id}</td>
-        <td>{row.warehouse?.name}</td>
-        <td>{row.product_sku?.sku}</td>
-        <td>{row.quantity}</td>
+        <td>{row.name}</td>
+        <td>{row.email}</td>
+        <td>{row.phone}</td>
         <td>
           <Trash
             color="#ed522f"
@@ -258,7 +262,16 @@ const Drivers = () => {
               marginLeft: "10px",
             }}
             size={24}
-            onClick={() => handleEditDriver(row.id, row)}
+            onClick={() => handleEditSales(row.id, row)}
+          />
+          <ManualGearbox
+            style={{
+              cursor: "pointer",
+              marginLeft: "10px",
+            }}
+            color="#1971C2"
+            size={24}
+            //onClick={() => handleManageSales(`${row.id}`)}
           />
         </td>
       </tr>
@@ -283,62 +296,35 @@ const Drivers = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Editing Stock"
+        title="Editing a Sales"
         padding="xl"
         onClose={() => setOpenedEdit(false)}
         position="bottom"
         size="80%"
       >
-        <ManageStock
-          total={total}
-          setTotal={setTotal}
+        <SalesEditModal
           activePage={activePage}
-          setActivePage={setActivePage}
+          fetchData={fetchData}
+          editRow={editRow}
           setOpenedEdit={setOpenedEdit}
           editId={editId}
-          fetchData={fetchData}
         />
       </Drawer>
       <Drawer
         opened={opened}
         onClose={() => setOpened(false)}
-        title="Adding Stock"
+        title="Adding a Sales"
         padding="xl"
         size="80%"
         position="bottom"
       >
-        <StockAddModal
+        <SalesAddModal
           total={total}
           setTotal={setTotal}
           activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}
           fetchData={fetchData}
-          totalPages={totalPages}
-        />
-      </Drawer>
-      <Drawer
-        opened={openedDetail}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Driver Detail"
-        padding="xl"
-        onClose={() => setOpenedDetail(false)}
-        position="bottom"
-        size="80%"
-      >
-        <DriverDetailModal
-          total={total}
-          setTotal={setTotal}
-          activePage={activePage}
-          setActivePage={setActivePage}
-          setOpenedDetail={setOpenedDetail}
-          Id={editId}
         />
       </Drawer>
       <Card shadow="sm" p="lg">
@@ -354,7 +340,7 @@ const Drivers = () => {
                 }}
                 leftIcon={<Plus size={14} />}
               >
-                Add Stock
+                Add Sales
               </Button>
             </div>
             <div></div>
@@ -381,21 +367,18 @@ const Drivers = () => {
                 }}
               >
                 <Th sortable={false} onSort={() => handleSort("id")}>
-                  <span className={classes.thh}>ID</span>
+                 <span className={classes.thh}>ID</span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("name")}>
-                  <span className={classes.thh}>Warehouse</span>
+                <Th sortable onSort={() => handleSort("name")}>
+                <span className={classes.thh}> Name </span>
                 </Th>
                 <Th sortable onSort={() => handleSort("email")}>
-                  <span className={classes.thh}> Product Sku</span>
+                <span className={classes.thh}> Email</span>
                 </Th>
-                <Th sortable onSort={() => handleSort("quantity")}>
-                  <span className={classes.thh}> Quantity </span>
+                <Th sortable onSort={() => handleSort("phone")}>
+                 <span className={classes.thh}> Phone</span>
                 </Th>
-                <Th sortable={false}>
-                  {" "}
-                  <span className={classes.thh}>Actions</span>
-                </Th>
+                <Th sortable={false}> <span className={classes.thh}>Actions</span></Th>
               </tr>
             </thead>
             <tbody>
@@ -431,9 +414,9 @@ const Drivers = () => {
           title="Warning"
           centered
         >
-          <p>Are you sure do you want to delete this Stock?</p>
+          <p>Are you sure do you want to delete this Sales?</p>
           <Group position="right">
-            <Button onClick={() => deleteStock()} color="red">
+            <Button onClick={() => deleteSales()} color="red">
               Delete
             </Button>
           </Group>

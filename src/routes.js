@@ -18,6 +18,7 @@ import Vehicles from "pages/vehicles";
 import Drivers from "pages/driver";
 import Users from "pages/users";
 import DropOffs from "pages/dropoffs";
+import Sales from "pages/sales"
 
 const RoutesComp = () => {
   return (
@@ -41,6 +42,7 @@ const RoutesComp = () => {
       <Route path="/users" element={<Users />} />
       <Route path="/dropoffs" element={<DropOffs />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/sales" element={<Sales />} />
     </Routes>
   );
 };
