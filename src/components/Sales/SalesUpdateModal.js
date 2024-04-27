@@ -117,11 +117,20 @@ export const SalesEditModal = ({
                 />
               </Grid.Col>
             </Grid>
-            {/* user */}
 
             <Grid>
-              <Grid.Col span={12}>
-                <Button type="submit" color="blue" variant="outline" fullWidth>
+              <Grid.Col span={4}>
+                <Button
+                  style={{
+                    width: "25%",
+                    marginTop: "15px",
+                    backgroundColor: "rgba(244, 151, 3, 0.8)",
+                    color: "rgb(20, 61, 89)",
+                  }}
+                  type="submit"
+                  variant="outline"
+                  fullWidth
+                >
                   Submit
                 </Button>
               </Grid.Col>

@@ -97,7 +97,7 @@ const Retailers = () => {
         showNotification({
           color: "green",
           title: "Success",
-          message: "Product Deleted Successfully",
+          message: "Retailer Deleted Successfully",
         });
       },
       onError(error) {

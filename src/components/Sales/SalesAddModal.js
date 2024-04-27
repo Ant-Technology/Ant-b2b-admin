@@ -64,14 +64,16 @@ export const SalesAddModal = ({
         });
         setLoading(false);
         fetchData(1);
-        setOpened(false)
+        setOpened(false);
       }
     } catch (error) {
       setLoading(false);
       showNotification({
         color: "red",
         title: "Error",
-        message: error?.response?.data?.errors?.email?error.response.data.errors.email[0]:"Sales Not Created!",
+        message: error?.response?.data?.errors?.email
+          ? error.response.data.errors.email[0]
+          : "Sales Not Created!",
       });
     }
   };
@@ -118,8 +120,18 @@ export const SalesAddModal = ({
               </Grid.Col>
             </Grid>
             <Grid>
-              <Grid.Col span={12}>
-                <Button type="submit" color="blue" variant="outline" fullWidth>
+              <Grid.Col span={4}>
+                <Button
+                  style={{
+                    width: "25%",
+                    marginTop: "15px",
+                    backgroundColor: "rgba(244, 151, 3, 0.8)",
+                    color: "rgb(20, 61, 89)",
+                  }}
+                  type="submit"
+                  variant="outline"
+                  fullWidth
+                >
                   Submit
                 </Button>
               </Grid.Col>
