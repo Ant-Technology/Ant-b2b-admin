@@ -168,7 +168,7 @@ function ProductDetailModal({ Id }) {
                       <th>Name</th>
                       <th>Phone</th>
                       <th>Status</th>
-                      <th>Coast</th>
+                      <th>Cost</th>
                       <th>All Received</th>
                     </tr>
                   </thead>
@@ -212,7 +212,7 @@ function ProductDetailModal({ Id }) {
                         <th>Departure Time</th>
                         <th>Arrival Time</th>
                         <th>Status</th>
-                        <th>Coast</th>
+                        <th>Cost</th>
                       </tr>
                     </thead>
                     <tbody>
