@@ -20,6 +20,7 @@ const Layout = ({ children,setPosition }) => {
   return (
     <AppShell
       styles={{
+        
         main: {
           paddingLeft: opened ? width / 5 : width / 14,
           background:

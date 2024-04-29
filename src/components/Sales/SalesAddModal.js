@@ -7,6 +7,8 @@ import {
   ScrollArea,
   TextInput,
   Stack,
+  Checkbox,
+  FileInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
@@ -31,6 +33,13 @@ export const SalesAddModal = ({
       email: "",
       phone: "",
       password: "",
+      address: "",
+      gender: "",
+      region: "",
+      city: "",
+      subcity: "",
+      woreda: "",
+      house_number: "",
     },
   });
 
@@ -45,15 +54,26 @@ export const SalesAddModal = ({
           Authorization: `Bearer ${token}`,
         },
       };
+      const formData = new FormData();
+      formData.append("profile_image", file);
+      formData.append("name", form.getInputProps("name").value);
+      formData.append("phone", form.getInputProps("phone").value);
+      formData.append("email", form.getInputProps("email").value);
+      formData.append("password", form.getInputProps("password").value);
+      formData.append("address", form.getInputProps("address").value);
+      formData.append("city", form.getInputProps("city").value);
+      formData.append("subcity", form.getInputProps("subcity").value);
+      formData.append("gender", form.getInputProps("gender").value);
+      formData.append("woreda", form.getInputProps("woreda").value);
+      formData.append("house_number", form.getInputProps("house_number").value);
+      formData.append("region", form.getInputProps("region").value);
+      formData.append("status", 1);
+
       const { data } = await axios.post(
         `${API}/sales`,
-        {
-          name: form.getInputProps("name").value,
-          phone: form.getInputProps("phone").value,
-          email: form.getInputProps("email").value,
-          password: form.getInputProps("password").value,
-          status: 1,
-        },
+
+        formData,
+
         config
       );
       if (data) {
@@ -76,6 +96,25 @@ export const SalesAddModal = ({
           : "Sales Not Created!",
       });
     }
+  };
+  const [isMaleChecked, setIsMaleChecked] = useState(false);
+  const [isFemaleChecked, setIsFemaleChecked] = useState(false);
+
+  const handleMaleChange = (event) => {
+    setIsMaleChecked(event.target.checked);
+    form.setFieldValue("gender", "Male");
+    setIsFemaleChecked(false);
+  };
+
+  const handleFemaleChange = (event) => {
+    form.setFieldValue("gender", "Female");
+    setIsFemaleChecked(event.target.checked);
+    setIsMaleChecked(false);
+  };
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (newFile) => {
+    setFile(newFile);
   };
 
   return (
@@ -103,8 +142,6 @@ export const SalesAddModal = ({
                   placeholder="Email"
                   {...form.getInputProps("email")}
                 />
-              </Grid.Col>
-              <Grid.Col span={6}>
                 <TextInput
                   required
                   label="Phone"
@@ -117,6 +154,67 @@ export const SalesAddModal = ({
                   label="Password"
                   {...form.getInputProps("password")}
                 />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Address"
+                  placeholder="Address"
+                  {...form.getInputProps("address")}
+                />
+                <TextInput
+                  placeholder="Region"
+                  label="Region"
+                  {...form.getInputProps("region")}
+                />
+                <TextInput
+                  required
+                  label="City"
+                  placeholder="City"
+                  {...form.getInputProps("city")}
+                />
+                <TextInput
+                  placeholder="SubCity"
+                  label="Sub City"
+                  {...form.getInputProps("subcity")}
+                />
+              </Grid.Col>
+            </Grid>
+            <Grid>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Woreda"
+                  placeholder="Woreda"
+                  {...form.getInputProps("woreda")}
+                />
+                <TextInput
+                  required
+                  label="House Number"
+                  placeholder="House Number"
+                  {...form.getInputProps("house_number")}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <FileInput
+                  label="Choose Photo"
+                  placeholder="Upload files"
+                  value={file}
+                  onChange={handleFileChange}
+                />
+                <div style={{ display: "flex", marginTop: "25px" }}>
+                  <Checkbox
+                    checked={isMaleChecked}
+                    onChange={handleMaleChange}
+                    label="Male"
+                  />
+                  <Checkbox
+                    style={{ marginLeft: "10px" }}
+                    checked={isFemaleChecked}
+                    onChange={handleFemaleChange}
+                    label="Female"
+                  />
+                </div>
               </Grid.Col>
             </Grid>
             <Grid>

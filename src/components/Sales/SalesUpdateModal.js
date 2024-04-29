@@ -1,8 +1,11 @@
 import { useMutation, useQuery } from "@apollo/client";
 import {
   Button,
+  Checkbox,
+  FileInput,
   Grid,
   LoadingOverlay,
+  PasswordInput,
   ScrollArea,
   Stack,
   TextInput,
@@ -30,10 +33,26 @@ export const SalesEditModal = ({
 
   const [updateDriver, { loading: driverLoading }] = useMutation(UPDATE_DRIVER);
   useEffect(() => {
+    if(editRow.gender === 'Male'){
+      setIsMaleChecked(true);
+      form.setFieldValue("gender", "Male");
+      setIsFemaleChecked(false);
+    }
+    else{
+      setIsFemaleChecked(true);
+      form.setFieldValue("gender", "Female");
+      setIsMaleChecked(false)
+    }
     form.setValues({
       name: editRow.name,
       phone: editRow.phone,
       email: editRow.email,
+      city:editRow.city,
+      subcity:editRow.subcity,
+      address:editRow.address,
+      house_number:editRow.house_number,
+      region:editRow.region,
+
     });
   }, [editRow]);
 
@@ -50,6 +69,20 @@ export const SalesEditModal = ({
           Authorization: `Bearer ${token}`,
         },
       };
+      const formData = new FormData();
+      formData.append("profile_image", file);
+      formData.append("name", form.values("name").value);
+      formData.append("phone", form.values.phone)
+      formData.append("email", form.values.email)
+      formData.append("password", form.valuespassword)
+      formData.append("address", form.values.address)
+      formData.append("city", form.values.city);
+      formData.append("subcity", form.values.subcity)
+      formData.append("gender", form.values.gender);
+      formData.append("woreda", form.values.woreda)
+      formData.append("house_number", form.values.house_number)
+      formData.append("region", form.values.region);
+      formData.append("status", 1);
       const { data } = await axios.put(
         `${API}/sales/${editId}`,
         {
@@ -81,7 +114,25 @@ export const SalesEditModal = ({
       });
     }
   };
+  const [isMaleChecked, setIsMaleChecked] = useState(false);
+  const [isFemaleChecked, setIsFemaleChecked] = useState(false);
 
+  const handleMaleChange = (event) => {
+    setIsMaleChecked(event.target.checked);
+    form.setFieldValue("gender", "Male");
+    setIsFemaleChecked(false);
+  };
+
+  const handleFemaleChange = (event) => {
+    form.setFieldValue("gender", "Female");
+    setIsFemaleChecked(event.target.checked);
+    setIsMaleChecked(false);
+  };
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (newFile) => {
+    setFile(newFile);
+  };
   return (
     <>
       <LoadingOverlay
@@ -107,17 +158,81 @@ export const SalesEditModal = ({
                   placeholder="Email"
                   {...form.getInputProps("email")}
                 />
+                <TextInput
+                  required
+                  label="Phone"
+                  type="number"
+                  placeholder="Phone"
+                  {...form.getInputProps("phone")}
+                />
+                <PasswordInput
+                  placeholder="Password"
+                  label="Password"
+                  {...form.getInputProps("password")}
+                />
               </Grid.Col>
               <Grid.Col span={6}>
                 <TextInput
                   required
-                  label="Phone"
-                  placeholder="Phone"
-                  {...form.getInputProps("phone")}
+                  label="Address"
+                  placeholder="Address"
+                  {...form.getInputProps("address")}
+                />
+                <TextInput
+                  placeholder="Region"
+                  label="Region"
+                  {...form.getInputProps("region")}
+                />
+                <TextInput
+                  required
+                  label="City"
+                  placeholder="City"
+                  {...form.getInputProps("city")}
+                />
+                <TextInput
+                  placeholder="SubCity"
+                  label="Sub City"
+                  {...form.getInputProps("subcity")}
                 />
               </Grid.Col>
             </Grid>
-
+            <Grid>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Woreda"
+                  placeholder="Woreda"
+                  {...form.getInputProps("woreda")}
+                />
+                <TextInput
+                  required
+                  label="House Number"
+                  placeholder="House Number"
+                  {...form.getInputProps("house_number")}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <FileInput
+                  label="Choose Photo"
+                  placeholder="Upload files"
+                  value={file}
+                  onChange={handleFileChange}
+                />
+                <div style={{ display: "flex", marginTop: "25px" }}>
+                  <Checkbox
+                    checked={isMaleChecked}
+                    onChange={handleMaleChange}
+                    label="Male"
+                  />
+                  <Checkbox
+                    style={{ marginLeft: "10px" }}
+                    checked={isFemaleChecked}
+                    onChange={handleFemaleChange}
+                    label="Female"
+                  />
+                </div>
+              </Grid.Col>
+            </Grid>
             <Grid>
               <Grid.Col span={4}>
                 <Button
@@ -137,7 +252,7 @@ export const SalesEditModal = ({
             </Grid>
           </Stack>
         </form>
-      </ScrollArea>
+      </ScrollArea>{" "}
     </>
   );
 };
