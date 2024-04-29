@@ -30,7 +30,7 @@ import { ManualGearbox } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
-import DriverDetailModal from "components/Driver/DriverDetail";
+import SalesDetailModal from "components/Sales/SalesDetailModal";
 import { SalesEditModal } from "components/Sales/SalesUpdateModal";
 import { SalesAddModal } from "components/Sales/SalesAddModal";
 import { API } from "utiles/url";
@@ -184,7 +184,7 @@ const Drivers = () => {
     setEditRow(row);
   };
   const [isHovered, setIsHovered] = useState(false);
-  const handleManageDriver = (id) => {
+  const handleManageSales = (id) => {
     setEditId(id);
     setOpenedDetail(true);
   };
@@ -243,10 +243,10 @@ const Drivers = () => {
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
-        <td>{row.id}</td>
         <td>{row.name}</td>
         <td>{row.email}</td>
         <td>{row.phone}</td>
+        <td>{row.retailers_count}</td>
         <td>
           <Trash
             color="#ed522f"
@@ -271,7 +271,7 @@ const Drivers = () => {
             }}
             color="#1971C2"
             size={24}
-            //onClick={() => handleManageSales(`${row.id}`)}
+            onClick={() => handleManageSales(`${row.id}`)}
           />
         </td>
       </tr>
@@ -327,6 +327,26 @@ const Drivers = () => {
           fetchData={fetchData}
         />
       </Drawer>
+      <Drawer
+        opened={openedDetail}
+        overlayColor={
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2]
+        }
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        title="Sales Detail"
+        padding="xl"
+        onClose={() => setOpenedDetail(false)}
+        position="bottom"
+        size="80%"
+      >
+        <SalesDetailModal
+       
+          Id={editId}
+        />
+      </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
           <SimpleGrid cols={3}>
@@ -366,9 +386,7 @@ const Drivers = () => {
                   backgroundColor: "rgba(244, 151, 3, 0.8)",
                 }}
               >
-                <Th sortable={false} onSort={() => handleSort("id")}>
-                 <span className={classes.thh}>ID</span>
-                </Th>
+                
                 <Th sortable onSort={() => handleSort("name")}>
                 <span className={classes.thh}> Name </span>
                 </Th>
@@ -377,6 +395,9 @@ const Drivers = () => {
                 </Th>
                 <Th sortable onSort={() => handleSort("phone")}>
                  <span className={classes.thh}> Phone</span>
+                </Th>
+                <Th sortable onSort={() => handleSort("retailers_count")}>
+                 <span className={classes.thh}> Retailers Count</span>
                 </Th>
                 <Th sortable={false}> <span className={classes.thh}>Actions</span></Th>
               </tr>

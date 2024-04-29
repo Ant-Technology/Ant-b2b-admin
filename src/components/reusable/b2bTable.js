@@ -153,7 +153,7 @@ const B2bTable = ({
           <div>
             <Button
               onClick={() => optionsData.setAddModal(true)}
-              style={{backgroundColor:"rgba(244, 151, 3, 0.8)",color:"rgb(20, 61, 89)"}}
+              style={{backgroundColor:"#FF6A00",color:"#FFFFFF"}}
               leftIcon={<Plus size={14} />}
             >
               {optionsData.actionLabel}
@@ -185,7 +185,7 @@ const B2bTable = ({
           overlayBlur={2}
           loader={customLoader}
         />
-        <thead  style={{backgroundColor:"rgba(244, 151, 3, 0.8)",color:"rgb(20, 61, 89)"}}>
+        <thead  style={{backgroundColor:"#FF6A00"}}>
           <tr>
             {header.map((th, index) => {
               return th.sortable ? (
@@ -195,10 +195,10 @@ const B2bTable = ({
                   reversed={reverseSortDirection}
                   onSort={() => setSorting(th.key)}
                 >
-                  <span style={{color:"rgb(20, 61, 89)"}}>{th.label}</span>
+                  <span style={{color:"#FFFFFF"}}>{th.label}</span>
                 </Th>
               ) : (
-                <th key={th.label}>{th.label}</th>
+                <th style={{color:"#FFFFFF"}} key={th.label}>{th.label}</th>
               );
             })}
           </tr>

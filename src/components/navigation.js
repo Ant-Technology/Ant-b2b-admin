@@ -84,17 +84,17 @@ const useStyles = createStyles((theme, _params, getRef) => {
           : "rgb(20, 61, 89)",
       padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
       borderRadius: theme.radius.sm,
-      fontWeight: 750,
+      fontWeight: 600,
 
       "&:hover": {
         backgroundColor:
           theme.colorScheme === "dark"
             ? theme.colors.dark[6]
-            : "rgba(244, 151, 3, 0.8)",
-        color: theme.colorScheme === "dark" ? theme.white : "rgb(20, 61, 89)",
+            :  theme.colors.gray[2],
+      color: theme.colorScheme === "dark" ? theme.white : "#333333",
 
         [`& .${icon}`]: {
-          color: theme.colorScheme === "dark" ? theme.white : theme.black,
+          color: theme.colorScheme === "dark" ? theme.white : "#333333",
         },
       },
     },
@@ -119,10 +119,10 @@ const useStyles = createStyles((theme, _params, getRef) => {
 
     linkActive: {
       "&, &:hover": {
-        backgroundColor: "rgba(244, 151, 3, 0.8)", // Background color
-        color: "rgb(20, 61, 89)", // Text color
+        backgroundColor: "#FF6A00", // Background color
+        color: "#FFFFFF", // Text color
         [`& .${icon}`]: {
-          color: "rgb(20, 61, 89)", // Icon color
+          color: "#FFFFFF", // Icon color
         },
       },
     },    
@@ -254,6 +254,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
             setActive(item.label);
             navigate(item.link);
           }}
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           <item.icon
             className={opened ? classes.linkIcon : classes.linkIconShort}
@@ -267,7 +268,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                   orderCount &&
                   parseInt(orderCount) > 0 && (
                     <Badge
-                      style={{backgroundColor:"rgba(244, 151, 3, 0.8)", marginLeft: "15px",color:"rgb(20, 61, 89)"}}
+                      style={{backgroundColor:"#FF6A00", marginLeft: "15px",color:"#FFFFFF"}}
                       size="md"
                       variant="danger"
                       circle
@@ -279,7 +280,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 shipments &&
                 parseInt(shipments) > 0 ? (
                   <Badge
-                  style={{backgroundColor:"rgba(244, 151, 3, 0.8)", marginLeft: "15px",color:"rgb(20, 61, 89)"}}
+                  style={{backgroundColor:"#FF6A00", marginLeft: "15px",color:"#FFFFFF"}}
                     size="md"
                     variant="danger"
                     circle
@@ -291,7 +292,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 wallets &&
                 parseInt(wallets) > 0 ? (
                   <Badge
-                  style={{backgroundColor:"rgba(244, 151, 3, 0.8)", marginLeft: "15px",color:"rgb(20, 61, 89)"}}
+                  style={{backgroundColor:"#FF6A00", marginLeft: "15px",color:"#FFFFFF"}}
                     size="md"
                     variant="danger"
                     circle
@@ -303,7 +304,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                   dropoffs &&
                   parseInt(dropoffs) > 0 && (
                     <Badge
-                    style={{backgroundColor:"rgba(244, 151, 3, 0.8)", marginLeft: "15px",color:"rgb(20, 61, 89)"}}
+                    style={{backgroundColor:"#FF6A00", marginLeft: "15px",color:"#FFFFFF"}}
                       size="md"
                       variant="danger"
                       circle

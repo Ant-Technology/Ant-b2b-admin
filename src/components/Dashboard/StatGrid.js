@@ -28,12 +28,7 @@ const useStyles = createStyles((theme) => ({
     alignItems: "center",
   },
 
-  icon: {
-    color:
-      theme.colorScheme === "dark"
-        ? theme.colors.dark[3]
-        : theme.colors.gray[4],
-  },
+ 
 
   title: {
     fontWeight: 700,
@@ -66,12 +61,12 @@ export default function StatsGrid({ datas }) {
     const DiffIcon = stat.diff > 0 ? ArrowUpRight : ArrowDownRight;
 
     return (
-      <Paper withBorder p="md" radius="md" key={stat.title}>
+      <Paper style={{backgroundColor:"#FF6A00",color:"#FFFFFF"}} withBorder p="md" radius="md" key={stat.title}>
         <Group position="apart">
-          <Text size="xs" color="dimmed" className={classes.title}>
+          <Text size="xs"  className={classes.title}>
             {stat.title}
           </Text>
-          <Icon className={classes.icon} size={22} />
+          <Icon  size={22} />
         </Group>
 
         <Group align="flex-end" spacing="xs" mt={25}>
@@ -87,7 +82,7 @@ export default function StatsGrid({ datas }) {
           </Text>
         </Group>
 
-        <Text size="xs" color="dimmed" mt={7}>
+        <Text size="xs"  mt={7}>
           Compared to previous month
         </Text>
       </Paper>
@@ -96,6 +91,7 @@ export default function StatsGrid({ datas }) {
   return (
     <div className={classes.root}>
       <SimpleGrid
+      
         cols={4}
         breakpoints={[
           { maxWidth: "md", cols: 2 },
