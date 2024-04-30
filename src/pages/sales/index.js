@@ -58,7 +58,7 @@ const useStyles = createStyles((theme) => ({
     borderRadius: 21,
   },
   thh: {
-    color: "rgb(20, 61, 89)",
+    color: "#FFFFFF",
   },
 }));
 
@@ -124,10 +124,7 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(
-        `${API}/sales?page=${page}`,
-        config
-      );
+      const response = await axios.get(`${API}/sales?page=${page}`, config);
       if (response.data) {
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
@@ -213,10 +210,7 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.delete(
-        `${API}/sales/${deleteID}`,
-        config
-      );
+      const response = await axios.delete(`${API}/sales/${deleteID}`, config);
       if (response.data) {
         fetchData(activePage);
         setOpenedDelete(false);
@@ -342,10 +336,7 @@ const Drivers = () => {
         position="bottom"
         size="80%"
       >
-        <SalesDetailModal
-       
-          Id={editId}
-        />
+        <SalesDetailModal Id={editId} />
       </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
@@ -353,10 +344,9 @@ const Drivers = () => {
             <div>
               <Button
                 onClick={() => setOpened(true)}
-                variant="blue"
                 style={{
-                  backgroundColor: "rgba(244, 151, 3, 0.8)",
-                  color: "rgb(20, 61, 89)",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
                 }}
                 leftIcon={<Plus size={14} />}
               >
@@ -383,23 +373,27 @@ const Drivers = () => {
             <thead>
               <tr
                 style={{
-                  backgroundColor: "rgba(244, 151, 3, 0.8)",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                
                 }}
               >
-                
                 <Th sortable onSort={() => handleSort("name")}>
-                <span className={classes.thh}> Name </span>
+                  <span className={classes.thh}> Name </span>
                 </Th>
                 <Th sortable onSort={() => handleSort("email")}>
-                <span className={classes.thh}> Email</span>
+                  <span className={classes.thh}> Email</span>
                 </Th>
                 <Th sortable onSort={() => handleSort("phone")}>
-                 <span className={classes.thh}> Phone</span>
+                  <span className={classes.thh}> Phone</span>
                 </Th>
                 <Th sortable onSort={() => handleSort("retailers_count")}>
-                 <span className={classes.thh}> Retailers Count</span>
+                  <span className={classes.thh}> Retailers Count</span>
                 </Th>
-                <Th sortable={false}> <span className={classes.thh}>Actions</span></Th>
+                <Th sortable={false}>
+                  {" "}
+                  <span className={classes.thh}>Actions</span>
+                </Th>
               </tr>
             </thead>
             <tbody>

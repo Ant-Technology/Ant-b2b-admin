@@ -11,7 +11,7 @@ import {
 import { useQuery } from "@apollo/client";
 import { GET_ANALYTICS } from "apollo/queries";
 import PendingIcon from "@mui/icons-material/Pending";
-
+import StartIcon from '@mui/icons-material/Start';
 const useStyles = createStyles((theme) => ({
   root: {
     padding: theme.spacing.xl * 1.5,
@@ -89,6 +89,7 @@ export default function StatsGrid() {
             <Text size="xs" color="dimmed" className={classes.title}>
               Pending
             </Text>
+            <PendingIcon  sx={{ fontSize: 25}} style={{color:"#FF6A00"}}/>
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={25}>
@@ -100,6 +101,7 @@ export default function StatsGrid() {
             <Text size="xs" color="dimmed" className={classes.title}>
               STARTED
             </Text>
+            <StartIcon style={{color:"#FF6A00"}}/>
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={25}>
