@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createStyles, Group, Paper, SimpleGrid, Text } from "@mantine/core";
 import {
   UserPlus,
@@ -11,6 +11,8 @@ import {
 import { useQuery } from "@apollo/client";
 import { GET_ANALYTICS } from "apollo/queries";
 import PendingIcon from "@mui/icons-material/Pending";
+import axios from "axios";
+import { API } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -51,38 +53,41 @@ const icons = {
 };
 
 export default function StatsGrid() {
-  const { data, loading } = useQuery(GET_ANALYTICS);
+  const [data, setData] = useState();
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    fetchDeposit();
+  }, []);
+
+  const fetchDeposit = async () => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const { data } = await axios.get(`${API}/order/status-counts`, config);
+      if (data) {
+        setLoading(false);
+        setData(data);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching data:", error);
+    }
+  };
+ 
 
   const { classes } = useStyles();
-  const fieldMap = {
-    Orders: "orders",
-    Shipments: "shipments",
-    "Total Sales": "totalSales",
-    "Total Active Products": "totalActiveProducts",
-  };
-  const stats = () => {
-    return (
-      <Paper withBorder p="md" radius="md">
-        <Group position="apart">
-          <Text size="xs" color="dimmed" className={classes.title}>
-            DropOff
-          </Text>
-        </Group>
-
-        <Group align="flex-end" spacing="xs" mt={25}>
-          <Text className={classes.value}>2</Text>
-        </Group>
-      </Paper>
-    );
-  };
+  
+ 
   return (
     <div className={classes.root}>
       <SimpleGrid
-        cols={4}
-        breakpoints={[
-          { maxWidth: "md", cols: 2 },
-          { maxWidth: "xs", cols: 1 },
-        ]}
+        cols={5} // Adjust the number of columns to match the number of papers
+        breakpoints={[{ maxWidth: "xl", cols: 4 }, { maxWidth: "md", cols: 3 }, { maxWidth: "sm", cols: 2 }, { maxWidth: "xs", cols: 1 }]}
       >
         <Paper withBorder p="md" radius="md">
           <Group position="apart">
@@ -92,7 +97,7 @@ export default function StatsGrid() {
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>2</Text>
+            <Text className={classes.value}>{data?.CANCELED}</Text>
           </Group>
         </Paper>
         <Paper withBorder p="md" radius="md">
@@ -103,7 +108,7 @@ export default function StatsGrid() {
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>2</Text>
+            <Text className={classes.value}>{data?.SHIPPED}</Text>
           </Group>
         </Paper>
         <Paper withBorder p="md" radius="md">
@@ -114,7 +119,7 @@ export default function StatsGrid() {
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>2</Text>
+            <Text className={classes.value}>{data?.DELIVERED}</Text>
           </Group>
         </Paper>
         <Paper withBorder p="md" radius="md">
@@ -125,7 +130,18 @@ export default function StatsGrid() {
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>2</Text>
+            <Text className={classes.value}>{data?.ORDERED}</Text>
+          </Group>
+        </Paper>
+        <Paper withBorder p="md" radius="md">
+          <Group position="apart">
+            <Text size="xs" color="dimmed" className={classes.title}>
+            BACKORDERED
+            </Text>
+          </Group>
+
+          <Group align="flex-end" spacing="xs" mt={25}>
+            <Text className={classes.value}>{data?.BACKORDERED}</Text>
           </Group>
         </Paper>
       </SimpleGrid>

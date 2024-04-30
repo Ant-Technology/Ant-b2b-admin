@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createStyles, Group, Paper, SimpleGrid, Text } from "@mantine/core";
 import {
   UserPlus,
@@ -11,7 +11,9 @@ import {
 import { useQuery } from "@apollo/client";
 import { GET_ANALYTICS } from "apollo/queries";
 import PendingIcon from "@mui/icons-material/Pending";
-import StartIcon from '@mui/icons-material/Start';
+import StartIcon from "@mui/icons-material/Start";
+import axios from "axios";
+import { API } from "utiles/url";
 const useStyles = createStyles((theme) => ({
   root: {
     padding: theme.spacing.xl * 1.5,
@@ -51,29 +53,31 @@ const icons = {
 };
 
 export default function StatsGrid() {
-  const { data, loading } = useQuery(GET_ANALYTICS);
-
   const { classes } = useStyles();
-  const fieldMap = {
-    Orders: "orders",
-    Shipments: "shipments",
-    "Total Sales": "totalSales",
-    "Total Active Products": "totalActiveProducts",
-  };
-  const stats = () => {
-    return (
-      <Paper withBorder p="md" radius="md">
-        <Group position="apart">
-          <Text size="xs" color="dimmed" className={classes.title}>
-            DropOff
-          </Text>
-        </Group>
+  const [data, setData] = useState();
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    fetchDeposit();
+  }, []);
 
-        <Group align="flex-end" spacing="xs" mt={25}>
-          <Text className={classes.value}>2</Text>
-        </Group>
-      </Paper>
-    );
+  const fetchDeposit = async () => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const { data } = await axios.get(`${API}/dropoff/status-counts`, config);
+      if (data) {
+        setLoading(false);
+        setData(data);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching data:", error);
+    }
   };
   return (
     <div className={classes.root}>
@@ -89,11 +93,11 @@ export default function StatsGrid() {
             <Text size="xs" color="dimmed" className={classes.title}>
               Pending
             </Text>
-            <PendingIcon  sx={{ fontSize: 25}} style={{color:"#FF6A00"}}/>
+            <PendingIcon sx={{ fontSize: 25 }} style={{ color: "#FF6A00" }} />
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>2</Text>
+            <Text className={classes.value}>{data?.PENDING}</Text>
           </Group>
         </Paper>
         <Paper withBorder p="md" radius="md">
@@ -101,11 +105,11 @@ export default function StatsGrid() {
             <Text size="xs" color="dimmed" className={classes.title}>
               STARTED
             </Text>
-            <StartIcon style={{color:"#FF6A00"}}/>
+            <StartIcon style={{ color: "#FF6A00" }} />
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>2</Text>
+            <Text className={classes.value}>{data?.STARTED}</Text>
           </Group>
         </Paper>
         <Paper withBorder p="md" radius="md">
@@ -116,7 +120,18 @@ export default function StatsGrid() {
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>2</Text>
+            <Text className={classes.value}>{data?.DRIVER_ACCEPTED}</Text>
+          </Group>
+        </Paper>
+        <Paper withBorder p="md" radius="md">
+          <Group position="apart">
+            <Text size="xs" color="dimmed" className={classes.title}>
+              FINISHED
+            </Text>
+          </Group>
+
+          <Group align="flex-end" spacing="xs" mt={25}>
+            <Text className={classes.value}>{data?.FINISHED}</Text>
           </Group>
         </Paper>
       </SimpleGrid>
