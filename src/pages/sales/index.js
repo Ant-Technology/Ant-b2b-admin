@@ -58,7 +58,11 @@ const useStyles = createStyles((theme) => ({
     borderRadius: 21,
   },
   thh: {
-    color: "#FFFFFF",
+      color: "#666666",
+      fontFamily: "'__Inter_aaf875','__Inter_Fallback_aaf875'",
+      fontSize: "10px",
+      textTransform: "uppercase",
+      fontWeight: "bold",
   },
 }));
 
@@ -350,7 +354,7 @@ const Drivers = () => {
                 }}
                 leftIcon={<Plus size={14} />}
               >
-                Add Sales
+              Add Sales
               </Button>
             </div>
             <div></div>
@@ -372,11 +376,7 @@ const Drivers = () => {
           >
             <thead>
               <tr
-                style={{
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                
-                }}
+              style={{ backgroundColor: "#F1F1F1" }}
               >
                 <Th sortable onSort={() => handleSort("name")}>
                   <span className={classes.thh}> Name </span>

@@ -53,7 +53,11 @@ const useStyles = createStyles((theme) => ({
     borderRadius: 21,
   },
   thh: {
-    color: "rgb(20, 61, 89)",
+    color: "#666666",
+    fontFamily: "'__Inter_aaf875','__Inter_Fallback_aaf875'",
+    fontSize: "10px",
+    textTransform: "uppercase",
+    fontWeight: "bold",
   },
 }));
 
@@ -281,22 +285,20 @@ const Wallets = () => {
           >
             <thead>
               <tr
-                style={{
-                  backgroundColor: "rgba(244, 151, 3, 0.8)",
-                }}
+               style={{ backgroundColor: "#F1F1F1" }}
               >
                 <Th
-                  style={{ color: "rgb(20, 61, 89)" }}
+        
                   sortable={false}
                   onSort={() => handleSort("id")}
                 >
-                  ID
+                  <span className={classes.th}>ID</span> 
                 </Th>
                 <Th
                   sortable={false}
                   onSort={() => handleSort("reference_number")}
                 >
-                  <span style={{ color: "rgb(20, 61, 89)" }}>
+                  <span className={classes.th}>
                     Reference Number
                   </span>
                 </Th>

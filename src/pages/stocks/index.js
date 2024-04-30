@@ -60,7 +60,11 @@ const useStyles = createStyles((theme) => ({
     borderRadius: 21,
   },
   thh: {
-    color: "rgb(20, 61, 89)",
+    color: "#666666",
+    fontFamily: "'__Inter_aaf875','__Inter_Fallback_aaf875'",
+    fontSize: "10px",
+    textTransform: "uppercase",
+    fontWeight: "bold",
   },
 }));
 
@@ -375,11 +379,7 @@ const Drivers = () => {
             sx={{ tableLayout: "fixed", minWidth: 700 }}
           >
             <thead>
-              <tr
-                style={{
-                  backgroundColor: "rgba(244, 151, 3, 0.8)",
-                }}
-              >
+              <tr style={{ backgroundColor: "#F1F1F1" }}>
                 <Th sortable={false} onSort={() => handleSort("id")}>
                   <span className={classes.thh}>ID</span>
                 </Th>
