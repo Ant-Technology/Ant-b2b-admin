@@ -33,27 +33,16 @@ export const SalesEditModal = ({
 
   const [updateDriver, { loading: driverLoading }] = useMutation(UPDATE_DRIVER);
   useEffect(() => {
-    if(editRow.gender === 'Male'){
-      setIsMaleChecked(true);
-      form.setFieldValue("gender", "Male");
-      setIsFemaleChecked(false);
-    }
-    else if (editRow.gender === 'Female'){
-      setIsFemaleChecked(true);
-      form.setFieldValue("gender", "Female");
-      setIsMaleChecked(false)
-    }
-    console.log(editRow.phone)
     form.setValues({
       name: editRow.name,
       phone: editRow.phone,
       email: editRow.email,
-      city:editRow.city,
-      subcity:editRow.subcity,
-      address:editRow.address,
-      house_number:editRow.house_number,
-      region:editRow.region,
-
+      city: editRow.city,
+      subcity: editRow.subcity,
+      address: editRow.address,
+      house_number: editRow.house_number,
+      woreda: editRow.woreda,
+      region: editRow.region,
     });
   }, [editRow]);
 
@@ -68,26 +57,27 @@ export const SalesEditModal = ({
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       };
       const formData = new FormData();
       formData.append("profile_image", file);
       formData.append("name", form.values.name);
-      formData.append("phone", form.values.phone)
-      formData.append("email", form.values.email)
-      formData.append("password", form.valuespassword)
-      formData.append("address", form.values.address)
+      formData.append("phone", form.values.phone);
+      formData.append("email", form.values.email);
+      formData.append("password", form.valuespassword);
+      formData.append("address", form.values.address);
       formData.append("city", form.values.city);
-      formData.append("subcity", form.values.subcity)
+      formData.append("subcity", form.values.subcity);
       formData.append("gender", form.values.gender);
-      formData.append("woreda", form.values.woreda)
-      formData.append("house_number", form.values.house_number)
+      formData.append("woreda", form.values.woreda);
+      formData.append("house_number", form.values.house_number);
       formData.append("region", form.values.region);
       formData.append("status", 1);
-      const { data } = await axios.patch(
+      formData.append("_method", "PATCH");
+      const { data } = await axios.post(
         `${API}/sales/${editId}`,
-       formData,
+        formData,
         config
       );
       if (data) {
@@ -111,25 +101,24 @@ export const SalesEditModal = ({
       });
     }
   };
-  const [isMaleChecked, setIsMaleChecked] = useState(false);
-  const [isFemaleChecked, setIsFemaleChecked] = useState(false);
 
-  const handleMaleChange = (event) => {
-    setIsMaleChecked(event.target.checked);
-    form.setFieldValue("gender", "Male");
-    setIsFemaleChecked(false);
-  };
-
-  const handleFemaleChange = (event) => {
-    form.setFieldValue("gender", "Female");
-    setIsFemaleChecked(event.target.checked);
-    setIsMaleChecked(false);
-  };
   const [file, setFile] = useState(null);
 
   const handleFileChange = (newFile) => {
     setFile(newFile);
   };
+  const imagePreview = () => {
+    const imageUrl = URL.createObjectURL(file);
+    return (
+      <img
+        src={imageUrl}
+        width="130"
+        alt=""
+        imageprops={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
+      />
+    );
+  };
+
   return (
     <>
       <LoadingOverlay
@@ -200,6 +189,16 @@ export const SalesEditModal = ({
                   placeholder="Woreda"
                   {...form.getInputProps("woreda")}
                 />
+
+                <FileInput
+                  label="Upload Photo"
+                  placeholder="Upload Photo"
+                  value={file}
+                  accept="image/png,image/jpeg"
+                  onChange={handleFileChange}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
                 <TextInput
                   required
                   label="House Number"
@@ -207,26 +206,21 @@ export const SalesEditModal = ({
                   {...form.getInputProps("house_number")}
                 />
               </Grid.Col>
+            </Grid>
+            <Grid>
               <Grid.Col span={6}>
-                <FileInput
-                  label="Upload Photo"
-                  placeholder="Upload Photo"
-                  value={file}
-                  onChange={handleFileChange}
-                />
-                <div style={{ display: "flex", marginTop: "25px" }}>
-                  <Checkbox
-                    checked={isMaleChecked}
-                    onChange={handleMaleChange}
-                    label="Male"
+                {file ? (
+                  <>{imagePreview()}</>
+                ) : (
+                  <img
+                    src={editRow.profile_image}
+                    width="130"
+                    alt=""
+                    imageprops={{
+                      onLoad: () => URL.revokeObjectURL(editRow.profile_image),
+                    }}
                   />
-                  <Checkbox
-                    style={{ marginLeft: "10px" }}
-                    checked={isFemaleChecked}
-                    onChange={handleFemaleChange}
-                    label="Female"
-                  />
-                </div>
+                )}
               </Grid.Col>
             </Grid>
             <Grid>
@@ -235,11 +229,10 @@ export const SalesEditModal = ({
                   style={{
                     width: "25%",
                     marginTop: "15px",
-                    backgroundColor: "rgba(244, 151, 3, 0.8)",
-                    color: "rgb(20, 61, 89)",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
                   }}
                   type="submit"
-                  variant="outline"
                   fullWidth
                 >
                   Submit

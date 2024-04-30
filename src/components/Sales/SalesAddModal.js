@@ -116,6 +116,17 @@ export const SalesAddModal = ({
   const handleFileChange = (newFile) => {
     setFile(newFile);
   };
+  const imagePreview = () => {
+    const imageUrl = URL.createObjectURL(file);
+    return (
+      <img
+        src={imageUrl}
+        width="130"
+        alt=""
+        imageprops={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
+      />
+    );
+  };
 
   return (
     <>
@@ -187,19 +198,21 @@ export const SalesAddModal = ({
                   placeholder="Woreda"
                   {...form.getInputProps("woreda")}
                 />
+
+                <FileInput
+                  label="Upload Photo"
+                  placeholder="Upload Photo"
+                  value={file}
+                  accept="image/png,image/jpeg"
+                  onChange={handleFileChange}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
                 <TextInput
                   required
                   label="House Number"
                   placeholder="House Number"
                   {...form.getInputProps("house_number")}
-                />
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <FileInput
-                  label="Upload Photo"
-                  placeholder="Upload Photo"
-                  value={file}
-                  onChange={handleFileChange}
                 />
                 <div style={{ display: "flex", marginTop: "25px" }}>
                   <Checkbox
@@ -217,16 +230,19 @@ export const SalesAddModal = ({
               </Grid.Col>
             </Grid>
             <Grid>
+              <Grid.Col span={6}>{file && imagePreview()}</Grid.Col>
+            </Grid>
+            <Grid>
               <Grid.Col span={4}>
                 <Button
                   style={{
                     width: "25%",
                     marginTop: "15px",
-                    backgroundColor: "rgba(244, 151, 3, 0.8)",
-                    color: "rgb(20, 61, 89)",
+                    backgroundColor: "#FF6A00", 
+                    color: "#FFFFFF",
                   }}
                   type="submit"
-                  variant="outline"
+                  
                   fullWidth
                 >
                   Submit
