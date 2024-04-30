@@ -135,7 +135,9 @@ const B2bTable = ({
     <Fragment key={row.id}>
       <tr>
         {header.map((data, index) => (
-          <td key={index} style={{ width: "20%" }}>{data?.render(row)}</td>
+          <td key={index} style={{ width: "20%" }}>
+            {data?.render(row)}
+          </td>
         ))}
       </tr>
       {row.id === selectedCollapse && collapsible && content(row)}
@@ -153,7 +155,7 @@ const B2bTable = ({
           <div>
             <Button
               onClick={() => optionsData.setAddModal(true)}
-              style={{backgroundColor:"#FF6A00",color:"#FFFFFF"}}
+              style={{ backgroundColor: "#FF6A00", color: "#FFFFFF" }}
               leftIcon={<Plus size={14} />}
             >
               {optionsData.actionLabel}
@@ -185,7 +187,7 @@ const B2bTable = ({
           overlayBlur={2}
           loader={customLoader}
         />
-        <thead  style={{backgroundColor:"#FF6A00"}}>
+        <thead style={{ backgroundColor: "#F1F1F1" }}>
           <tr>
             {header.map((th, index) => {
               return th.sortable ? (
@@ -195,10 +197,31 @@ const B2bTable = ({
                   reversed={reverseSortDirection}
                   onSort={() => setSorting(th.key)}
                 >
-                  <span style={{color:"#FFFFFF"}}>{th.label}</span>
+                  <span
+                    style={{
+                      color: "#666666",
+                      fontFamily: "'__Inter_aaf875','__Inter_Fallback_aaf875'",
+                      fontSize: "10px",
+                      textTransform: "uppercase",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {th.label}
+                  </span>
                 </Th>
               ) : (
-                <th style={{color:"#FFFFFF"}} key={th.label}>{th.label}</th>
+                <th
+                  style={{
+                    color: "#666666",
+                    fontFamily: "'__Inter_aaf875','__Inter_Fallback_aaf875'",
+                    fontSize: "10px",
+                    textTransform: "uppercase",
+                    fontWeight: "bold",
+                  }}
+                  key={th.label}
+                >
+                  {th.label}
+                </th>
               );
             })}
           </tr>
