@@ -24,6 +24,7 @@ import ShipmentManageModal from "components/Shipment/ShipmentManageModal";
 import { customLoader } from "components/utilities/loader";
 import { DEL_SHIPMENT } from "apollo/mutuations";
 import { IconMinus, IconPhone, IconPlus } from "@tabler/icons";
+import ShipmentCard from './card'
 
 const Shipments = () => {
   const [size] = useState(10);
@@ -413,6 +414,7 @@ const Shipments = () => {
         />
       </Drawer>
       <Card shadow="sm" p="lg">
+        <ShipmentCard/>
         <ScrollArea>
           <B2bTable
             total={total}

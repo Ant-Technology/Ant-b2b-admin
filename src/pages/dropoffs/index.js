@@ -12,7 +12,7 @@ import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import React, { useState } from "react";
 import {  ManualGearbox, Trash } from "tabler-icons-react";
-
+import DropOffCard from "./card"
 const DropOffs = () => {
   const [size] = useState(10);
   const [opened, setOpened] = useState(false);
@@ -157,6 +157,7 @@ const DropOffs = () => {
         />
       </Drawer>
       <Card shadow="sm" p="lg">
+        <DropOffCard/>
         <ScrollArea>
           <B2bTable
             total={total}

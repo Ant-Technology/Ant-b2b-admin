@@ -45,12 +45,14 @@ const VehicleTypeAddModal = ({
       />
     );
   });
-  
+
   const theme = useMantineTheme();
   //form initialization and validation
   const form = useForm({
     initialValues: {
       title: { en: "", am: "" },
+      starting_price: "",
+      price_per_kilometer: "",
     },
   });
 
@@ -85,6 +87,8 @@ const VehicleTypeAddModal = ({
       addVehicleType({
         variables: {
           title: form.getInputProps("title").value,
+          starting_price: parseFloat(form.values.starting_price),
+          price_per_kilometer: parseFloat(form.values.price_per_kilometer),
         },
         onCompleted() {
           showNotification({
@@ -143,7 +147,23 @@ const VehicleTypeAddModal = ({
                       />
                     </Grid.Col>
                     <Grid.Col span={4}>
-                    <ScrollArea style={{ height: 300 }}>
+                      <TextInput
+                        required
+                        label="Starting Price"
+                        placeholder="Starting Price"
+                        type="number"
+                        {...form.getInputProps("starting_price")}
+                      />
+                      <TextInput
+                        required
+                        label="Price Per Kilometer"
+                        placeholder="Price Per Kilometer"
+                        type="number"
+                        {...form.getInputProps("price_per_kilometer")}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={4}>
+                      <ScrollArea style={{ height: 300 }}>
                         <div style={{ marginTop: "25px" }}>
                           <Dropzone accept={IMAGE_MIME_TYPE} onDrop={setFiles}>
                             <Group

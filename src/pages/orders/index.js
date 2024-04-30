@@ -12,7 +12,7 @@ import B2bTable from "components/reusable/b2bTable";
 import { ManualGearbox } from "tabler-icons-react";
 import { customLoader } from "components/utilities/loader";
 import ManageOrderModal from "components/Order/ManageOrderModal";
-
+import OrderCard from "./card"
 const Orders = () => {
   const [size] = useState(10);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -161,6 +161,7 @@ const Orders = () => {
       </Drawer>
 
       <Card shadow="sm" p="lg">
+        <OrderCard/>
         <ScrollArea>
           <B2bTable
             total={total}
