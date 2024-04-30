@@ -8,6 +8,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "tabler-icons-react";
+import { Clock } from "tabler-icons-react"; // Import the Clock icon
+
 import { useQuery } from "@apollo/client";
 import { GET_ANALYTICS } from "apollo/queries";
 
@@ -71,20 +73,9 @@ export default function StatsGrid({ datas }) {
 
         <Group align="flex-end" spacing="xs" mt={25}>
           <Text className={classes.value}>{stat.value}</Text>
-          <Text
-            color={stat.diff > 0 ? "teal" : "red"}
-            size="sm"
-            weight={500}
-            className={classes.diff}
-          >
-            <span>{stat.diff}%</span>
-            <DiffIcon size={16} />
-          </Text>
+        
         </Group>
 
-        <Text size="xs"  mt={7}>
-          Compared to previous month
-        </Text>
       </Paper>
     );
   });

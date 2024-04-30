@@ -256,6 +256,7 @@ const VehicleTypes = () => {
           activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}
+          setTotal={setTotal}
         />
       </Drawer>
 

@@ -38,11 +38,12 @@ export const SalesEditModal = ({
       form.setFieldValue("gender", "Male");
       setIsFemaleChecked(false);
     }
-    else{
+    else if (editRow.gender === 'Female'){
       setIsFemaleChecked(true);
       form.setFieldValue("gender", "Female");
       setIsMaleChecked(false)
     }
+    console.log(editRow.phone)
     form.setValues({
       name: editRow.name,
       phone: editRow.phone,
@@ -67,11 +68,12 @@ export const SalesEditModal = ({
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
       };
       const formData = new FormData();
       formData.append("profile_image", file);
-      formData.append("name", form.values("name").value);
+      formData.append("name", form.values.name);
       formData.append("phone", form.values.phone)
       formData.append("email", form.values.email)
       formData.append("password", form.valuespassword)
@@ -83,21 +85,16 @@ export const SalesEditModal = ({
       formData.append("house_number", form.values.house_number)
       formData.append("region", form.values.region);
       formData.append("status", 1);
-      const { data } = await axios.put(
+      const { data } = await axios.patch(
         `${API}/sales/${editId}`,
-        {
-          name: form.values.name,
-          email: form.values.email,
-          phone: form.values.phone,
-          status: 1,
-        },
+       formData,
         config
       );
       if (data) {
         showNotification({
           color: "green",
           title: "Success",
-          message: "Sales Created Successfully",
+          message: "Sales Updated Successfully",
         });
         setLoading(false);
         fetchData(1);
@@ -161,7 +158,6 @@ export const SalesEditModal = ({
                 <TextInput
                   required
                   label="Phone"
-                  type="number"
                   placeholder="Phone"
                   {...form.getInputProps("phone")}
                 />
@@ -213,8 +209,8 @@ export const SalesEditModal = ({
               </Grid.Col>
               <Grid.Col span={6}>
                 <FileInput
-                  label="Choose Photo"
-                  placeholder="Upload files"
+                  label="Upload Photo"
+                  placeholder="Upload Photo"
                   value={file}
                   onChange={handleFileChange}
                 />

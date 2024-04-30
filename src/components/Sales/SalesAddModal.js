@@ -145,7 +145,6 @@ export const SalesAddModal = ({
                 <TextInput
                   required
                   label="Phone"
-                  type="number"
                   placeholder="Phone"
                   {...form.getInputProps("phone")}
                 />
@@ -197,8 +196,8 @@ export const SalesAddModal = ({
               </Grid.Col>
               <Grid.Col span={6}>
                 <FileInput
-                  label="Choose Photo"
-                  placeholder="Upload files"
+                  label="Upload Photo"
+                  placeholder="Upload Photo"
                   value={file}
                   onChange={handleFileChange}
                 />
