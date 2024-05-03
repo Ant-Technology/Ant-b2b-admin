@@ -19,6 +19,7 @@ import Drivers from "pages/driver";
 import Users from "pages/users";
 import DropOffs from "pages/dropoffs";
 import Sales from "pages/sales"
+import Feedbacks from "pages/feedbacks"
 
 const RoutesComp = () => {
   return (
@@ -43,6 +44,7 @@ const RoutesComp = () => {
       <Route path="/dropoffs" element={<DropOffs />} />
       <Route path="/login" element={<Login />} />
       <Route path="/sales" element={<Sales />} />
+      <Route path="/feedbacks" element={<Feedbacks/>}/>
     </Routes>
   );
 };

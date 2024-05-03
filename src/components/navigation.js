@@ -12,7 +12,7 @@ import {
   Badge,
 } from "@mantine/core";
 import Pusher from "pusher-js";
-
+import FeedbackIcon from '@mui/icons-material/Feedback';
 import { useMediaQuery, useViewportSize } from "@mantine/hooks";
 import {
   IconDashboard,
@@ -155,6 +155,7 @@ const data = [
   },
   { link: "/stocks", label: "Stocks", icon: IconBuildingStore },
   { link: "/sales", label: "Sales", icon: IconUser },
+  { link: "/feedbacks", label: "Feedbacks", icon: FeedbackIcon },
 ];
 
 const NavbarSimple = ({ opened, setOpened, setPosition }) => {
