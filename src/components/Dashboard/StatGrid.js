@@ -17,10 +17,19 @@ const useStyles = createStyles((theme) => ({
   root: {
     padding: theme.spacing.xl * 1.5,
   },
-
+  paper: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center", // Center content vertically
+    alignItems: "center", // Center content horizontally
+    padding: theme.spacing.md,
+    backgroundColor: "#FF6A00",
+    color: "#FFFFFF",
+    borderRadius: theme.radius.md,
+  },
   value: {
-    fontSize: 24,
-    fontWeight: 700,
+    fontSize: 15,
+    fontWeight: 650,
     lineHeight: 1,
   },
 
@@ -63,7 +72,7 @@ export default function StatsGrid({ datas }) {
     const DiffIcon = stat.diff > 0 ? ArrowUpRight : ArrowDownRight;
 
     return (
-      <Paper style={{backgroundColor:"#FF6A00",color:"#FFFFFF"}} withBorder p="md" radius="md" key={stat.title}>
+      <Paper className={classes.paper}withBorder p="md" radius="md" key={stat.title}>
         <Group position="apart">
           <Text size="xs"  className={classes.title}>
             {stat.title}
@@ -71,7 +80,7 @@ export default function StatsGrid({ datas }) {
           <Icon  size={22} />
         </Group>
 
-        <Group align="flex-end" spacing="xs" mt={25}>
+        <Group align="center" spacing="xs" mt={25}>
           <Text className={classes.value}>{stat.value}</Text>
         
         </Group>

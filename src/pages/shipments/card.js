@@ -17,10 +17,20 @@ import { API } from "utiles/url";
 const useStyles = createStyles((theme) => ({
   root: {
     padding: theme.spacing.xl * 1.5,
+    maxWidth:800
   },
-
+  paper: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center", // Center content vertically
+    alignItems: "center", // Center content horizontally
+    padding: theme.spacing.md,
+    backgroundColor: "#FF6A00",
+    color: "#FFFFFF",
+    borderRadius: theme.radius.md,
+  },
   value: {
-    fontSize: 24,
+    fontSize: 15,
     fontWeight: 700,
     lineHeight: 1,
   },
@@ -41,8 +51,9 @@ const useStyles = createStyles((theme) => ({
   title: {
     fontWeight: 700,
     textTransform: "uppercase",
-    color: "#666666",
+    color: "#FFFFFF",
   },
+
 }));
 
 const icons = {
@@ -89,7 +100,7 @@ export default function StatsGrid() {
           { maxWidth: "xs", cols: 1 },
         ]}
       >
-        <Paper withBorder p="md" radius="md">
+        <Paper className={classes.paper} withBorder p="md" radius="md">
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               CANCELED
@@ -100,7 +111,7 @@ export default function StatsGrid() {
             <Text className={classes.value}>{data?.cancelled}</Text>
           </Group>
         </Paper>
-        <Paper withBorder p="md" radius="md">
+        <Paper className={classes.paper}  withBorder p="md" radius="md">
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               SHIPPED
@@ -111,7 +122,7 @@ export default function StatsGrid() {
             <Text className={classes.value}>{data?.shipped}</Text>
           </Group>
         </Paper>
-        <Paper withBorder p="md" radius="md">
+        <Paper className={classes.paper}  withBorder p="md" radius="md">
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               DELIVERED
@@ -122,7 +133,7 @@ export default function StatsGrid() {
             <Text className={classes.value}>{data?.delivered}</Text>
           </Group>
         </Paper>
-        <Paper withBorder p="md" radius="md">
+        <Paper className={classes.paper}  withBorder p="md" radius="md">
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               PENDING
