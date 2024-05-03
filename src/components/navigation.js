@@ -370,20 +370,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       className={classes.bg}
     >
       <Navbar.Section mt="xs">
-        <Group className={classes.header} position="apart">
-          {/* Hamburger Here */}
-          {!mobScreen && (
-            <Burger
-              opened={opened}
-              onClick={() => setOpened((o) => !o)}
-              size="md"
-              color={theme.colors.gray[6]}
-              mr="auto"
-              ml={opened ? 0 : "sm"}
-            />
-          )}
-          {opened ? <Code sx={{ fontWeight: 700 }}>Act B2B</Code> : null}
-        </Group>
+      
       </Navbar.Section>
 
       <Navbar.Section
@@ -454,28 +441,6 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
             <p>RETAILER</p>
           </Popover.Dropdown>
         </Popover>
-
-        <Tooltip
-          disabled={opened ? true : false}
-          label="Logout"
-          position="right"
-          withArrow
-        >
-          <Link
-            href="#"
-            className={classes.link}
-            onClick={(event) => {
-              event.preventDefault();
-              logout();
-            }}
-          >
-            <IconLogout
-              className={opened ? classes.linkIcon : classes.linkIconShort}
-              stroke={1.5}
-            />
-            {opened ? <span>Logout</span> : null}
-          </Link>
-        </Tooltip>
       </Navbar.Section>
     </Navbar>
   );

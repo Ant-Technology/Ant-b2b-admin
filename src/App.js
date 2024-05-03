@@ -11,6 +11,12 @@ import {
 } from "@mantine/notifications";
 import { useHotkeys, useLocalStorage } from "@mantine/hooks";
 import Pusher from 'pusher-js';
+import { ThemeProvider } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
+
+// Define your theme
+
+
 import RoutesComp from "./routes";
 import Layout from "components/layout/Layout";
 import { useQuery } from "@apollo/client";
@@ -43,7 +49,9 @@ function App() {
       navigate("/login");
     },
   });
-
+  const theme = createTheme({
+    // Your theme configurations
+  });
   useEffect(() => {
     if (!authDataVar().auth) {
       console.log("noauthdata");
@@ -70,6 +78,8 @@ function App() {
       loader={customLoader}
     />
   ) : (
+    <ThemeProvider theme={theme}>
+
     <ColorSchemeProvider
       colorScheme={colorScheme}
       toggleColorScheme={toggleColorScheme}
@@ -111,6 +121,7 @@ function App() {
 }
       </MantineProvider>
     </ColorSchemeProvider>
+    </ThemeProvider>
   );
 }
 
