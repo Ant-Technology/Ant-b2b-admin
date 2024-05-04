@@ -48,8 +48,17 @@ export const DropOffAddModal = ({
         },
       },
       orders: {
-        ids: [3],
+        ids: [],
       },
+    },
+    validate: (values) => {
+      const errors = {
+        orders:
+          values.orders.ids.length === 0
+            ? "Please select at least one order"
+            : null,
+      };
+      return errors;
     },
   });
 
@@ -70,7 +79,7 @@ export const DropOffAddModal = ({
           return;
         }
         const updatedDropoffs = [createDropoff, ...dropoffs.data];
-  
+
         cache.writeQuery({
           query: GET_DROPOFFS,
           variables: {
@@ -84,7 +93,7 @@ export const DropOffAddModal = ({
             },
           },
         });
-  
+
         const newTotal = dropoffs.paginatorInfo.total + 1;
         setTotal(newTotal);
         setActivePage(1);
@@ -207,7 +216,7 @@ export const DropOffAddModal = ({
         showNotification({
           color: "red",
           title: "Error",
-          message: errorMessage
+          message: errorMessage,
         });
       },
     });
@@ -270,6 +279,9 @@ export const DropOffAddModal = ({
                   placeholder="Pick one or more Orders"
                   nothingFoundMessage="Nothing found..."
                 />
+                {form.errors.orders && (
+                  <div style={{ color: "red" }}>{form.errors.orders}</div>
+                )}
               </Grid.Col>
             </Grid>
             <Grid>

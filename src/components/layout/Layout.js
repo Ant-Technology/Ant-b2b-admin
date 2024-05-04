@@ -24,8 +24,6 @@ import { IconLogout } from "@tabler/icons";
 const useStyles = createStyles((theme, _params, getRef) => {
   const icon = getRef("icon");
   return {
-   
-
     link: {
       ...theme.fn.focusStyles(),
       display: "flex",
@@ -37,13 +35,11 @@ const useStyles = createStyles((theme, _params, getRef) => {
       padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
       borderRadius: theme.radius.sm,
       fontWeight: 600,
-
     },
 
     linkIcon: {
       ref: icon,
-      color:
-        theme.colorScheme === "dark" ? theme.colors.dark[2] : "#FFFFFF",
+      color: theme.colorScheme === "dark" ? theme.colors.dark[2] : "#FFFFFF",
       marginRight: theme.spacing.sm,
     },
 
@@ -159,9 +155,11 @@ const Layout = ({ children, setPosition }) => {
               height={70}
               p="md"
             >
+              <Text style={{marginLeft:"15px"}}>ACT B2B</Text>
+
               <Burger
-              style={{marginLeft:"100px",paddingLeft:"100px"}}
-              opened={false} // Always display the menu icon
+                style={{ marginLeft: "80px", paddingLeft: "100px" }}
+                opened={false}
                 onClick={() => setOpened((o) => !o)}
                 size="md"
                 color={"#FFFFFF"}
@@ -177,11 +175,8 @@ const Layout = ({ children, setPosition }) => {
                   logout();
                 }}
               >
-                <IconLogout
-                  className={ classes.linkIcon}
-                  stroke={1.5}
-                />
-                <span style={{color:"#FFFFFF"}}>Logout</span>
+                <IconLogout className={classes.linkIcon} stroke={1.5} />
+                <span style={{ color: "#FFFFFF" }}>Logout</span>
               </Link>
             </Header>
           </div>
