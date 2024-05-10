@@ -5,6 +5,8 @@ import {
   LoadingOverlay,
   ScrollArea,
 } from "@mantine/core";
+import { FiEdit, FiEye } from "react-icons/fi";
+import EditIcon from '@mui/icons-material/Edit';
 import { GET_DROPOFFS } from "apollo/queries";
 import { DropOffAddModal } from "components/Dropoff/DropOffAddModal";
 import ManageDropOffModal from "components/Dropoff/ManageDropOffModal";
@@ -13,6 +15,7 @@ import { customLoader } from "components/utilities/loader";
 import React, { useState } from "react";
 import {  ManualGearbox, Trash } from "tabler-icons-react";
 import DropOffCard from "./card"
+import Controls from "components/controls/Controls";
 const DropOffs = () => {
   const [size] = useState(10);
   const [opened, setOpened] = useState(false);
@@ -100,12 +103,22 @@ const DropOffs = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash color="#ed522f" size={24}   style={{cursor:"pointer"}} />
-            <ManualGearbox color="#1971C2"
-            style={{marginLeft:"10px",cursor:"pointer"}}
-              size={24}
-              onClick={() => handleManageDropOff(`${rowData.id}`)}
-            />
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+            
+            >
+              <EditIcon style={{ fontSize: '1rem' }}/>
+            </Controls.ActionButton>
+            <span style={{ marginLeft: "1px" }}>
+              <Controls.ActionButton
+                color="primary"
+                title="View Detail"
+                onClick={() => handleManageDropOff(`${rowData.id}`)}
+              >
+                <FiEye fontSize="medium" />
+              </Controls.ActionButton>
+            </span>
           </>
         );
       },

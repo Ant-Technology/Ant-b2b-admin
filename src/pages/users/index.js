@@ -13,14 +13,17 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { DEL_USER } from "apollo/mutuations";
+import { FiEdit, FiEye } from "react-icons/fi";
+import { ManualGearbox, Trash } from "tabler-icons-react";
+import EditIcon from '@mui/icons-material/Edit';
 import { GET_ALL_USERS } from "apollo/queries";
+import Controls from "components/controls/Controls";
 import B2bTable from "components/reusable/b2bTable";
 import UserAddModal from "components/User/UserAddModal";
 import UserEditModal from "components/User/UserEditModal";
 import { customLoader } from "components/utilities/loader";
 import React from "react";
 import { useState } from "react";
-import { Edit, Trash } from "tabler-icons-react";
 
 const Users = () => {
   const [isTrashHovered, setIsTrashHovered] = useState(false);
@@ -135,37 +138,21 @@ const Users = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash
-              color="#ed522f"
-              size={24}
-              onClick={() => handleDelete(`${rowData.id}`)}
-              onMouseEnter={() => setIsTrashHovered(true)}
-              onMouseLeave={() => setIsTrashHovered(false)}
-              style={{
-                cursor: "pointer",
-                transition: "opacity 0.3s, box-shadow 0.3s",
-                opacity: isTrashHovered ? 0.8 : 1,
-                boxShadow: isTrashHovered
-                  ? "0 0 10px rgba(0, 0, 0, 0.3)"
-                  : "none",
-              }}
-            />
-            <Edit
-              onMouseEnter={() => setIsEditHovered(true)}
-              onMouseLeave={() => setIsEditHovered(false)}
-              style={{
-                marginLeft: "10px",
-                cursor: "pointer",
-                transition: "opacity 0.3s, box-shadow 0.3s",
-                opacity: isEditHovered ? 0.8 : 1,
-                boxShadow: isEditHovered
-                  ? "0 0 10px rgba(0, 0, 0, 0.3)"
-                  : "none",
-              }}
-              color="orange"
-              size={24}
+          
+          <Controls.ActionButton
+              color="primary"
+              title="Update"
               onClick={() => handleEditUser(`${rowData.id}`)}
-            />
+            >
+              <EditIcon style={{ fontSize: '1rem' }}/>
+            </Controls.ActionButton>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${rowData.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
           </>
         );
       },

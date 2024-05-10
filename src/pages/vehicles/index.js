@@ -11,6 +11,8 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { DEL_VEHICLE } from "apollo/mutuations";
+import EditIcon from "@mui/icons-material/Edit";
+
 import { GET_VEHICLES } from "apollo/queries";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
@@ -18,6 +20,7 @@ import VehicleAddModal from "components/Vehicle/VehicleAddModal";
 import VehicleEditModal from "components/Vehicle/VehicleEditModal";
 import { useEffect, useState } from "react";
 import { Edit, Trash } from "tabler-icons-react";
+import Controls from "components/controls/Controls";
 
 const Vehicles = () => {
   const [size] = useState(10);
@@ -157,11 +160,21 @@ const Vehicles = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash size={24} color="#ed522f" onClick={() => handleDelete(`${rowData.id}`)} />
-            <Edit
-              size={24}
+            <Controls.ActionButton
+              color="primary"
+              title="Update"
               onClick={() => handleEditProduct(`${rowData.id}`)}
-            />
+            >
+              <EditIcon style={{ fontSize: "1rem" }} />
+            </Controls.ActionButton>
+
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${rowData.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
           </>
         );
       },
@@ -192,7 +205,7 @@ const Vehicles = () => {
       },
 
       onError(data) {
-        console.log("ERROR FOR NOT DELETE",data)
+        console.log("ERROR FOR NOT DELETE", data);
         setOpenedDelete(false);
         showNotification({
           color: "red",

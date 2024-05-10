@@ -25,6 +25,7 @@ import axios from "axios";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
+import EditIcon from "@mui/icons-material/Edit";
 import React, { Fragment, useEffect, useState } from "react";
 import { ManualGearbox } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
@@ -36,6 +37,7 @@ import { DriverAddModal } from "components/Driver/DriverAddModal";
 import { DEL_STOCK } from "apollo/mutuations";
 import StockAddModal from "components/Stock/StockAddModal";
 import ManageStock from "components/Stock/ManageStock";
+import Controls from "components/controls/Controls";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -248,22 +250,22 @@ const Drivers = () => {
         <td>{row.product_sku?.sku}</td>
         <td>{row.quantity}</td>
         <td>
-          <Trash
-            color="#ed522f"
-            style={{
-              cursor: "pointer",
-            }}
-            size={24}
-            onClick={() => handleDelete(`${row.id}`)}
-          />
-          <Edit
-            style={{
-              cursor: "pointer",
-              marginLeft: "10px",
-            }}
-            size={24}
-            onClick={() => handleEditDriver(row.id, row)}
-          />
+        <Controls.ActionButton
+              color="primary"
+              title="Update"
+              onClick={() => handleEditDriver(`${row.id}`)}
+            >
+              <EditIcon style={{ fontSize: "1rem" }} />
+            </Controls.ActionButton>
+
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${row.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
+
         </td>
       </tr>
     </Fragment>
@@ -352,10 +354,7 @@ const Drivers = () => {
               <Button
                 onClick={() => setOpened(true)}
                 variant="blue"
-                style={{
-                  backgroundColor: "rgba(244, 151, 3, 0.8)",
-                  color: "rgb(20, 61, 89)",
-                }}
+                style={{ backgroundColor: "#FF6A00", color: "#FFFFFF" }}
                 leftIcon={<Plus size={14} />}
               >
                 Add Stock

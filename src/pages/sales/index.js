@@ -20,13 +20,15 @@ import {
   Tooltip,
   Modal,
 } from "@mantine/core";
-import { Edit, Trash } from "tabler-icons-react";
+import { FiEdit, FiEye } from "react-icons/fi";
+import EditIcon from '@mui/icons-material/Edit';
+
+import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import axios from "axios";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import React, { Fragment, useEffect, useState } from "react";
-import { ManualGearbox } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
@@ -34,6 +36,7 @@ import SalesDetailModal from "components/Sales/SalesDetailModal";
 import { SalesEditModal } from "components/Sales/SalesUpdateModal";
 import { SalesAddModal } from "components/Sales/SalesAddModal";
 import { API } from "utiles/url";
+import Controls from "components/controls/Controls";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -246,31 +249,32 @@ const Drivers = () => {
         <td>{row.phone}</td>
         <td>{row.retailers_count}</td>
         <td>
-          <Trash
-            color="#ed522f"
-            style={{
-              cursor: "pointer",
-            }}
-            size={24}
-            onClick={() => handleDelete(`${row.id}`)}
-          />
-          <Edit
-            style={{
-              cursor: "pointer",
-              marginLeft: "10px",
-            }}
-            size={24}
-            onClick={() => handleEditSales(row.id, row)}
-          />
-          <ManualGearbox
-            style={{
-              cursor: "pointer",
-              marginLeft: "10px",
-            }}
-            color="#1971C2"
-            size={24}
-            onClick={() => handleManageSales(`${row.id}`)}
-          />
+        <>
+            <Controls.ActionButton
+              color="primary"
+              title="Update"
+              onClick={() => handleEditSales(`${row.id}`)}
+            >
+              <EditIcon style={{ fontSize: '1rem' }}/>
+            </Controls.ActionButton>
+            <span style={{ marginLeft: "1px" }}>
+              <Controls.ActionButton
+                color="primary"
+                title="View Detail"
+                onClick={() => handleManageSales(`${row.id}`)}
+              >
+                <FiEye fontSize="medium" />
+              </Controls.ActionButton>
+            </span>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${row.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
+          </>
+
         </td>
       </tr>
     </Fragment>

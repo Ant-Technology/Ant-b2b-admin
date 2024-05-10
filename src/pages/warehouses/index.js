@@ -2,16 +2,20 @@ import { useState } from "react";
 import { Drawer, LoadingOverlay, useMantineTheme } from "@mantine/core";
 import { ScrollArea, Group, Button, Card, Avatar, Modal } from "@mantine/core";
 import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
-
+import axios from "axios";
+import { FiEdit, FiEye } from "react-icons/fi";
 import { Trash, Edit } from "tabler-icons-react";
 import WarehouseAddModal from "components/Warehouse/warehouseAddModal";
 import WarehouseEditModal from "components/Warehouse/warehouseEditModal";
 import { showNotification } from "@mantine/notifications";
+import EditIcon from '@mui/icons-material/Edit';
+
 import { customLoader } from "components/utilities/loader";
 import { GET_WARE_HOUSE, GET_WARE_HOUSES } from "apollo/queries";
 import { DEL_WAREHOUSE } from "apollo/mutuations";
 import B2bTable from "components/reusable/b2bTable";
 import ShowWarehouseLocation from "components/Warehouse/showWarehouseLocation";
+import Controls from "components/controls/Controls";
 
 const Warehouses = () => {
   const [size] = useState(10);
@@ -174,17 +178,22 @@ const Warehouses = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash
-              size={24}
-              style={{ cursor: "pointer" }}
-              color="#ed522f"
-              onClick={() => handleDelete(`${rowData.id}`)}
-            />
-            <Edit
-              size={24}
-              style={{ marginLeft: "10px", cursor: "pointer" }}
+                  <Controls.ActionButton
+              color="primary"
+              title="Update"
               onClick={() => handleEditCategory(`${rowData.id}`)}
-            />
+            >
+              <EditIcon style={{ fontSize: '1rem' }}/>
+            </Controls.ActionButton>
+          
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${rowData.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
+
           </>
         );
       },

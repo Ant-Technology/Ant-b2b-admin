@@ -11,6 +11,9 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
+
+import axios from "axios";
+import { FiEdit, FiEye } from "react-icons/fi";
 import { DEL_VEHICLE_TYPES } from "apollo/mutuations";
 import { GET_VEHICLE_TYPES } from "apollo/queries";
 import B2bTable from "components/reusable/b2bTable";
@@ -19,6 +22,8 @@ import VehicleTypeAddModal from "components/VehicleType/VehicleTypeAddModal";
 import VehicleTypeEditModal from "components/VehicleType/VehicleTypeEditModal";
 import React, { useState } from "react";
 import { Edit, Trash } from "tabler-icons-react";
+import Controls from "components/controls/Controls";
+import EditIcon from "@mui/icons-material/Edit";
 
 const VehicleTypes = () => {
   const [size] = useState(10);
@@ -176,11 +181,21 @@ const VehicleTypes = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash size={24} color="#ed522f" onClick={() => handleDelete(`${rowData.id}`)} />
-            <Edit
-              size={24}
+            <Controls.ActionButton
+              color="primary"
+              title="Update"
               onClick={() => handleEditVehicleType(`${rowData.id}`)}
-            />
+            >
+              <EditIcon style={{ fontSize: "1rem" }} />
+            </Controls.ActionButton>
+
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${rowData.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
           </>
         );
       },
