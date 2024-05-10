@@ -384,7 +384,6 @@ export const DEL_PRODUCT_SKU = gql`
     }
   }
 `;
-
 //retailer
 export const CREATE_RETAILER = gql`
   mutation create_retailer(
@@ -397,6 +396,7 @@ export const CREATE_RETAILER = gql`
     $contact_email: String
     $region: CreateRegionBelongsTo!
     $user: CreateUserBelongsTo!
+    $registered_by: ID
   ) {
     createRetailer(
       input: {
@@ -409,6 +409,7 @@ export const CREATE_RETAILER = gql`
         contact_email: $contact_email
         region: $region
         user: $user
+        registered_by: $registered_by
       }
     ) {
       id
