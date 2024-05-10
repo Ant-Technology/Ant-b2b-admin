@@ -17,6 +17,8 @@ import Map from "components/utilities/Map";
 import { CREATE_RETAILER } from "apollo/mutuations";
 import { GET_REGIONS, GET_RETAILERS } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
+import axios from "axios";
+import { API } from "utiles/url";
 
 const RetailerAddModal = ({
   setOpened,
@@ -27,6 +29,7 @@ const RetailerAddModal = ({
 }) => {
   // state variables
   const [regionsDropDownData, setRegionsDropDownData] = useState([]);
+  const [salesDropDownData, setSalesDropDownData] = useState([]);
   // state variable to handle map location
   const [location, setLocation] = useState({});
   // form state
@@ -39,6 +42,7 @@ const RetailerAddModal = ({
       contact_name: "",
       contact_phone: "",
       contact_email: "",
+      registered_by: "",
       region: {
         connect: "1",
       },
@@ -49,8 +53,8 @@ const RetailerAddModal = ({
           password: "fafa",
           password_confirmation: "fafa",
           role: {
-            connect: "3"
-          }
+            connect: "3",
+          },
         },
       },
     },
@@ -60,28 +64,38 @@ const RetailerAddModal = ({
   const [addRetailer, { loading: retailerLoading }] = useMutation(
     CREATE_RETAILER,
     {
+     
       update(cache, { data: { createRetailer } }) {
-        cache.updateQuery(
-          {
-            query: GET_RETAILERS,
-            variables: {
-              first: 10,
-              page: activePage,
+        // Read the existing data from the cache
+        const { retailers } = cache.readQuery({
+          query: GET_RETAILERS,
+          variables: {
+            first: 10,
+            page: 1,
+          },
+        });
+        if (!retailers) {
+          return;
+        }
+        const updatedRetailers = [createRetailer, ...retailers.data];
+
+        cache.writeQuery({
+          query: GET_RETAILERS,
+          variables: {
+            first: 10,
+            page: 1,
+          },
+          data: {
+            retailers: {
+              ...retailers,
+              data: updatedRetailers,
             },
           },
-          (data) => {
-            if (data.retailers.data.length === 10) {
-              setTotal(total + 1);
-              setActivePage(total + 1);
-            } else {
-              return {
-                retailers: {
-                  data: [createRetailer, ...data.retailers.data],
-                },
-              };
-            }
-          }
-        );
+        });
+
+        const newTotal = retailers.paginatorInfo.count + 1;
+        setTotal(newTotal);
+        setActivePage(1);
       },
     }
   );
@@ -116,7 +130,37 @@ const RetailerAddModal = ({
     },
   });
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    fetchData(activePage);
+  }, [activePage]);
+
+  const fetchData = async (page) => {
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(`${API}/sales?paginate=0`, config);
+      if (response.data) {
+        let salesArray = [];
+
+        // loop over regions data to structure the data for the use of drop down
+        response.data.forEach((sales, index) => {
+          salesArray.push({
+            label: sales?.name,
+            value: sales?.id,
+          });
+        });
+
+        // put it on the state
+        setSalesDropDownData([...salesArray]);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   const { height } = useViewportSize();
 
@@ -135,6 +179,7 @@ const RetailerAddModal = ({
         region: form.getInputProps("region").value,
         address: form.getInputProps("address").value,
         user: form.getInputProps("user").value,
+        registered_by: form.getInputProps("registered_by").value,
       },
       onCompleted(data) {
         showNotification({
@@ -160,6 +205,11 @@ const RetailerAddModal = ({
   // set the selected value to the form state
   const setRegionDropDownValue = (val) => {
     form.setFieldValue("region.connect", val);
+  };
+  //registered_by
+  const setSalesValue = (val) => {
+    console.log(val);
+    form.setFieldValue("registered_by", val);
   };
 
   return (
@@ -219,6 +269,16 @@ const RetailerAddModal = ({
                   label="Contact Phone"
                   placeholder="Phone"
                   {...form.getInputProps("contact_phone")}
+                />
+                <Select
+                  data={salesDropDownData}
+                  value={form.values.registered_by} // Use form.values to access the value
+                  onChange={(value) => {
+                    setSalesValue(value); // Pass the selected value to setSalesValue function
+                    form.setFieldValue("registered_by", value); // Update the form value
+                  }}
+                  label="Sales"
+                  placeholder="Pick a Sales this retailer Registered by"
                 />
               </Grid.Col>
             </Grid>
