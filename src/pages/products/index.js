@@ -10,12 +10,16 @@ import {
   Modal,
   Drawer,
 } from "@mantine/core";
+import { FiEdit, FiEye } from "react-icons/fi";
+import EditIcon from '@mui/icons-material/Edit';
+
 import { showNotification } from "@mantine/notifications";
 import { DEL_PRODUCT } from "apollo/mutuations";
 import { GET_PRODUCTS } from "apollo/queries";
 import ProductDetailModal from "components/Product/ProductDetail";
 import ProductAddModal from "components/Product/productAddModal";
 import ProductEditModal from "components/Product/productEditModal";
+import Controls from "components/controls/Controls";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import React, { useEffect, useState } from "react";
@@ -161,28 +165,30 @@ const Products = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash
-              color="#ed522f"
-              size={24}
-              onClick={() => handleDelete(`${rowData.id}`)}
-            />
-            <Edit
-              style={{
-                marginLeft: "10px",
-                cursor: "pointer",
-              }}
-              size={24}
+           <Controls.ActionButton
+              color="primary"
+              title="Update"
               onClick={() => handleEditProduct(`${rowData.id}`)}
-            />
-            <ManualGearbox
-              style={{
-                marginLeft: "10px",
-                cursor: "pointer",
-              }}
-              color="#1971C2"
-              size={24}
-              onClick={() => handleManageProduct(`${rowData.id}`)}
-            />
+            >
+              <EditIcon style={{ fontSize: '1rem' }}/>
+            </Controls.ActionButton>
+            <span style={{ marginLeft: "1px" }}>
+              <Controls.ActionButton
+                color="primary"
+                title="View Detail"
+                onClick={() => handleManageProduct(`${rowData.id}`)}
+              >
+                <FiEye fontSize="medium" />
+              </Controls.ActionButton>
+            </span>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${rowData.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
+          
           </>
         );
       },

@@ -21,6 +21,8 @@ import {
   Modal,
 } from "@mantine/core";
 import { Edit, Trash } from "tabler-icons-react";
+import { FiEdit, FiEye } from "react-icons/fi";
+import EditIcon from '@mui/icons-material/Edit';
 import axios from "axios";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
@@ -33,6 +35,7 @@ import { showNotification } from "@mantine/notifications";
 import DriverDetailModal from "components/Driver/DriverDetail";
 import { DriverEditModal } from "components/Driver/DriverEditModal";
 import { DriverAddModal } from "components/Driver/DriverAddModal";
+import Controls from "components/controls/Controls";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -251,31 +254,30 @@ const Drivers = () => {
         <td>{row.email}</td>
         <td>{row.phone}</td>
         <td>
-          <Trash
-            color="#ed522f"
-            style={{
-              cursor: "pointer",
-            }}
-            size={24}
-            onClick={() => handleDelete(`${row.id}`)}
-          />
-          <Edit
-            style={{
-              cursor: "pointer",
-              marginLeft: "10px",
-            }}
-            size={24}
-            onClick={() => handleEditDriver(row.id, row)}
-          />
-          <ManualGearbox
-            style={{
-              cursor: "pointer",
-              marginLeft: "10px",
-            }}
-            color="#1971C2"
-            size={24}
-            onClick={() => handleManageDriver(`${row.id}`)}
-          />
+        <Controls.ActionButton
+              color="primary"
+              title="Update"
+              onClick={() => handleEditDriver(`${row.id}`)}
+            >
+              <EditIcon style={{ fontSize: '1rem' }}/>
+            </Controls.ActionButton>
+            <span style={{ marginLeft: "1px" }}>
+              <Controls.ActionButton
+                color="primary"
+                title="View Detail"
+                onClick={() => handleManageDriver(`${row.id}`)}
+              >
+                <FiEye fontSize="medium" />
+              </Controls.ActionButton>
+            </span>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${row.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
+          
         </td>
       </tr>
     </Fragment>
@@ -361,10 +363,7 @@ const Drivers = () => {
               <Button
                 onClick={() => setOpened(true)}
                 variant="blue"
-                style={{
-                  backgroundColor: "rgba(244, 151, 3, 0.8)",
-                  color: "rgb(20, 61, 89)",
-                }}
+                style={{ backgroundColor: "#FF6A00", color: "#FFFFFF" }}
                 leftIcon={<Plus size={14} />}
               >
                 Add Driver

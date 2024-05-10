@@ -13,6 +13,8 @@ import { ManualGearbox } from "tabler-icons-react";
 import { customLoader } from "components/utilities/loader";
 import ManageOrderModal from "components/Order/ManageOrderModal";
 import OrderCard from "./card"
+import Controls from "components/controls/Controls";
+import { FiEye } from "react-icons/fi";
 const Orders = () => {
   const [size] = useState(10);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -98,14 +100,15 @@ const Orders = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <ManualGearbox
-            size={24}
-            style={{
-              cursor: "pointer",
-            }}
-            color="#1971C2"
+          <span style={{ marginLeft: "1px" }}>
+          <Controls.ActionButton
+            color="primary"
+            title="View Detail"
             onClick={() => ManageOrder(`${rowData.id}`)}
-          />
+          >
+            <FiEye fontSize="medium" />
+          </Controls.ActionButton>
+        </span>
         );
       },
     },

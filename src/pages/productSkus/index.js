@@ -22,6 +22,9 @@ import {
 } from "@mantine/core";
 import { Edit, Trash } from "tabler-icons-react";
 import axios from "axios";
+import { FiEdit, FiEye } from "react-icons/fi";
+import EditIcon from '@mui/icons-material/Edit';
+
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
@@ -38,6 +41,7 @@ import StockAddModal from "components/Stock/StockAddModal";
 import ManageStock from "components/Stock/ManageStock";
 import ProductSkuAddModal from "components/ProductSku/ProductSkuAddModal";
 import ProductSkuEditModal from "components/ProductSku/ProductSkuEditModal";
+import Controls from "components/controls/Controls";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -260,22 +264,22 @@ const Drivers = () => {
           )}
         </td>
         <td>
-          <Trash
-            color="#ed522f"
-            style={{
-              cursor: "pointer",
-            }}
-            size={24}
-            onClick={() => handleDelete(`${row.id}`)}
-          />
-          <Edit
-            style={{
-              cursor: "pointer",
-              marginLeft: "10px",
-            }}
-            size={24}
-            onClick={() => handleEdit(row.id, row)}
-          />
+        <Controls.ActionButton
+              color="primary"
+              title="Update"
+              onClick={() => handleEdit(`${row.id}`)}
+            >
+              <EditIcon style={{ fontSize: '1rem' }}/>
+            </Controls.ActionButton>
+          
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${row.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
+          
         </td>
       </tr>
     </Fragment>
@@ -344,11 +348,10 @@ const Drivers = () => {
             <div>
               <Button
                 onClick={() => setOpened(true)}
-                variant="blue"
-                color="blue"
+                style={{ backgroundColor: "#FF6A00", color: "#FFFFFF" }}
                 leftIcon={<Plus size={14} />}
               >
-                Add Stock
+                Add Product Sku
               </Button>
             </div>
             <div></div>

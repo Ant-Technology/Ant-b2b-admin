@@ -22,6 +22,7 @@
     "@mantine/tiptap": "^5.8.0",
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
+    "@mui/styles": "^5.15.17",
     "@react-google-maps/api": "^2.13.1",
     "@tabler/icons": "^1.112.0",
     "@testing-library/jest-dom": "^5.16.5",
@@ -40,6 +41,7 @@
     "react": "^18.2.0",
     "react-content-loader": "^6.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.2.1",
     "react-router-dom": "6",
     "react-scripts": "5.0.1",
     "tabler-icons-react": "^1.55.0",
@@ -70,9 +72,9 @@
     ]
   },
   "devDependencies": {
-    "serve": "^14.0.1",
     "autoprefixer": "9",
     "postcss": "7",
+    "serve": "^14.0.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat"
   }
 }

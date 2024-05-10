@@ -388,61 +388,6 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       >
         {links}
       </Navbar.Section>
-
-      <Navbar.Section className={classes.footer}>
-        <Tooltip
-          disabled={opened ? true : false}
-          label="Profile"
-          position="right"
-          withArrow
-        >
-          <Link
-            to="#"
-            className={classes.link}
-            onClick={(event) => event.preventDefault()}
-          >
-            <Avatar
-              className={opened ? classes.linkIcon : classes.linkIconShort}
-              size="sm"
-              color="cyan"
-              radius="xl"
-            >
-              {handleNameAvatar()?.toUpperCase()}
-            </Avatar>{" "}
-            {opened ? (
-              <span className="">{authDataVar().auth?.name}</span>
-            ) : null}
-          </Link>
-        </Tooltip>
-
-        <Popover width={300} position="right" withArrow shadow="md">
-          <Tooltip
-            disabled={opened ? true : false}
-            label="Change Account"
-            position="right"
-            withArrow
-          >
-            <Popover.Target>
-              <Link
-                to="#"
-                className={classes.link}
-                onClick={(event) => event.preventDefault()}
-              >
-                <IconSwitchHorizontal
-                  className={opened ? classes.linkIcon : classes.linkIconShort}
-                  stroke={1.5}
-                />
-                {opened ? <span>Change account</span> : null}
-              </Link>
-            </Popover.Target>
-          </Tooltip>
-          <Popover.Dropdown>
-            <p>DISTRIBUTOR</p>
-            <p>DRIVER</p>
-            <p>RETAILER</p>
-          </Popover.Dropdown>
-        </Popover>
-      </Navbar.Section>
     </Navbar>
   );
 };

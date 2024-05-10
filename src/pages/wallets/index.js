@@ -20,6 +20,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { Edit, Trash } from "tabler-icons-react";
+import { FiEdit, FiEye } from "react-icons/fi";
 import axios from "axios";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
@@ -28,6 +29,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { ManualGearbox } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
+import Controls from "components/controls/Controls";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -215,14 +217,15 @@ const Wallets = () => {
           )}
         </td>
         <td>
-          <ManualGearbox
-            style={{
-              cursor: "pointer",
-            }}
-            color="#1971C2"
-            size={24}
-            onClick={() => handleManageDepositSlip(`${row.id}`)}
-          />
+        <span style={{ marginLeft: "1px" }}>
+              <Controls.ActionButton
+                color="primary"
+                title="View Detail"
+                onClick={() => handleManageDepositSlip(`${row.id}`)}
+              >
+                <FiEye fontSize="medium" />
+              </Controls.ActionButton>
+            </span>
         </td>
       </tr>
     </Fragment>

@@ -16,6 +16,7 @@ import {
   Flex,
   Text,
 } from "@mantine/core";
+import EditIcon from "@mui/icons-material/Edit";
 import B2bTable from "components/reusable/b2bTable";
 import { Edit, Trash, DotsCircleHorizontal } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
@@ -24,7 +25,8 @@ import ShipmentManageModal from "components/Shipment/ShipmentManageModal";
 import { customLoader } from "components/utilities/loader";
 import { DEL_SHIPMENT } from "apollo/mutuations";
 import { IconMinus, IconPhone, IconPlus } from "@tabler/icons";
-import ShipmentCard from './card'
+import ShipmentCard from "./card";
+import Controls from "components/controls/Controls";
 
 const Shipments = () => {
   const [size] = useState(10);
@@ -185,21 +187,20 @@ const Shipments = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash
-              color="#ed522f"
-              size={24}
+            <Controls.ActionButton
+              color="primary"
+              title="Update"
+              onClick={() => handleManageShipment(`${rowData.id}`)}
+            >
+              <EditIcon style={{ fontSize: "1rem" }} />
+            </Controls.ActionButton>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
               onClick={() => handleDelete(`${rowData.id}`)}
-            />
-            <Edit
-              style={{ marginLeft: "10px" }}
-              size={24}
-              onClick={() => handleManageShipment(`${rowData.id}`)}
-            />
-            <DotsCircleHorizontal
-              style={{ marginLeft: "10px" }}
-              size={24}
-              onClick={() => handleManageShipment(`${rowData.id}`)}
-            />
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
           </>
         );
       },
@@ -414,7 +415,7 @@ const Shipments = () => {
         />
       </Drawer>
       <Card shadow="sm" p="lg">
-        <ShipmentCard/>
+        <ShipmentCard />
         <ScrollArea>
           <B2bTable
             total={total}

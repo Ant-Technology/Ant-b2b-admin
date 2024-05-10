@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { customLoader } from "components/utilities/loader";
 import { useMutation, useQuery } from "@apollo/client";
+import Controls from "../../components/controls/Controls";
 import {
   Card,
   Button,
@@ -11,14 +12,19 @@ import {
   Group,
   Modal,
 } from "@mantine/core";
+import { FiEdit, FiEye } from "react-icons/fi";
+import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
+import EditIcon from '@mui/icons-material/Edit';
 import { showNotification } from "@mantine/notifications";
 import { DEL_RETAILER } from "apollo/mutuations";
 import { GET_RETAILERS } from "apollo/queries";
 import RetailerAddModal from "components/Retailer/RetailerAddModal";
 import B2bTable from "components/reusable/b2bTable";
-import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
+
 import RetailerEditModal from "components/Retailer/RetailerEditModal";
 import RetailerDetailModal from "components/Retailer/RetailerDetail";
+
+import { Tooltip } from "@mui/material";
 
 const Retailers = () => {
   const [size] = useState(10);
@@ -121,10 +127,10 @@ const Retailers = () => {
     setActivePage(currentPage);
   };
   const theme = useMantineTheme();
-  const handleManageRetailer = (id)=>{
+  const handleManageRetailer = (id) => {
     setEditId(id);
     setOpenedDetail(true);
-  }
+  };
   const headerData = [
     {
       label: "id",
@@ -188,28 +194,29 @@ const Retailers = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash
-              color="#ed522f"
-              size={24}
-              onClick={() => handleDelete(`${rowData.id}`)}
-            />
-            <Edit
-              style={{
-                cursor: "pointer",
-                marginLeft: "10px",
-              }}
-              size={24}
+            <Controls.ActionButton
+              color="primary"
+              title="Update"
               onClick={() => handleEditRetailer(`${rowData.id}`)}
-            />
-            <ManualGearbox
-              color="#1971C2"
-              style={{
-                cursor: "pointer",
-                marginLeft: "10px",
-              }}
-              size={24}
-              onClick={() => handleManageRetailer(`${rowData.id}`)}
-            />
+            >
+              <EditIcon style={{ fontSize: '1rem' }}/>
+            </Controls.ActionButton>
+            <span style={{ marginLeft: "1px" }}>
+              <Controls.ActionButton
+                color="primary"
+                title="View Detail"
+                onClick={() => handleManageRetailer(`${rowData.id}`)}
+              >
+                <FiEye fontSize="medium" />
+              </Controls.ActionButton>
+            </span>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${rowData.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
           </>
         );
       },
@@ -247,7 +254,7 @@ const Retailers = () => {
       >
         <RetailerEditModal setOpenedEdit={setOpenedEdit} editId={editId} />
       </Drawer>
-      
+
       <Drawer
         opened={openedDetail}
         overlayColor={
