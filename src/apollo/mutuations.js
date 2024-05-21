@@ -448,7 +448,6 @@ export const UPDATE_RETAILER = gql`
       city
       contact_name
       address
-      phone
     }
   }
 `;
