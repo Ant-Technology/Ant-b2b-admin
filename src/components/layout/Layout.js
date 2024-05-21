@@ -155,7 +155,7 @@ const Layout = ({ children, setPosition }) => {
               height={70}
               p="md"
             >
-              <Text style={{marginLeft:"15px"}}>ACT B2B</Text>
+              <Text style={{marginLeft:"15px"}}>ANT B2B</Text>
 
               <Burger
                 style={{ marginLeft: "80px", paddingLeft: "100px" }}
