@@ -109,7 +109,7 @@ const Login = () => {
           mt="md"
           mb={50}
         >
-          Welcome back to Act B2B!
+          Welcome back to ANT B2B!
         </Title>
         <form onSubmit={login}>
           <TextInput
