@@ -597,9 +597,10 @@ export const CONFIRM_DEPOSIT_SLIP = gql`
 `;
 
 export const CREATE_VEHICLE_TYPE = gql`
-  mutation($title: TranslatableInput!, $starting_price: Float!, $price_per_kilometer: Float!) {
+  mutation($title: TranslatableInput!, $type: String!, $starting_price: Float!, $price_per_kilometer: Float!) {
     createVehicleType(input: {
       title: $title
+      type: $type
       starting_price: $starting_price
       price_per_kilometer: $price_per_kilometer
     }) {

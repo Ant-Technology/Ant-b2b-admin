@@ -195,16 +195,15 @@ const Wallets = () => {
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
-        <td>{row.id}</td>
         <td>{row.reference_number}</td>
-        <td>{row.amount}</td>
+        <td>{row.amount} <span style={{marginLeft:"7px"}}>ETB</span></td>
         <td>
           {row.confirmed_at
             ? new Date(row.confirmed_at).toLocaleDateString()
             : "Not Confirmed"}
         </td>
-        <td>{row.confirmed_by?.name}</td>
-        <td>{row.retailer?.name}</td>
+        <td>{row.user_type}</td>
+        <td>{row.depositable?.name}</td>
         <td>
           {row.confirmed_at ? (
             <Badge variant="light" color="green">
@@ -291,13 +290,6 @@ const Wallets = () => {
                style={{ backgroundColor: "#F1F1F1" }}
               >
                 <Th
-        
-                  sortable={false}
-                  onSort={() => handleSort("id")}
-                >
-                  <span className={classes.th}>ID</span> 
-                </Th>
-                <Th
                   sortable={false}
                   onSort={() => handleSort("reference_number")}
                 >
@@ -311,11 +303,11 @@ const Wallets = () => {
                 <Th sortable onSort={() => handleSort("confirmed_at")}>
                   <span className={classes.th}>Date</span>
                 </Th>
-                <Th>
-                  <span className={classes.th}>Approved By</span>
+                <Th sortable onSort={() => handleSort("user_type")}>
+                  <span className={classes.th}>User Type</span>
                 </Th>
-                <Th sortable onSort={() => handleSort("retailer_id")}>
-                  <span className={classes.th}> Retailer</span>
+                <Th sortable={false}>
+                  <span className={classes.th}>User</span>
                 </Th>
                 <Th sortable={false}>
                   <span className={classes.th}>Status</span>
