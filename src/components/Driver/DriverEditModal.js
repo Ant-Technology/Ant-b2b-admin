@@ -23,14 +23,13 @@ export const DriverEditModal = ({
   setOpenedEdit,
 }) => {
   const form = useForm({});
-
   const [updateDriver, { loading: driverLoading }] = useMutation(UPDATE_DRIVER);
   useEffect(() => {
     form.setValues({
-      name: editRow.name,
-      phone: editRow.phone,
-      address: editRow.address,
-      city: editRow.city,
+      name: editRow?.name,
+      phone: editRow?.phone,
+      address: editRow?.address,
+      city: editRow?.city,
     });
   }, [editRow]);
 
@@ -39,7 +38,7 @@ export const DriverEditModal = ({
   const submit = () => {
     updateDriver({
       variables: {
-        id: editId,
+        id: editRow.id,
         name: form.values.name,
         address: form.values.address,
         phone: form.values.phone,
