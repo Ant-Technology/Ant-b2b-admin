@@ -184,9 +184,9 @@ const Drivers = () => {
     setSortBy(field);
     setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
   };
-  const handleEditDriver = (id, row) => {
+  const handleEditDriver = (row) => {
     setOpenedEdit(true);
-    setEditId(id);
+    console.log(row)
     setEditRow(row);
   };
   const [isHovered, setIsHovered] = useState(false);
@@ -257,7 +257,7 @@ const Drivers = () => {
         <Controls.ActionButton
               color="primary"
               title="Update"
-              onClick={() => handleEditDriver(`${row.id}`)}
+              onClick={() => handleEditDriver(row)}
             >
               <EditIcon style={{ fontSize: '1rem' }}/>
             </Controls.ActionButton>

@@ -147,7 +147,7 @@ const Layout = ({ children, setPosition }) => {
             <Header
               style={{
                 color: "#FFFFFF",
-                backgroundColor: "#FF6A00",
+                backgroundColor: "#FF7519",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",

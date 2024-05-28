@@ -142,6 +142,30 @@ function ProductDetailModal({ Id }) {
             <Group align="flex-end" spacing="xs" mt={25}>
               <Text size="sm" weight={500} className={classes.diff}>
                 <span>
+                  Region<span style={{ marginLeft: "5px" }}>:</span>
+                </span>
+              </Text>
+              <Text className={classes.value}>{data?.region?.name.en}</Text>
+            </Group>
+            <Group align="flex-end" spacing="xs" mt={25}>
+              <Text size="sm" weight={500} className={classes.diff}>
+                <span>
+                Vehicle<span style={{ marginLeft: "5px" }}>:</span>
+                </span>
+              </Text>
+              <Text className={classes.value}>{data?.vehicle?.name}</Text>
+            </Group>
+            <Group align="flex-end" spacing="xs" mt={25}>
+              <Text size="sm" weight={500} className={classes.diff}>
+                <span>
+                Vehicle Type<span style={{ marginLeft: "5px" }}>:</span>
+                </span>
+              </Text>
+              <Text className={classes.value}>{data?.vehicle?.vehicle_type?.title?.en}</Text>
+            </Group>
+            <Group align="flex-end" spacing="xs" mt={25}>
+              <Text size="sm" weight={500} className={classes.diff}>
+                <span>
                   City <span style={{ marginLeft: "5px" }}>:</span>
                 </span>
               </Text>
