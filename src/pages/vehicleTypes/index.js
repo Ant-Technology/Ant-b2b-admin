@@ -149,7 +149,6 @@ const VehicleTypes = () => {
     {
       label: "Image",
       key: "title",
-      sortable: true,
       searchable: true,
       render: (rowData) => {
         return <Avatar src={rowData.image} alt="avatar" />;
@@ -173,8 +172,35 @@ const VehicleTypes = () => {
         return <span>{rowData.type}</span>;
       },
     },
+    //price_per_kilometer
     {
-      label: "Date Created",
+      label: "Starting Price",
+      key: "starting_price",
+      sortable: false,
+      render: (rowData) => {
+        return (
+          <span>
+            {rowData.starting_price}{" "}
+            <span style={{ marginLeft: "7px" }}>ETB</span>
+          </span>
+        );
+      },
+    },
+    {
+      label: "Price Per Kilometer",
+      key: "price_per_kilometer",
+      sortable: false,
+      render: (rowData) => {
+        return (
+          <span>
+            {rowData.price_per_kilometer}{" "}
+            <span style={{ marginLeft: "7px" }}>ETB</span>
+          </span>
+        );
+      },
+    },
+    {
+      label: "Date",
       key: "created_at",
       sortable: true,
       searchable: true,
