@@ -674,6 +674,7 @@ export const GET_SHIPMENTS = gql`
       data {
         id
         departure_time
+        self_shipment
         arrival_time
         items {
           shipment_itemable {

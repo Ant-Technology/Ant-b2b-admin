@@ -23,11 +23,11 @@ import { showNotification } from "@mantine/notifications";
 import { ShipmentAddModal } from "components/Shipment/ShipmentAddModal";
 import ShipmentManageModal from "components/Shipment/ShipmentManageModal";
 import { customLoader } from "components/utilities/loader";
-import { DEL_SHIPMENT } from "apollo/mutuations";
+import { DEL_SHIPMENT, MARK_AS_DELIVERED_SELF_SHIPMENT } from "apollo/mutuations";
 import { IconMinus, IconPhone, IconPlus } from "@tabler/icons";
 import ShipmentCard from "./card";
 import Controls from "components/controls/Controls";
-
+import UpdateIcon from '@mui/icons-material/Update';
 const Shipments = () => {
   const [size] = useState(10);
   const [opened, setOpened] = useState(false);
@@ -44,7 +44,7 @@ const Shipments = () => {
 
   const theme = useMantineTheme();
 
-  const { data, loading, fetchMore } = useQuery(GET_SHIPMENTS, {
+  const { data, loading, fetchMore,refetch } = useQuery(GET_SHIPMENTS, {
     variables: {
       first: size,
       page: activePage,
@@ -104,15 +104,7 @@ const Shipments = () => {
         );
       },
     },
-    {
-      label: "Id",
-      key: "id",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.id}</span>;
-      },
-    },
+  
     {
       label: "Departure Time",
       key: "departure_time",
@@ -186,7 +178,7 @@ const Shipments = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <>
+          <div style={{display:"flex",width:"100%"}}>
             <Controls.ActionButton
               color="primary"
               title="Update"
@@ -201,7 +193,15 @@ const Shipments = () => {
             >
               <Trash size={17} />
             </Controls.ActionButton>
-          </>
+            {rowData.self_shipment &&  rowData.status === "PENDING" &&
+              <Controls.ActionButton
+              color="primary"
+              title="Update Status"
+              onClick={() => handleChangeShipmentStatus(`${rowData.id}`)}
+            >
+              <UpdateIcon style={{ fontSize: "1rem" }} />
+            </Controls.ActionButton>}
+          </div>
         );
       },
     },
@@ -212,6 +212,22 @@ const Shipments = () => {
     setAddModal: setOpened,
   };
 
+  const [markAsDelivered] = useMutation(MARK_AS_DELIVERED_SELF_SHIPMENT, {
+    onCompleted: (data) => {
+      console.log('Shipment status updated:', data);
+      refetch(); // Refetch shipments after successful update
+    },
+    onError: (error) => {
+      console.error('Error updating shipment status:', error);
+      // Handle error, e.g., show an error message
+    },
+  });
+
+  const handleChangeShipmentStatus = (shipmentId) => {
+    markAsDelivered({
+      variables: { shipment_id: shipmentId },
+    });
+  };
   const prepareContent = (row) => {
     return (
       <tr>
