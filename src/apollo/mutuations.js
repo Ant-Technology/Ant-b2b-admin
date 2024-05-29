@@ -79,8 +79,20 @@ export const CREATE_WARE_HOUSE = gql`
   }
 `;
 export const UPDATE_WARE_HOUSE = gql`
-  mutation UPDATE_WARE_HOUSE($id: ID!, $name: String!, $_geo: GeoInput!, $specific_area: String!, $region: UpdateRegionBelongsTo!) {
-    updateWarehouse(id: $id, name: $name, _geo: $_geo, specific_area: $specific_area, region: $region) {
+  mutation UPDATE_WARE_HOUSE(
+    $id: ID!
+    $name: String!
+    $_geo: GeoInput!
+    $specific_area: String!
+    $region: UpdateRegionBelongsTo!
+  ) {
+    updateWarehouse(
+      id: $id
+      name: $name
+      _geo: $_geo
+      specific_area: $specific_area
+      region: $region
+    ) {
       id
       name
       _geo {
@@ -597,13 +609,20 @@ export const CONFIRM_DEPOSIT_SLIP = gql`
 `;
 
 export const CREATE_VEHICLE_TYPE = gql`
-  mutation($title: TranslatableInput!, $type: String!, $starting_price: Float!, $price_per_kilometer: Float!) {
-    createVehicleType(input: {
-      title: $title
-      type: $type
-      starting_price: $starting_price
-      price_per_kilometer: $price_per_kilometer
-    }) {
+  mutation (
+    $title: TranslatableInput!
+    $type: String!
+    $starting_price: Float!
+    $price_per_kilometer: Float!
+  ) {
+    createVehicleType(
+      input: {
+        title: $title
+        type: $type
+        starting_price: $starting_price
+        price_per_kilometer: $price_per_kilometer
+      }
+    ) {
       id
     }
   }
@@ -619,10 +638,18 @@ export const DEL_VEHICLE_TYPES = gql`
 `;
 
 export const UPDATE_VEHICLE_TYPE = gql`
-  mutation ($id: ID!, $title: TranslatableInput!) {
-    updateVehicleType(id: $id, input: { title: $title }) {
+  mutation (
+    $id: ID!
+    $title: TranslatableInput!
+    $type: String!
+    $starting_price: Float
+    $price_per_kilometer: Float
+  ) {
+    updateVehicleType(id: $id, input: { title: $title, type: $type,	starting_price: $starting_price,
+      price_per_kilometer: $price_per_kilometer }) {
       id
       title
+      type
     }
   }
 `;
