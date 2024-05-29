@@ -667,6 +667,14 @@ export const CREATE_DROP_OFF = gql`
     }
   }
 `;
+export const MARK_AS_DELIVERED_SELF_SHIPMENT = gql`
+  mutation MARK_AS_DELIVERED_SELF_SHIPMENT($shipment_id: ID!) {
+    markAsDeliveredSelfShipment(shipment_id: $shipment_id) {
+      id
+      status
+    }
+  }
+`;
 //drivers
 export const CREATE_DRIVER = gql`
   mutation (
