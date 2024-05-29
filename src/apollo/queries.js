@@ -815,6 +815,8 @@ export const GET_VEHICLE_TYPES = gql`
         title
         image
         type
+        starting_price
+        price_per_kilometer
         vehicleCount
         created_at
       }
