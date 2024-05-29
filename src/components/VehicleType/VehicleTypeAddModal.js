@@ -5,6 +5,7 @@ import {
   Group,
   LoadingOverlay,
   ScrollArea,
+  Select,
   SimpleGrid,
   Tabs,
   Text,
@@ -19,7 +20,7 @@ import { CREATE_VEHICLE_TYPE } from "apollo/mutuations";
 import { GET_VEHICLE_TYPES } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 import { tabList } from "components/utilities/tablist";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Photo, PictureInPicture, Upload } from "tabler-icons-react";
 
 const VehicleTypeAddModal = ({
@@ -32,7 +33,23 @@ const VehicleTypeAddModal = ({
   // to control the current active tab
   const [activeTab, setActiveTab] = useState(tabList[0].value);
   const [files, setFiles] = useState([]);
+  const [typeDropDownData, setTypeDropDownData] = useState([]);
 
+ useEffect (()=>{
+  let types =  ["Shipment", "Dropoff"] ;
+      let type = [];
+
+      // loop over regions data to structure the data for the use of drop down
+      types.forEach((item, index) => {
+        type.push({
+          label: item,
+          value: item,
+        });
+      });
+
+      // put it on the state
+      setTypeDropDownData([...type]);
+ },[])
   const previews = files.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
     return (
@@ -53,6 +70,7 @@ const VehicleTypeAddModal = ({
       title: { en: "", am: "" },
       starting_price: "",
       price_per_kilometer: "",
+      type:""
     },
   });
 
@@ -87,6 +105,7 @@ const VehicleTypeAddModal = ({
       addVehicleType({
         variables: {
           title: form.getInputProps("title").value,
+          type: form.getInputProps("type").value,
           starting_price: parseFloat(form.values.starting_price),
           price_per_kilometer: parseFloat(form.values.price_per_kilometer),
         },
@@ -112,6 +131,9 @@ const VehicleTypeAddModal = ({
   };
 
   const { height } = useViewportSize();
+  const setTypeDropDownValue = (val) => {
+    form.setFieldValue("type", val);
+  };
 
   return (
     <Tabs color="blue" value={activeTab} onTabChange={setActiveTab}>
@@ -145,6 +167,13 @@ const VehicleTypeAddModal = ({
                         placeholder={tab.placeHolder}
                         {...form.getInputProps("title." + tab.shortHand)}
                       />
+                        <Select
+                  data={typeDropDownData}
+                  value={form.getInputProps("type")?.value.toString()}
+                  onChange={setTypeDropDownValue}
+                  label="Type"
+                  placeholder="Pick a Type this Vehicle Type belongs to"
+                />
                     </Grid.Col>
                     <Grid.Col span={4}>
                       <TextInput

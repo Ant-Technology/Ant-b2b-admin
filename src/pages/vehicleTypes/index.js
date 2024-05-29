@@ -165,6 +165,15 @@ const VehicleTypes = () => {
       },
     },
     {
+      label: "Type",
+      key: "type",
+      sortable: false,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.type}</span>;
+      },
+    },
+    {
       label: "Date Created",
       key: "created_at",
       sortable: true,

@@ -102,11 +102,11 @@ export const GET_CATEGORY = gql`
           name
           description
           imageUrl
-          images{
-              id
-              original_url
+          images {
+            id
+            original_url
           }
-      }
+        }
       }
     }
   }
@@ -120,10 +120,10 @@ export const GET_WARE_HOUSES = gql`
         id
         name
         specific_area
-        region{
+        region {
           id
           name
-      }
+        }
         stocks {
           id
           quantity
@@ -149,9 +149,9 @@ export const GET_WARE_HOUSE = gql`
       id
       name
       specific_area
-      region{
-          id
-          name
+      region {
+        id
+        name
       }
       _geo {
         lat
@@ -814,6 +814,7 @@ export const GET_VEHICLE_TYPES = gql`
         id
         title
         image
+        type
         vehicleCount
         created_at
       }
@@ -835,6 +836,9 @@ export const GET_VEHICLE_TYPE = gql`
     vehicleType(id: $id) {
       id
       title
+      type
+      starting_price
+      price_per_kilometer
       title_translations {
         am
         en
