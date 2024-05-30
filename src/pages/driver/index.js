@@ -19,10 +19,11 @@ import {
   Button,
   Tooltip,
   Modal,
+  Tabs,
 } from "@mantine/core";
 import { Edit, Trash } from "tabler-icons-react";
 import { FiEdit, FiEye } from "react-icons/fi";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import axios from "axios";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
@@ -36,6 +37,10 @@ import DriverDetailModal from "components/Driver/DriverDetail";
 import { DriverEditModal } from "components/Driver/DriverEditModal";
 import { DriverAddModal } from "components/Driver/DriverAddModal";
 import Controls from "components/controls/Controls";
+import { API } from "utiles/url";
+import MapView from "./mapView";
+import { Box } from "@mui/material";
+import Demo from "./activeDrivers";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -106,6 +111,7 @@ const Drivers = () => {
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState([]);
+  const [activeTab, setActiveTab] = useState("first");
 
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
@@ -113,6 +119,7 @@ const Drivers = () => {
   const [deleteID, setDeleteID] = useState(false);
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState([]);
+  const [activeDrivers, setActiveDrivers] = useState([]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
@@ -120,6 +127,7 @@ const Drivers = () => {
 
   useEffect(() => {
     fetchData(activePage);
+    fetchActiveDriver();
   }, [activePage]);
 
   const fetchData = async (page) => {
@@ -145,6 +153,22 @@ const Drivers = () => {
     }
   };
 
+  const fetchActiveDriver = async (page) => {
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(`${API}/drivers-location`, config);
+      if (response.data) {
+        setActiveDrivers(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   const handleSearchChange = (event) => {
     const { value } = event.currentTarget;
     setSearch(value);
@@ -186,10 +210,9 @@ const Drivers = () => {
   };
   const handleEditDriver = (row) => {
     setOpenedEdit(true);
-    console.log(row)
+    console.log(row);
     setEditRow(row);
   };
-  const [isHovered, setIsHovered] = useState(false);
   const handleManageDriver = (id) => {
     setEditId(id);
     setOpenedDetail(true);
@@ -244,6 +267,10 @@ const Drivers = () => {
       });
     }
   };
+  const handleTabChange = (tab) => {
+    console.log("Tab changed to:", tab); // Debugging line
+    setActiveTab(tab);
+  };
 
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
@@ -254,30 +281,29 @@ const Drivers = () => {
         <td>{row.email}</td>
         <td>{row.phone}</td>
         <td>
-        <Controls.ActionButton
-              color="primary"
-              title="Update"
-              onClick={() => handleEditDriver(row)}
-            >
-              <EditIcon style={{ fontSize: '1rem' }}/>
-            </Controls.ActionButton>
-            <span style={{ marginLeft: "1px" }}>
-              <Controls.ActionButton
-                color="primary"
-                title="View Detail"
-                onClick={() => handleManageDriver(`${row.id}`)}
-              >
-                <FiEye fontSize="medium" />
-              </Controls.ActionButton>
-            </span>
+          <Controls.ActionButton
+            color="primary"
+            title="Update"
+            onClick={() => handleEditDriver(row)}
+          >
+            <EditIcon style={{ fontSize: "1rem" }} />
+          </Controls.ActionButton>
+          <span style={{ marginLeft: "1px" }}>
             <Controls.ActionButton
               color="primary"
-              title="Delete"
-              onClick={() => handleDelete(`${row.id}`)}
+              title="View Detail"
+              onClick={() => handleManageDriver(`${row.id}`)}
             >
-              <Trash size={17} />
+              <FiEye fontSize="medium" />
             </Controls.ActionButton>
-          
+          </span>
+          <Controls.ActionButton
+            color="primary"
+            title="Delete"
+            onClick={() => handleDelete(`${row.id}`)}
+          >
+            <Trash size={17} />
+          </Controls.ActionButton>
         </td>
       </tr>
     </Fragment>
@@ -291,163 +317,195 @@ const Drivers = () => {
       loader={customLoader}
     />
   ) : (
-    <div style={{ width: "98%", margin: "auto" }}>
-      <Drawer
-        opened={openedEdit}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Editing a Driver"
-        padding="xl"
-        onClose={() => setOpenedEdit(false)}
-        position="bottom"
-        size="80%"
-      >
-        <DriverEditModal
-          activePage={activePage}
-          fetchData={fetchData}
-          editRow={editRow}
-          setOpenedEdit={setOpenedEdit}
-          editId={editId}
-        />
-      </Drawer>
-      <Drawer
-        opened={opened}
-        onClose={() => setOpened(false)}
-        title="Adding a Driver"
-        padding="xl"
-        size="80%"
-        position="bottom"
-      >
-        <DriverAddModal
-          total={total}
-          setTotal={setTotal}
-          activePage={activePage}
-          setActivePage={setActivePage}
-          setOpened={setOpened}
-          fetchData={fetchData}
-        />
-      </Drawer>
-      <Drawer
-        opened={openedDetail}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Driver Detail"
-        padding="xl"
-        onClose={() => setOpenedDetail(false)}
-        position="bottom"
-        size="80%"
-      >
-        <DriverDetailModal
-          total={total}
-          setTotal={setTotal}
-          activePage={activePage}
-          setActivePage={setActivePage}
-          setOpenedDetail={setOpenedDetail}
-          Id={editId}
-        />
-      </Drawer>
-      <Card shadow="sm" p="lg">
-        <ScrollArea>
-          <SimpleGrid cols={3}>
-            <div>
-              <Button
-                onClick={() => setOpened(true)}
-                variant="blue"
-                style={{ backgroundColor: "#FF6A00", color: "#FFFFFF" }}
-                leftIcon={<Plus size={14} />}
-              >
-                Add Driver
-              </Button>
-            </div>
-            <div></div>
-            <div>
-              <TextInput
-                placeholder="Search by any field"
-                mb="md"
-                icon={<Search size={14} />}
-                value={search}
-                onChange={handleSearchChange}
-              />
-            </div>
-          </SimpleGrid>
-          <Table
-            highlightOnHover
-            horizontalSpacing="md"
-            verticalSpacing="xs"
-            sx={{ tableLayout: "fixed", minWidth: 700 }}
-          >
-            <thead>
-              <tr style={{ backgroundColor: "#F1F1F1" }}>
-                <Th sortable={false} onSort={() => handleSort("id")}>
-                  <span className={classes.thh}>ID</span>
-                </Th>
-                <Th sortable={false} onSort={() => handleSort("name")}>
-                  <span className={classes.thh}> Name </span>
-                </Th>
-                <Th sortable onSort={() => handleSort("email")}>
-                  <span className={classes.thh}> Email</span>
-                </Th>
-                <Th sortable onSort={() => handleSort("phone")}>
-                  <span className={classes.thh}> Phone</span>
-                </Th>
-                <Th sortable={false}>
-                  {" "}
-                  <span className={classes.thh}>Actions</span>
-                </Th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows?.length > 0 ? (
-                rows
-              ) : (
-                <tr>
-                  <td colSpan={8}>
-                    <Text weight={500} align="center">
-                      Nothing found
-                    </Text>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
-                />
-              </Container>
-            </div>
-          </Center>
-        </ScrollArea>
-        <Modal
-          opened={openedDelete}
-          onClose={() => setOpenedDelete(false)}
-          title="Warning"
-          centered
+    <Tabs value={activeTab} onTabChange={handleTabChange}>
+      <Tabs.List>
+        <Tabs.Tab value="first">All Drivers</Tabs.Tab>
+        <Tabs.Tab value="second">All Active Drivers</Tabs.Tab>
+      </Tabs.List>
+
+      <Tabs.Panel value="second">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-start",
+            p: 1,
+            m: 1,
+            bgcolor: "background.paper",
+            borderRadius: 1,
+          }}
         >
-          <p>Are you sure do you want to delete this Driver?</p>
-          <Group position="right">
-            <Button onClick={() => deleteDriver()} color="red">
-              Delete
-            </Button>
-          </Group>
-        </Modal>
-      </Card>
-    </div>
+          <div style={{ width: "60%" }}>
+            <Card shadow="sm" p="lg">
+              <MapView activeDrivers={activeDrivers} />
+            </Card>
+          </div>
+          <div style={{ width: "40%" }}>
+            <Card shadow="sm" p="lg">
+              <Demo activeDrivers={activeDrivers} />
+            </Card>
+          </div>
+        </Box>
+      </Tabs.Panel>
+      <Tabs.Panel value="first">
+        <div style={{ width: "98%", margin: "auto" }}>
+          <Drawer
+            opened={openedEdit}
+            overlayColor={
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[9]
+                : theme.colors.gray[2]
+            }
+            overlayOpacity={0.55}
+            overlayBlur={3}
+            title="Editing a Driver"
+            padding="xl"
+            onClose={() => setOpenedEdit(false)}
+            position="bottom"
+            size="80%"
+          >
+            <DriverEditModal
+              activePage={activePage}
+              fetchData={fetchData}
+              editRow={editRow}
+              setOpenedEdit={setOpenedEdit}
+              editId={editId}
+            />
+          </Drawer>
+          <Drawer
+            opened={opened}
+            onClose={() => setOpened(false)}
+            title="Adding a Driver"
+            padding="xl"
+            size="80%"
+            position="bottom"
+          >
+            <DriverAddModal
+              total={total}
+              setTotal={setTotal}
+              activePage={activePage}
+              setActivePage={setActivePage}
+              setOpened={setOpened}
+              fetchData={fetchData}
+            />
+          </Drawer>
+          <Drawer
+            opened={openedDetail}
+            overlayColor={
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[9]
+                : theme.colors.gray[2]
+            }
+            overlayOpacity={0.55}
+            overlayBlur={3}
+            title="Driver Detail"
+            padding="xl"
+            onClose={() => setOpenedDetail(false)}
+            position="bottom"
+            size="80%"
+          >
+            <DriverDetailModal
+              total={total}
+              setTotal={setTotal}
+              activePage={activePage}
+              setActivePage={setActivePage}
+              setOpenedDetail={setOpenedDetail}
+              Id={editId}
+            />
+          </Drawer>
+          <Card shadow="sm" p="lg">
+            <ScrollArea>
+              <SimpleGrid cols={3}>
+                <div>
+                  <Button
+                    onClick={() => setOpened(true)}
+                    variant="blue"
+                    style={{ backgroundColor: "#FF6A00", color: "#FFFFFF" }}
+                    leftIcon={<Plus size={14} />}
+                  >
+                    Add Driver
+                  </Button>
+                </div>
+                <div></div>
+                <div>
+                  <TextInput
+                    placeholder="Search by any field"
+                    mb="md"
+                    icon={<Search size={14} />}
+                    value={search}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+              </SimpleGrid>
+              <Table
+                highlightOnHover
+                horizontalSpacing="md"
+                verticalSpacing="xs"
+                sx={{ tableLayout: "fixed", minWidth: 700 }}
+              >
+                <thead>
+                  <tr style={{ backgroundColor: "#F1F1F1" }}>
+                    <Th sortable={false} onSort={() => handleSort("id")}>
+                      <span className={classes.thh}>ID</span>
+                    </Th>
+                    <Th sortable={false} onSort={() => handleSort("name")}>
+                      <span className={classes.thh}> Name </span>
+                    </Th>
+                    <Th sortable onSort={() => handleSort("email")}>
+                      <span className={classes.thh}> Email</span>
+                    </Th>
+                    <Th sortable onSort={() => handleSort("phone")}>
+                      <span className={classes.thh}> Phone</span>
+                    </Th>
+                    <Th sortable={false}>
+                      {" "}
+                      <span className={classes.thh}>Actions</span>
+                    </Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows?.length > 0 ? (
+                    rows
+                  ) : (
+                    <tr>
+                      <td colSpan={8}>
+                        <Text weight={500} align="center">
+                          Nothing found
+                        </Text>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+              <Center>
+                <div style={{ paddingTop: "12px" }}>
+                  <Container>
+                    <Pagination
+                      color="blue"
+                      page={activePage}
+                      onChange={handleChange}
+                      total={totalPages}
+                    />
+                  </Container>
+                </div>
+              </Center>
+            </ScrollArea>
+            <Modal
+              opened={openedDelete}
+              onClose={() => setOpenedDelete(false)}
+              title="Warning"
+              centered
+            >
+              <p>Are you sure do you want to delete this Driver?</p>
+              <Group position="right">
+                <Button onClick={() => deleteDriver()} color="red">
+                  Delete
+                </Button>
+              </Group>
+            </Modal>
+          </Card>
+        </div>
+      </Tabs.Panel>
+    </Tabs>
   );
 };
 
