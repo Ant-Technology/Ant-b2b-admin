@@ -27,14 +27,13 @@ export default function Demo({activeDrivers}) {
   return (
     <Table>
       <thead>
-        <tr>
+        <tr style={{ backgroundColor: "#F1F1F1" }}>
           <th>Name</th>
           <th>Email</th>
           <th>Phone</th>
         </tr>
       </thead>
       <tbody>{rows}</tbody>
-      <caption>Scroll page to see sticky thead</caption>
     </Table>
   );
 }

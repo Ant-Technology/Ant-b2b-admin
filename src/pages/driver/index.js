@@ -317,10 +317,10 @@ const Drivers = () => {
       loader={customLoader}
     />
   ) : (
-    <Tabs value={activeTab} onTabChange={handleTabChange}>
+    <Tabs color = "#FF6A00" value={activeTab} onTabChange={handleTabChange}>
       <Tabs.List>
-        <Tabs.Tab value="first">All Drivers</Tabs.Tab>
-        <Tabs.Tab value="second">All Active Drivers</Tabs.Tab>
+        <Tabs.Tab value="first"><span style={{color:"rgb(20, 61, 89)",fontWeight:"bold"}}>All Drivers</span></Tabs.Tab>
+        <Tabs.Tab value="second"><span style={{color:"rgb(20, 61, 89)",fontWeight:"bold"}}>All Active Drivers</span></Tabs.Tab>
       </Tabs.List>
 
       <Tabs.Panel value="second">
