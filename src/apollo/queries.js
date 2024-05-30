@@ -686,6 +686,13 @@ export const GET_SHIPMENTS = gql`
                   product_sku {
                     id
                     sku
+                    product {
+                      name
+                      images {
+                        id
+                        original_url
+                    }
+                  }
                   }
                 }
               }

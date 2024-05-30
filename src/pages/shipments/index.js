@@ -229,6 +229,7 @@ const Shipments = () => {
     });
   };
   const prepareContent = (row) => {
+    console.log(row)
     return (
       <tr>
         <td colSpan={headerData.length}>
