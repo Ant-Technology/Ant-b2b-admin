@@ -41,6 +41,7 @@ import { API } from "utiles/url";
 import MapView from "./mapView";
 import { Box } from "@mui/material";
 import Demo from "./activeDrivers";
+import Pusher from "pusher-js";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -128,7 +129,7 @@ const Drivers = () => {
   useEffect(() => {
     fetchData(activePage);
     fetchActiveDriver();
-  }, [activePage]);
+  }, []);
 
   const fetchData = async (page) => {
     try {
@@ -153,7 +154,11 @@ const Drivers = () => {
     }
   };
 
-  const fetchActiveDriver = async (page) => {
+  const fetchActiveDriver = async () => {
+    const pusher = new Pusher("83f49852817c6b52294f", {
+      cluster: "mt1",
+    });
+    const notificationChannel = pusher.subscribe("driver-location")
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -161,9 +166,12 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/drivers-location`, config);
+      const response = await axios.get(`${API}/location`, config);
       if (response.data) {
-        setActiveDrivers(response.data);
+        console.log("api")
+      notificationChannel.bind("driver-location", function (data) {
+       setActiveDrivers(data.data)
+      });
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -271,7 +279,15 @@ const Drivers = () => {
     console.log("Tab changed to:", tab); // Debugging line
     setActiveTab(tab);
   };
+  useEffect(() => {
+    const pusher = new Pusher("83f49852817c6b52294f", {
+      cluster: "mt1",
+    });
+    const channel = pusher.subscribe("nav-counter");
+    const notificationChannel = pusher.subscribe("notification");
 
+    
+  }, [activePage]);
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
