@@ -158,7 +158,8 @@ const Drivers = () => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
     });
-    const notificationChannel = pusher.subscribe("driver-location")
+    const notificationChannel = pusher.subscribe("driver-location");
+
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -168,10 +169,10 @@ const Drivers = () => {
       };
       const response = await axios.get(`${API}/location`, config);
       if (response.data) {
-        console.log("api")
-      notificationChannel.bind("driver-location", function (data) {
-       setActiveDrivers(data.data)
-      });
+        notificationChannel.bind("driver-location", function (data) {
+          console.log("api");
+          setActiveDrivers(data.data);
+        });
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -276,18 +277,15 @@ const Drivers = () => {
     }
   };
   const handleTabChange = (tab) => {
-    console.log("Tab changed to:", tab); // Debugging line
-    setActiveTab(tab);
-  };
-  useEffect(() => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
     });
-    const channel = pusher.subscribe("nav-counter");
-    const notificationChannel = pusher.subscribe("notification");
-
-    
-  }, [activePage]);
+    setActiveTab(tab);
+    const notificationChannel = pusher.subscribe("driver-location");
+    notificationChannel.bind("driver-location", function (data) {
+      setActiveDrivers(data.data);
+    });
+  }
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
@@ -333,10 +331,18 @@ const Drivers = () => {
       loader={customLoader}
     />
   ) : (
-    <Tabs color = "#FF6A00" value={activeTab} onTabChange={handleTabChange}>
+    <Tabs color="#FF6A00" value={activeTab} onTabChange={handleTabChange}>
       <Tabs.List>
-        <Tabs.Tab value="first"><span style={{color:"rgb(20, 61, 89)",fontWeight:"bold"}}>All Drivers</span></Tabs.Tab>
-        <Tabs.Tab value="second"><span style={{color:"rgb(20, 61, 89)",fontWeight:"bold"}}>All Active Drivers</span></Tabs.Tab>
+        <Tabs.Tab value="first">
+          <span style={{ color: "rgb(20, 61, 89)", fontWeight: "bold" }}>
+            All Drivers
+          </span>
+        </Tabs.Tab>
+        <Tabs.Tab value="second">
+          <span style={{ color: "rgb(20, 61, 89)", fontWeight: "bold" }}>
+            All Active Drivers
+          </span>
+        </Tabs.Tab>
       </Tabs.List>
 
       <Tabs.Panel value="second">
