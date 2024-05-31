@@ -39,7 +39,7 @@ const distributerIcon = {
 };
 
 const retailerIcon = {
-  url: "https://img.icons8.com/external-filled-outline-wichaiwi/40/000000/external-Retailer-business-filled-outline-wichaiwi.png"
+  url: "https://img.icons8.com/?size=100&id=WSJxjrdAqTwz&format=png&color=000000"
 };
 
 const warehouseIcon = {
