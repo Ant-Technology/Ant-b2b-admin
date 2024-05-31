@@ -57,7 +57,7 @@ const MapView = ({activeDrivers}) => {
   });
 
   useEffect(() => {
-    setDrivers(activeDrivers.filter(driver => 
+    setDrivers(activeDrivers?.filter(driver => 
       driver._geo && 
       driver._geo.lat >= -90 && driver._geo.lat <= 90 && 
       driver._geo.lng >= -180 && driver._geo.lng <= 180
