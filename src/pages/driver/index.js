@@ -331,22 +331,35 @@ const Drivers = () => {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "flex-start",
+            alignItems: "flex-start",
+            flexDirection: "column",
             p: 1,
             m: 1,
             bgcolor: "background.paper",
             borderRadius: 1,
           }}
         >
-          <div style={{ width: "60%" }}>
+          <div style={{ width: "96%" }}>
             {activeDrivers.length > 0}
             <Card shadow="sm" p="lg">
               <MapView activeDrivers={activeDrivers} />
             </Card>
           </div>
-          <div style={{ width: "40%" }}>
+          <div style={{ marginTop: "10px" }}>
             <Card shadow="sm" p="lg">
-              <Demo activeDrivers={activeDrivers} />
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  p: 1,
+                  m: 1,
+                  bgcolor: "background.paper",
+                  borderRadius: 1,
+                  alignItems: "center", // Align items center to vertically center the content
+                }}
+              >
+                <Demo activeDrivers={activeDrivers} />
+              </Box>
             </Card>
           </div>
         </Box>
