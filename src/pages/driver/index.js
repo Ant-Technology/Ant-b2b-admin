@@ -169,6 +169,7 @@ const Drivers = () => {
       };
       const response = await axios.get(`${API}/location`, config);
       if (response.data) {
+         console.log("api");
         notificationChannel.bind("driver-location", function (data) {
           console.log("api");
           setActiveDrivers(data.data);
