@@ -331,7 +331,7 @@ const Drivers = () => {
         <Box
           sx={{
             display: "flex",
-            alignItems: "flex-start",
+            alignItems: "center",
             flexDirection: "column",
             p: 1,
             m: 1,
@@ -347,19 +347,7 @@ const Drivers = () => {
           </div>
           <div style={{ marginTop: "10px" }}>
             <Card shadow="sm" p="lg">
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  p: 1,
-                  m: 1,
-                  bgcolor: "background.paper",
-                  borderRadius: 1,
-                  alignItems: "center", // Align items center to vertically center the content
-                }}
-              >
-                <Demo activeDrivers={activeDrivers} />
-              </Box>
+              <Demo activeDrivers={activeDrivers} />
             </Card>
           </div>
         </Box>

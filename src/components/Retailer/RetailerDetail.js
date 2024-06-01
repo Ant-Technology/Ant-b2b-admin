@@ -27,6 +27,7 @@ import {
 } from "apollo/queries";
 import { SHIP_ITEM } from "apollo/mutuations";
 import { useViewportSize } from "@mantine/hooks";
+import { Box } from "@mui/material";
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -81,7 +82,17 @@ function RetailerDetailModal({ Id }) {
           overlayBlur={2}
           loader={customLoader}
         />
-
+  <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+            p: 1,
+            m: 1,
+            bgcolor: "background.paper",
+            borderRadius: 1,
+          }}
+        >
         <Card style={{ width: "40%" }} shadow="sm" radius="md" withBorder>
           <div style={{ paddingLeft: "20px" }}>
             <Group align="flex-end" spacing="xs" mt={25}>
@@ -134,6 +145,7 @@ function RetailerDetailModal({ Id }) {
             </Group>
           </div>
         </Card>
+        </Box>
         <Card style={{ marginTop: "30px" }} shadow="sm" p="lg">
           <ScrollArea>
             <div style={{ display: "flex" }}>
