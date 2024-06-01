@@ -358,9 +358,11 @@ const Drivers = () => {
           }}
         >
           <div style={{ width: "60%" }}>
+            {activeDrivers.length >0 &&
             <Card shadow="sm" p="lg">
               <MapView activeDrivers={activeDrivers} />
             </Card>
+}
           </div>
           <div style={{ width: "40%" }}>
             <Card shadow="sm" p="lg">
