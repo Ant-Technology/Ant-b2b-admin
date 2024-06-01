@@ -57,13 +57,12 @@ const MapView = ({activeDrivers}) => {
   });
 
   useEffect(() => {
-    setDrivers(activeDrivers?.filter(driver => 
-      driver._geo && 
-      driver._geo.lat >= -90 && driver._geo.lat <= 90 && 
-      driver._geo.lng >= -180 && driver._geo.lng <= 180
-    ));
+    if (activeDrivers) {
+      const validDrivers = activeDrivers.filter(driver => driver._geo !== null);
+      setDrivers(validDrivers);
+    }
   }, [activeDrivers]);
-
+console.log(drivers)
   const { data, loading } = useQuery(GET_ALL_GEO_LOCATIONS, {
     fetchPolicy: "no-cache",
   });
