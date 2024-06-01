@@ -159,7 +159,6 @@ const Drivers = () => {
 
     fetchActiveDriver();
 
-
   }, []);
 
 
@@ -185,6 +184,7 @@ const Drivers = () => {
       console.error("Error fetching data:", error);
     }
   };
+
   const handleSearchChange = (event) => {
     const { value } = event.currentTarget;
     setSearch(value);
