@@ -79,7 +79,7 @@ const MapView = ({activeDrivers}) => {
   const mapLoadHandler = (map) => {
     const bounds = new window.google.maps.LatLngBounds();
     let geo = [];
-    drivers.forEach((_geo) => geo.push(_geo));    
+    drivers?.forEach((_geo) => geo.push(_geo));    
     geo.forEach(({ _geo }) => bounds.extend(_geo));
     map.fitBounds(bounds);
   };
@@ -115,7 +115,7 @@ const MapView = ({activeDrivers}) => {
     );
   };
 
-  return isLoaded && drivers.length !== 0 ? renderMap() : <Loader />;
+  return isLoaded && drivers?.length !== 0 ? renderMap() : <Loader />;
 }
 
 export default MapView;

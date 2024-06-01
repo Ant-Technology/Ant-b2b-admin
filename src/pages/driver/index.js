@@ -128,8 +128,39 @@ const Drivers = () => {
 
   useEffect(() => {
     fetchData(activePage);
-    fetchActiveDriver();
   }, []);
+  useEffect(() => {
+    const fetchActiveDriver = async () => {
+      const pusher = new Pusher("83f49852817c6b52294f", {
+        cluster: "mt1",
+      });
+      const notificationChannel = pusher.subscribe("driver-location");
+
+      try {
+        let token = localStorage.getItem("auth_token");
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        const response = await axios.get(`${API}/location`, config);
+        if (response.data) {
+          // Initialize Pusher only after the initial data is fetched
+        
+          notificationChannel.bind("driver-location", function (data) {
+            console.log("Pusher event received:", data);
+            setActiveDrivers(data.data)
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchActiveDriver();
+
+  }, []);
+
 
   const fetchData = async (page) => {
     try {
@@ -154,34 +185,6 @@ const Drivers = () => {
     }
   };
 
-  const fetchActiveDriver = async () => {
-    const pusher = new Pusher("83f49852817c6b52294f", {
-      cluster: "mt1",
-    });
-    const notificationChannel = pusher.subscribe("driver-location");
-    notificationChannel.bind("driver-location", function (data) {
-          console.log("api");
-          setActiveDrivers(data.data);
-        });
-    try {
-      let token = localStorage.getItem("auth_token");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      const response = await axios.get(`${API}/location`, config);
-      if (response.data) {
-         console.log("api");
-        notificationChannel.bind("driver-location", function (data) {
-          console.log("api");
-          setActiveDrivers(data.data);
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
   const handleSearchChange = (event) => {
     const { value } = event.currentTarget;
     setSearch(value);
@@ -281,14 +284,8 @@ const Drivers = () => {
     }
   };
   const handleTabChange = (tab) => {
-    const pusher = new Pusher("83f49852817c6b52294f", {
-      cluster: "mt1",
-    });
     setActiveTab(tab);
-    const notificationChannel = pusher.subscribe("driver-location");
-    notificationChannel.bind("driver-location", function (data) {
-      setActiveDrivers(data.data);
-    });
+   
   }
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
