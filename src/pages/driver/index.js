@@ -159,7 +159,10 @@ const Drivers = () => {
       cluster: "mt1",
     });
     const notificationChannel = pusher.subscribe("driver-location");
-
+    notificationChannel.bind("driver-location", function (data) {
+          console.log("api");
+          setActiveDrivers(data.data);
+        });
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
