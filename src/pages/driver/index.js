@@ -21,7 +21,7 @@ import {
   Modal,
   Tabs,
 } from "@mantine/core";
-import { Edit, Trash } from "tabler-icons-react";
+import { Api, Edit, Trash } from "tabler-icons-react";
 import { FiEdit, FiEye } from "react-icons/fi";
 import EditIcon from "@mui/icons-material/Edit";
 import axios from "axios";
@@ -130,37 +130,15 @@ const Drivers = () => {
     fetchData(activePage);
   }, []);
   useEffect(() => {
-    const fetchActiveDriver = async () => {
-      const pusher = new Pusher("83f49852817c6b52294f", {
-        cluster: "mt1",
-      });
-      const notificationChannel = pusher.subscribe("driver-location");
-
-      try {
-        let token = localStorage.getItem("auth_token");
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-        const response = await axios.get(`${API}/location`, config);
-        if (response.data) {
-          // Initialize Pusher only after the initial data is fetched
-        
-          notificationChannel.bind("driver-location", function (data) {
-            console.log("Pusher event received:", data);
-            setActiveDrivers(data.data)
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchActiveDriver();
-
+    const pusher = new Pusher("83f49852817c6b52294f", {
+      cluster: "mt1",
+    });
+    const notificationChannel = pusher.subscribe("driver-location");
+    notificationChannel.bind("driver-location", function (data) {
+      console.log("Pusher event received:", data);
+      setActiveDrivers(data.data);
+    });
   }, []);
-
 
   const fetchData = async (page) => {
     try {
@@ -170,10 +148,7 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(
-        `http://157.230.102.54:8081/api/drivers?page=${page}`,
-        config
-      );
+      const response = await axios.get(`${API}/drivers?page=${page}`, config);
       if (response.data) {
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
@@ -258,10 +233,7 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.delete(
-        `http://157.230.102.54:8081/api/drivers/${deleteID}`,
-        config
-      );
+      const response = await axios.delete(`${Api}/drivers/${deleteID}`, config);
       if (response.data) {
         fetchData(activePage);
         setOpenedDelete(false);
@@ -283,10 +255,19 @@ const Drivers = () => {
       });
     }
   };
-  const handleTabChange = (tab) => {
+  const handleTabChange = async (tab) => {
+    console.log(tab);
     setActiveTab(tab);
-   
-  }
+    if (tab === "second") {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      await axios.get(`${API}/location`, config);
+    }
+  };
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
@@ -358,11 +339,10 @@ const Drivers = () => {
           }}
         >
           <div style={{ width: "60%" }}>
-            {activeDrivers.length >0 &&
+            {activeDrivers.length > 0}
             <Card shadow="sm" p="lg">
               <MapView activeDrivers={activeDrivers} />
             </Card>
-}
           </div>
           <div style={{ width: "40%" }}>
             <Card shadow="sm" p="lg">
