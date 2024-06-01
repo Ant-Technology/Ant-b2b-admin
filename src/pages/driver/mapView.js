@@ -49,7 +49,7 @@ const warehouseIcon = {
 const GOOGLE_API_KEY = "AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk";
 
 const MapView = ({activeDrivers}) => {
-  const [center, setCenter] = useState({ lat: 0, lng: 0 });
+  const [center, setCenter] = useState({ lat: 90857.03, lng: 402955.92 });
   const [activeMarker, setActiveMarker] = useState(null);
   const [drivers, setDrivers] = useState([]);
   const { isLoaded } = useLoadScript({
@@ -62,7 +62,7 @@ const MapView = ({activeDrivers}) => {
       setDrivers(validDrivers);
     }
   }, [activeDrivers]);
-console.log(drivers)
+console.log("drivers",drivers)
   const { data, loading } = useQuery(GET_ALL_GEO_LOCATIONS, {
     fetchPolicy: "no-cache",
   });
@@ -80,6 +80,7 @@ console.log(drivers)
     let geo = [];
     drivers?.forEach((_geo) => geo.push(_geo));    
     geo.forEach(({ _geo }) => bounds.extend(_geo));
+    console.log(geo)
     map.fitBounds(bounds);
   };
 

@@ -747,6 +747,12 @@ export const GET_ALL_GEO_LOCATIONS = gql`
     retailersNonPaginated {
       id
       name
+      address
+      region
+      {
+          id
+          name
+      }
       _geo {
         lat
         lng
@@ -756,6 +762,12 @@ export const GET_ALL_GEO_LOCATIONS = gql`
     distributorsNonPaginated {
       id
       name
+      address
+      region
+      {
+          id
+          name
+      }
       _geo {
         lat
         lng
@@ -765,6 +777,11 @@ export const GET_ALL_GEO_LOCATIONS = gql`
     warehousesNonPaginated {
       id
       name
+      region
+      {
+          id
+          name
+      }
       _geo {
         lat
         lng

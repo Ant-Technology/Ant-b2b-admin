@@ -31,7 +31,7 @@ const Loader = () => (
     background: `white`,
     border: `1px solid #E03131`,
     color: `#E03131`,
-    padding: 15
+    padding: '0 15px 0 15px'
   }
   
   const distributerIcon = {
@@ -48,7 +48,7 @@ const Loader = () => (
   
   const GOOGLE_API_KEY = "AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk";
 
-const MapView = () => {
+const MapView = ({value}) => {
   const [center, setCenter] = useState({ lat: 90857.03, lng: 402955.92 });
   const [activeMarker, setActiveMarker] = useState(null);
 
@@ -71,11 +71,15 @@ const MapView = () => {
   const mapLoadHandler = (map) => {
     const bounds = new window.google.maps.LatLngBounds();
     let geo = [];
-
-    data.distributorsNonPaginated.forEach((_geo) => geo.push(_geo));
-    data.warehousesNonPaginated.forEach((_geo) => geo.push(_geo));
-    data.distributorsNonPaginated.forEach((_geo) => geo.push(_geo));
-
+    if (value === 'Retailer' || value === null) {
+      data.retailersNonPaginated.forEach((_geo) => geo.push(_geo));
+    }
+    if (value === 'Distributor' || value === null) {
+      data.distributorsNonPaginated.forEach((_geo) => geo.push(_geo));
+    }
+    if (value === 'Warehouse' || value === null) {
+      data.warehousesNonPaginated.forEach((_geo) => geo.push(_geo));
+    }
     geo.forEach(({ _geo }) => bounds.extend(_geo));
     map.fitBounds(bounds);
   };
@@ -90,7 +94,7 @@ const MapView = () => {
         onLoad={mapLoadHandler}
       >
 
-        {data.retailersNonPaginated.map(({ id, _geo, name }) => (
+        {(value === 'Retailer' || value === null) && data.retailersNonPaginated.map(({ id, _geo, name, region, address}) => (
           <MarkerF
             key={name}
             position={_geo}
@@ -102,14 +106,17 @@ const MapView = () => {
                 position={_geo}
               >
                 <div style={divStyle}>
-                  <p>{name}</p>
+                <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Name</span>{name}</p>     
+                  <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Region</span>{region.name}</p>
+                  <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Address</span>{address}</p>
+                  <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Type</span>Retailer</p>
                 </div>
               </InfoWindow>
             ) : null}
           </MarkerF>
         ))}
 
-        {data.distributorsNonPaginated.map(({ id, _geo, name }) => (
+        {(value === 'Distributor' || value === null) && data.distributorsNonPaginated.map(({ id, _geo, name, region, address }) => (
           <MarkerF
             key={name}
             position={_geo}
@@ -121,14 +128,17 @@ const MapView = () => {
                 position={_geo}
               >
                 <div style={divStyle}>
-                  <p>{name}</p>
-                </div>
-              </InfoWindow>
+                <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Name</span>{name}</p>     
+                  <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Region</span>{region.name}</p>
+                  <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Address</span>{address}</p>
+                  <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Type</span>Distributor</p>   
+                  </div>
+                             </InfoWindow>
             ) : null}
           </MarkerF>
         ))}
 
-        {data.warehousesNonPaginated.map(({ id, _geo, name }) => (
+        {(value === 'Warehouse' || value === null) && data.warehousesNonPaginated.map(({ id, _geo, name,region }) => (
           <MarkerF
             key={name}
             position={_geo}
@@ -140,8 +150,9 @@ const MapView = () => {
                 position={_geo}
               >
                 <div style={divStyle}>
-                  <p>{name}</p>
-                </div>
+                <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Name</span>{name}</p>     
+                  <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Region</span>{region.name}</p>
+                  <p><span style={{marginRight:"10px",color: "rgb(20, 61, 89)"}}>Type</span>Warehouse</p>                   </div>
               </InfoWindow>
             ) : null}
           </MarkerF>
