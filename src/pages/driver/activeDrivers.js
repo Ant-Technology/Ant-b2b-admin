@@ -31,7 +31,7 @@ export default function Demo({ activeDrivers }) {
       <td>{element.phone}</td>
     </tr>
   ));
-
+console.log(drivers)
   return (
   
     <Table style={{ width: "100%", minWidth: "600px" }}>

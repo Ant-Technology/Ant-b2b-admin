@@ -17,6 +17,8 @@ import {
   Text,
 } from "@mantine/core";
 import EditIcon from "@mui/icons-material/Edit";
+import { FiEdit, FiEye } from "react-icons/fi";
+
 import B2bTable from "components/reusable/b2bTable";
 import { Edit, Trash, DotsCircleHorizontal } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
@@ -28,6 +30,8 @@ import { IconMinus, IconPhone, IconPlus } from "@tabler/icons";
 import ShipmentCard from "./card";
 import Controls from "components/controls/Controls";
 import UpdateIcon from '@mui/icons-material/Update';
+import SalesDetailModal from "components/Sales/SalesDetailModal";
+import ShipmentDetail from "components/Shipment/ShipmentDetail";
 const Shipments = () => {
   const [size] = useState(10);
   const [opened, setOpened] = useState(false);
@@ -35,7 +39,12 @@ const Shipments = () => {
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
-
+  const [openedDetail, setOpenedDetail] = useState(false);
+  const[rowData,setRowData] = useState(null)
+  const handleShipmentDetail = (row) => {    
+    setRowData(row)
+    setOpenedDetail(true);
+  };
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
@@ -64,47 +73,6 @@ const Shipments = () => {
   };
 
   const headerData = [
-    {
-      label: "",
-      key: "",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return (
-          <span
-            style={{
-              cursor: "pointer",
-              background: "#228be6",
-              color: "white",
-              padding: "3px",
-              borderRadius: "50%",
-              textAlign: "center",
-              verticalAlign: "middle",
-            }}
-          >
-            {rowData.id !== selectedCollapse ? (
-              <IconPlus
-                size={16}
-                onClick={() => {
-                  setChecked(true);
-                  setSelectedCollapse(rowData.id);
-                  // prepareContent(rowData.id);
-                }}
-              />
-            ) : (
-              <IconMinus
-                size={16}
-                onClick={() => {
-                  setChecked(false);
-                  setSelectedCollapse("");
-                }}
-              />
-            )}
-          </span>
-        );
-      },
-    },
-  
     {
       label: "Departure Time",
       key: "departure_time",
@@ -178,7 +146,7 @@ const Shipments = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <div style={{display:"flex",width:"100%"}}>
+          <div style={{display:"flex",width:"155px"}}>
             <Controls.ActionButton
               color="primary"
               title="Update"
@@ -201,6 +169,16 @@ const Shipments = () => {
             >
               <UpdateIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>}
+            <span style={{ marginLeft: "1px" }}>
+            <Controls.ActionButton
+              color="primary"
+              title="View Detail"
+              onClick={() => handleShipmentDetail(rowData)}
+
+            >
+              <FiEye fontSize="medium" />
+            </Controls.ActionButton>
+          </span>
           </div>
         );
       },
@@ -409,6 +387,24 @@ const Shipments = () => {
           setActivePage={setActivePage}
           setOpened={setOpened}
         />
+      </Drawer>
+      
+      <Drawer
+        opened={openedDetail}
+        overlayColor={
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2]
+        }
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        title="Shipment Detail"
+        padding="xl"
+        onClose={() => setOpenedDetail(false)}
+        position="bottom"
+        size="80%"
+      >
+        <ShipmentDetail row={rowData} />
       </Drawer>
       <Drawer
         opened={openedEdit}
