@@ -11,7 +11,9 @@
       transform: scale(1);
     }
   }
-  
+  .app{
+    overflow-x:hidden 
+  }
   .pumping {
     animation: pump 1s infinite;
     color: green;

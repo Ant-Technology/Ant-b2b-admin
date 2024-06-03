@@ -494,7 +494,13 @@ export const CREATE_STOCK = gql`
     }
   }
 `;
-
+export const ACCEPT_SHIPMENT_REQUEST = gql`
+  mutation ACCEPT_SHIPMENT_REQUEST($shipment_id: ID!, $driver_id: ID!) {
+    acceptShipmentRequest(shipment_id: $shipment_id, driver_id: $driver_id) {
+      id
+    }
+  }
+`;
 export const MANAGE_STOCK = gql`
   mutation MANAGE_STOCK(
     $stock_id: ID!
