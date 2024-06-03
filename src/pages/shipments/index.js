@@ -99,6 +99,7 @@ const Shipments = () => {
       render: (rowData) => {
         return <span>{rowData.cost}</span>;
       },
+      style: { width: '100px' } // Set the desired width for the "Cost" column
     },
     {
       label: "From",
@@ -205,105 +206,7 @@ const Shipments = () => {
     markAsDelivered({
       variables: { shipment_id: shipmentId },
     });
-  };
-  const prepareContent = (row) => {
-    console.log(row)
-    return (
-      <tr>
-        <td colSpan={headerData.length}>
-          <Card shadow="sm" withBorder>
-            <Grid grow>
-              <Grid.Col span={4}>
-                <Grid grow>
-                  <Grid.Col span={4}>
-                    <ScrollArea style={{ width: 300, height: 200 }}>
-                      {row?.items?.map((data, idx) => (
-                        <div key={idx}>
-                          {data.shipment_itemable?.order?.items?.map(
-                            (data, idx) => (
-                              <Flex key={idx}>
-                                <Card
-                                  shadow="sm"
-                                  p="sm"
-                                  m="sm"
-                                  radius="md"
-                                  withBorder
-                                >
-                                  <Avatar.Group>
-                                    {data.product_sku.product?.images?.map(
-                                      (data, idx) => (
-                                        <Avatar
-                                          key={idx}
-                                          src={data.original_url}
-                                        />
-                                      )
-                                    )}
-                                  </Avatar.Group>
-                                </Card>
-                                <Card
-                                  shadow="sm"
-                                  p="sm"
-                                  m="sm"
-                                  radius="md"
-                                  withBorder
-                                >
-                                  <Text tt="capitalize">
-                                    {data?.product_sku?.product?.name},
-                                  </Text>
-                                </Card>
-                              </Flex>
-                            )
-                          )}
-                        </div>
-                      ))}
-                    </ScrollArea>
-                  </Grid.Col>
-                </Grid>
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Flex
-                  mih="100%"
-                  gap="xl"
-                  justify="center"
-                  align="center"
-                  direction="row"
-                  wrap="wrap"
-                >
-                  <Group>
-                    <Button variant="light" color="green" fullWidth radius="md">
-                      From: {row.from.name}
-                    </Button>
-
-                    <Button variant="light" color="blue" fullWidth radius="md">
-                      To: {row.to.name}
-                    </Button>
-                  </Group>
-                </Flex>
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Flex
-                  mih="100%"
-                  gap="xl"
-                  justify="center"
-                  align="center"
-                  direction="row"
-                  wrap="wrap"
-                >
-                  <Button
-                    leftIcon={<IconPhone />}
-                    color="green"
-                    variant="green"
-                  >
-                    Call Driver
-                  </Button>
-                </Flex>
-              </Grid.Col>
-            </Grid>
-          </Card>
-        </td>
-      </tr>
-    );
-  };
+  };     
 
   if (!total && data) {
     setTotal(data.shipments.paginatorInfo.lastPage);
@@ -352,7 +255,7 @@ const Shipments = () => {
       loader={customLoader}
     />
   ) : (
-    <div style={{ width: "98%", margin: "auto" }}>
+    <div style={{ width:"1240px", overflowX: 'hidden' , margin: "auto" }}>
       <Modal
         opened={openedDelete}
         onClose={() => setOpenedDelete(false)}
@@ -404,7 +307,7 @@ const Shipments = () => {
         position="bottom"
         size="80%"
       >
-        <ShipmentDetail row={rowData} />
+        <ShipmentDetail refetch ={refetch} setOpenedDetail={setOpenedDetail} row={rowData} />
       </Drawer>
       <Drawer
         opened={openedEdit}
@@ -429,7 +332,7 @@ const Shipments = () => {
       </Drawer>
       <Card shadow="sm" p="lg">
         <ShipmentCard />
-        <ScrollArea>
+        <ScrollArea style={{ overflowX: 'hidden' }}>
           <B2bTable
             total={total}
             activePage={activePage}
@@ -441,7 +344,6 @@ const Shipments = () => {
             collapsible={checked}
             selectedCollapse={selectedCollapse}
             setSelectedCollapse={setSelectedCollapse}
-            content={prepareContent}
           />
         </ScrollArea>
       </Card>
