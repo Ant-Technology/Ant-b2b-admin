@@ -38,6 +38,8 @@ const ShipmentDetail = ({refetch,setOpenedDetail, row }) => {
   const { classes } = useStyles();
   const { height } = useViewportSize();
   const [driversDropDownData, setDriversDropDownData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
+
  console.log(row)
   const form = useForm({
     initialValues: {
@@ -237,6 +239,10 @@ const ShipmentDetail = ({refetch,setOpenedDetail, row }) => {
                   onChange={setDriverDropDownValue}
                   label="Drivers"
                   placeholder="Pick a Driver to be Assign"
+                  searchable
+                  nothingFound="No drivers found"
+                  searchValue={searchValue}
+                  onSearchChange={setSearchValue}
                 />
                  <Button
                   style={{
