@@ -72,6 +72,9 @@ const useStyles = createStyles((theme) => ({
     textTransform: "uppercase",
     fontWeight: "bold",
   },
+  idColumn: {
+    width: "10%",
+  },
 }));
 
 function Th({ children, sortable, sorted, reversed, onSort }) {
@@ -272,7 +275,7 @@ const Drivers = () => {
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
-        <td>{row.id}</td>
+        <td className={classes.idColumn}>{row.id}</td>
         <td>{row.name}</td>
         <td>{row.email}</td>
         <td>{row.phone}</td>
@@ -446,11 +449,11 @@ const Drivers = () => {
                 highlightOnHover
                 horizontalSpacing="md"
                 verticalSpacing="xs"
-                sx={{ tableLayout: "fixed", minWidth: 700 }}
+                sx={{  minWidth: 700 }}
               >
                 <thead>
                   <tr style={{ backgroundColor: "#F1F1F1" }}>
-                    <Th sortable={false} onSort={() => handleSort("id")}>
+                    <Th  sortable={false} onSort={() => handleSort("id")}>
                       <span className={classes.thh}>ID</span>
                     </Th>
                     <Th sortable={false} onSort={() => handleSort("name")}>
