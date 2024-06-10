@@ -48,7 +48,7 @@ export const DriverEditModal = ({
         showNotification({
           color: "green",
           title: "Success",
-          message: "Driver Created Successfully",
+          message: "Driver Updated Successfully",
         });
         fetchData(activePage);
 
