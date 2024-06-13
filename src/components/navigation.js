@@ -1,24 +1,11 @@
-import { useEffect, useState } from "react";
-import {
-  createStyles,
-  ScrollArea,
-  Navbar,
-  Group,
-  Code,
-  Burger,
-  Avatar,
-  Tooltip,
-  Popover,
-  Badge,
-} from "@mantine/core";
+import React, { useEffect, useState } from "react";
+import { createStyles, Navbar, Tooltip, Badge, Collapse } from "@mantine/core";
 import Pusher from "pusher-js";
-import FeedbackIcon from '@mui/icons-material/Feedback';
+import FeedbackIcon from "@mui/icons-material/Feedback";
 import { useMediaQuery, useViewportSize } from "@mantine/hooks";
 import {
   IconDashboard,
   IconApps,
-  IconSwitchHorizontal,
-  IconLogout,
   IconShoppingCart,
   IconGeometry,
   IconBuildingWarehouse,
@@ -33,6 +20,8 @@ import {
   IconUser,
   IconUsers,
   IconTruckLoading,
+  IconChevronDown,
+  IconChevronUp,
 } from "@tabler/icons";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -50,7 +39,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
   return {
     bg: {
       backgroundColor:
-        theme.colorScheme === "dark" ? theme.colors.gray : '#ffffff',
+        theme.colorScheme === "dark" ? theme.colors.gray : "#ffffff",
     },
     header: {
       paddingBottom: theme.spacing.md,
@@ -79,9 +68,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
       textDecoration: "none",
       fontSize: theme.fontSizes.sm,
       color:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[1]
-          : "rgb(20, 61, 89)",
+        theme.colorScheme === "dark" ? theme.colors.dark[1] : "rgb(20, 61, 89)",
       padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
       borderRadius: theme.radius.sm,
       fontWeight: 600,
@@ -90,8 +77,8 @@ const useStyles = createStyles((theme, _params, getRef) => {
         backgroundColor:
           theme.colorScheme === "dark"
             ? theme.colors.dark[6]
-            :  theme.colors.gray[2],
-      color: theme.colorScheme === "dark" ? theme.white : "#333333",
+            : theme.colors.gray[2],
+        color: theme.colorScheme === "dark" ? theme.white : "#333333",
 
         [`& .${icon}`]: {
           color: theme.colorScheme === "dark" ? theme.white : "#333333",
@@ -102,9 +89,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
     linkIcon: {
       ref: icon,
       color:
-        theme.colorScheme === "dark"
-          ? theme.colors.dark[2]
-          : "rgb(20, 61, 89)",
+        theme.colorScheme === "dark" ? theme.colors.dark[2] : "rgb(20, 61, 89)",
       marginRight: theme.spacing.sm,
     },
 
@@ -125,7 +110,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
           color: "#FFFFFF", // Icon color
         },
       },
-    },    
+    },
   };
 });
 const data = [
@@ -155,7 +140,15 @@ const data = [
   },
   { link: "/stocks", label: "Stocks", icon: IconBuildingStore },
   { link: "/sales", label: "Sales", icon: IconUser },
-  { link: "/feedbacks", label: "Feedbacks", icon: FeedbackIcon },
+  {
+    label: "Feedback",
+    icon: FeedbackIcon,
+    initiallyOpened: false,
+    links: [
+      { link: "/feedbacks", label: "Feedbacks" },
+      { link: "/feedback-types", label: "Feedback Types" },
+    ],
+  },
 ];
 
 const NavbarSimple = ({ opened, setOpened, setPosition }) => {
@@ -179,10 +172,13 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
 
   const navigate = useNavigate();
   const [signout] = useMutation(LOGOUT);
+  const [collapseOpened, setCollapseOpened] = useState(false);
+
   useEffect(() => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
     });
+
     const channel = pusher.subscribe("nav-counter");
     const notificationChannel = pusher.subscribe("notification");
 
@@ -198,6 +194,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       setShipments(data.data.shipments);
       setDrppoffs(data.data.drop_offs);
     });
+
     notificationChannel.bind("new-item-created", function (data) {
       showNotification({
         color: data.type === "Error" ? "red" : "green",
@@ -218,134 +215,193 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       pusher.disconnect();
     };
   }, []); //notification
-  const logout = () => {
-    signout({
-      onCompleted() {
-        localStorage.removeItem("auth_token");
-        navigate("/login");
-        showNotification({
-          color: "green",
-          title: "Success",
-          message: "Logged Out!",
-        });
-      },
-
-      onError(err) {
-        showNotification({
-          color: "red",
-          title: "Error",
-          message: "something went wrong!",
-        });
-      },
-    });
-  };
 
   const links = data.map((item, index) => (
-    <>
-      {opened ? (
-        <Link
-          key={index}
-          className={cx(classes.link, {
-            [classes.linkActive]: item.label === active,
-          })}
-          to={item.link}
-          onClick={(event) => {
-            event.preventDefault();
-            setActive(item.label);
-            navigate(item.link);
-          }}
-          style={{ fontFamily: "'Inter', sans-serif" }}
-        >
-          <item.icon
-            className={opened ? classes.linkIcon : classes.linkIconShort}
-            stroke={1.5}
-          />
-          <div style={{ overflow: "hidden" }}>
-            {opened ? (
-              <span>
-                {item.label}{" "}
-                {item.link === "/orders" &&
-                  orderCount &&
-                  parseInt(orderCount) > 0 && (
-                    <Badge
-                      style={{backgroundColor:"#FF6A00", marginLeft: "15px",color:"#FFFFFF"}}
-                      size="md"
-                      variant="danger"
-                      circle
-                    >
-                      {orderCount}
-                    </Badge>
-                  )}
-                {item.link === "/shipments" &&
-                shipments &&
-                parseInt(shipments) > 0 ? (
-                  <Badge
-                  style={{backgroundColor:"#FF6A00", marginLeft: "15px",color:"#FFFFFF"}}
-                    size="md"
-                    variant="danger"
-                    circle
-                  >
-                    {shipments}
-                  </Badge>
-                ) : null}
-                {item.link === "/wallets" &&
-                wallets &&
-                parseInt(wallets) > 0 ? (
-                  <Badge
-                  style={{backgroundColor:"#FF6A00", marginLeft: "15px",color:"#FFFFFF"}}
-                    size="md"
-                    variant="danger"
-                    circle
-                  >
-                    {wallets}
-                  </Badge>
-                ) : null}
-                {item.link === "/dropoffs" &&
-                  dropoffs &&
-                  parseInt(dropoffs) > 0 && (
-                    <Badge
-                    style={{backgroundColor:"#FF6A00", marginLeft: "15px",color:"#FFFFFF"}}
-                      size="md"
-                      variant="danger"
-                      circle
-                    >
-                      {dropoffs}
-                    </Badge>
-                  )}
-              </span>
-            ) : null}
-          </div>
-        </Link>
-      ) : (
-        <Tooltip
-          key={index}
-          label={!opened ? item.label : null}
-          position="right"
-          withArrow
-        >
-          <Link
-            key={index}
+    <React.Fragment key={index}>
+      {item.links ? (
+        <>
+          <div
             className={cx(classes.link, {
               [classes.linkActive]: item.label === active,
             })}
-            to={item.link}
-            onClick={(event) => {
-              event.preventDefault();
-              setActive(item.label);
-              navigate(item.link);
-            }}
+            onClick={() => setCollapseOpened((o) => !o)}
           >
-            <item.icon
-              className={opened ? classes.linkIcon : classes.linkIconShort}
-              stroke={1.5}
-            />
+            {item.icon && (
+              <item.icon
+                className={opened ? classes.linkIcon : classes.linkIconShort}
+                stroke={1.5}
+              />
+            )}
             <div style={{ overflow: "hidden" }}>
-              {opened ? <span>{item.label}</span> : null}
+              {opened ? (
+                <span>
+                  {item.label}
+                  <Badge
+                    style={{ marginLeft: "10px"}}
+                    size="xs"
+                    variant="filled"
+                  >
+                    {collapseOpened ? (
+                      <IconChevronUp size={16} />
+                    ) : (
+                      <IconChevronDown size={16} />
+                    )}
+                  </Badge>
+                </span>
+              ) : null}
             </div>
-          </Link>
-        </Tooltip>
+          </div>
+          <Collapse in={collapseOpened}>
+            {item.links.map((subItem, subIndex) => (
+              <Link
+                key={subIndex}
+                className={cx(classes.link, {
+                  [classes.linkActive]: subItem.label === active,
+                })}
+                to={subItem.link}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setActive(subItem.label);
+                  navigate(subItem.link);
+                }}
+                style={{ paddingLeft: theme.spacing.lg }}
+              >
+                {subItem.icon&&
+                <subItem.icon
+                  className={opened ? classes.linkIcon : classes.linkIconShort}
+                  stroke={1.5}
+                />
+}
+                <div style={{ overflow: "hidden" }}>
+                  {opened ? <span>{subItem.label}</span> : null}
+                </div>
+              </Link>
+            ))}
+          </Collapse>
+        </>
+      ) : (
+        <>
+          {opened ? (
+            <Link
+              className={cx(classes.link, {
+                [classes.linkActive]: item.label === active,
+              })}
+              to={item.link}
+              onClick={(event) => {
+                event.preventDefault();
+                setActive(item.label);
+                navigate(item.link);
+              }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              <item.icon
+                className={opened ? classes.linkIcon : classes.linkIconShort}
+                stroke={1.5}
+              />
+              <div style={{ overflow: "hidden" }}>
+                {opened ? (
+                  <span>
+                    {item.label}{" "}
+                    {item.link === "/orders" &&
+                      orderCount &&
+                      parseInt(orderCount) > 0 && (
+                        <Badge
+                          style={{
+                            backgroundColor: "#FF6A00",
+                            marginLeft: "15px",
+                            color: "#FFFFFF",
+                          }}
+                          size="md"
+                          variant="danger"
+                          circle
+                        >
+                          {orderCount}
+                        </Badge>
+                      )}
+                    {item.link === "/shipments" &&
+                      shipments &&
+                      parseInt(shipments) > 0 && (
+                        <Badge
+                          style={{
+                            backgroundColor: "#FF6A00",
+                            marginLeft: "15px",
+                            color: "#FFFFFF",
+                          }}
+                          size="md"
+                          variant="danger"
+                          circle
+                        >
+                          {shipments}
+                        </Badge>
+                      )}
+                    {item.link === "/wallets" &&
+                      wallets &&
+                      parseInt(wallets) > 0 && (
+                        <Badge
+                          style={{
+                            backgroundColor: "#FF6A00",
+                            marginLeft: "15px",
+                            color: "#FFFFFF",
+                          }}
+                          size="md"
+                          variant="danger"
+                          circle
+                        >
+                          {wallets}
+                        </Badge>
+                      )}
+                    {item.link === "/dropoffs" &&
+                      dropoffs &&
+                      parseInt(dropoffs) > 0 && (
+                        <Badge
+                          style={{
+                            backgroundColor: "#FF6A00",
+                            marginLeft: "15px",
+                            color: "#FFFFFF",
+                          }}
+                          size="md"
+                          variant="danger"
+                          circle
+                        >
+                          {dropoffs}
+                        </Badge>
+                      )}
+                  </span>
+                ) : null}
+              </div>
+            </Link>
+          ) : (
+            <Tooltip
+              key={index}
+              label={!opened ? item.label : null}
+              position="right"
+              withArrow
+            >
+              <Link
+                key={index}
+                className={cx(classes.link, {
+                  [classes.linkActive]: item.label === active,
+                })}
+                to={item.link}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setActive(item.label);
+                  navigate(item.link);
+                }}
+              >
+                <item.icon
+                  className={opened ? classes.linkIcon : classes.linkIconShort}
+                  stroke={1.5}
+                />
+                <div style={{ overflow: "hidden" }}>
+                  {opened ? <span>{item.label}</span> : null}
+                </div>
+              </Link>
+            </Tooltip>
+          )}
+        </>
       )}
-    </>
+    </React.Fragment>
   ));
 
   const handleNameAvatar = () => {
@@ -369,9 +425,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       p="md"
       className={classes.bg}
     >
-      <Navbar.Section mt="xs">
-      
-      </Navbar.Section>
+      <Navbar.Section mt="xs"></Navbar.Section>
 
       <Navbar.Section
         grow

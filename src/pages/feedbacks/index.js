@@ -231,6 +231,9 @@ const Feedbacks = () => {
     <Fragment key={row.id}>
       <tr>
         <td>{row.description}</td>
+        <td>{row.user?.name}</td>
+        <td>{row.user?.email}</td>
+        <td>{row.user?.role}</td>
         <td>{row.feedback_type?.name}</td>
         <td>{new Date(row.created_at).toLocaleDateString()}</td>
       </tr>
@@ -275,7 +278,16 @@ const Feedbacks = () => {
                 <Th sortable={false} onSort={() => handleSort("type")}>
                   <span className={classes.thh}> Type</span>
                 </Th>
-                <Th sortable onSort={() => handleSort("created_at")}>
+                <Th sortable={false} onSort={() => handleSort("type")}>
+                  <span className={classes.thh}> Name</span>
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("type")}>
+                  <span className={classes.thh}> Email</span>
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("type")}>
+                  <span className={classes.thh}> Role</span>
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("created_at")}>
                   <span className={classes.thh}> Date</span>
                 </Th>
               </tr>
