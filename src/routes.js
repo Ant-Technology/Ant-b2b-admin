@@ -20,7 +20,7 @@ import Users from "pages/users";
 import DropOffs from "pages/dropoffs";
 import Sales from "pages/sales"
 import Feedbacks from "pages/feedbacks"
-
+import FeedbackTypes from "pages/feedbacks/feedback_type";
 const RoutesComp = () => {
   return (
     <Routes>
@@ -45,6 +45,7 @@ const RoutesComp = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/sales" element={<Sales />} />
       <Route path="/feedbacks" element={<Feedbacks/>}/>
+      <Route path="/feedback-types" element = {<FeedbackTypes/>}/>
     </Routes>
   );
 };

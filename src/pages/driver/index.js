@@ -131,7 +131,7 @@ const Drivers = () => {
 
   useEffect(() => {
     fetchData(activePage);
-  }, []);
+  }, [activePage]);
   useEffect(() => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
@@ -141,6 +141,10 @@ const Drivers = () => {
       console.log("Pusher event received:", data);
       setActiveDrivers(data.data);
     });
+    return () => {
+      // Unsubscribe from channels, disconnect, etc.
+      pusher.disconnect();
+    };
   }, []);
 
   const fetchData = async (page) => {
@@ -279,7 +283,11 @@ const Drivers = () => {
         <td>{row.name}</td>
         <td>{row.email}</td>
         <td>{row.phone}</td>
+        <td>{row.region?.name?.en}</td>
+        <td>{row.city}</td>
+        <td style={{width:"10%"}}>{row.address}</td>
         <td>
+          <div style={{display:"flex"}}>
           <Controls.ActionButton
             color="primary"
             title="Update"
@@ -303,6 +311,7 @@ const Drivers = () => {
           >
             <Trash size={17} />
           </Controls.ActionButton>
+          </div>
         </td>
       </tr>
     </Fragment>
@@ -464,6 +473,16 @@ const Drivers = () => {
                     </Th>
                     <Th sortable onSort={() => handleSort("phone")}>
                       <span className={classes.thh}> Phone</span>
+                    </Th>
+                    <Th sortable={false}>
+                      {" "}
+                      <span className={classes.thh}>Region</span>
+                    </Th>
+                    <Th sortable onSort={() => handleSort("email")}>
+                      <span className={classes.thh}> City</span>
+                    </Th>
+                    <Th sortable onSort={() => handleSort("phone")}>
+                      <span className={classes.thh}> Address</span>
                     </Th>
                     <Th sortable={false}>
                       {" "}
