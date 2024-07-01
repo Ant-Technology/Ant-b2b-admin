@@ -123,6 +123,15 @@ const Warehouses = () => {
       },
     },
     {
+      label: "Name",
+      key: "name",
+      sortable: true,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.name}</span>;
+      },
+    },
+    {
       label: "Region",
       key: "region",
       sortable: true,
