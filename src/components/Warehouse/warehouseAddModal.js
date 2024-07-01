@@ -178,7 +178,7 @@ export default function WarehouseAddModal({
   const submit = () => {
     createWarehouse({
       variables: {
-        name: form.getInputProps("specific_area").value,
+        name: form.getInputProps("name").value,
         regionId: form.getInputProps("regionId").value, // Provide the regionId variable
         _geo: {
           lat: +location.lat,
@@ -228,18 +228,13 @@ export default function WarehouseAddModal({
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
           <Grid>
             <Grid.Col span={6}>
-              {" "}
-              <Select
+              <TextInput
                 required
-                data={regionsDropDownData}
-                value={form.getInputProps("regionId")?.value}
-                onChange={setRegionDropDownValue}
-                label="Region"
-                placeholder="Pick a region this Warehouse belongs to"
+                label="Name"
+                placeholder="Name"
+                {...form.getInputProps("name")}
               />
-            </Grid.Col>
-            {isLoaded && (
-              <Grid.Col span={6}>
+               {isLoaded && (
                 <Autocomplete
                   onLoad={autocompleteLoadHandler}
                   onPlaceChanged={onPlaceChangedHandler}
@@ -251,11 +246,18 @@ export default function WarehouseAddModal({
                     {...form.getInputProps("location")}
                   />
                 </Autocomplete>
-              </Grid.Col>
-            )}
-          </Grid>
-          <Grid>
+              )}
+            </Grid.Col>
+            
             <Grid.Col span={6}>
+            <Select
+                required
+                data={regionsDropDownData}
+                value={form.getInputProps("regionId")?.value}
+                onChange={setRegionDropDownValue}
+                label="Region"
+                placeholder="Pick a region this Warehouse belongs to"
+              />
               <Select
                 required
                 data={areasDropDownData}
