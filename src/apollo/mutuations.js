@@ -20,7 +20,6 @@ export const CREATE_CATEGORY = gql`
     ) {
       id
       name
-      image
     }
   }
 `;

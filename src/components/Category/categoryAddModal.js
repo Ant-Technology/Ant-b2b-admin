@@ -11,7 +11,7 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Photo,  Trash } from "tabler-icons-react";
+import { Photo, Trash } from "tabler-icons-react";
 import { useMutation } from "@apollo/client";
 import React, { useState } from "react";
 import { useViewportSize } from "@mantine/hooks";
@@ -29,7 +29,6 @@ export default function CategoryAddModal({
   activePage,
   setActivePage,
 }) {
-
   // to control the current active tab
   const [activeTab, setActiveTab] = useState(tabList[0].value);
   const [file, setFile] = useState([]);
@@ -60,7 +59,7 @@ export default function CategoryAddModal({
       return (
         <Group key={item.key} mt="xs">
           <TextInput
-            placeholder="John Doe"
+            placeholder="Subcategory"
             required
             label={`child Category ${index + 1}`}
             sx={{ flex: 1 }}
@@ -84,29 +83,38 @@ export default function CategoryAddModal({
     return fields;
   };
 
-  const [addCategory, {  loading }] = useMutation(CREATE_CATEGORY, {
+  const [addCategory, { loading }] = useMutation(CREATE_CATEGORY, {
     update(cache, { data: { createCategory } }) {
-      cache.updateQuery(
-        {
-          query: GET_CATEGORIES,
-          variables: {
-            first: 10,
-            page: activePage,
+      // Read the existing data from the cache
+      const { categories } = cache.readQuery({
+        query: GET_CATEGORIES,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+      });
+      if (!categories) {
+        return;
+      }
+      const updatedDropoffs = [createCategory, ...categories.data];
+
+      cache.writeQuery({
+        query: GET_CATEGORIES,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+        data: {
+          categories: {
+            ...categories,
+            data: updatedDropoffs,
           },
         },
-        (data) => {
-          if (data.categories.data.length === 10) {
-            setTotal(total + 1);
-            setActivePage(total + 1);
-          } else {
-            return {
-              categories: {
-                data: [createCategory, ...data.categories.data],
-              },
-            };
-          }
-        }
-      );
+      });
+
+      const newTotal = categories.paginatorInfo.total + 1;
+      setTotal(newTotal);
+      setActivePage(1);
     },
   });
 
@@ -118,7 +126,7 @@ export default function CategoryAddModal({
           image: form.getInputProps("image").value,
           children: form.getInputProps("children").value,
         },
-       
+
         onCompleted() {
           showNotification({
             color: "green",
