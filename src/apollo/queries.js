@@ -19,7 +19,7 @@ export const GET_CATEGORIES = gql`
       first: $first
       page: $page
       parentOnly: true
-      orderBy: { column: UPDATED_AT, order: ASC }
+      orderBy: { column: NAME, order: DESC }
     ) {
       data {
         id
