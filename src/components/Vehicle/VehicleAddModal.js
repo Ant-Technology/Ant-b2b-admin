@@ -203,6 +203,7 @@ const VehicleAddModal = ({
               />
               {/* pick vehcle type */}
               <Select
+              searchable
                 label="Select Vehicle Type"
                 placeholder="Pick one"
                 data={vehicleTypeDropDownData}
@@ -214,6 +215,7 @@ const VehicleAddModal = ({
               {/* pick driver  */}
               <Select
                 label="Select Driver"
+                searchable
                 placeholder="Pick one"
                 data={driverDropDownData}
                 value={form.getInputProps("driver.connect").value.toString()}

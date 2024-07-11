@@ -60,7 +60,7 @@ const ProductSkuAddModal = ({
       const selectedArr = [];
       selectedProduct.attributes.forEach((item) => {
         const selectedAttrVal = [];
-        item.values.forEach((val) => {
+        item.values?.forEach((val) => {
           selectedAttrVal.push({ label: val.value, value: val.id });
         });
         selectedArr.push({
@@ -162,9 +162,10 @@ const ProductSkuAddModal = ({
               </Grid.Col>
               <Grid.Col span={6}>
                 <Select
+                searchable
                   data={dropDownData}
                   disabled={productskuLoading ? true : false}
-                  value={form.getInputProps("product").value}
+                  value={form.getInputProps("product").value.toString()}
                   onChange={setProductToSelect}
                   label="Select Product"
                   placeholder="Pick a product"

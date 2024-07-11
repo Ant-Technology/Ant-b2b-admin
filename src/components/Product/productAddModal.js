@@ -44,30 +44,37 @@ const ProductAddModal = ({
   setActivePage,
 }) => {
   const theme = useMantineTheme();
-  
+
   const [addProduct, { loading }] = useMutation(CREATE_PRODUCT, {
     update(cache, { data: { createProduct } }) {
-      cache.updateQuery(
-        {
-          query: GET_PRODUCTS,
-          variables: {
-            first: 10,
-            page: activePage,
+      const { products } = cache.readQuery({
+        query: GET_PRODUCTS,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+      });
+      if (!products) {
+        return;
+      }
+      const updatedProduct = [createProduct, ...products.data];
+      cache.writeQuery({
+        query: GET_PRODUCTS,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+        data: {
+          products: {
+            ...products,
+            data: updatedProduct,
           },
         },
-        (data) => {
-          if (data.products.data.length === 10) {
-            setTotal(total + 1);
-            setActivePage(total + 1);
-          } else {
-            return {
-              products: {
-                data: [createProduct, ...data.products.data],
-              },
-            };
-          }
-        }
-      );
+      });
+
+      const newTotal = products.paginatorInfo.total + 1;
+      setTotal(newTotal);
+      setActivePage(1);
     },
   });
   const { height } = useViewportSize();
@@ -83,7 +90,7 @@ const ProductAddModal = ({
 
       const amArr = [];
       data.categoryNonPaginated.forEach((item, index) => {
-        amArr.push({ label: item.name_translations.am, value: item.id });
+        amArr.push({ label: item.name_translations.en, value: item.id });
       });
 
       setDropDownData({ enArr, amArr });
@@ -159,7 +166,7 @@ const ProductAddModal = ({
                 >
                   Add value
                 </Button>
-              </Group> 
+              </Group>
               {form.values.attributes.create[index].values.create.length > 0 ? (
                 form.values.attributes.create[index].values.create.map(
                   (attr, idx) => (
@@ -184,7 +191,7 @@ const ProductAddModal = ({
                           )
                         }
                       >
-                        <Trash  size={24} />
+                        <Trash size={24} />
                       </ActionIcon>
                     </Group>
                   )
@@ -202,7 +209,6 @@ const ProductAddModal = ({
   };
 
   const submit = () => {
- 
     if (activeTab === tabList[tabList.length - 1].value) {
       addProduct({
         variables: {
@@ -320,6 +326,7 @@ const ProductAddModal = ({
                         </div>
                       </Group>
                       <Select
+                        searchable
                         data={
                           tab.shortHand === "en"
                             ? dropDownData.enArr

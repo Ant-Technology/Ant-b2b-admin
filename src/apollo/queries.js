@@ -25,6 +25,7 @@ export const GET_CATEGORIES = gql`
         id
         name
         productCount
+        deleted_at
         productSkusCount
         name_translations {
           en
@@ -274,6 +275,10 @@ export const GET_PRODUCTS = gql`
         attributes {
           id
           name
+           values {
+                    id
+                    value
+                }
         }
       }
       paginatorInfo {
