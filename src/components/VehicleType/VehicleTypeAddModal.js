@@ -35,21 +35,21 @@ const VehicleTypeAddModal = ({
   const [files, setFiles] = useState([]);
   const [typeDropDownData, setTypeDropDownData] = useState([]);
 
- useEffect (()=>{
-  let types =  ["Shipment", "Dropoff"] ;
-      let type = [];
+  useEffect(() => {
+    let types = ["Shipment", "Dropoff"];
+    let type = [];
 
-      // loop over regions data to structure the data for the use of drop down
-      types.forEach((item, index) => {
-        type.push({
-          label: item,
-          value: item,
-        });
+    // loop over regions data to structure the data for the use of drop down
+    types.forEach((item, index) => {
+      type.push({
+        label: item,
+        value: item,
       });
+    });
 
-      // put it on the state
-      setTypeDropDownData([...type]);
- },[])
+    // put it on the state
+    setTypeDropDownData([...type]);
+  }, []);
   const previews = files.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
     return (
@@ -70,7 +70,7 @@ const VehicleTypeAddModal = ({
       title: { en: "", am: "" },
       starting_price: "",
       price_per_kilometer: "",
-      type:""
+      type: "",
     },
   });
 
@@ -167,13 +167,13 @@ const VehicleTypeAddModal = ({
                         placeholder={tab.placeHolder}
                         {...form.getInputProps("title." + tab.shortHand)}
                       />
-                        <Select
-                  data={typeDropDownData}
-                  value={form.getInputProps("type")?.value.toString()}
-                  onChange={setTypeDropDownValue}
-                  label="Type"
-                  placeholder="Pick a Type this Vehicle Type belongs to"
-                />
+                      <Select
+                        data={typeDropDownData}
+                        value={form.getInputProps("type")?.value.toString()}
+                        onChange={setTypeDropDownValue}
+                        label="Type"
+                        placeholder="Pick a Type this Vehicle Type belongs to"
+                      />
                     </Grid.Col>
                     <Grid.Col span={4}>
                       <TextInput
@@ -191,63 +191,7 @@ const VehicleTypeAddModal = ({
                         {...form.getInputProps("price_per_kilometer")}
                       />
                     </Grid.Col>
-                    <Grid.Col span={4}>
-                      <ScrollArea style={{ height: 300 }}>
-                        <div style={{ marginTop: "25px" }}>
-                          <Dropzone accept={IMAGE_MIME_TYPE} onDrop={setFiles}>
-                            <Group
-                              position="center"
-                              spacing="xl"
-                              style={{ minHeight: 200, pointerEvents: "none" }}
-                            >
-                              <Dropzone.Accept>
-                                <Upload
-                                  size={50}
-                                  stroke={1.5}
-                                  color={
-                                    theme.colors[theme.primaryColor][
-                                      theme.colorScheme === "dark" ? 4 : 6
-                                    ]
-                                  }
-                                />
-                              </Dropzone.Accept>
-                              <Dropzone.Reject>
-                                <PictureInPicture
-                                  size={50}
-                                  stroke={1.5}
-                                  color={
-                                    theme.colors.red[
-                                      theme.colorScheme === "dark" ? 4 : 6
-                                    ]
-                                  }
-                                />
-                              </Dropzone.Reject>
-                              <Dropzone.Idle>
-                                <PictureInPicture size={50} stroke={1.5} />
-                              </Dropzone.Idle>
 
-                              <div>
-                                <Text size="xl" inline>
-                                  Drag images here or click to select files
-                                </Text>
-                                <Text size="sm" color="dimmed" inline mt={7}>
-                                  Attach as many files as you like, each file
-                                  should not exceed 5mb
-                                </Text>
-                              </div>
-                            </Group>
-                          </Dropzone>
-
-                          <SimpleGrid
-                            cols={4}
-                            breakpoints={[{ maxWidth: "sm", cols: 1 }]}
-                            mt={previews.length > 0 ? "xl" : 0}
-                          >
-                            {previews}
-                          </SimpleGrid>
-                        </div>
-                      </ScrollArea>
-                    </Grid.Col>
                     <Grid.Col span={4}>
                       <Button
                         style={{ display: activeTab === 1 ? "none" : "" }}

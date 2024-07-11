@@ -19,7 +19,7 @@ import { CREATE_USER } from "apollo/mutuations";
 import { GET_ALL_USERS, GET_ROLES } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 import React, { useState } from "react";
-import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import { PictureInPicture, Upload } from "tabler-icons-react";
 
 const UserAddModal = ({
@@ -60,27 +60,35 @@ const UserAddModal = ({
   // mutation
   const [addUser, { loading: userLoading }] = useMutation(CREATE_USER, {
     update(cache, { data: { createUser } }) {
-      cache.updateQuery(
-        {
-          query: GET_ALL_USERS,
-          variables: {
-            first: 10,
-            page: activePage,
+      const { users } = cache.readQuery({
+        query: GET_ALL_USERS,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+      });
+      if (!users) {
+        return;
+      }
+      const updatedUsers = [createUser, ...users.data];
+
+      cache.writeQuery({
+        query: GET_ALL_USERS,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+        data: {
+          users: {
+            ...users,
+            data: updatedUsers,
           },
         },
-        (data) => {
-          if (data.users.data.length === 10) {
-            setTotal(total + 1);
-            setActivePage(total + 1);
-          } else {
-            return {
-              users: {
-                data: [createUser, ...data.users.data],
-              },
-            };
-          }
-        }
-      );
+      });
+
+      const newTotal = users.paginatorInfo.total + 1;
+      setTotal(newTotal);
+      setActivePage(1);
     },
   });
 
@@ -98,15 +106,15 @@ const UserAddModal = ({
   });
 
   const submit = () => {
-   
     addUser({
       variables: {
         name: form.getInputProps("name").value,
         email: form.getInputProps("email").value,
         password: form.getInputProps("password").value,
-        password_confirmation: form.getInputProps("password_confirmation").value,
+        password_confirmation: form.getInputProps("password_confirmation")
+          .value,
         profile_image: files[files.length - 1],
-        role:form.getInputProps("role").value,
+        role: form.getInputProps("role").value,
       },
       onCompleted(data) {
         showNotification({
@@ -130,7 +138,7 @@ const UserAddModal = ({
   };
 
   // set previews
-  
+
   const previews = files.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
     return (
@@ -205,61 +213,61 @@ const UserAddModal = ({
                     label="Select Role"
                     placeholder="Pick a role this user belongs to"
                   />
-                     <ScrollArea style={{ height: 300 }}>
-                        <div style={{ marginTop: "25px" }}>
-                          <Dropzone accept={IMAGE_MIME_TYPE} onDrop={setFiles}>
-                            <Group
-                              position="center"
-                              spacing="xl"
-                              style={{ minHeight: 200, pointerEvents: "none" }}
-                            >
-                              <Dropzone.Accept>
-                                <Upload
-                                  size={50}
-                                  stroke={1.5}
-                                  color={
-                                    theme.colors[theme.primaryColor][
-                                      theme.colorScheme === "dark" ? 4 : 6
-                                    ]
-                                  }
-                                />
-                              </Dropzone.Accept>
-                              <Dropzone.Reject>
-                                <PictureInPicture
-                                  size={50}
-                                  stroke={1.5}
-                                  color={
-                                    theme.colors.red[
-                                      theme.colorScheme === "dark" ? 4 : 6
-                                    ]
-                                  }
-                                />
-                              </Dropzone.Reject>
-                              <Dropzone.Idle>
-                                <PictureInPicture size={50} stroke={1.5} />
-                              </Dropzone.Idle>
+                  <ScrollArea style={{ height: 300 }}>
+                    <div style={{ marginTop: "25px" }}>
+                      <Dropzone accept={IMAGE_MIME_TYPE} onDrop={setFiles}>
+                        <Group
+                          position="center"
+                          spacing="xl"
+                          style={{ minHeight: 200, pointerEvents: "none" }}
+                        >
+                          <Dropzone.Accept>
+                            <Upload
+                              size={50}
+                              stroke={1.5}
+                              color={
+                                theme.colors[theme.primaryColor][
+                                  theme.colorScheme === "dark" ? 4 : 6
+                                ]
+                              }
+                            />
+                          </Dropzone.Accept>
+                          <Dropzone.Reject>
+                            <PictureInPicture
+                              size={50}
+                              stroke={1.5}
+                              color={
+                                theme.colors.red[
+                                  theme.colorScheme === "dark" ? 4 : 6
+                                ]
+                              }
+                            />
+                          </Dropzone.Reject>
+                          <Dropzone.Idle>
+                            <PictureInPicture size={50} stroke={1.5} />
+                          </Dropzone.Idle>
 
-                              <div>
-                                <Text size="xl" inline>
-                                  Drag images here or click to select files
-                                </Text>
-                                <Text size="sm" color="dimmed" inline mt={7}>
-                                  Attach as many files as you like, each file
-                                  should not exceed 5mb
-                                </Text>
-                              </div>
-                            </Group>
-                          </Dropzone>
+                          <div>
+                            <Text size="xl" inline>
+                              Drag images here or click to select files
+                            </Text>
+                            <Text size="sm" color="dimmed" inline mt={7}>
+                              Attach as many files as you like, each file should
+                              not exceed 5mb
+                            </Text>
+                          </div>
+                        </Group>
+                      </Dropzone>
 
-                          <SimpleGrid
-                            cols={4}
-                            breakpoints={[{ maxWidth: "sm", cols: 1 }]}
-                            mt={previews.length > 0 ? "xl" : 0}
-                          >
-                            {previews}
-                          </SimpleGrid>
-                        </div>
-                      </ScrollArea>
+                      <SimpleGrid
+                        cols={4}
+                        breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                        mt={previews.length > 0 ? "xl" : 0}
+                      >
+                        {previews}
+                      </SimpleGrid>
+                    </div>
+                  </ScrollArea>
                 </Grid.Col>
               </Grid>
 
