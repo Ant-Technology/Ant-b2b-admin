@@ -24,7 +24,7 @@ const ProductSkuAddModal = ({
   activePage,
   setActivePage,
   fetchData,
-  totalPages
+  totalPages,
 }) => {
   const [dropDownData, setDropDownData] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState();
@@ -74,9 +74,8 @@ const ProductSkuAddModal = ({
   }, [selectedProduct]);
 
   const { height } = useViewportSize();
-  const [addProductSku, { loading: addingSkuLoading }] = useMutation(
-    CREATE_PRODUCT_SKUS
-  );
+  const [addProductSku, { loading: addingSkuLoading }] =
+    useMutation(CREATE_PRODUCT_SKUS);
 
   const submit = () => {
     addProductSku({
@@ -93,7 +92,7 @@ const ProductSkuAddModal = ({
           title: "Success",
           message: "ProductSKU Created Successfully",
         });
-        fetchData(totalPages)
+        fetchData(totalPages);
         setOpened(false);
       },
       onError(err) {
@@ -126,105 +125,103 @@ const ProductSkuAddModal = ({
       loader={customLoader}
     />
   ) : (
-    <>
-      <ScrollArea style={{ height: height / 2.2 }} type="auto" offsetScrollbars>
-        <form onSubmit={form.onSubmit(() => submit())}>
-          <Stack>
-            <Grid>
-              <Grid.Col span={6}>
-                <TextInput
-                  type="text"
-                  {...form.getInputProps("sku")}
-                  placeholder="Sku unique id"
-                  label="SKU"
+    <ScrollArea style={{ height: height / 2.2 }} type="auto" offsetScrollbars>
+      <form onSubmit={form.onSubmit(() => submit())}>
+        <Stack>
+          <Grid>
+            <Grid.Col span={6}>
+              <TextInput
+                type="text"
+                {...form.getInputProps("sku")}
+                placeholder="Sku unique id"
+                label="SKU"
+              />
+              <TextInput
+                {...form.getInputProps("price")}
+                type="number"
+                placeholder="price"
+                label="PRICE"
+              />
+              <div style={{ marginTop: "10px" }}>
+                <Checkbox
+                  color="blue"
+                  size="lg"
+                  {...form.getInputProps("product")}
+                  checked={form.values.is_active}
+                  label="Is active"
+                  onChange={(event) => {
+                    form.setFieldValue(
+                      "is_active",
+                      event.currentTarget.checked
+                    );
+                  }}
                 />
-                <TextInput
-                  {...form.getInputProps("price")}
-                  type="number"
-                  placeholder="price"
-                  label="PRICE"
-                />
-                <div style={{ marginTop: "10px" }}>
-                  <Checkbox
-                    color="blue"
-                    size="lg"
-                    {...form.getInputProps("product")}
-                    checked={form.values.is_active}
-                    label="Is active"
-                    onChange={(event) => {
-                      form.setFieldValue(
-                        "is_active",
-                        event.currentTarget.checked
-                      );
-                    }}
-                  />
-                </div>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Select
+              </div>
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <Select
                 searchable
-                  data={dropDownData}
-                  disabled={productskuLoading ? true : false}
-                  value={form.getInputProps("product").value.toString()}
-                  onChange={setProductToSelect}
-                  label="Select Product"
-                  placeholder="Pick a product"
-                  styles={(theme) => ({
-                    item: {
-                      // applies styles to selected item
-                      "&[data-selected]": {
-                        "&, &:hover": {
-                          backgroundColor:
-                            theme.colorScheme === "dark"
-                              ? theme.colors.blue[6]
-                              : theme.colors.blue[3],
-                          color:
-                            theme.colorScheme === "dark"
-                              ? theme.white
-                              : theme.colors.black,
-                        },
-                      },
-
-                      // applies styles to hovered item (with mouse or keyboard)
-                      "&[data-hovered]": {
+                data={dropDownData}
+                disabled={productskuLoading ? true : false}
+                value={form.getInputProps("product")?.value?.toString()}
+                onChange={setProductToSelect}
+                label="Select Product"
+                placeholder="Pick a product"
+                styles={(theme) => ({
+                  item: {
+                    // applies styles to selected item
+                    "&[data-selected]": {
+                      "&, &:hover": {
                         backgroundColor:
                           theme.colorScheme === "dark"
-                            ? theme.colors.blue[9]
+                            ? theme.colors.blue[6]
                             : theme.colors.blue[3],
                         color:
                           theme.colorScheme === "dark"
                             ? theme.white
-                            : theme.colors.blue[9],
+                            : theme.colors.black,
                       },
                     },
-                  })}
-                />
-                {productAttrs &&
-                  productAttrs.map((item, i) => {
-                    return (
-                      <Select
-                        key={i}
-                        data={item.values}
-                        onChange={(val) => setAttributeValues(val, item.value)}
-                        label={item.label}
-                        placeholder={"pick_" + item.label}
-                        color="blue"
-                      />
-                    );
-                  })}
-              </Grid.Col>
-            </Grid>
-            <Grid>
-              <Grid.Col>
-                <Button type="submit" color="blue" variant="outline" fullWidth>
-                  Submit
-                </Button>
-              </Grid.Col>
-            </Grid>
-          </Stack>
-        </form>
-      </ScrollArea>
-    </>
+
+                    // applies styles to hovered item (with mouse or keyboard)
+                    "&[data-hovered]": {
+                      backgroundColor:
+                        theme.colorScheme === "dark"
+                          ? theme.colors.blue[9]
+                          : theme.colors.blue[3],
+                      color:
+                        theme.colorScheme === "dark"
+                          ? theme.white
+                          : theme.colors.blue[9],
+                    },
+                  },
+                })}
+              />
+              {productAttrs &&
+                productAttrs.map((item, i) => {
+                  return (
+                    <Select
+                      key={i}
+                      data={item.values}
+                      onChange={(val) => setAttributeValues(val, item.value)}
+                      label={item.label}
+                      placeholder={"pick_" + item.label}
+                      color="blue"
+                    />
+                  );
+                })}
+            </Grid.Col>
+          </Grid>
+          <Grid>
+            <Grid.Col>
+              <Button type="submit" color="blue" variant="outline" fullWidth>
+                Submit
+              </Button>
+            </Grid.Col>
+          </Grid>
+        </Stack>
+      </form>
+    </ScrollArea>
   );
 };
 
