@@ -275,10 +275,10 @@ export const GET_PRODUCTS = gql`
         attributes {
           id
           name
-           values {
-                    id
-                    value
-                }
+          values {
+            id
+            value
+          }
         }
       }
       paginatorInfo {
@@ -298,9 +298,10 @@ export const NON_PAGINATED_CATEGORIES = gql`
   query {
     categoryNonPaginated {
       id
-      name_translations {
-        am
-        en
+      name
+      children {
+        id
+        name
       }
     }
   }
@@ -696,8 +697,8 @@ export const GET_SHIPMENTS = gql`
                       images {
                         id
                         original_url
+                      }
                     }
-                  }
                   }
                 }
               }
@@ -753,10 +754,9 @@ export const GET_ALL_GEO_LOCATIONS = gql`
       id
       name
       address
-      region
-      {
-          id
-          name
+      region {
+        id
+        name
       }
       _geo {
         lat
@@ -768,10 +768,9 @@ export const GET_ALL_GEO_LOCATIONS = gql`
       id
       name
       address
-      region
-      {
-          id
-          name
+      region {
+        id
+        name
       }
       _geo {
         lat
@@ -782,10 +781,9 @@ export const GET_ALL_GEO_LOCATIONS = gql`
     warehousesNonPaginated {
       id
       name
-      region
-      {
-          id
-          name
+      region {
+        id
+        name
       }
       _geo {
         lat
