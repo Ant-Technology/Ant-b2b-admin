@@ -32,15 +32,16 @@ export default function CategoryAddModal({
   // to control the current active tab
   const [activeTab, setActiveTab] = useState(tabList[0].value);
   const [file, setFile] = useState([]);
+  const [subCategoryFiles, setSubCategoryFiles] = useState({});
 
-  const imagePreview = () => {
-    const imageUrl = URL.createObjectURL(file[0]);
+  const imagePreview = (imageFile) => {
+    const imageUrl = URL.createObjectURL(imageFile);
     return (
       <img
         src={imageUrl}
         width="130"
         alt=""
-        imageprops={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
+        onLoad={() => URL.revokeObjectURL(imageUrl)}
       />
     );
   };
@@ -61,7 +62,7 @@ export default function CategoryAddModal({
           <TextInput
             placeholder="Subcategory"
             required
-            label={`child Category ${index + 1}`}
+            label={`Subcategory ${index + 1}`}
             sx={{ flex: 1 }}
             {...form.getInputProps(
               value === "am"
@@ -69,6 +70,23 @@ export default function CategoryAddModal({
                 : `children.${index}.name.en`
             )}
           />
+          <Dropzone
+            accept={IMAGE_MIME_TYPE}
+            onDrop={(files) => handleSubCategoryImageUpload(files, index)}
+          >
+            <Group
+              position="center"
+              spacing="xl"
+              style={{ minHeight: 100, pointerEvents: "none" }}
+            >
+              <div>
+                <Text size="sm" inline>
+                  Drag image here or click to select file
+                </Text>
+              </div>
+            </Group>
+          </Dropzone>
+          {subCategoryFiles[index] && imagePreview(subCategoryFiles[index])}
           <ActionIcon
             color="#ed522f"
             onClick={() => form.removeListItem("children", index)}
@@ -119,12 +137,20 @@ export default function CategoryAddModal({
   });
 
   const submit = () => {
+    console.log(form.getInputProps("children").value.map((child, index) => ({
+      ...child,
+      image: subCategoryFiles[index],
+    })),)
+    console.log(form.getInputProps("image").value)
     if (activeTab === tabList[tabList.length - 1].value) {
       addCategory({
         variables: {
           name: form.getInputProps("name").value,
           image: form.getInputProps("image").value,
-          children: form.getInputProps("children").value,
+          children: form.getInputProps("children").value.map((child, index) => ({
+            ...child,
+            image: subCategoryFiles[index],
+          })),
         },
 
         onCompleted() {
@@ -154,6 +180,14 @@ export default function CategoryAddModal({
   const handleImageUpload = (image) => {
     setFile(image);
     form.setFieldValue("image", image[0]);
+  };
+
+  const handleSubCategoryImageUpload = (files, index) => {
+    setSubCategoryFiles((prev) => ({
+      ...prev,
+      [index]: files[0],
+    }));
+    form.setFieldValue(`children.${index}.image`, files[0]);
   };
 
   return (
@@ -194,6 +228,8 @@ export default function CategoryAddModal({
                           <Dropzone
                             accept={IMAGE_MIME_TYPE}
                             onDrop={handleImageUpload}
+                            style={{ width: 320, height: 200 }}
+
                           >
                             <Group
                               position="center"
@@ -220,7 +256,7 @@ export default function CategoryAddModal({
                             <Grid>
                               <Grid.Col span={4}></Grid.Col>
                               <Grid.Col span={4}>
-                                {file.length > 0 && imagePreview()}
+                                {file.length > 0 && imagePreview(file[0])}
                               </Grid.Col>
                               <Grid.Col span={4}></Grid.Col>
                             </Grid>
@@ -266,6 +302,7 @@ export default function CategoryAddModal({
                           onClick={() =>
                             form.insertListItem("children", {
                               name: { en: "", am: "" },
+                              image: "",
                             })
                           }
                         >
