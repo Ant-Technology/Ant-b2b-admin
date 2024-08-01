@@ -67,12 +67,29 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
       });
     },
   });
-  // to control the current active tab
+  const imagePreviewsub = (imageFile) => {
+    const imageUrl = URL.createObjectURL(imageFile);
+    return (
+      <img
+        src={imageUrl}
+        width="130"
+        alt=""
+        onLoad={() => URL.revokeObjectURL(imageUrl)}
+      />
+    );
+  };
   const [activeTab, setActiveTab] = useState(tabList[0].value);
+  const [subCategoryFiles, setSubCategoryFiles] = useState({});
+
   const [file, setFile] = useState([]);
   const { height } = useViewportSize();
-
-  //existing sub categories while editing (populated already)
+  const handleSubCategoryImageUpload = (files, index) => {
+    setSubCategoryFiles((prev) => ({
+      ...prev,
+      [index]: files[0],
+    }));
+    form.setFieldValue(`children.${index}.image`, files[0]);
+  };
   const handleFields = (value) => {
     let fields = form.values.childrens?.update?.map((item, index) => {
       return (
@@ -88,6 +105,29 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
                 : `childrens.update.${index}.name.en`
             )}
           />
+          <Dropzone
+            accept={IMAGE_MIME_TYPE}
+            onDrop={(files) =>
+              handleSubCategoryImageUpload(files, index, "update")
+            }
+          >
+            <Group
+              position="center"
+              spacing="xl"
+              style={{ minHeight: 100, pointerEvents: "none" }}
+            >
+              <div>
+                <Text size="sm" inline>
+                  Drag image here or click to select file
+                </Text>
+              </div>
+            </Group>
+          </Dropzone>
+          {subCategoryFiles[`update-${index}`]
+            ? imagePreviewsub(subCategoryFiles[`update-${index}`])
+            : item.imageUrl && (
+                <img src={item.imageUrl} width="130" alt="Sub Category" />
+              )}
           <ActionIcon
             color="#ed522f"
             onClick={() => {
@@ -121,6 +161,24 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
                 : `childrens.create.${index}.name.en`
             )}
           />
+          <Dropzone
+            accept={IMAGE_MIME_TYPE}
+            onDrop={(files) => handleSubCategoryImageUpload(files, index)}
+          >
+            <Group
+              position="center"
+              spacing="xl"
+              style={{ minHeight: 100, pointerEvents: "none" }}
+            >
+              <div>
+                <Text size="sm" inline>
+                  Drag image here or click to select file
+                </Text>
+              </div>
+            </Group>
+          </Dropzone>
+          {subCategoryFiles[index] && imagePreview(subCategoryFiles[index])}
+
           <ActionIcon
             color="#ed522f"
             onClick={() => {
@@ -163,7 +221,6 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
     form.getInputProps("childrens.update")?.value?.forEach((obj, index) => {
       delete obj.__typename;
       delete obj.name.__typename;
-      
     });
     // return;
     if (activeTab === tabList[tabList.length - 1].value) {
@@ -174,7 +231,7 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
             am: form.getInputProps("name_translations.am").value,
             en: form.getInputProps("name_translations.en").value,
           },
-        //  image: form.getInputProps("image").value, // Pass the image value
+          //  image: form.getInputProps("image").value, // Pass the image value
 
           children: {
             create: form.getInputProps("childrens.create").value,
@@ -250,6 +307,7 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
                           <Dropzone
                             accept={IMAGE_MIME_TYPE}
                             onDrop={handleImageUpload}
+                            style={{ width: 320, height: 200 }}
                           >
                             <Group
                               position="center"
@@ -321,6 +379,7 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
                           onClick={() => {
                             form.insertListItem("childrens.create", {
                               name: { en: "", am: "" },
+                              image: "",
                             });
                           }}
                         >

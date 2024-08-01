@@ -98,6 +98,7 @@ export const GET_CATEGORY = gql`
           en
           am
         }
+        imageUrl
         products {
           id
           name
