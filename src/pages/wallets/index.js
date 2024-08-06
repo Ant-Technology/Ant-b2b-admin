@@ -155,6 +155,12 @@ const Wallets = () => {
 
     return filterData(
       [...data].sort((a, b) => {
+        if (payload.sortBy === "confirmed_at") {
+          const dateA = new Date(a[payload.sortBy]);
+          const dateB = new Date(b[payload.sortBy]);
+          return payload.reversed ? dateB - dateA : dateA - dateB;
+        }
+
         if (payload.reversed) {
           return b[payload.sortBy].localeCompare(a[payload.sortBy]);
         }
