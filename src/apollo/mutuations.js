@@ -612,7 +612,13 @@ export const CONFIRM_DEPOSIT_SLIP = gql`
     }
   }
 `;
-
+export const DIS_APPROVE_DEPOSIT_SLIP = gql`
+  mutation ($deposit_id: ID!) {
+    diapproveDepositWithSlip(deposit_id: $deposit_id) {
+      id
+    }
+  }
+`;
 export const CREATE_VEHICLE_TYPE = gql`
   mutation (
     $title: TranslatableInput!
