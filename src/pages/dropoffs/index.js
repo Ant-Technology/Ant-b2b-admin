@@ -1,20 +1,15 @@
 import { useQuery } from "@apollo/client";
-import {
-  Card,
-  Drawer,
-  LoadingOverlay,
-  ScrollArea,
-} from "@mantine/core";
+import { Card, Drawer, LoadingOverlay, ScrollArea } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import { GET_DROPOFFS } from "apollo/queries";
 import { DropOffAddModal } from "components/Dropoff/DropOffAddModal";
 import ManageDropOffModal from "components/Dropoff/ManageDropOffModal";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import React, { useState } from "react";
-import {  ManualGearbox, Trash } from "tabler-icons-react";
-import DropOffCard from "./card"
+import { ManualGearbox, Trash } from "tabler-icons-react";
+import DropOffCard from "./card";
 import Controls from "components/controls/Controls";
 const DropOffs = () => {
   const [size] = useState(10);
@@ -102,24 +97,15 @@ const DropOffs = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <>
+          <span style={{ marginLeft: "1px" }}>
             <Controls.ActionButton
               color="primary"
-              title="Delete"
-            
+              title="View Detail"
+              onClick={() => handleManageDropOff(`${rowData.id}`)}
             >
-              <EditIcon style={{ fontSize: '1rem' }}/>
+              <FiEye fontSize="medium" />
             </Controls.ActionButton>
-            <span style={{ marginLeft: "1px" }}>
-              <Controls.ActionButton
-                color="primary"
-                title="View Detail"
-                onClick={() => handleManageDropOff(`${rowData.id}`)}
-              >
-                <FiEye fontSize="medium" />
-              </Controls.ActionButton>
-            </span>
-          </>
+          </span>
         );
       },
     },
@@ -142,7 +128,8 @@ const DropOffs = () => {
       loader={customLoader}
     />
   ) : (
-    <div style={{ width: "98%", margin: "auto" }}>{" "}
+    <div style={{ width: "98%", margin: "auto" }}>
+      {" "}
       <Drawer
         opened={openedEdit}
         onClose={() => setOpenedEdit(false)}
@@ -161,7 +148,7 @@ const DropOffs = () => {
         size="80%"
         position="bottom"
       >
-     <DropOffAddModal
+        <DropOffAddModal
           total={total}
           setTotal={setTotal}
           activePage={activePage}
@@ -170,7 +157,7 @@ const DropOffs = () => {
         />
       </Drawer>
       <Card shadow="sm" p="lg">
-        <DropOffCard/>
+        <DropOffCard />
         <ScrollArea>
           <B2bTable
             total={total}

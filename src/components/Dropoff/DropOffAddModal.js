@@ -19,6 +19,7 @@ import {
   GET_DRIVERS,
   GET_DROPOFFS,
   GET_ORDERS,
+  GET_ORDERS_BY_DROPOFF_STATUS,
   GET_REGIONS,
   GET_VEHICLE_TYPES,
 } from "apollo/queries";
@@ -132,17 +133,17 @@ export const DropOffAddModal = ({
   });
 
   // graphql queries
-  const { loading: ordersLoading } = useQuery(GET_ORDERS, {
+  const { loading: ordersLoading } = useQuery(GET_ORDERS_BY_DROPOFF_STATUS, {
     variables: {
-      first: 100000,
-      page: 1,
+     status: "pending"
     },
     onCompleted(data) {
-      let orders = data.orders;
+      console.log(data)
+      let orders = data.getOrdersByDropOffStatus;
       let ordersArray = [];
 
       // loop over regions data to structure the data for the use of drop down
-      orders.data.forEach((order, index) => {
+      orders?.forEach((order, index) => {
         ordersArray.push({
           label: order?.id,
           value: order?.id,
@@ -252,6 +253,7 @@ export const DropOffAddModal = ({
               <Grid.Col span={6}>
                 <Select
                   data={vehicleTypesDropDownData}
+                  searchable
                   value={form
                     .getInputProps("vehicle_type.connect")
                     ?.value.toString()}
@@ -261,6 +263,7 @@ export const DropOffAddModal = ({
                 />
                 <Select
                   data={distributorsDropDownData}
+                  searchable
                   value={form
                     .getInputProps("from.connect.id")
                     ?.value.toString()}
@@ -271,6 +274,7 @@ export const DropOffAddModal = ({
               </Grid.Col>
               <Grid.Col span={6}>
                 <MultiSelect
+                searchable
                   data={ordersDropDownData}
                   value={form.getInputProps("orders")?.value}
                   onChange={setOrdersDropDownValue}
