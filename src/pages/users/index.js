@@ -12,10 +12,10 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
-import { DEL_USER } from "apollo/mutuations";
+import { CHANGE_USER_STATUS, DEL_USER } from "apollo/mutuations";
 import { FiEdit, FiEye } from "react-icons/fi";
 import { ManualGearbox, Trash } from "tabler-icons-react";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import { GET_ALL_USERS } from "apollo/queries";
 import Controls from "components/controls/Controls";
 import B2bTable from "components/reusable/b2bTable";
@@ -24,6 +24,8 @@ import UserEditModal from "components/User/UserEditModal";
 import { customLoader } from "components/utilities/loader";
 import React from "react";
 import { useState } from "react";
+import BlockIcon from "@mui/icons-material/Block";
+import AccessibilityIcon from "@mui/icons-material/Accessibility";
 
 const Users = () => {
   const [isTrashHovered, setIsTrashHovered] = useState(false);
@@ -120,6 +122,27 @@ const Users = () => {
       },
     },
     {
+      label: "Account",
+      key: "account",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return (
+          <span>
+            {rowData.status === true ? (
+              <Badge variant="light" color="green">
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="light" color="red">
+                Not Active
+              </Badge>
+            )}
+          </span>
+        );
+      },
+    },
+    {
       label: "Roles",
       key: "roles",
       sortable: false,
@@ -137,14 +160,13 @@ const Users = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <>
-          
-          <Controls.ActionButton
+          <div style={{display:"flex"}}>
+            <Controls.ActionButton
               color="primary"
               title="Update"
               onClick={() => handleEditUser(`${rowData.id}`)}
             >
-              <EditIcon style={{ fontSize: '1rem' }}/>
+              <EditIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>
             <Controls.ActionButton
               color="primary"
@@ -153,12 +175,58 @@ const Users = () => {
             >
               <Trash size={17} />
             </Controls.ActionButton>
-          </>
+            <Controls.ActionButton
+              color="primary"
+              title={rowData.status ? "Deactivate" : "Activate"}
+              onClick={() => handleUserStatusChange(rowData.id,rowData.status)}
+            >
+              {rowData.status ? (
+                <BlockIcon size={17} />
+              ) : (
+                <AccessibilityIcon size={17} />
+              )}
+            </Controls.ActionButton>
+          </div>
         );
       },
     },
   ];
+  const [changeUserStatus] = useMutation(CHANGE_USER_STATUS, {
+    refetchQueries: [
+      {
+        query: GET_ALL_USERS,
+        variables: {
+          first: 10,
+          page: activePage,
+        },
+      },
+    ],
+    onCompleted(data) {
+      const action = data.changeUserStatus.status ? "Activated" : "Deactivated";
+      showNotification({
+        color: "green",
+        title: "Success",
+        message: `User ${action} successfully`,
+      });
+    },
+    onError(error) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `${error.message}`,
+      });
+    },
+  });
 
+
+  const handleUserStatusChange = (id, currentStatus) => {
+    changeUserStatus({
+      variables: {
+        id: id,  // Ensure id is an integer
+        status: !currentStatus, // Toggle the status
+      },
+    });
+  };
   const optionsData = {
     actionLabel: "Add User",
     setAddModal: setOpened,

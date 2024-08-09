@@ -850,13 +850,22 @@ export const DEL_USER = gql`
     }
   }
 `;
+export const CHANGE_USER_STATUS = gql`
+  mutation ChangeUserStatus($id: ID!, $status: Boolean!) {
+    changeUserStatus(id: $id, status: $status) {
+      id
+      name
+      status
+    }
+  }
+`;
 
 export const CREATE_USER = gql`
   mutation (
     $name: String!
     $email: String!
     $password: String!
-    $profile_image: Upload!
+    $profile_image: Upload
     $password_confirmation: String!
     $role: CreateRoleBelongsTo!
   ) {

@@ -17,20 +17,20 @@ import {
   Select,
   PasswordInput,
 } from "@mantine/core";
-import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
+import { Box } from "@mui/material";
 import { IconX } from "@tabler/icons";
 import { ATTACH_ROLE, DETTACH_ROLE, UPDATE_USER } from "apollo/mutuations";
 import { GET_ROLES } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 import { useEffect, useState } from "react";
-import { PictureInPicture, Upload } from "tabler-icons-react";
 
 const UserEditModal = ({ setOpenedEdit, editId, data }) => {
   const [roles, setRoles] = useState([]);
   const [currentRoles, setCurrentRoles] = useState([]);
+  const [initialProfileImage, setInitialProfileImage] = useState(null); // State for initial profile image
 
   useEffect(() => {
     data.forEach((data) => {
@@ -39,8 +39,10 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
           name: data.name,
           email: data.email,
         });
-
         setCurrentRoles(data.roles);
+        if (data.profile_image) {
+          setInitialProfileImage(data.profile_image); // Set initial profile image if exists
+        }
       }
     });
     // eslint-disable-next-line
@@ -97,6 +99,13 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
     );
   });
 
+  if (initialProfileImage && files.length === 0) {
+    // Display the initial profile image if no new file is selected
+    previews.unshift(
+      <img key="initial" src={initialProfileImage} alt="Profile" width="130" />
+    );
+  }
+
   const removeButton = (val) => {
     return (
       <ActionIcon size="xs" color="blue" radius="xl" variant="transparent">
@@ -127,7 +136,7 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
         showNotification({
           color: "red",
           title: "Error",
-          message: "Something went wrong while attachng a role!",
+          message: "Something went wrong while attaching a role!",
         });
       },
     });
@@ -143,7 +152,7 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
         showNotification({
           color: "Green",
           title: "Success",
-          message: "Role Dettached!",
+          message: "Role Detached!",
         });
 
         setCurrentRoles(data.detachRole.roles);
@@ -197,6 +206,13 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
   const availableRoles = roles.filter((role) => {
     return !currentRoles.some((currentRole) => currentRole.name === role.value);
   });
+
+  // Handle file selection
+  const handleFileChange = (event) => {
+    const selectedFiles = Array.from(event.target.files);
+    setFiles(selectedFiles);
+  };
+
   return (
     <>
       <LoadingOverlay
@@ -215,62 +231,6 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
             <Stack>
               <Grid>
                 <Grid.Col span={12}>
-                  <ScrollArea style={{ height: 300 }}>
-                    <div style={{ marginTop: "25px" }}>
-                      <Dropzone accept={IMAGE_MIME_TYPE} onDrop={setFiles}>
-                        <Group
-                          position="center"
-                          spacing="xl"
-                          style={{ minHeight: 200, pointerEvents: "none" }}
-                        >
-                          <Dropzone.Accept>
-                            <Upload
-                              size={50}
-                              stroke={1.5}
-                              color={
-                                theme.colors[theme.primaryColor][
-                                  theme.colorScheme === "dark" ? 4 : 6
-                                ]
-                              }
-                            />
-                          </Dropzone.Accept>
-                          <Dropzone.Reject>
-                            <PictureInPicture
-                              size={50}
-                              stroke={1.5}
-                              color={
-                                theme.colors.red[
-                                  theme.colorScheme === "dark" ? 4 : 6
-                                ]
-                              }
-                            />
-                          </Dropzone.Reject>
-                          <Dropzone.Idle>
-                            <PictureInPicture size={50} stroke={1.5} />
-                          </Dropzone.Idle>
-
-                          <div>
-                            <Text size="xl" inline>
-                              Drag images here or click to select files
-                            </Text>
-                            <Text size="sm" color="dimmed" inline mt={7}>
-                              Attach as many files as you like, each file should
-                              not exceed 5mb
-                            </Text>
-                          </div>
-                        </Group>
-                      </Dropzone>
-
-                      <SimpleGrid
-                        cols={4}
-                        breakpoints={[{ maxWidth: "sm", cols: 1 }]}
-                        mt={previews.length > 0 ? "xl" : 0}
-                      >
-                        {previews}
-                      </SimpleGrid>
-                    </div>
-                  </ScrollArea>
-
                   <TextInput
                     required
                     label="Name"
@@ -301,17 +261,52 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
                   placeholder="Password Confirmation"
                   {...form.getInputProps("password_confirmation")}
                 />
-                {/* <Button compact mt="md">
-                  Change Password
-                </Button> */}
               </Card>
+              <div>
+                <Flex
+                  align="center"
+                  justify="space-between" // Distributes space between items
+                  direction="row"
+                  p="xs"
+                  m="xs"
+                  bg="background.paper"
+                  style={{
+                    borderRadius: 8,
+                    height: "70px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Button
+                    onClick={() => document.getElementById("fileInput").click()}
+                  >
+                    Upload Image
+                  </Button>
+
+                  <input
+                    type="file"
+                    id="fileInput"
+                    style={{ display: "none" }}
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+
+                  <SimpleGrid>{previews}</SimpleGrid>
+                </Flex>
+              </div>
+
               <Grid>
                 <Grid.Col span={12}>
                   <Button
+                     style={{
+                      marginTop: "20px",
+                      width: "30%",
+
+                      backgroundColor: "#FF6A00",
+                      color: "#FFFFFF",
+                    }}
+                    fullWidth
                     type="submit"
                     color="blue"
-                    variant="outline"
-                    fullWidth
                   >
                     Submit
                   </Button>

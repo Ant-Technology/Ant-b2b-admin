@@ -23,11 +23,9 @@ const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
   },
-
   control: {
     width: "100%",
     padding: `${theme.spacing.xs}px ${theme.spacing.md}px`,
-
     "&:hover": {
       backgroundColor:
         theme.colorScheme === "dark"
@@ -35,7 +33,6 @@ const useStyles = createStyles((theme) => ({
           : theme.colors.gray[0],
     },
   },
-
   icon: {
     width: 21,
     height: 21,
@@ -67,18 +64,26 @@ function Th({ children, reversed, sorted, onSort }) {
 }
 
 function filterData(data, search) {
-  // console.log("data is ", data, search, data, Object.keys(data[0]))
   const query = search.toLowerCase().trim();
-  return data.filter((item) =>
-    Object.keys(item).some(
-      (key) =>
-        typeof item[key] === "string" &&
-        item[key] &&
-        item[key].toLowerCase().includes(query)
-    )
-  );
-}
+  console.log("Filtering data with query:", query); // Debugging log
+  return data.filter((item) => {
+    return Object.keys(item).some((key) => {
+      const value = item[key];
+      
+      if (typeof value === "string") {
+        return value.toLowerCase().includes(query);
+      }
 
+      if (typeof value === "object" && value !== null) {
+        return Object.values(value).some(val => 
+          typeof val === "string" && val.toLowerCase().includes(query)
+        );
+      }
+
+      return false;
+    });
+  });
+}
 function sortData(data, payload) {
   if (!payload.sortBy) {
     return filterData(data, payload.search);
@@ -86,15 +91,38 @@ function sortData(data, payload) {
 
   return filterData(
     [...data].sort((a, b) => {
-      if (payload.reversed) {
-        return b[payload.sortBy].localeCompare(a[payload.sortBy]);
-      }
+      const aValue = a[payload.sortBy];
+      const bValue = b[payload.sortBy];
 
-      return a[payload.sortBy].localeCompare(b[payload.sortBy]);
+      // Convert values to strings for comparison
+      const aStr = (aValue !== null && aValue !== undefined) ? String(aValue) : '';
+      const bStr = (bValue !== null && bValue !== undefined) ? String(bValue) : '';
+
+      if (payload.sortBy === "cost" || payload.sortBy === "total_price") {
+        // Ensure numeric comparison
+        const aNum = parseFloat(aStr);
+        const bNum = parseFloat(bStr);
+
+        return payload.reversed
+          ? bNum - aNum
+          : aNum - bNum;
+      } else if (payload.sortBy === "driver") {
+        const aDriver = aValue?.name || "";
+        const bDriver = bValue?.name || "";
+        return payload.reversed
+          ? bDriver.localeCompare(aDriver)
+          : aDriver.localeCompare(bDriver);
+      } else {
+        // For other fields
+        return payload.reversed
+          ? bStr.localeCompare(aStr)
+          : aStr.localeCompare(bStr);
+      }
     }),
     payload.search
   );
 }
+
 
 const B2bTable = ({
   data,
@@ -114,8 +142,6 @@ const B2bTable = ({
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
-  //pagination states
-
   const setSorting = (field) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
@@ -125,6 +151,7 @@ const B2bTable = ({
 
   const handleSearchChange = (event) => {
     const { value } = event.currentTarget;
+    console.log("Search input:", value); // Debugging log
     setSearch(value);
     setSortedData(
       sortData(data, { sortBy, reversed: reverseSortDirection, search: value })

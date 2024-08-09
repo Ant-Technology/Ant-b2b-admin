@@ -69,7 +69,7 @@ const Orders = () => {
       label: "Status",
       key: "status",
       sortable: false,
-      searchable: false,
+      searchable: true,
       render: (rowData) => {
         return <span>{rowData.state}</span>;
       },

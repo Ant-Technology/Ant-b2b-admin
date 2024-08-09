@@ -617,6 +617,15 @@ export const GET_ORDERS = gql`
     }
   }
 `;
+export const GET_ORDERS_BY_DROPOFF_STATUS = gql`
+  query ($status: String!) {
+    getOrdersByDropOffStatus(status: $status) {
+      id
+      total_price
+    }
+  }
+`;
+
 
 //  shipment
 export const GET_SHIPMENT = gql`
@@ -1053,6 +1062,7 @@ export const GET_ALL_USERS = gql`
       data {
         id
         name
+        status
         email
         profile_image
         roles {

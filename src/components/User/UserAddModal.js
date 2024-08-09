@@ -18,9 +18,7 @@ import { showNotification } from "@mantine/notifications";
 import { CREATE_USER } from "apollo/mutuations";
 import { GET_ALL_USERS, GET_ROLES } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
-import React, { useState } from "react";
-import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from "@mantine/dropzone";
-import { PictureInPicture, Upload } from "tabler-icons-react";
+import React, { useState, useRef } from "react";
 
 const UserAddModal = ({
   setOpened,
@@ -29,9 +27,12 @@ const UserAddModal = ({
   activePage,
   setActivePage,
 }) => {
-  //roles
+  // roles
   const [roles, setRoles] = useState([]);
   const [files, setFiles] = useState([]);
+
+  // ref for file input
+  const fileInputRef = useRef(null);
 
   // apollo queries
   const { data: rolesList, loading: rolesListLoading } = useQuery(GET_ROLES, {
@@ -104,7 +105,6 @@ const UserAddModal = ({
       },
     },
   });
-
   const submit = () => {
     addUser({
       variables: {
@@ -126,19 +126,30 @@ const UserAddModal = ({
         setOpened(false);
       },
       onError(error) {
-        setOpened(false);
+        setOpened(true);
+        let errorMessage = "User Not Created!";
+        if (error?.graphQLErrors?.length) {
+          const validationErrors =
+            error.graphQLErrors[0]?.extensions?.validation;
+          if (validationErrors) {
+            errorMessage = Object.values(validationErrors).flat().join(", ");
+          }
+        }
         showNotification({
           color: "red",
           title: "Error",
-          message: "User Not Created!",
+          message: errorMessage,
         });
       },
     });
-    // e.preventDefault();
+  };
+
+  // handle file change
+  const handleFileChange = (event) => {
+    setFiles(Array.from(event.target.files));
   };
 
   // set previews
-
   const previews = files.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
     return (
@@ -147,7 +158,7 @@ const UserAddModal = ({
         src={imageUrl}
         alt=""
         width="130"
-        imageProps={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
+        onLoad={() => URL.revokeObjectURL(imageUrl)}
       />
     );
   });
@@ -197,15 +208,13 @@ const UserAddModal = ({
                     type="password"
                     {...form.getInputProps("password")}
                   />
-
                   <TextInput
                     required
-                    label="Password_confirmation"
-                    placeholder="Password_confirmation"
+                    label="Password Confirmation"
+                    placeholder="Password Confirmation"
                     type="password"
                     {...form.getInputProps("password_confirmation")}
                   />
-
                   <Select
                     data={roles}
                     value={form.getInputProps("role.connect")?.value}
@@ -213,71 +222,46 @@ const UserAddModal = ({
                     label="Select Role"
                     placeholder="Pick a role this user belongs to"
                   />
-                  <ScrollArea style={{ height: 300 }}>
-                    <div style={{ marginTop: "25px" }}>
-                      <Dropzone accept={IMAGE_MIME_TYPE} onDrop={setFiles}>
-                        <Group
-                          position="center"
-                          spacing="xl"
-                          style={{ minHeight: 200, pointerEvents: "none" }}
-                        >
-                          <Dropzone.Accept>
-                            <Upload
-                              size={50}
-                              stroke={1.5}
-                              color={
-                                theme.colors[theme.primaryColor][
-                                  theme.colorScheme === "dark" ? 4 : 6
-                                ]
-                              }
-                            />
-                          </Dropzone.Accept>
-                          <Dropzone.Reject>
-                            <PictureInPicture
-                              size={50}
-                              stroke={1.5}
-                              color={
-                                theme.colors.red[
-                                  theme.colorScheme === "dark" ? 4 : 6
-                                ]
-                              }
-                            />
-                          </Dropzone.Reject>
-                          <Dropzone.Idle>
-                            <PictureInPicture size={50} stroke={1.5} />
-                          </Dropzone.Idle>
 
-                          <div>
-                            <Text size="xl" inline>
-                              Drag images here or click to select files
-                            </Text>
-                            <Text size="sm" color="dimmed" inline mt={7}>
-                              Attach as many files as you like, each file should
-                              not exceed 5mb
-                            </Text>
-                          </div>
-                        </Group>
-                      </Dropzone>
-
-                      <SimpleGrid
-                        cols={4}
-                        breakpoints={[{ maxWidth: "sm", cols: 1 }]}
-                        mt={previews.length > 0 ? "xl" : 0}
-                      >
-                        {previews}
-                      </SimpleGrid>
-                    </div>
-                  </ScrollArea>
+                  <div style={{ marginTop: "25px" }}>
+                    <Button
+                      onClick={() => fileInputRef.current.click()}
+                      color="blue"
+                      variant="outline"
+                      fullWidth
+                    >
+                      Upload Image
+                    </Button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      onChange={handleFileChange}
+                    />
+                    <SimpleGrid
+                      cols={4}
+                      breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                      mt={previews.length > 0 ? "xl" : 0}
+                    >
+                      {previews}
+                    </SimpleGrid>
+                  </div>
                 </Grid.Col>
               </Grid>
-
               <Grid>
                 <Grid.Col span={12}>
                   <Button
+                    style={{
+                      marginTop: "20px",
+                      width: "30%",
+
+                      backgroundColor: "#FF6A00",
+                      color: "#FFFFFF",
+                    }}
+                    fullWidth
                     type="submit"
                     color="blue"
-                    variant="outline"
-                    fullWidth
                   >
                     Submit
                   </Button>
