@@ -210,31 +210,6 @@ const RegionEditModal = ({ editId, setOpenedEdit }) => {
             </Grid>
           </Stack>
 
-          <Grid style={{ marginTop: "10px" }}>
-            <Grid.Col span={12}>
-              <ScrollArea style={{ height: "auto" }}>
-                {isLoaded ? (
-                  <GoogleMap
-                    center={center}
-                    zoom={14}
-                    mapContainerStyle={containerStyle}
-                    onLoad={mapLoadHandler}
-                    onClick={() =>
-                      mapRef && setCenter(mapRef.getCenter().toJSON())
-                    }
-                  >
-                    <MarkerF
-                      position={center}
-                      draggable
-                      onDragEnd={(a) => setLocation(a.latLng.toJSON())}
-                    />
-                  </GoogleMap>
-                ) : (
-                  <Loader />
-                )}
-              </ScrollArea>
-            </Grid.Col>
-          </Grid>
           <Grid style={{ marginTop: "10px", marginBottom: "20px" }}>
             <Grid.Col span={4}>
               <Button
