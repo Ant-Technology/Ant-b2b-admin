@@ -851,6 +851,7 @@ export const GET_VEHICLE_TYPES = gql`
       data {
         id
         title
+        status
         image
         type
         starting_price

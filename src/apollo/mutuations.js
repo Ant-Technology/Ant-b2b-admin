@@ -860,6 +860,15 @@ export const CHANGE_USER_STATUS = gql`
   }
 `;
 
+export const CHANGE_VEHICLE_TYPE_STATUS = gql`
+  mutation ChangeVehicleTypeStatus($id: ID!, $status: String!) {
+    changeVehicleTypeStatus(id: $id, status: $status) {
+      id
+      status
+    }
+  }
+`;
+
 export const CREATE_USER = gql`
   mutation (
     $name: String!

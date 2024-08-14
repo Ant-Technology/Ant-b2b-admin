@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@apollo/client";
 import {
   Avatar,
+  Badge,
   Button,
   Card,
   Drawer,
@@ -14,7 +15,7 @@ import { showNotification } from "@mantine/notifications";
 
 import axios from "axios";
 import { FiEdit, FiEye } from "react-icons/fi";
-import { DEL_VEHICLE_TYPES } from "apollo/mutuations";
+import { CHANGE_VEHICLE_TYPE_STATUS, DEL_VEHICLE_TYPES } from "apollo/mutuations";
 import { GET_VEHICLE_TYPES } from "apollo/queries";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
@@ -24,6 +25,8 @@ import React, { useState } from "react";
 import { Edit, Trash } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
 import EditIcon from "@mui/icons-material/Edit";
+import BlockIcon from "@mui/icons-material/Block";
+import AccessibilityIcon from "@mui/icons-material/Accessibility";
 
 const VehicleTypes = () => {
   const [size] = useState(10);
@@ -83,6 +86,48 @@ const VehicleTypes = () => {
     setDeleteID(id);
   };
 
+  const [changeVehicleTypeStatus] = useMutation(CHANGE_VEHICLE_TYPE_STATUS, {
+    refetchQueries: [
+      {
+        query: GET_VEHICLE_TYPES,
+        variables: {
+          first: 10,
+          page: activePage,
+        },
+      },
+    ],
+    onCompleted(data) {
+      const action = data.changeVehicleTypeStatus.status=== "ACTIVATED" ? "Activated" : "Deactivated";
+      showNotification({
+        color: "green",
+        title: "Success",
+        message: `VehicleType ${action} successfully`,
+      });
+    },
+    onError(error) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `${error.message}`,
+      });
+    },
+  });
+  const handleVehicleTypStatusChange = (id, currentStatus) => {
+    let status;
+    if (currentStatus === 'DEACTIVATED') {
+      status = 'ACTIVATED'
+    }
+    else{
+      status = "DEACTIVATED"
+    }
+    changeVehicleTypeStatus({
+      variables: {
+        id: id,  // Ensure id is an integer
+        status: status, // Toggle the status
+      },
+    });
+  };
+
   const deleteVehicleType = () => {
     delVehicleType({
       variables: { id: deleteID },
@@ -127,15 +172,6 @@ const VehicleTypes = () => {
   const theme = useMantineTheme();
 
   const headerData = [
-    {
-      label: "id",
-      key: "id",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.id}</span>;
-      },
-    },
 
     {
       label: "Title",
@@ -146,14 +182,7 @@ const VehicleTypes = () => {
         return <span>{rowData.title}</span>;
       },
     },
-    {
-      label: "Image",
-      key: "title",
-      searchable: true,
-      render: (rowData) => {
-        return <Avatar src={rowData.image} alt="avatar" />;
-      },
-    },
+   
     {
       label: "Vehicles",
       key: "title",
@@ -170,6 +199,28 @@ const VehicleTypes = () => {
       searchable: true,
       render: (rowData) => {
         return <span>{rowData.type}</span>;
+      },
+    },
+    
+    {
+      label: "Status",
+      key: "status",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return (
+          <span>
+            {rowData.status === "ACTIVATED" ? (
+              <Badge variant="light" color="green">
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="light" color="red">
+                Not Active
+              </Badge>
+            )}
+          </span>
+        );
       },
     },
     //price_per_kilometer
@@ -215,7 +266,7 @@ const VehicleTypes = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <>
+          <div style={{display:"flex"}}>
             <Controls.ActionButton
               color="primary"
               title="Update"
@@ -229,9 +280,20 @@ const VehicleTypes = () => {
               title="Delete"
               onClick={() => handleDelete(`${rowData.id}`)}
             >
-              <Trash size={17} />
+              <Trash size={22} />
             </Controls.ActionButton>
-          </>
+            <Controls.ActionButton
+              color="primary"
+              title={rowData?.status ==="ACTIVATED" ? "Deactivate" : "Activate"}
+              onClick={() => handleVehicleTypStatusChange(rowData.id,rowData.status)}
+            >
+              {rowData.status==="ACTIVATED" ? (
+                <BlockIcon size={17} />
+              ) : (
+                <AccessibilityIcon size={17} />
+              )}
+            </Controls.ActionButton>
+          </div>
         );
       },
     },
