@@ -25,8 +25,9 @@ import React, { useState } from "react";
 import { Edit, Trash } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
 import EditIcon from "@mui/icons-material/Edit";
-import BlockIcon from "@mui/icons-material/Block";
-import AccessibilityIcon from "@mui/icons-material/Accessibility";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+
 
 const VehicleTypes = () => {
   const [size] = useState(10);
@@ -280,7 +281,7 @@ const VehicleTypes = () => {
               title="Delete"
               onClick={() => handleDelete(`${rowData.id}`)}
             >
-              <Trash size={22} />
+              <Trash size={25} />
             </Controls.ActionButton>
             <Controls.ActionButton
               color="primary"
@@ -288,9 +289,9 @@ const VehicleTypes = () => {
               onClick={() => handleVehicleTypStatusChange(rowData.id,rowData.status)}
             >
               {rowData.status==="ACTIVATED" ? (
-                <BlockIcon size={17} />
+                <CancelIcon size={17} />
               ) : (
-                <AccessibilityIcon size={17} />
+                <CheckCircleIcon size={17} />
               )}
             </Controls.ActionButton>
           </div>

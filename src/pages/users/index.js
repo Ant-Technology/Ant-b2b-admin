@@ -24,8 +24,8 @@ import UserEditModal from "components/User/UserEditModal";
 import { customLoader } from "components/utilities/loader";
 import React from "react";
 import { useState } from "react";
-import BlockIcon from "@mui/icons-material/Block";
-import AccessibilityIcon from "@mui/icons-material/Accessibility";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const Users = () => {
   const [isTrashHovered, setIsTrashHovered] = useState(false);
@@ -181,9 +181,9 @@ const Users = () => {
               onClick={() => handleUserStatusChange(rowData.id,rowData.status)}
             >
               {rowData.status ? (
-                <BlockIcon size={17} />
+                <CancelIcon size={17} />
               ) : (
-                <AccessibilityIcon size={17} />
+                <CheckCircleIcon size={17} />
               )}
             </Controls.ActionButton>
           </div>

@@ -246,10 +246,6 @@ export const GET_REGION = gql`
         en
         am
       }
-      _geo {
-        lat
-        lng
-      }
     }
   }
 `;
