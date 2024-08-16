@@ -106,16 +106,6 @@ const Vehicles = () => {
         return <span>{rowData.id}</span>;
       },
     },
-
-    {
-      label: "Name",
-      key: "name",
-      sortable: true,
-      searchable: true,
-      render: (rowData) => {
-        return <span>{rowData.name}</span>;
-      },
-    },
     {
       label: "Owner Name",
       key: "owner_name",

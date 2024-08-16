@@ -121,6 +121,7 @@ export const GET_WARE_HOUSES = gql`
       data {
         id
         name
+        status
         specific_area
         region {
           id
@@ -883,6 +884,16 @@ export const GET_VEHICLE_TYPE = gql`
     }
   }
 `;
+// unassignedDrivers
+export const GET_UNASSIGNED_DRIVERS = gql`
+  query {
+    getUnAssignedDrivers {
+      id
+      name
+    }
+  }
+`;
+
 
 //drivers
 export const GET_DRIVERS = gql`
@@ -924,7 +935,6 @@ export const GET_VEHICLES = gql`
     vehicles(first: $first, page: $page) {
       data {
         id
-        name
         owner_name
         color
         plate_number

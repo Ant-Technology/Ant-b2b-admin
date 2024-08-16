@@ -10,7 +10,12 @@ import {
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { CREATE_VEHICLE } from "apollo/mutuations";
-import { GET_DRIVERS, GET_VEHICLES, GET_VEHICLE_TYPES } from "apollo/queries";
+import {
+  GET_DRIVERS,
+  GET_UNASSIGNED_DRIVERS,
+  GET_VEHICLES,
+  GET_VEHICLE_TYPES,
+} from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 import React, { useState } from "react";
 
@@ -21,11 +26,8 @@ const VehicleAddModal = ({
   activePage,
   setActivePage,
 }) => {
-
-
   const form = useForm({
     initialValues: {
-      name: "",
       model: "",
       plate_number: "",
       color: "",
@@ -61,13 +63,10 @@ const VehicleAddModal = ({
       setOpened(false);
     },
   });
-  const { loading: driver_loading } = useQuery(GET_DRIVERS, {
-    variables: {
-      first: 100,
-    },
+  const { loading: driver_loading } = useQuery(GET_UNASSIGNED_DRIVERS, {
     onCompleted(data) {
       const newArr = [];
-      data.drivers.data.forEach((element) => {
+      data.getUnAssignedDrivers.forEach((element) => {
         newArr.push({ label: element.name, value: element.id });
       });
       setDriverDropDownData(newArr);
@@ -111,7 +110,6 @@ const VehicleAddModal = ({
   const submit = () => {
     addVehicle({
       variables: {
-        name: form.getInputProps("name").value,
         model: form.getInputProps("model").value,
         plate_number: form.getInputProps("plate_number").value,
         color: form.getInputProps("color").value,
@@ -161,19 +159,17 @@ const VehicleAddModal = ({
           <Grid>
             <Grid.Col span={6}>
               <TextInput
-                placeholder="Name"
-                label="Name"
-                {...form.getInputProps("name")}
-                withAsterisk
-              />
-
-              <TextInput
                 placeholder="Model"
                 label="Model"
                 {...form.getInputProps("model")}
                 withAsterisk
               />
-
+              <TextInput
+                placeholder="Owner Phone"
+                label="Owner Phone"
+                {...form.getInputProps("owner_phone")}
+                withAsterisk
+              />
               <TextInput
                 placeholder="Plate Number"
                 label="Plate Number"
@@ -195,15 +191,10 @@ const VehicleAddModal = ({
                 {...form.getInputProps("owner_name")}
                 withAsterisk
               />
-              <TextInput
-                placeholder="Owner Phone"
-                label="Owner Phone"
-                {...form.getInputProps("owner_phone")}
-                withAsterisk
-              />
+
               {/* pick vehcle type */}
               <Select
-              searchable
+                searchable
                 label="Select Vehicle Type"
                 placeholder="Pick one"
                 data={vehicleTypeDropDownData}
@@ -225,7 +216,18 @@ const VehicleAddModal = ({
           </Grid>
           <Grid>
             <Grid.Col span={12}>
-              <Button type="submit" color="blue" variant="outline" fullWidth>
+              <Button
+                type="submit"
+                style={{
+                  marginTop: "20px",
+                  width: "20%",
+
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                fullWidth
+                color="blue"
+              >
                 Submit
               </Button>
             </Grid.Col>

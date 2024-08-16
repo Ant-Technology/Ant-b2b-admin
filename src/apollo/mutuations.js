@@ -748,7 +748,6 @@ export const DEL_DRIVER = gql`
 
 export const CREATE_VEHICLE = gql`
   mutation (
-    $name: String!
     $model: String!
     $plate_number: String!
     $color: String!
@@ -759,7 +758,6 @@ export const CREATE_VEHICLE = gql`
   ) {
     createVehicle(
       input: {
-        name: $name
         model: $model
         plate_number: $plate_number
         color: $color
@@ -868,7 +866,14 @@ export const CHANGE_VEHICLE_TYPE_STATUS = gql`
     }
   }
 `;
-
+export const CHANGE_WAREHOUSE_STATUS = gql`
+  mutation ChangeWarehouseStatus($id: ID!, $status: String!) {
+    changeWarehouseStatus(id: $id, status: $status) {
+      id
+      status
+    }
+  }
+`;
 export const CREATE_USER = gql`
   mutation (
     $name: String!
