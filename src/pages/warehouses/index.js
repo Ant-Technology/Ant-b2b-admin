@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Drawer, LoadingOverlay, useMantineTheme } from "@mantine/core";
+import { Badge, Drawer, LoadingOverlay, useMantineTheme } from "@mantine/core";
 import { ScrollArea, Group, Button, Card, Avatar, Modal } from "@mantine/core";
 import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
 import axios from "axios";
@@ -9,10 +9,11 @@ import WarehouseAddModal from "components/Warehouse/warehouseAddModal";
 import WarehouseEditModal from "components/Warehouse/warehouseEditModal";
 import { showNotification } from "@mantine/notifications";
 import EditIcon from '@mui/icons-material/Edit';
-
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { customLoader } from "components/utilities/loader";
 import { GET_WARE_HOUSE, GET_WARE_HOUSES } from "apollo/queries";
-import { DEL_WAREHOUSE } from "apollo/mutuations";
+import { CHANGE_WAREHOUSE_STATUS, DEL_WAREHOUSE } from "apollo/mutuations";
 import B2bTable from "components/reusable/b2bTable";
 import ShowWarehouseLocation from "components/Warehouse/showWarehouseLocation";
 import Controls from "components/controls/Controls";
@@ -111,17 +112,50 @@ const Warehouses = () => {
     setEditId(id);
     setOpenedEdit(true);
   };
+  
+  const [changeWarehouseStatus] = useMutation(CHANGE_WAREHOUSE_STATUS, {
+    refetchQueries: [
+      {
+        query: GET_WARE_HOUSES,
+        variables: {
+          first: 10,
+          page: activePage,
+        },
+      },
+    ],
+    onCompleted(data) {
+      const action = data.changeWarehouseStatus.status=== "ACTIVE" ? "Activated" : "Deactivated";
+      showNotification({
+        color: "green",
+        title: "Success",
+        message: `Warehouse ${action} successfully`,
+      });
+    },
+    onError(error) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `${error.message}`,
+      });
+    },
+  });
+  const handleWarehouseStatusChange = (id, currentStatus) => {
+    let status;
+    if (currentStatus === 'DEACTIVATED') {
+      status = 'ACTIVE'
+    }
+    else{
+      status = "DEACTIVATED"
+    }
+    changeWarehouseStatus({
+      variables: {
+        id: id,  // Ensure id is an integer
+        status: status, // Toggle the status
+      },
+    });
+  };
 
   const headerData = [
-    {
-      label: "id",
-      key: "id",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.id}</span>;
-      },
-    },
     {
       label: "Name",
       key: "name",
@@ -179,6 +213,28 @@ const Warehouses = () => {
         );
       },
     },
+    
+    {
+      label: "Status",
+      key: "status",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return (
+          <span>
+            {rowData.status === "ACTIVE" ? (
+              <Badge variant="light" color="green">
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="light" color="red">
+                Not Active
+              </Badge>
+            )}
+          </span>
+        );
+      },
+    },
     {
       label: "Actions",
       key: "actions",
@@ -186,7 +242,7 @@ const Warehouses = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <>
+          <div style={{display:"flex"}}>
                   <Controls.ActionButton
               color="primary"
               title="Update"
@@ -202,8 +258,20 @@ const Warehouses = () => {
             >
               <Trash size={17} />
             </Controls.ActionButton>
+          
+            <Controls.ActionButton
+              color="primary"
+              title={rowData?.status ==="ACTIVE" ? "Deactivate" : "Activate"}
+              onClick={() => handleWarehouseStatusChange(rowData.id,rowData.status)}
+            >
+              {rowData.status==="ACTIVE" ? (
+                <CancelIcon size={15} />
+              ) : (
+                <CheckCircleIcon size={15} />
+              )}
+            </Controls.ActionButton>
 
-          </>
+          </div>
         );
       },
     },
