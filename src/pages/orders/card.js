@@ -17,9 +17,10 @@ import { API } from "utiles/url";
 const useStyles = createStyles((theme) => ({
   root: {
     padding: theme.spacing.xl * 1.5,
-    maxWidth:800
+    maxWidth: 800,
   },
   paper: {
+    cursor:"pointer",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center", // Center content vertically
@@ -53,7 +54,6 @@ const useStyles = createStyles((theme) => ({
     textTransform: "uppercase",
     color: "#FFFFFF",
   },
-
 }));
 
 const icons = {
@@ -63,7 +63,7 @@ const icons = {
   coin: Coin,
 };
 
-export default function StatsGrid() {
+export default function StatsGrid({ onCardClick }) {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -89,18 +89,27 @@ export default function StatsGrid() {
       console.error("Error fetching data:", error);
     }
   };
- 
 
   const { classes } = useStyles();
-  
- 
+
   return (
     <div className={classes.root}>
       <SimpleGrid
         cols={5} // Adjust the number of columns to match the number of papers
-        breakpoints={[{ maxWidth: "xl", cols: 4 }, { maxWidth: "md", cols: 3 }, { maxWidth: "sm", cols: 2 }, { maxWidth: "xs", cols: 1 }]}
+        breakpoints={[
+          { maxWidth: "xl", cols: 4 },
+          { maxWidth: "md", cols: 3 },
+          { maxWidth: "sm", cols: 2 },
+          { maxWidth: "xs", cols: 1 },
+        ]}
       >
-        <Paper className={classes.paper} withBorder p="md" radius="md">
+        <Paper
+          onClick={() => onCardClick("CANCELED")} // Handle card click
+          className={classes.paper}
+          withBorder
+          p="md"
+          radius="md"
+        >
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               CANCELED
@@ -111,7 +120,7 @@ export default function StatsGrid() {
             <Text className={classes.value}>{data?.CANCELED}</Text>
           </Group>
         </Paper>
-        <Paper className={classes.paper} withBorder p="md" radius="md">
+        <Paper onClick={() => onCardClick("SHIPPED")} className={classes.paper} withBorder p="md" radius="md">
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               SHIPPED
@@ -122,7 +131,7 @@ export default function StatsGrid() {
             <Text className={classes.value}>{data?.SHIPPED}</Text>
           </Group>
         </Paper>
-        <Paper  className={classes.paper} withBorder p="md" radius="md">
+        <Paper onClick={() => onCardClick("DELIVERED")} className={classes.paper} withBorder p="md" radius="md">
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               DELIVERED
@@ -133,7 +142,7 @@ export default function StatsGrid() {
             <Text className={classes.value}>{data?.DELIVERED}</Text>
           </Group>
         </Paper>
-        <Paper className={classes.paper} withBorder p="md" radius="md">
+        <Paper onClick={() => onCardClick("ORDERED")} className={classes.paper} withBorder p="md" radius="md">
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               ORDERED
@@ -144,10 +153,10 @@ export default function StatsGrid() {
             <Text className={classes.value}>{data?.ORDERED}</Text>
           </Group>
         </Paper>
-        <Paper className={classes.paper} withBorder p="md" radius="md">
+        <Paper onClick={() => onCardClick("BACKORDERED")} className={classes.paper} withBorder p="md" radius="md">
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
-            BACKORDERED
+              BACKORDERED
             </Text>
           </Group>
 

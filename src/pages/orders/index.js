@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@apollo/client";
-import { GET_ORDERS } from "apollo/queries";
 import {
+  GET_ORDERS,
+  GET_ORDERS_BY_DROPOFF_STATUS,
+  GET_ORDERS_BY_STATUS,
+} from "apollo/queries";
+import {
+  Button,
   Card,
   Drawer,
   LoadingOverlay,
@@ -12,10 +17,12 @@ import B2bTable from "components/reusable/b2bTable";
 import { ManualGearbox } from "tabler-icons-react";
 import { customLoader } from "components/utilities/loader";
 import ManageOrderModal from "components/Order/ManageOrderModal";
-import OrderCard from "./card"
+import OrderCard from "./card";
 import Controls from "components/controls/Controls";
 import { FiEye } from "react-icons/fi";
 const Orders = () => {
+  const [dropoffStatus, setDropoffStatus] = useState(null); // Track selected status
+
   const [size] = useState(10);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
@@ -25,18 +32,47 @@ const Orders = () => {
   //pagination states
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
+  const { data, loading, fetchMore, refetch } = useQuery(
+    dropoffStatus ? GET_ORDERS_BY_STATUS : GET_ORDERS,
+    {
+      variables: dropoffStatus
+        ? {
+            status: dropoffStatus, // Ensure this matches exactly with backend
+            first: size, // Increase `first` to fetch more data
+            page: activePage,
+            ordered_by: [
+              {
+                column: "CREATED_AT",
+                order: "DESC",
+              },
+            ],
+          }
+        : { first: size, page: activePage },
 
-  const { data, loading, fetchMore } = useQuery(GET_ORDERS, {
-    variables: {
-      first: size,
-      page: activePage,
-    },
-  });
+      onCompleted: (data) => {
+        console.log("Query completed with data:", data);
+        console.log(
+          "Pagination Info:",
+          data?.getOrdersByOrderItemStatus?.paginatorInfo
+        );
+        if (data?.getOrdersByOrderItemStatus) {
+          setTotal(data?.getOrdersByOrderItemStatus?.paginatorInfo.lastPage);
+        } else {
+          setTotal(data?.orders.paginatorInfo.lastPage);
+        }
+      },
 
-  if (!total && data) {
-    setTotal(data.orders.paginatorInfo.lastPage);
-  }
+      onError: (error) => {
+        console.error("Query encountered an error:", error);
+      },
+    }
+  );
 
+  const clearFilter = () => {
+    setDropoffStatus(null); // Clear the filter
+    refetch(); // Refetch data using GET_ORDERS
+    setActivePage(1); // Reset to the first page
+  };
   const headerData = [
     {
       label: "id",
@@ -74,7 +110,6 @@ const Orders = () => {
         return <span>{rowData.state}</span>;
       },
     },
-    //productSkuCount
     {
       label: "Product Count",
       key: "productSkuCount",
@@ -101,14 +136,14 @@ const Orders = () => {
       render: (rowData) => {
         return (
           <span style={{ marginLeft: "1px" }}>
-          <Controls.ActionButton
-            color="primary"
-            title="View Detail"
-            onClick={() => ManageOrder(`${rowData.id}`)}
-          >
-            <FiEye fontSize="medium" />
-          </Controls.ActionButton>
-        </span>
+            <Controls.ActionButton
+              color="primary"
+              title="View Detail"
+              onClick={() => ManageOrder(`${rowData.id}`)}
+            >
+              <FiEye fontSize="medium" />
+            </Controls.ActionButton>
+          </span>
         );
       },
     },
@@ -128,7 +163,6 @@ const Orders = () => {
     setOpenedEdit(true);
     setEditId(id);
   };
-
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -164,7 +198,23 @@ const Orders = () => {
       </Drawer>
 
       <Card shadow="sm" p="lg">
-        <OrderCard/>
+        <OrderCard onCardClick={setDropoffStatus} />{" "}
+        {dropoffStatus && (
+          <Button
+            onClick={clearFilter}
+            style={{
+              marginLeft: "40px",
+              width: "10%",
+              backgroundColor: "#FF6A00",
+              color: "#FFFFFF",
+            }}
+            fullWidth
+            type="submit"
+            color="blue"
+          >
+            Clear Filter
+          </Button>
+        )}
         <ScrollArea>
           <B2bTable
             total={total}
@@ -172,7 +222,9 @@ const Orders = () => {
             handleChange={handleChange}
             header={headerData}
             loading={loading}
-            data={data ? data.orders.data : []}
+            data={
+              data?.orders?.data || data?.getOrdersByOrderItemStatus?.data || []
+            }
           />
         </ScrollArea>
       </Card>
