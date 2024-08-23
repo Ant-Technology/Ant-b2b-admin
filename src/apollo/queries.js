@@ -614,6 +614,59 @@ export const GET_ORDERS = gql`
     }
   }
 `;
+
+export const GET_ORDERS_BY_STATUS = gql`
+  query getOrdersByOrderItemStatus(
+    $status: String!
+    $first: Int!
+    $page: Int
+    $ordered_by: [OrderByInput]!
+  ) {
+    getOrdersByOrderItemStatus(
+      status: $status
+      first: $first
+      page: $page
+      orderBy: $ordered_by
+    ) {
+      data {
+        id
+        total_price
+        created_at_human
+        created_at
+        retailer {
+          id
+          name
+        }
+        state
+        driver {
+          id
+          name
+        }
+        productSkuCount
+        items {
+          id
+          quantity
+          state
+          product_sku {
+            id
+            sku
+            price
+          }
+        }
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
 export const GET_ORDERS_BY_DROPOFF_STATUS = gql`
   query ($status: String!) {
     getOrdersByDropOffStatus(status: $status) {
