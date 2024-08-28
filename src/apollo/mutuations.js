@@ -874,6 +874,14 @@ export const CHANGE_WAREHOUSE_STATUS = gql`
     }
   }
 `;
+export const RECALL_DRIVER_FOR_PENDING_DROPOFF = gql`
+  mutation RecallDriverForPendingDropoff($dropoff_id: ID!) {
+    recallDriverForPendingDropoff(dropoff_id: $dropoff_id) {
+      id
+    }
+  }
+`;
+
 export const CREATE_USER = gql`
   mutation (
     $name: String!

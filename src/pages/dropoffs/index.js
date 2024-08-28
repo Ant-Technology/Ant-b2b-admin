@@ -1,6 +1,8 @@
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { Card, Drawer, LoadingOverlay, ScrollArea } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
+import { IoIosCall } from "react-icons/io";
+
 import EditIcon from "@mui/icons-material/Edit";
 import { GET_DROPOFFS } from "apollo/queries";
 import { DropOffAddModal } from "components/Dropoff/DropOffAddModal";
@@ -11,6 +13,9 @@ import React, { useState } from "react";
 import { ManualGearbox, Trash } from "tabler-icons-react";
 import DropOffCard from "./card";
 import Controls from "components/controls/Controls";
+import CallIcon from '@mui/icons-material/Call';
+import { RECALL_DRIVER_FOR_PENDING_DROPOFF } from "apollo/mutuations";
+import { showNotification } from "@mantine/notifications";
 const DropOffs = () => {
   const [size] = useState(10);
   const [opened, setOpened] = useState(false);
@@ -105,11 +110,49 @@ const DropOffs = () => {
             >
               <FiEye fontSize="medium" />
             </Controls.ActionButton>
+            {rowData.status === "PENDING" &&
+            <Controls.ActionButton
+              color="primary"
+              title="Call Driver"
+              onClick={() => handleRecallDriver(`${rowData.id}`)}
+            >
+              <IoIosCall fontSize="medium" />
+            </Controls.ActionButton>
+      }
           </span>
         );
       },
     },
   ];
+  const [recallDriverForPendingDropoff] = useMutation(RECALL_DRIVER_FOR_PENDING_DROPOFF, {
+    refetchQueries: [
+      {
+        query: GET_DROPOFFS,
+        variables: {
+          first: 10,
+          page: activePage,
+        },
+      },
+    ],
+    onCompleted(data) {
+      showNotification({
+        color: "green",
+        title: "Success",
+        message: "Driver recalled successfully!",
+      });
+    },
+    onError(error) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `${error.message}`,
+      });
+    },
+  });
+  const handleRecallDriver = (id) => {
+    recallDriverForPendingDropoff({ variables: { dropoff_id: id } });
+  };
+
   const handleManageDropOff = (id) => {
     setOpenedEdit(true);
     setEditId(id);
