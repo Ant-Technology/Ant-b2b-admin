@@ -9,11 +9,12 @@ import { DropOffAddModal } from "components/Dropoff/DropOffAddModal";
 import ManageDropOffModal from "components/Dropoff/ManageDropOffModal";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ManualGearbox, Trash } from "tabler-icons-react";
+import Pusher from "pusher-js";
 import DropOffCard from "./card";
 import Controls from "components/controls/Controls";
-import CallIcon from '@mui/icons-material/Call';
+import CallIcon from "@mui/icons-material/Call";
 import { RECALL_DRIVER_FOR_PENDING_DROPOFF } from "apollo/mutuations";
 import { showNotification } from "@mantine/notifications";
 const DropOffs = () => {
@@ -21,14 +22,11 @@ const DropOffs = () => {
   const [opened, setOpened] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
-  // const [openedDelete, setOpenedDelete] = useState(false);
-  // const [deleteID, setDeleteID] = useState(false);
-
-  //pagination states
-  const [activePage, setActivePage] = useState(1);
+  const [isCall, setCall] = useState(false);
+   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const { data, loading } = useQuery(GET_DROPOFFS, {
+  const { data, loading, refetch } = useQuery(GET_DROPOFFS, {
     variables: {
       first: size,
       page: activePage,
@@ -38,8 +36,6 @@ const DropOffs = () => {
   if (!total && data) {
     setTotal(data.dropoffs.paginatorInfo.lastPage);
   }
-
-  // const theme = useMantineTheme();
 
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
@@ -110,46 +106,62 @@ const DropOffs = () => {
             >
               <FiEye fontSize="medium" />
             </Controls.ActionButton>
-            {rowData.status === "PENDING" &&
-            <Controls.ActionButton
-              color="primary"
-              title="Call Driver"
-              onClick={() => handleRecallDriver(`${rowData.id}`)}
-            >
-              <IoIosCall fontSize="medium" />
-            </Controls.ActionButton>
+            {rowData.status === "PENDING" && (
+              <>
+              {isCall?
+               <Controls.ActionButton
+               color="primary"
+             >
+               Calling
+             </Controls.ActionButton>:
+              
+              <Controls.ActionButton
+                color="primary"
+                title="Call Driver"
+                onClick={() => handleRecallDriver(`${rowData.id}`)}
+              >
+                <IoIosCall fontSize="medium" />
+              </Controls.ActionButton>
       }
+              </>
+            )}
           </span>
         );
       },
     },
   ];
-  const [recallDriverForPendingDropoff] = useMutation(RECALL_DRIVER_FOR_PENDING_DROPOFF, {
-    refetchQueries: [
-      {
-        query: GET_DROPOFFS,
-        variables: {
-          first: 10,
-          page: activePage,
+  const [recallDriverForPendingDropoff] = useMutation(
+    RECALL_DRIVER_FOR_PENDING_DROPOFF,
+    {
+      refetchQueries: [
+        {
+          query: GET_DROPOFFS,
+          variables: {
+            first: 10,
+            page: activePage,
+          },
         },
+      ],
+      onCompleted(data) {
+        setCall(false)
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: "Driver recalled successfully!",
+        });
       },
-    ],
-    onCompleted(data) {
-      showNotification({
-        color: "green",
-        title: "Success",
-        message: "Driver recalled successfully!",
-      });
-    },
-    onError(error) {
-      showNotification({
-        color: "red",
-        title: "Error",
-        message: `${error.message}`,
-      });
-    },
-  });
+      onError(error) {
+        setCall(false)
+        showNotification({
+          color: "red",
+          title: "Error",
+          message: `${error.message}`,
+        });
+      },
+    }
+  );
   const handleRecallDriver = (id) => {
+    setCall(true)
     recallDriverForPendingDropoff({ variables: { dropoff_id: id } });
   };
 
@@ -158,10 +170,36 @@ const DropOffs = () => {
     setEditId(id);
   };
 
-  const optionsData = {
-    actionLabel: "Add DropOff",
-    setAddModal: setOpened,
-  };
+
+  useEffect(() => {
+    const pusher = new Pusher("83f49852817c6b52294f", {
+      cluster: "mt1",
+    });
+
+    const notificationChannel = pusher.subscribe("notification");
+
+    notificationChannel.bind("new-item-created", function (newOrder) {
+      refetch()
+        .then(({ data }) => {
+          const updatedDropOff = data.dropoffs.data || [];
+
+          setTotal(data.dropoffs.paginatorInfo.lastPage);
+
+          setDropOffs(updatedDropOff);
+        })
+        .catch((error) => {
+          console.error("Error fetching updated orders:", error);
+        });
+    });
+
+    return () => {
+      pusher.disconnect();
+    };
+  }, [refetch]); // Include `refetch` in the dependencies array
+
+  // Define a state to store the list of orders
+
+  const [dropOffs, setDropOffs] = useState([]);
 
   return loading ? (
     <LoadingOverlay
@@ -207,9 +245,8 @@ const DropOffs = () => {
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
-            optionsData={optionsData}
             loading={loading}
-            data={data ? data.dropoffs.data : []}
+            data={dropOffs.length ? dropOffs : data.dropoffs.data || []}
           />
         </ScrollArea>
       </Card>

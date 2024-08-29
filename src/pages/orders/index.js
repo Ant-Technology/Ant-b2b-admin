@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client";
 import {
   GET_ORDERS,
   GET_ORDERS_BY_DROPOFF_STATUS,
   GET_ORDERS_BY_STATUS,
 } from "apollo/queries";
+import Pusher from "pusher-js";
 import {
   Button,
   Card,
@@ -67,6 +68,38 @@ const Orders = () => {
       },
     }
   );
+  useEffect(() => {
+    const pusher = new Pusher("83f49852817c6b52294f", {
+      cluster: "mt1",
+    });
+  
+    const notificationChannel = pusher.subscribe("notification");
+  
+    notificationChannel.bind("new-item-created", function (newOrder) {
+  
+      if (!dropoffStatus || newOrder.state === dropoffStatus) {
+        refetch().then(({ data }) => {
+          const updatedOrders = data?.orders?.data || data?.getOrdersByOrderItemStatus?.data || [];
+          if (data?.getOrdersByOrderItemStatus) {
+            setTotal(data?.getOrdersByOrderItemStatus?.paginatorInfo.lastPage);
+          } else {
+            setTotal(data?.orders.paginatorInfo.lastPage);
+          }
+          setOrders(updatedOrders);
+        }).catch((error) => {
+          console.error("Error fetching updated orders:", error);
+        });
+      }
+    });
+  
+    return () => {
+      pusher.disconnect();
+    };
+  }, [dropoffStatus, refetch]); // Include `refetch` in the dependencies array
+  
+  // Define a state to store the list of orders
+  
+  const [orders, setOrders] = useState([]);
 
   const clearFilter = () => {
     setDropoffStatus(null); // Clear the filter
@@ -223,7 +256,11 @@ const Orders = () => {
             header={headerData}
             loading={loading}
             data={
-              data?.orders?.data || data?.getOrdersByOrderItemStatus?.data || []
+              orders.length
+                ? orders
+                : data?.orders?.data ||
+                  data?.getOrdersByOrderItemStatus?.data ||
+                  []
             }
           />
         </ScrollArea>
