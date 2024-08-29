@@ -1,25 +1,14 @@
-FROM node:18-alpine AS builder
-
+# Stage 1: Build the React Application
+FROM node:18 as build
 WORKDIR /app
-
-COPY package.json package.json
-COPY yarn.lock yarn.lock
-
+COPY package*.json ./
 RUN yarn install --production
-
 COPY . .
-
 RUN yarn build
 
-FROM nginx:alpine
-
-WORKDIR /usr/share/nginx/html
-
-RUN rm -rf *
-
-COPY --from=builder /app/build .
-
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d
-
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+# Stage 2: Setup the Nginx Server to serve the React Application
+FROM nginx:1.25.0-alpine as production
+COPY --from=build /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
