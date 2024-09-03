@@ -41,6 +41,12 @@ const Vehicles = () => {
     variables: {
       first: size,
       page: activePage,
+      ordered_by: [
+        {
+          column: "CREATED_AT",
+          order: "DESC",
+        },
+      ],
     },
   });
 
@@ -52,6 +58,12 @@ const Vehicles = () => {
           variables: {
             first: 10,
             page: activePage,
+            ordered_by: [
+              {
+                column: "CREATED_AT",
+                order: "DESC",
+              },
+            ],
           },
         },
         (data) => {
@@ -271,6 +283,7 @@ const Vehicles = () => {
       >
         <VehicleAddModal
           total={total}
+          setTotal={setTotal}
           activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}

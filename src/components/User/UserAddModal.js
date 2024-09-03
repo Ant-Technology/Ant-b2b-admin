@@ -222,8 +222,10 @@ const UserAddModal = ({
                     label="Select Role"
                     placeholder="Pick a role this user belongs to"
                   />
-
-                  <div style={{ marginTop: "25px" }}>
+                </Grid.Col>
+              </Grid>
+              
+              <div style={{ marginTop: "25px" }}>
                     <Button
                       onClick={() => fileInputRef.current.click()}
                       color="blue"
@@ -247,8 +249,6 @@ const UserAddModal = ({
                       {previews}
                     </SimpleGrid>
                   </div>
-                </Grid.Col>
-              </Grid>
               <Grid>
                 <Grid.Col span={12}>
                   <Button

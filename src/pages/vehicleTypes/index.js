@@ -252,12 +252,12 @@ const VehicleTypes = () => {
       },
     },
     {
-      label: "Date",
-      key: "created_at",
-      sortable: true,
-      searchable: true,
+      label: "Image",
+      key: "avatar",
+      sortable: false,
+      searchable: false,
       render: (rowData) => {
-        return <span>{rowData.created_at}</span>;
+        return <Avatar src={rowData.image} />;
       },
     },
     {
@@ -267,7 +267,7 @@ const VehicleTypes = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <div style={{display:"flex"}}>
+          <div style={{ display: "flex", width: "115px",}}>
             <Controls.ActionButton
               color="primary"
               title="Update"

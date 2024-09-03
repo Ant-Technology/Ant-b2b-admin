@@ -624,6 +624,7 @@ export const CREATE_VEHICLE_TYPE = gql`
     $title: TranslatableInput!
     $type: String!
     $starting_price: Float!
+    $image: Upload
     $price_per_kilometer: Float!
   ) {
     createVehicleType(
@@ -631,6 +632,7 @@ export const CREATE_VEHICLE_TYPE = gql`
         title: $title
         type: $type
         starting_price: $starting_price
+        image:$image
         price_per_kilometer: $price_per_kilometer
       }
     ) {
@@ -656,8 +658,15 @@ export const UPDATE_VEHICLE_TYPE = gql`
     $starting_price: Float
     $price_per_kilometer: Float
   ) {
-    updateVehicleType(id: $id, input: { title: $title, type: $type,	starting_price: $starting_price,
-      price_per_kilometer: $price_per_kilometer }) {
+    updateVehicleType(
+      id: $id
+      input: {
+        title: $title
+        type: $type
+        starting_price: $starting_price
+        price_per_kilometer: $price_per_kilometer
+      }
+    ) {
       id
       title
       type
@@ -754,6 +763,7 @@ export const CREATE_VEHICLE = gql`
     $owner_name: String!
     $owner_phone: String!
     $driver: CreateDriverBelongsTo!
+    $region: CreateRegionBelongsTo!
     $vehicle_type: CreateVehicleTypeBelongsTo!
   ) {
     createVehicle(
@@ -765,10 +775,10 @@ export const CREATE_VEHICLE = gql`
         owner_phone: $owner_phone
         driver: $driver
         vehicle_type: $vehicle_type
+        region: $region
       }
     ) {
       id
-      name
       color
       owner_name
       owner_phone
