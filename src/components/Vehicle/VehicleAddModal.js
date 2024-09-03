@@ -12,6 +12,7 @@ import { showNotification } from "@mantine/notifications";
 import { CREATE_VEHICLE } from "apollo/mutuations";
 import {
   GET_DRIVERS,
+  GET_REGIONS,
   GET_UNASSIGNED_DRIVERS,
   GET_VEHICLES,
   GET_VEHICLE_TYPES,
@@ -34,24 +35,26 @@ const VehicleAddModal = ({
       owner_name: "",
       owner_phone: "",
       driver: { connect: 1 },
+      region: { connect: 1 },
       vehicle_type: { connect: 1 },
     },
   });
 
-  //states for the drop down
+  // States for the dropdowns
   const [vehicleTypeDropDownData, setVehicleTypeDropDownData] = useState([]);
   const [driverDropDownData, setDriverDropDownData] = useState([]);
+  const [regionDropDownData, setRegionDropDownData] = useState([]);
 
+  // Fetch Vehicle Types
   const { loading: vehicle_type_loading } = useQuery(GET_VEHICLE_TYPES, {
     variables: {
       first: 100,
     },
     onCompleted(data) {
-      const newArr = [];
-      data.vehicleTypes.data.forEach((element) => {
-        newArr.push({ label: element.title, value: element.id });
-      });
-
+      const newArr = data.vehicleTypes.data.map((element) => ({
+        label: element.title,
+        value: element.id,
+      }));
       setVehicleTypeDropDownData(newArr);
     },
     onError() {
@@ -63,12 +66,37 @@ const VehicleAddModal = ({
       setOpened(false);
     },
   });
+
+  // Fetch Regions
+  const { loading: region_loading } = useQuery(GET_REGIONS, {
+    variables: {
+      first: 100,
+      page: 1,
+    },
+    onCompleted(data) {
+      const newArr = data.regions.data.map((element) => ({
+        label: element.name,
+        value: element.id,
+      }));
+      setRegionDropDownData(newArr);
+    },
+    onError() {
+      setOpened(false);
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: "Something went wrong while fetching regions!",
+      });
+    },
+  });
+
+  // Fetch Unassigned Drivers
   const { loading: driver_loading } = useQuery(GET_UNASSIGNED_DRIVERS, {
     onCompleted(data) {
-      const newArr = [];
-      data.getUnAssignedDrivers.forEach((element) => {
-        newArr.push({ label: element.name, value: element.id });
-      });
+      const newArr = data.getUnAssignedDrivers.map((element) => ({
+        label: element.name,
+        value: element.id,
+      }));
       setDriverDropDownData(newArr);
     },
     onError() {
@@ -81,32 +109,81 @@ const VehicleAddModal = ({
     },
   });
 
+  // Mutation to Create Vehicle
   const [addVehicle, { loading }] = useMutation(CREATE_VEHICLE, {
+    refetchQueries: [{ query: GET_UNASSIGNED_DRIVERS }],
+    awaitRefetchQueries: true,
     update(cache, { data: { createVehicle } }) {
-      cache.updateQuery(
-        {
+      try {
+        const { vehicles } = cache.readQuery({
           query: GET_VEHICLES,
           variables: {
             first: 10,
             page: activePage,
+            ordered_by: [
+              {
+                 column:"CREATED_AT",
+                 order:"DESC"
+              }]
           },
-        },
-        (data) => {
-          if (data.vehicles.data.length === 10) {
-            setTotal(total + 1);
-            setActivePage(total + 1);
-          } else {
-            return {
-              vehicles: {
-                data: [createVehicle, ...data.vehicles.data],
+        }) || { vehicles: { data: [], paginatorInfo: { total: 0 } } };
+  
+        const updatedVehicle = [createVehicle, ...vehicles.data];
+        cache.writeQuery({
+          query: GET_VEHICLES,
+          variables: {
+            first: 10,
+            page: activePage,
+            ordered_by: [
+              {
+                 column:"CREATED_AT",
+                 order:"DESC"
+              }]
+          },
+          data: {
+            vehicles: {
+              ...vehicles,
+              data: updatedVehicle,
+              paginatorInfo: {
+                ...vehicles.paginatorInfo,
+                total: vehicles.paginatorInfo.total + 1,
               },
-            };
-          }
-        }
-      );
+            },
+          },
+        });
+  
+        // Update the total count and reset the active page
+        const newTotal = vehicles.paginatorInfo.total + 1;
+        setTotal(newTotal);
+        setActivePage(1);
+      } catch (err) {
+        console.error("Error updating cache:", err);
+      }
+    },
+    onCompleted(data) {
+      if (data.createVehicle) {
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: "Vehicle Created Successfully",
+        });
+        setOpened(false);
+      }
+    },
+    onError(error) {
+      const errorMessage =
+        error?.message || "Something went wrong while creating the vehicle";
+
+      setOpened(true);
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: errorMessage,
+      });
     },
   });
 
+  // Submit Method
   const submit = () => {
     addVehicle({
       variables: {
@@ -116,24 +193,8 @@ const VehicleAddModal = ({
         owner_name: form.getInputProps("owner_name").value,
         owner_phone: form.getInputProps("owner_phone").value,
         driver: form.getInputProps("driver").value,
+        region: form.getInputProps("region").value,
         vehicle_type: form.getInputProps("vehicle_type").value,
-      },
-      onCompleted() {
-        showNotification({
-          color: "green",
-          title: "Success",
-          message: "Vehicle Created Successfully",
-        });
-
-        setOpened(false);
-      },
-      onError() {
-        setOpened(false);
-        showNotification({
-          color: "red",
-          title: "Error",
-          message: "Something went wrong while creating vehicle",
-        });
       },
     });
   };
@@ -145,11 +206,15 @@ const VehicleAddModal = ({
   const setDriverDropDownValue = (val) => {
     form.setFieldValue("driver.connect", val);
   };
+  
+  const setRegionDropDownValue = (val) => {
+    form.setFieldValue("region.connect", val);
+  };
 
   return (
     <>
       <LoadingOverlay
-        visible={loading || driver_loading || vehicle_type_loading}
+        visible={loading || driver_loading || region_loading || vehicle_type_loading}
         color="blue"
         overlayBlur={2}
         loader={customLoader}
@@ -176,7 +241,6 @@ const VehicleAddModal = ({
                 {...form.getInputProps("plate_number")}
                 withAsterisk
               />
-
               <TextInput
                 placeholder="Color"
                 label="Color"
@@ -191,19 +255,14 @@ const VehicleAddModal = ({
                 {...form.getInputProps("owner_name")}
                 withAsterisk
               />
-
-              {/* pick vehcle type */}
               <Select
                 searchable
                 label="Select Vehicle Type"
                 placeholder="Pick one"
                 data={vehicleTypeDropDownData}
-                value={form
-                  .getInputProps("vehicle_type.connect")
-                  .value.toString()}
+                value={form.getInputProps("vehicle_type.connect").value.toString()}
                 onChange={setVehicleTypeDropDownValue}
               />
-              {/* pick driver  */}
               <Select
                 label="Select Driver"
                 searchable
@@ -211,6 +270,14 @@ const VehicleAddModal = ({
                 data={driverDropDownData}
                 value={form.getInputProps("driver.connect").value.toString()}
                 onChange={setDriverDropDownValue}
+              />
+              <Select
+                label="Select Region"
+                searchable
+                placeholder="Pick one"
+                data={regionDropDownData}
+                value={form.getInputProps("region.connect").value.toString()}
+                onChange={setRegionDropDownValue}
               />
             </Grid.Col>
           </Grid>
@@ -221,7 +288,6 @@ const VehicleAddModal = ({
                 style={{
                   marginTop: "20px",
                   width: "20%",
-
                   backgroundColor: "#FF6A00",
                   color: "#FFFFFF",
                 }}

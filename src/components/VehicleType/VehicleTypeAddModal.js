@@ -7,6 +7,7 @@ import {
   ScrollArea,
   Select,
   SimpleGrid,
+  Stack,
   Tabs,
   Text,
   TextInput,
@@ -20,7 +21,7 @@ import { CREATE_VEHICLE_TYPE } from "apollo/mutuations";
 import { GET_VEHICLE_TYPES } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 import { tabList } from "components/utilities/tablist";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Photo, PictureInPicture, Upload } from "tabler-icons-react";
 
 const VehicleTypeAddModal = ({
@@ -73,7 +74,10 @@ const VehicleTypeAddModal = ({
       type: "",
     },
   });
-
+  const fileInputRef = useRef(null);
+  const handleFileChange = (event) => {
+    setFiles(Array.from(event.target.files));
+  };
   const [addVehicleType, { loading }] = useMutation(CREATE_VEHICLE_TYPE, {
     update(cache, { data: { createVehicleType } }) {
       cache.updateQuery(
@@ -105,6 +109,7 @@ const VehicleTypeAddModal = ({
       addVehicleType({
         variables: {
           title: form.getInputProps("title").value,
+          image: files[files.length - 1],
           type: form.getInputProps("type").value,
           starting_price: parseFloat(form.values.starting_price),
           price_per_kilometer: parseFloat(form.values.price_per_kilometer),
@@ -153,14 +158,49 @@ const VehicleTypeAddModal = ({
         })}
       </Tabs.List>
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
+        <Grid>
+          <Grid.Col span={12}>
+            <div style={{ marginTop: "25px" }}>
+              <Button
+                onClick={() => fileInputRef.current.click()}
+                type="submit"
+                style={{
+                  marginTop: "5px",
+                  width: "20%",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                fullWidth
+                color="blue"
+              >
+                Upload Image
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <SimpleGrid
+                cols={4}
+                breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                mt={previews.length > 0 ? "xl" : 0}
+              >
+                {previews}
+              </SimpleGrid>
+            </div>
+          </Grid.Col>
+        </Grid>
+
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
           {/* mapping the tablist */}
           {tabList.map((tab, i) => {
             return (
               <Tabs.Panel key={i} value={tab.value} pt="xs">
-                <Grid grow>
-                  <Grid.Col span={6}>
-                    <Grid.Col span={4}>
+                <Stack>
+                  <Grid>
+                    <Grid.Col span={6}>
                       <TextInput
                         required
                         label={tab.label}
@@ -191,20 +231,25 @@ const VehicleTypeAddModal = ({
                         {...form.getInputProps("price_per_kilometer")}
                       />
                     </Grid.Col>
-
-                    <Grid.Col span={4}>
+                  </Grid>
+                  <Grid>
+                    <Grid.Col span={12}>
                       <Button
-                        style={{ display: activeTab === 1 ? "none" : "" }}
                         type="submit"
-                        color="blue"
-                        variant="outline"
+                        style={{
+                          marginTop: "10px",
+                          width: "20%",
+                          backgroundColor: "#FF6A00",
+                          color: "#FFFFFF",
+                        }}
                         fullWidth
+                        color="blue"
                       >
                         Submit
                       </Button>
                     </Grid.Col>
-                  </Grid.Col>
-                </Grid>
+                  </Grid>
+                </Stack>
               </Tabs.Panel>
             );
           })}

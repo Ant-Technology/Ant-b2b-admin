@@ -676,7 +676,6 @@ export const GET_ORDERS_BY_DROPOFF_STATUS = gql`
   }
 `;
 
-
 //  shipment
 export const GET_SHIPMENT = gql`
   query ($id: ID!) {
@@ -947,7 +946,6 @@ export const GET_UNASSIGNED_DRIVERS = gql`
   }
 `;
 
-
 //drivers
 export const GET_DRIVERS = gql`
   query ($first: Int!, $page: Int) {
@@ -984,8 +982,12 @@ export const GET_DRIVER = gql`
 
 //vehicles
 export const GET_VEHICLES = gql`
-  query ($first: Int!, $page: Int) {
-    vehicles(first: $first, page: $page) {
+  query (
+    $first: Int!
+    $page: Int
+    $ordered_by: [QueryVehiclesOrderByOrderByClause!]!
+  ) {
+    vehicles(first: $first, page: $page, orderBy: $ordered_by) {
       data {
         id
         owner_name
@@ -995,6 +997,9 @@ export const GET_VEHICLES = gql`
         vehicle_type {
           id
           title
+        }
+        region {
+          name
         }
         driver {
           id
