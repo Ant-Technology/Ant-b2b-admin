@@ -754,7 +754,6 @@ export const DEL_DRIVER = gql`
 `;
 
 //vehicle
-
 export const CREATE_VEHICLE = gql`
   mutation (
     $model: String!
@@ -765,6 +764,9 @@ export const CREATE_VEHICLE = gql`
     $driver: CreateDriverBelongsTo!
     $region: CreateRegionBelongsTo!
     $vehicle_type: CreateVehicleTypeBelongsTo!
+    $plate_doc: Upload
+    $license_doc: Upload
+    $libre_doc: Upload
   ) {
     createVehicle(
       input: {
@@ -776,6 +778,9 @@ export const CREATE_VEHICLE = gql`
         driver: $driver
         vehicle_type: $vehicle_type
         region: $region
+        plate_doc: $plate_doc
+        license_doc: $license_doc
+        libre_doc: $libre_doc
       }
     ) {
       id
@@ -792,6 +797,7 @@ export const CREATE_VEHICLE = gql`
     }
   }
 `;
+
 export const UPDATE_VEHICLE = gql`
   mutation (
     $id: ID!

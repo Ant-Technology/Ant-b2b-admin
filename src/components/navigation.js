@@ -21,6 +21,7 @@ import {
   IconUsers,
   IconTruckLoading,
   IconChevronDown,
+  IconSettings,
   IconChevronUp,
 } from "@tabler/icons";
 
@@ -141,6 +142,12 @@ const data = [
   { link: "/stocks", label: "Stocks", icon: IconBuildingStore },
   { link: "/sales", label: "Sales", icon: IconUser },
   {
+    label: "Settings",
+    icon: IconSettings,
+    initiallyOpened: false,
+    links: [{ link: "/configuration", label: "Configuration" }],
+  },
+  {
     label: "Feedback",
     icon: FeedbackIcon,
     initiallyOpened: false,
@@ -221,6 +228,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       {item.links ? (
         <>
           <div
+            style={{ cursor: "pointer" }}
             className={cx(classes.link, {
               [classes.linkActive]: item.label === active,
             })}
@@ -237,7 +245,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 <span>
                   {item.label}
                   <Badge
-                    style={{ marginLeft: "10px"}}
+                    style={{ marginLeft: "10px" }}
                     size="xs"
                     variant="filled"
                   >
@@ -266,12 +274,14 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 }}
                 style={{ paddingLeft: theme.spacing.lg }}
               >
-                {subItem.icon&&
-                <subItem.icon
-                  className={opened ? classes.linkIcon : classes.linkIconShort}
-                  stroke={1.5}
-                />
-}
+                {subItem.icon && (
+                  <subItem.icon
+                    className={
+                      opened ? classes.linkIcon : classes.linkIconShort
+                    }
+                    stroke={1.5}
+                  />
+                )}
                 <div style={{ overflow: "hidden" }}>
                   {opened ? <span>{subItem.label}</span> : null}
                 </div>

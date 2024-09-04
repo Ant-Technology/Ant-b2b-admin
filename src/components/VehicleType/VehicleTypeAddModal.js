@@ -158,41 +158,6 @@ const VehicleTypeAddModal = ({
         })}
       </Tabs.List>
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
-        <Grid>
-          <Grid.Col span={12}>
-            <div style={{ marginTop: "25px" }}>
-              <Button
-                onClick={() => fileInputRef.current.click()}
-                type="submit"
-                style={{
-                  marginTop: "5px",
-                  width: "20%",
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-                fullWidth
-                color="blue"
-              >
-                Upload Image
-              </Button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleFileChange}
-              />
-              <SimpleGrid
-                cols={4}
-                breakpoints={[{ maxWidth: "sm", cols: 1 }]}
-                mt={previews.length > 0 ? "xl" : 0}
-              >
-                {previews}
-              </SimpleGrid>
-            </div>
-          </Grid.Col>
-        </Grid>
-
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
           {/* mapping the tablist */}
           {tabList.map((tab, i) => {
@@ -232,6 +197,40 @@ const VehicleTypeAddModal = ({
                       />
                     </Grid.Col>
                   </Grid>
+                  <Grid>
+                    <Grid.Col span={12}>
+                      <div>
+                        <Button
+                          onClick={() => fileInputRef.current.click()}
+                          style={{
+                            marginTop: "5px",
+                            width: "20%",
+                            backgroundColor: "#FF6A00",
+                            color: "#FFFFFF",
+                          }}
+                          fullWidth
+                          color="blue"
+                        >
+                          Upload Image
+                        </Button>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={handleFileChange}
+                        />
+                        <SimpleGrid
+                          cols={4}
+                          breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                          mt={previews.length > 0 ? "xl" : 0}
+                        >
+                          {previews}
+                        </SimpleGrid>
+                      </div>
+                    </Grid.Col>
+                  </Grid>
+
                   <Grid>
                     <Grid.Col span={12}>
                       <Button
