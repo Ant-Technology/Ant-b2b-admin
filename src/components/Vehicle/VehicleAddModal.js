@@ -3,11 +3,14 @@ import {
   Button,
   Grid,
   LoadingOverlay,
+  ScrollArea,
   Select,
+  SimpleGrid,
   Stack,
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import { CREATE_VEHICLE } from "apollo/mutuations";
 import {
@@ -18,7 +21,7 @@ import {
   GET_VEHICLE_TYPES,
 } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
-import React, { useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 
 const VehicleAddModal = ({
   setOpened,
@@ -40,16 +43,12 @@ const VehicleAddModal = ({
     },
   });
 
-  // States for the dropdowns
   const [vehicleTypeDropDownData, setVehicleTypeDropDownData] = useState([]);
   const [driverDropDownData, setDriverDropDownData] = useState([]);
   const [regionDropDownData, setRegionDropDownData] = useState([]);
 
-  // Fetch Vehicle Types
   const { loading: vehicle_type_loading } = useQuery(GET_VEHICLE_TYPES, {
-    variables: {
-      first: 100,
-    },
+    variables: { first: 100 },
     onCompleted(data) {
       const newArr = data.vehicleTypes.data.map((element) => ({
         label: element.title,
@@ -67,12 +66,8 @@ const VehicleAddModal = ({
     },
   });
 
-  // Fetch Regions
   const { loading: region_loading } = useQuery(GET_REGIONS, {
-    variables: {
-      first: 100,
-      page: 1,
-    },
+    variables: { first: 100, page: 1 },
     onCompleted(data) {
       const newArr = data.regions.data.map((element) => ({
         label: element.name,
@@ -90,7 +85,6 @@ const VehicleAddModal = ({
     },
   });
 
-  // Fetch Unassigned Drivers
   const { loading: driver_loading } = useQuery(GET_UNASSIGNED_DRIVERS, {
     onCompleted(data) {
       const newArr = data.getUnAssignedDrivers.map((element) => ({
@@ -109,7 +103,6 @@ const VehicleAddModal = ({
     },
   });
 
-  // Mutation to Create Vehicle
   const [addVehicle, { loading }] = useMutation(CREATE_VEHICLE, {
     refetchQueries: [{ query: GET_UNASSIGNED_DRIVERS }],
     awaitRefetchQueries: true,
@@ -120,25 +113,17 @@ const VehicleAddModal = ({
           variables: {
             first: 10,
             page: activePage,
-            ordered_by: [
-              {
-                 column:"CREATED_AT",
-                 order:"DESC"
-              }]
+            ordered_by: [{ column: "CREATED_AT", order: "DESC" }],
           },
         }) || { vehicles: { data: [], paginatorInfo: { total: 0 } } };
-  
+
         const updatedVehicle = [createVehicle, ...vehicles.data];
         cache.writeQuery({
           query: GET_VEHICLES,
           variables: {
             first: 10,
             page: activePage,
-            ordered_by: [
-              {
-                 column:"CREATED_AT",
-                 order:"DESC"
-              }]
+            ordered_by: [{ column: "CREATED_AT", order: "DESC" }],
           },
           data: {
             vehicles: {
@@ -151,8 +136,7 @@ const VehicleAddModal = ({
             },
           },
         });
-  
-        // Update the total count and reset the active page
+
         const newTotal = vehicles.paginatorInfo.total + 1;
         setTotal(newTotal);
         setActivePage(1);
@@ -183,7 +167,6 @@ const VehicleAddModal = ({
     },
   });
 
-  // Submit Method
   const submit = () => {
     addVehicle({
       variables: {
@@ -195,6 +178,9 @@ const VehicleAddModal = ({
         driver: form.getInputProps("driver").value,
         region: form.getInputProps("region").value,
         vehicle_type: form.getInputProps("vehicle_type").value,
+        plate_doc: files.plate[0],
+        license_doc: files.license[0],
+        libre_doc: files.libre[0],
       },
     });
   };
@@ -206,81 +192,221 @@ const VehicleAddModal = ({
   const setDriverDropDownValue = (val) => {
     form.setFieldValue("driver.connect", val);
   };
-  
+
   const setRegionDropDownValue = (val) => {
     form.setFieldValue("region.connect", val);
   };
 
+  const [files, setFiles] = useState({
+    plate: [],
+    license: [],
+    libre: [],
+  });
+
+  const fileInputRefs = {
+    plate: useRef(null),
+    license: useRef(null),
+    libre: useRef(null),
+  };
+
+  const handleFileChange = (event, fileType) => {
+    setFiles((prevFiles) => ({
+      ...prevFiles,
+      [fileType]: Array.from(event.target.files),
+    }));
+  };
+
+  const FilePreview = ({ fileList }) => {
+    const previews = useMemo(() => {
+      return fileList.map((file, index) => {
+        const fileUrl = URL.createObjectURL(file);
+
+        return (
+          <div key={index} style={{ margin: "0 auto" }}>
+            {file.type === "application/pdf" ? (
+              <embed
+                src={fileUrl}
+                width="130"
+                height="160"
+                type="application/pdf"
+                onLoad={() => URL.revokeObjectURL(fileUrl)}
+              />
+            ) : (
+              <img
+                src={fileUrl}
+                alt=""
+                width="130"
+                onLoad={() => URL.revokeObjectURL(fileUrl)}
+              />
+            )}
+          </div>
+        );
+      });
+    }, [fileList]);
+
+    return (
+      <SimpleGrid
+        cols={3}
+        spacing="md"
+        style={{ maxHeight: "200px", overflowY: "auto" }} // Added fixed height and scroll
+      >
+        {previews}
+      </SimpleGrid>
+    );
+  };
+
+  const { height } = useViewportSize();
+
   return (
     <>
       <LoadingOverlay
-        visible={loading || driver_loading || region_loading || vehicle_type_loading}
+        visible={
+          loading || driver_loading || region_loading || vehicle_type_loading
+        }
         color="blue"
         overlayBlur={2}
         loader={customLoader}
       />
-      <form onSubmit={form.onSubmit(() => submit())}>
-        <Stack>
-          <Grid>
-            <Grid.Col span={6}>
-              <TextInput
-                placeholder="Model"
-                label="Model"
-                {...form.getInputProps("model")}
-                withAsterisk
+
+      <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
+        <form onSubmit={form.onSubmit(() => submit())}>
+          <Stack>
+            <Grid>
+              <Grid.Col span={6}>
+                <TextInput
+                  placeholder="Model"
+                  label="Model"
+                  {...form.getInputProps("model")}
+                  withAsterisk
+                />
+                <TextInput
+                  placeholder="Owner Phone"
+                  label="Owner Phone"
+                  {...form.getInputProps("owner_phone")}
+                  withAsterisk
+                />
+                <TextInput
+                  placeholder="Plate Number"
+                  label="Plate Number"
+                  {...form.getInputProps("plate_number")}
+                  withAsterisk
+                />
+                <TextInput
+                  placeholder="Color"
+                  label="Color"
+                  {...form.getInputProps("color")}
+                  withAsterisk
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  placeholder="Owner Name"
+                  label="Owner Name"
+                  {...form.getInputProps("owner_name")}
+                  withAsterisk
+                />
+                <Select
+                  searchable
+                  label="Select Vehicle Type"
+                  placeholder="Pick one"
+                  data={vehicleTypeDropDownData}
+                  value={form
+                    .getInputProps("vehicle_type.connect")
+                    .value.toString()}
+                  onChange={setVehicleTypeDropDownValue}
+                />
+                <Select
+                  label="Select Driver"
+                  searchable
+                  placeholder="Pick one"
+                  data={driverDropDownData}
+                  value={form.getInputProps("driver.connect").value.toString()}
+                  onChange={setDriverDropDownValue}
+                />
+                <Select
+                  label="Select Region"
+                  searchable
+                  placeholder="Pick one"
+                  data={regionDropDownData}
+                  value={form.getInputProps("region.connect").value.toString()}
+                  onChange={setRegionDropDownValue}
+                />
+              </Grid.Col>
+            </Grid>
+          </Stack>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-start",
+              flexWrap: "wrap",
+            }}
+          >
+            {/* Upload Plate */}
+            <div style={{ flex: "1 1 5%", margin: "5px" }}>
+              <Button
+                onClick={() => fileInputRefs.plate.current.click()}
+                style={{
+                  width: "70%",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Upload Plate
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRefs.plate}
+                accept="image/*,.pdf"
+                style={{ display: "none" }}
+                onChange={(event) => handleFileChange(event, "plate")}
               />
-              <TextInput
-                placeholder="Owner Phone"
-                label="Owner Phone"
-                {...form.getInputProps("owner_phone")}
-                withAsterisk
+              <FilePreview fileList={files.plate} />
+            </div>
+
+            {/* Upload License */}
+            <div style={{ flex: "1 1 5%", margin: "5px" }}>
+              <Button
+                onClick={() => fileInputRefs.license.current.click()}
+                style={{
+                  width: "70%",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Upload License
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRefs.license}
+                accept="image/*,.pdf"
+                style={{ display: "none" }}
+                onChange={(event) => handleFileChange(event, "license")}
               />
-              <TextInput
-                placeholder="Plate Number"
-                label="Plate Number"
-                {...form.getInputProps("plate_number")}
-                withAsterisk
+              <FilePreview fileList={files.license} />
+            </div>
+
+            {/* Upload Libre */}
+            <div style={{ flex: "1 1 5%", margin: "5px" }}>
+              <Button
+                onClick={() => fileInputRefs.libre.current.click()}
+                style={{
+                  width: "70%",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Upload Libre
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRefs.libre}
+                accept="image/*,.pdf"
+                style={{ display: "none" }}
+                onChange={(event) => handleFileChange(event, "libre")}
               />
-              <TextInput
-                placeholder="Color"
-                label="Color"
-                {...form.getInputProps("color")}
-                withAsterisk
-              />
-            </Grid.Col>
-            <Grid.Col span={6}>
-              <TextInput
-                placeholder="Owner Name"
-                label="Owner Name"
-                {...form.getInputProps("owner_name")}
-                withAsterisk
-              />
-              <Select
-                searchable
-                label="Select Vehicle Type"
-                placeholder="Pick one"
-                data={vehicleTypeDropDownData}
-                value={form.getInputProps("vehicle_type.connect").value.toString()}
-                onChange={setVehicleTypeDropDownValue}
-              />
-              <Select
-                label="Select Driver"
-                searchable
-                placeholder="Pick one"
-                data={driverDropDownData}
-                value={form.getInputProps("driver.connect").value.toString()}
-                onChange={setDriverDropDownValue}
-              />
-              <Select
-                label="Select Region"
-                searchable
-                placeholder="Pick one"
-                data={regionDropDownData}
-                value={form.getInputProps("region.connect").value.toString()}
-                onChange={setRegionDropDownValue}
-              />
-            </Grid.Col>
-          </Grid>
+              <FilePreview fileList={files.libre} />
+            </div>
+          </div>
           <Grid>
             <Grid.Col span={12}>
               <Button
@@ -298,8 +424,8 @@ const VehicleAddModal = ({
               </Button>
             </Grid.Col>
           </Grid>
-        </Stack>
-      </form>
+        </form>
+      </ScrollArea>
     </>
   );
 };

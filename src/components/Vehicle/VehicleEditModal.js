@@ -17,9 +17,7 @@ import { showNotification } from "@mantine/notifications";
 const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
   const [updateVehicle, { loading: updateVehicleLoading }] =
   useMutation(UPDATE_VEHICLE);
-
   
-  //states for the drop down
   const [vehicleTypeDropDownData, setVehicleTypeDropDownData] = useState([]);
   const [driverDropDownData, setDriverDropDownData] = useState([]);
 
