@@ -51,7 +51,6 @@ const useStyles = createStyles((theme, _params, getRef) => {
           : theme.colors.gray[2]
       }`,
     },
-
     footer: {
       paddingTop: theme.spacing.md,
       marginTop: theme.spacing.md,
@@ -61,7 +60,6 @@ const useStyles = createStyles((theme, _params, getRef) => {
           : theme.colors.gray[2]
       }`,
     },
-
     link: {
       ...theme.fn.focusStyles(),
       display: "flex",
@@ -73,27 +71,23 @@ const useStyles = createStyles((theme, _params, getRef) => {
       padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
       borderRadius: theme.radius.sm,
       fontWeight: 600,
-
       "&:hover": {
         backgroundColor:
           theme.colorScheme === "dark"
             ? theme.colors.dark[6]
             : theme.colors.gray[2],
         color: theme.colorScheme === "dark" ? theme.white : "#333333",
-
         [`& .${icon}`]: {
           color: theme.colorScheme === "dark" ? theme.white : "#333333",
         },
       },
     },
-
     linkIcon: {
       ref: icon,
       color:
         theme.colorScheme === "dark" ? theme.colors.dark[2] : "rgb(20, 61, 89)",
       marginRight: theme.spacing.sm,
     },
-
     linkIconShort: {
       ref: icon,
       color:
@@ -102,7 +96,6 @@ const useStyles = createStyles((theme, _params, getRef) => {
           : theme.colors.gray[6],
       margin: "auto",
     },
-
     linkActive: {
       "&, &:hover": {
         backgroundColor: "#FF6A00", // Background color
@@ -114,14 +107,11 @@ const useStyles = createStyles((theme, _params, getRef) => {
     },
   };
 });
+
 const data = [
   { link: "/", label: "Dashboard", icon: IconDashboard },
   { link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading },
-  {
-    link: "/orders",
-    label: "Orders",
-    icon: IconShoppingCart,
-  },
+  { link: "/orders", label: "Orders", icon: IconShoppingCart },
   { link: "/shipments", label: "Shipments", icon: IconShip },
   { link: "/wallets", label: "Wallet", icon: IconWallet },
   { link: "/users", label: "User Management", icon: IconUsers },
@@ -134,18 +124,14 @@ const data = [
   { link: "/drivers", label: "Drivers", icon: IconUser },
   { link: "/vehicle_types", label: "Vehicle Types", icon: IconTruck },
   { link: "/vehicles", label: "Vehicles", icon: IconTruckDelivery },
-  {
-    link: "/distributors",
-    label: "Distributers",
-    icon: IconLayoutDistributeHorizontal,
-  },
+  { link: "/distributors", label: "Distributers", icon: IconLayoutDistributeHorizontal },
   { link: "/stocks", label: "Stocks", icon: IconBuildingStore },
   { link: "/sales", label: "Sales", icon: IconUser },
   {
     label: "Settings",
     icon: IconSettings,
     initiallyOpened: false,
-    links: [{ link: "/configuration", label: "Configuration" }],
+    links: [{ link: "/config", label: "Configuration" }],
   },
   {
     label: "Feedback",
@@ -160,46 +146,36 @@ const data = [
 
 const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const { width } = useViewportSize();
-
   const { classes, cx, theme } = useStyles();
-
   const mobScreen = useMediaQuery("(max-width: 500px)");
 
   const [active, setActive] = useState("Billing");
-  const [orderCount, setOrderCount] = useState(
-    localStorage.getItem("orderCount") || 0
-  );
-  const [shipments, setShipments] = useState(
-    localStorage.getItem("shipments") || 0
-  );
+  const [orderCount, setOrderCount] = useState(localStorage.getItem("orderCount") || 0);
+  const [shipments, setShipments] = useState(localStorage.getItem("shipments") || 0);
   const [wallets, setWallets] = useState(localStorage.getItem("wallets") || 0);
-  const [dropoffs, setDrppoffs] = useState(
-    localStorage.getItem("dropoffs") || 0
-  );
+  const [dropoffs, setDropoffs] = useState(localStorage.getItem("dropoffs") || 0);
+
+  const [openSection, setOpenSection] = useState(""); // New state for tracking open section
 
   const navigate = useNavigate();
   const [signout] = useMutation(LOGOUT);
+  
   const [collapseOpened, setCollapseOpened] = useState(false);
 
   useEffect(() => {
-    const pusher = new Pusher("83f49852817c6b52294f", {
-      cluster: "mt1",
-    });
-
+    const pusher = new Pusher("83f49852817c6b52294f", { cluster: "mt1" });
     const channel = pusher.subscribe("nav-counter");
     const notificationChannel = pusher.subscribe("notification");
 
-    // Bind to a test event
     channel.bind("nav-counter", function (data) {
       localStorage.setItem("orderCount", data.data.orders);
       localStorage.setItem("wallets", data.data.wallets);
       localStorage.setItem("shipments", data.data.shipments);
       localStorage.setItem("dropoffs", data.data.drop_offs);
-      console.log(data.data);
       setOrderCount(data.data.orders);
       setWallets(data.data.wallets);
       setShipments(data.data.shipments);
-      setDrppoffs(data.data.drop_offs);
+      setDropoffs(data.data.drop_offs);
     });
 
     notificationChannel.bind("new-item-created", function (data) {
@@ -212,16 +188,19 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
           left: "50%",
           transform: "translate(-50%, -50%)",
         },
-        autoClose: 5000, // Disable auto close
-        // Adjust the duration time here (in milliseconds)
+        autoClose: 5000,
       });
     });
+
     setPosition(null);
     return () => {
-      // Unsubscribe from channels, disconnect, etc.
       pusher.disconnect();
     };
-  }, []); //notification
+  }, []); // notification
+
+  const handleSectionToggle = (sectionLabel) => {
+    setOpenSection(openSection === sectionLabel ? "" : sectionLabel);
+  };
 
   const links = data.map((item, index) => (
     <React.Fragment key={index}>
@@ -232,7 +211,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
             className={cx(classes.link, {
               [classes.linkActive]: item.label === active,
             })}
-            onClick={() => setCollapseOpened((o) => !o)}
+            onClick={() => handleSectionToggle(item.label)}
           >
             {item.icon && (
               <item.icon
@@ -249,7 +228,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                     size="xs"
                     variant="filled"
                   >
-                    {collapseOpened ? (
+                    {openSection === item.label ? (
                       <IconChevronUp size={16} />
                     ) : (
                       <IconChevronDown size={16} />
@@ -259,7 +238,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
               ) : null}
             </div>
           </div>
-          <Collapse in={collapseOpened}>
+          <Collapse in={openSection === item.label}>
             {item.links.map((subItem, subIndex) => (
               <Link
                 key={subIndex}
@@ -312,70 +291,62 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 {opened ? (
                   <span>
                     {item.label}{" "}
-                    {item.link === "/orders" &&
-                      orderCount &&
-                      parseInt(orderCount) > 0 && (
-                        <Badge
-                          style={{
-                            backgroundColor: "#FF6A00",
-                            marginLeft: "15px",
-                            color: "#FFFFFF",
-                          }}
-                          size="md"
-                          variant="danger"
-                          circle
-                        >
-                          {orderCount}
-                        </Badge>
-                      )}
-                    {item.link === "/shipments" &&
-                      shipments &&
-                      parseInt(shipments) > 0 && (
-                        <Badge
-                          style={{
-                            backgroundColor: "#FF6A00",
-                            marginLeft: "15px",
-                            color: "#FFFFFF",
-                          }}
-                          size="md"
-                          variant="danger"
-                          circle
-                        >
-                          {shipments}
-                        </Badge>
-                      )}
-                    {item.link === "/wallets" &&
-                      wallets &&
-                      parseInt(wallets) > 0 && (
-                        <Badge
-                          style={{
-                            backgroundColor: "#FF6A00",
-                            marginLeft: "15px",
-                            color: "#FFFFFF",
-                          }}
-                          size="md"
-                          variant="danger"
-                          circle
-                        >
-                          {wallets}
-                        </Badge>
-                      )}
-                    {item.link === "/dropoffs" &&
-                      dropoffs &&
-                      parseInt(dropoffs) > 0 && (
-                        <Badge
-                          style={{
-                            backgroundColor: "#FF6A00",
-                            marginLeft: "15px",
-                            color: "#FFFFFF",
-                          }}
-                          size="md"
-                          variant="danger"
-                          circle
-                        >
-                          {dropoffs}
-                        </Badge>
-                      )}
+                    {item.link === "/orders" && orderCount && parseInt(orderCount) > 0 && (
+                      <Badge
+                        style={{
+                          backgroundColor: "#FF6A00",
+                          marginLeft: "15px",
+                          color: "#FFFFFF",
+                        }}
+                        size="md"
+                        variant="danger"
+                        circle
+                      >
+                        {orderCount}
+                      </Badge>
+                    )}
+                    {item.link === "/shipments" && shipments && parseInt(shipments) > 0 && (
+                      <Badge
+                        style={{
+                          backgroundColor: "#FF6A00",
+                          marginLeft: "15px",
+                          color: "#FFFFFF",
+                        }}
+                        size="md"
+                        variant="danger"
+                        circle
+                      >
+                        {shipments}
+                      </Badge>
+                    )}
+                    {item.link === "/wallets" && wallets && parseInt(wallets) > 0 && (
+                      <Badge
+                        style={{
+                          backgroundColor: "#FF6A00",
+                          marginLeft: "15px",
+                          color: "#FFFFFF",
+                        }}
+                        size="md"
+                        variant="danger"
+                        circle
+                      >
+                        {wallets}
+                      </Badge>
+                    )}
+                    {item.link === "/dropoffs" && dropoffs && parseInt(dropoffs) > 0 && (
+                      <Badge
+                        style={{
+                          backgroundColor: "#FF6A00",
+                          marginLeft: "15px",
+                          color: "#FFFFFF",
+                        }}
+                        size="md"
+                        variant="danger"
+                        circle
+                      >
+                        {dropoffs}
+                      </Badge>
+                    )}
                   </span>
                 ) : null}
               </div>
@@ -418,9 +389,8 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
     if (authDataVar().auth) {
       const text = authDataVar().auth.name;
       const new_splitted_text = text.split(" ");
-      // alert(new_splitted_text[0]);
       const NL = new_splitted_text[0].charAt(0);
-      const FL = new_splitted_text[1].charAt(0);
+      const FL = new_splitted_text[1]?.charAt(0) || ""; // Handle case where there might not be a second name
 
       return NL + " " + FL;
     }
@@ -446,7 +416,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
           scrollbarColor: "rgba(155, 155, 155, 0.5) rgba(255, 255, 255, 0.1)",
           scrollbarTrackColor: "rgba(255, 255, 255, 0.1)",
           scrollbarThumbColor: "rgba(155, 155, 155, 0.5)",
-          WebkitScrollbarWidth: "2px", // Adjust this value as needed
+          WebkitScrollbarWidth: "2px",
         }}
       >
         {links}
