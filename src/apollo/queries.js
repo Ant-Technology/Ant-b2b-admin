@@ -4,7 +4,6 @@ export const AUTH = gql`
   query {
     auth {
       name
-      role
       roles {
         name
       }
@@ -250,6 +249,40 @@ export const GET_REGION = gql`
     }
   }
 `;
+
+export const GET_ACTIVITY_LOGS = gql`
+  query GET_ACTIVITY_LOGS($first: Int!, $page: Int, $ordered_by: [OrderByInput]!) {
+    getActivityLogs(
+      first: $first
+      page: $page
+      orderBy: $ordered_by
+    ) {
+      data {
+        id
+        log_name
+        event
+        properties
+        causer {
+          ... on User {
+            id
+            name
+          }
+        }
+        created_at
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
 
 //products query
 
@@ -1023,7 +1056,6 @@ export const GET_VEHICLE = gql`
   query ($id: ID!) {
     vehicle(id: $id) {
       id
-      name
       model
       owner_name
       color

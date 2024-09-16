@@ -22,6 +22,9 @@ import {
   IconTruckLoading,
   IconChevronDown,
   IconSettings,
+  IconHistory,
+  IconClipboardList,
+  IconTimeline,
   IconChevronUp,
 } from "@tabler/icons";
 
@@ -124,14 +127,27 @@ const data = [
   { link: "/drivers", label: "Drivers", icon: IconUser },
   { link: "/vehicle_types", label: "Vehicle Types", icon: IconTruck },
   { link: "/vehicles", label: "Vehicles", icon: IconTruckDelivery },
-  { link: "/distributors", label: "Distributers", icon: IconLayoutDistributeHorizontal },
+  {
+    link: "/distributors",
+    label: "Distributers",
+    icon: IconLayoutDistributeHorizontal,
+  },
   { link: "/stocks", label: "Stocks", icon: IconBuildingStore },
   { link: "/sales", label: "Sales", icon: IconUser },
+  {
+    link: "/activities",
+    label: "Activities Log",
+    icon: IconTimeline,
+  },
   {
     label: "Settings",
     icon: IconSettings,
     initiallyOpened: false,
-    links: [{ link: "/config", label: "Configuration" }],
+    links: [
+      { link: "/roles", label: "Roles" },
+      
+      { link: "/config", label: "Configuration" },
+    ],
   },
   {
     label: "Feedback",
@@ -150,16 +166,22 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const mobScreen = useMediaQuery("(max-width: 500px)");
 
   const [active, setActive] = useState("Billing");
-  const [orderCount, setOrderCount] = useState(localStorage.getItem("orderCount") || 0);
-  const [shipments, setShipments] = useState(localStorage.getItem("shipments") || 0);
+  const [orderCount, setOrderCount] = useState(
+    localStorage.getItem("orderCount") || 0
+  );
+  const [shipments, setShipments] = useState(
+    localStorage.getItem("shipments") || 0
+  );
   const [wallets, setWallets] = useState(localStorage.getItem("wallets") || 0);
-  const [dropoffs, setDropoffs] = useState(localStorage.getItem("dropoffs") || 0);
+  const [dropoffs, setDropoffs] = useState(
+    localStorage.getItem("dropoffs") || 0
+  );
 
   const [openSection, setOpenSection] = useState(""); // New state for tracking open section
 
   const navigate = useNavigate();
   const [signout] = useMutation(LOGOUT);
-  
+
   const [collapseOpened, setCollapseOpened] = useState(false);
 
   useEffect(() => {
@@ -291,62 +313,70 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 {opened ? (
                   <span>
                     {item.label}{" "}
-                    {item.link === "/orders" && orderCount && parseInt(orderCount) > 0 && (
-                      <Badge
-                        style={{
-                          backgroundColor: "#FF6A00",
-                          marginLeft: "15px",
-                          color: "#FFFFFF",
-                        }}
-                        size="md"
-                        variant="danger"
-                        circle
-                      >
-                        {orderCount}
-                      </Badge>
-                    )}
-                    {item.link === "/shipments" && shipments && parseInt(shipments) > 0 && (
-                      <Badge
-                        style={{
-                          backgroundColor: "#FF6A00",
-                          marginLeft: "15px",
-                          color: "#FFFFFF",
-                        }}
-                        size="md"
-                        variant="danger"
-                        circle
-                      >
-                        {shipments}
-                      </Badge>
-                    )}
-                    {item.link === "/wallets" && wallets && parseInt(wallets) > 0 && (
-                      <Badge
-                        style={{
-                          backgroundColor: "#FF6A00",
-                          marginLeft: "15px",
-                          color: "#FFFFFF",
-                        }}
-                        size="md"
-                        variant="danger"
-                        circle
-                      >
-                        {wallets}
-                      </Badge>
-                    )}
-                    {item.link === "/dropoffs" && dropoffs && parseInt(dropoffs) > 0 && (
-                      <Badge
-                        style={{
-                          backgroundColor: "#FF6A00",
-                          marginLeft: "15px",
-                          color: "#FFFFFF",
-                        }}
-                        size="md"
-                        variant="danger"
-                        circle
-                      >
-                        {dropoffs}
-                      </Badge>
-                    )}
+                    {item.link === "/orders" &&
+                      orderCount &&
+                      parseInt(orderCount) > 0 && (
+                        <Badge
+                          style={{
+                            backgroundColor: "#FF6A00",
+                            marginLeft: "15px",
+                            color: "#FFFFFF",
+                          }}
+                          size="md"
+                          variant="danger"
+                          circle
+                        >
+                          {orderCount}
+                        </Badge>
+                      )}
+                    {item.link === "/shipments" &&
+                      shipments &&
+                      parseInt(shipments) > 0 && (
+                        <Badge
+                          style={{
+                            backgroundColor: "#FF6A00",
+                            marginLeft: "15px",
+                            color: "#FFFFFF",
+                          }}
+                          size="md"
+                          variant="danger"
+                          circle
+                        >
+                          {shipments}
+                        </Badge>
+                      )}
+                    {item.link === "/wallets" &&
+                      wallets &&
+                      parseInt(wallets) > 0 && (
+                        <Badge
+                          style={{
+                            backgroundColor: "#FF6A00",
+                            marginLeft: "15px",
+                            color: "#FFFFFF",
+                          }}
+                          size="md"
+                          variant="danger"
+                          circle
+                        >
+                          {wallets}
+                        </Badge>
+                      )}
+                    {item.link === "/dropoffs" &&
+                      dropoffs &&
+                      parseInt(dropoffs) > 0 && (
+                        <Badge
+                          style={{
+                            backgroundColor: "#FF6A00",
+                            marginLeft: "15px",
+                            color: "#FFFFFF",
+                          }}
+                          size="md"
+                          variant="danger"
+                          circle
+                        >
+                          {dropoffs}
+                        </Badge>
+                      )}
                   </span>
                 ) : null}
               </div>
