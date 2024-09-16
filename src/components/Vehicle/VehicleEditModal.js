@@ -29,7 +29,6 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
       //   console.log(data.vehicle.vehicle_type.id)
 
       form.setValues({
-        name: data.vehicle.name,
         model: data.vehicle.model,
         owner_name: data.vehicle.owner_name,
         color: data.vehicle.color,
@@ -146,13 +145,6 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
         <Stack>
           <Grid>
             <Grid.Col span={6}>
-              <TextInput
-                placeholder="Name"
-                label="Name"
-                {...form.getInputProps("name")}
-                withAsterisk
-              />
-
               <TextInput
                 placeholder="Model"
                 label="Model"

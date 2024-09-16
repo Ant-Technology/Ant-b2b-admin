@@ -62,20 +62,24 @@ function Th({ children, reversed, sorted, onSort }) {
     </th>
   );
 }
-
 function filterData(data, search) {
   const query = search.toLowerCase().trim();
-  console.log("Filtering data with query:", query); // Debugging log
+  
   return data.filter((item) => {
     return Object.keys(item).some((key) => {
       const value = item[key];
-      
+
       if (typeof value === "string") {
         return value.toLowerCase().includes(query);
       }
 
+      if (key === 'causer' && value && typeof value === "object") {
+        // Specifically check for causer.name
+        return value.name?.toLowerCase().includes(query);
+      }
+
       if (typeof value === "object" && value !== null) {
-        return Object.values(value).some(val => 
+        return Object.values(value).some(val =>
           typeof val === "string" && val.toLowerCase().includes(query)
         );
       }
@@ -84,6 +88,7 @@ function filterData(data, search) {
     });
   });
 }
+
 function sortData(data, payload) {
   if (!payload.sortBy) {
     return filterData(data, payload.search);
@@ -91,38 +96,29 @@ function sortData(data, payload) {
 
   return filterData(
     [...data].sort((a, b) => {
-      const aValue = a[payload.sortBy];
-      const bValue = b[payload.sortBy];
+      let aValue = a[payload.sortBy];
+      let bValue = b[payload.sortBy];
 
-      // Convert values to strings for comparison
-      const aStr = (aValue !== null && aValue !== undefined) ? String(aValue) : '';
-      const bStr = (bValue !== null && bValue !== undefined) ? String(bValue) : '';
+      // Special case for causer.name
+      if (payload.sortBy === 'causer') {
+        aValue = a.causer?.name || '';  // Get causer.name or empty string
+        bValue = b.causer?.name || '';
+      }
+
+      const aStr = aValue !== null && aValue !== undefined ? String(aValue) : '';
+      const bStr = bValue !== null && bValue !== undefined ? String(bValue) : '';
 
       if (payload.sortBy === "cost" || payload.sortBy === "total_price") {
-        // Ensure numeric comparison
         const aNum = parseFloat(aStr);
         const bNum = parseFloat(bStr);
-
-        return payload.reversed
-          ? bNum - aNum
-          : aNum - bNum;
-      } else if (payload.sortBy === "driver") {
-        const aDriver = aValue?.name || "";
-        const bDriver = bValue?.name || "";
-        return payload.reversed
-          ? bDriver.localeCompare(aDriver)
-          : aDriver.localeCompare(bDriver);
+        return payload.reversed ? bNum - aNum : aNum - bNum;
       } else {
-        // For other fields
-        return payload.reversed
-          ? bStr.localeCompare(aStr)
-          : aStr.localeCompare(bStr);
+        return payload.reversed ? bStr.localeCompare(aStr) : aStr.localeCompare(bStr);
       }
     }),
     payload.search
   );
 }
-
 
 const B2bTable = ({
   data,
