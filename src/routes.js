@@ -23,6 +23,7 @@ import Feedbacks from "pages/feedbacks"
 import Config from "pages/settings/config";
 import FeedbackTypes from "pages/feedbacks/feedback_type";
 import Activity from "pages/activityLogs";
+import Roles from "pages/settings/roles";
 const RoutesComp = () => {
   return (
     <Routes>
@@ -50,6 +51,7 @@ const RoutesComp = () => {
       <Route path="/feedback-types" element = {<FeedbackTypes/>}/>
       <Route path="/config" element = {<Config/>}/>
       <Route path="/activities" element = {<Activity/>} />
+      <Route path="/roles" element = {<Roles/>}/>
     </Routes>
   );
 };
