@@ -62,8 +62,8 @@ export const RoleAddModal = ({ setOpened, fetchData }) => {
       showNotification({
         color: "red",
         title: "Error",
-        message: error?.response?.data?.errors?.email
-          ? error.response.data.errors.email[0]
+        message: error?.response?.data?.message
+          ? error.response.data.message
           : "Role Not Created!",
       });
     }
