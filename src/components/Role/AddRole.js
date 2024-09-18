@@ -12,11 +12,13 @@ import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
-import { useState } from "react";
-import { API,allPermissions } from "utiles/url";
+import { useState, useEffect } from "react";
+import { API, allPermissions } from "utiles/url";
 
 export const RoleAddModal = ({ setOpened, fetchData }) => {
   const [loading, setLoading] = useState(false);
+  const [checkedPermissions, setCheckedPermissions] = useState([]);
+  const [isAllChecked, setIsAllChecked] = useState(false);
   const form = useForm({
     initialValues: {
       name: "",
@@ -41,7 +43,7 @@ export const RoleAddModal = ({ setOpened, fetchData }) => {
       // Append permissions array to formData
       formData.append(
         "permissions",
-        JSON.stringify(form.getInputProps("permissions").value)
+        JSON.stringify(checkedPermissions) // Use checkedPermissions state here
       );
 
       const { data } = await axios.post(`${API}/roles`, formData, config);
@@ -66,6 +68,24 @@ export const RoleAddModal = ({ setOpened, fetchData }) => {
       });
     }
   };
+
+  const handleToggleAll = () => {
+    if (isAllChecked) {
+      setCheckedPermissions([]);
+      form.setFieldValue("permissions", []);
+    } else {
+      setCheckedPermissions(allPermissions);
+      form.setFieldValue("permissions", allPermissions);
+    }
+    setIsAllChecked(!isAllChecked);
+  };
+
+  useEffect(() => {
+    // Update isAllChecked based on checkedPermissions
+    setIsAllChecked(
+      allPermissions.length > 0 && checkedPermissions.length === allPermissions.length
+    );
+  }, [checkedPermissions]);
 
   return (
     <>
@@ -94,16 +114,31 @@ export const RoleAddModal = ({ setOpened, fetchData }) => {
               <Grid.Col span={12}>
                 <Checkbox.Group
                   label="Permissions"
-                  {...form.getInputProps("permissions", { type: "checkbox" })}
+                  value={checkedPermissions} // Set value to managed state
+                  onChange={(value) => {
+                    setCheckedPermissions(value); // Update state on change
+                    form.setFieldValue("permissions", value);
+                  }}
                 >
                   <Grid>
-                    {allPermissions.map((permission, index) => (
+                    {allPermissions.map((permission) => (
                       <Grid.Col span={3} key={permission}>
                         <Checkbox value={permission} label={permission} />
                       </Grid.Col>
                     ))}
                   </Grid>
                 </Checkbox.Group>
+                <Button onClick={handleToggleAll}
+                 style={{
+                  width: "8%",
+                  marginTop: "15px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                fullWidth
+                >
+                  {isAllChecked ? "Uncheck All" : "Check All"}
+                </Button>
               </Grid.Col>
             </Grid>
 
