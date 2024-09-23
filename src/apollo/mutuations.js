@@ -950,7 +950,7 @@ export const UPDATE_USER = gql`
 
 //ROles
 export const ATTACH_ROLE = gql`
-  mutation ($user_id: ID!, $role: RoleEnum!) {
+  mutation ($user_id: ID!, $role: String!) {
     attachRole(user_id: $user_id, role: $role) {
       id
       name
