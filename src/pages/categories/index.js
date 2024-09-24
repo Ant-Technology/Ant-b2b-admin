@@ -25,7 +25,7 @@ import CategoryDetailModal from "components/Category/categoryDetail";
 import Controls from "components/controls/Controls";
 
 const Categories = () => {
-  const [size] = useState(10);
+  const [size, setSize] = useState("10"); // Default page size
   const [total, setTotal] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [hasMounted, setHasMounted] = useState(false);
@@ -42,7 +42,7 @@ const Categories = () => {
   const { data, loading, fetchMore } = useQuery(GET_CATEGORIES, {
     // fetchPolicy: "no-cache",
     variables: {
-      first: size,
+      first: parseInt(size), // Pass size dynamically
       page: activePage,
     },
   });
@@ -114,10 +114,15 @@ const Categories = () => {
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
-  if (!total && data) {
-    setTotal(data.categories.paginatorInfo.lastPage);
-  }
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.categories.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
 
   const handleChange = (currentPage) => {
     fetchMore({
@@ -322,6 +327,8 @@ const Categories = () => {
             optionsData={optionsData}
             loading={loading}
             data={data ? data.categories.data : []}
+            handlePageSizeChange= {handlePageSizeChange}
+            size={size}
           />
         </ScrollArea>
       </Card>

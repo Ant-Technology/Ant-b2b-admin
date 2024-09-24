@@ -22,15 +22,13 @@ import B2bTable from "components/reusable/b2bTable";
 import UserAddModal from "components/User/UserAddModal";
 import UserEditModal from "components/User/UserEditModal";
 import { customLoader } from "components/utilities/loader";
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 const Users = () => {
-  const [isTrashHovered, setIsTrashHovered] = useState(false);
-  const [isEditHovered, setIsEditHovered] = useState(false);
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -43,14 +41,21 @@ const Users = () => {
 
   const { data, loading } = useQuery(GET_ALL_USERS, {
     variables: {
-      first: size,
+      first: parseInt(size),
       page: activePage,
     },
   });
 
-  if (!total && data) {
-    setTotal(data.users.paginatorInfo.lastPage);
-  }
+ 
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.users.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
 
   const [delUser] = useMutation(DEL_USER, {
     update(cache, { data: { deleteUser } }) {
@@ -355,6 +360,8 @@ const Users = () => {
             optionsData={optionsData}
             loading={loading}
             data={data ? data.users.data : []}
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

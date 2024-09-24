@@ -22,9 +22,7 @@ import {
 } from "@mantine/core";
 import { Edit, Trash } from "tabler-icons-react";
 import axios from "axios";
-import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import EditIcon from "@mui/icons-material/Edit";
 import React, { Fragment, useEffect, useState } from "react";
 import { ManualGearbox } from "tabler-icons-react";

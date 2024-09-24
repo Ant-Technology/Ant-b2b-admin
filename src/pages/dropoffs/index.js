@@ -18,7 +18,7 @@ import CallIcon from "@mui/icons-material/Call";
 import { RECALL_DRIVER_FOR_PENDING_DROPOFF } from "apollo/mutuations";
 import { showNotification } from "@mantine/notifications";
 const DropOffs = () => {
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
@@ -28,14 +28,21 @@ const DropOffs = () => {
 
   const { data, loading, refetch } = useQuery(GET_DROPOFFS, {
     variables: {
-      first: size,
+      first: parseInt(size), // Pass size dynamically
       page: activePage,
     },
   });
 
-  if (!total && data) {
-    setTotal(data.dropoffs.paginatorInfo.lastPage);
-  }
+
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.dropoffs.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
 
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
@@ -247,6 +254,8 @@ const DropOffs = () => {
             header={headerData}
             loading={loading}
             data={dropOffs.length ? dropOffs : data.dropoffs.data || []}
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>
