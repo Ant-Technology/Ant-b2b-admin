@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ScrollArea,
   Group,
@@ -24,7 +24,7 @@ const Distributors = () => {
   //states
   const [isTrashHovered, setIsTrashHovered] = useState(false);
   const [isEditHovered, setIsEditHovered] = useState(false);
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
@@ -40,14 +40,19 @@ const Distributors = () => {
   const { data, loading } = useQuery(GET_DISTRIBUTORS, {
     // fetchPolicy: "network-only",
     variables: {
-      first: size,
+      first: parseInt(size), // Pass size dynamically
       page: activePage,
     },
   });
-
-  if (!total && data) {
-    setTotal(data.distributors.paginatorInfo.lastPage);
-  }
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.distributors.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
 
 
 
@@ -266,6 +271,8 @@ const Distributors = () => {
             optionsData={optionsData}
             loading={loading}
             data={data ? data.distributors.data : []}
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

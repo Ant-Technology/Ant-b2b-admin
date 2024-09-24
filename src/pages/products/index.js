@@ -26,7 +26,7 @@ import React, { useEffect, useState } from "react";
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 
 const Products = () => {
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [total, setTotal] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [hasMounted, setHasMounted] = useState(false);
@@ -47,10 +47,20 @@ const Products = () => {
   const { data, loading, fetchMore } = useQuery(GET_PRODUCTS, {
     // fetchPolicy: "no-cache",
     variables: {
-      first: size,
+      first: parseInt(size), // Pass size dynamically
       page: activePage,
     },
   });
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.products.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
+
 
   const [delProduct] = useMutation(DEL_PRODUCT, {
     update(cache, { data: { deleteProduct } }) {
@@ -86,9 +96,6 @@ const Products = () => {
     setHasMounted(true);
   }, []);
 
-  if (!total && data) {
-    setTotal(data.products.paginatorInfo.lastPage);
-  }
 
   const handleChange = (currentPage) => {
     fetchMore({
@@ -333,6 +340,8 @@ const Products = () => {
             optionsData={optionsData}
             loading={loading}
             data={data ? data.products.data : []}
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

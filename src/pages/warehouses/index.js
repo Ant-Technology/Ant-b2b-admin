@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge, Drawer, LoadingOverlay, useMantineTheme } from "@mantine/core";
 import { ScrollArea, Group, Button, Card, Avatar, Modal } from "@mantine/core";
 import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
@@ -19,7 +19,7 @@ import ShowWarehouseLocation from "components/Warehouse/showWarehouseLocation";
 import Controls from "components/controls/Controls";
 
 const Warehouses = () => {
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -34,14 +34,21 @@ const Warehouses = () => {
 
   const { data, loading, refetch } = useQuery(GET_WARE_HOUSES, {
     variables: {
-      first: size,
+      first: parseInt(size),
       page: activePage,
     },
   });
 
-  if (!total && data) {
-    setTotal(data.warehouses.paginatorInfo.lastPage);
-  }
+  
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.warehouses.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
 
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
@@ -369,6 +376,8 @@ const Warehouses = () => {
             data={data.warehouses.data}
             loading={loading}
             optionsData={optionsData}
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

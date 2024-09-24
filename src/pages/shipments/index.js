@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_SHIPMENTS } from "apollo/queries";
 import {
@@ -33,7 +33,7 @@ import UpdateIcon from '@mui/icons-material/Update';
 import SalesDetailModal from "components/Sales/SalesDetailModal";
 import ShipmentDetail from "components/Shipment/ShipmentDetail";
 const Shipments = () => {
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -55,7 +55,7 @@ const Shipments = () => {
 
   const { data, loading, fetchMore,refetch } = useQuery(GET_SHIPMENTS, {
     variables: {
-      first: size,
+      first:parseInt(size),
       page: activePage,
     },
   });
@@ -207,10 +207,16 @@ const Shipments = () => {
       variables: { shipment_id: shipmentId },
     });
   };     
-
-  if (!total && data) {
-    setTotal(data.shipments.paginatorInfo.lastPage);
-  }
+  
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.shipments.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
 
   const handleDelete = (id) => {
     setOpenedDelete(true);
@@ -344,6 +350,8 @@ const Shipments = () => {
             collapsible={checked}
             selectedCollapse={selectedCollapse}
             setSelectedCollapse={setSelectedCollapse}
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

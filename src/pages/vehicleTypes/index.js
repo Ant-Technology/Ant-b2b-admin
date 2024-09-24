@@ -21,7 +21,7 @@ import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import VehicleTypeAddModal from "components/VehicleType/VehicleTypeAddModal";
 import VehicleTypeEditModal from "components/VehicleType/VehicleTypeEditModal";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Edit, Trash } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
 import EditIcon from "@mui/icons-material/Edit";
@@ -30,27 +30,32 @@ import CancelIcon from '@mui/icons-material/Cancel';
 
 
 const VehicleTypes = () => {
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
 
-  //pagination states
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
   const { data, loading } = useQuery(GET_VEHICLE_TYPES, {
     variables: {
-      first: size,
+      first: parseInt(size),
       page: activePage,
     },
   });
 
-  if (!total && data) {
-    setTotal(data.vehicleTypes.paginatorInfo.lastPage);
-  }
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.vehicleTypes.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
 
   const [delVehicleType] = useMutation(DEL_VEHICLE_TYPES, {
     update(cache, { data: { deleteVehicleType } }) {
@@ -383,6 +388,8 @@ const VehicleTypes = () => {
             optionsData={optionsData}
             loading={loading}
             data={data ? data.vehicleTypes.data : []}
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

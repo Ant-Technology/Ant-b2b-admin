@@ -24,7 +24,7 @@ import { FiEye } from "react-icons/fi";
 const Orders = () => {
   const [dropoffStatus, setDropoffStatus] = useState(null); // Track selected status
 
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
 
@@ -68,6 +68,11 @@ const Orders = () => {
       },
     }
   );
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+
   useEffect(() => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
@@ -262,6 +267,8 @@ const Orders = () => {
                   data?.getOrdersByOrderItemStatus?.data ||
                   []
             }
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

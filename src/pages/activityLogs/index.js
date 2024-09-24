@@ -26,7 +26,7 @@ import React, { useEffect, useState } from "react";
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 
 const Activity = () => {
-  const [size] = useState(10);
+  const [size, setSize] = useState("10"); // Default page size
   const [total, setTotal] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [hasMounted, setHasMounted] = useState(false);
@@ -43,7 +43,7 @@ const Activity = () => {
 
   const { data, loading, fetchMore } = useQuery(GET_ACTIVITY_LOGS, {
     variables: {
-      first: size,
+      first: parseInt(size), // Pass size dynamically
       page: activePage,
       ordered_by: [
         {
@@ -53,13 +53,18 @@ const Activity = () => {
       ],
     },
   });
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.getActivityLogs.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
-  if (!total && data) {
-    setTotal(data.getActivityLogs.paginatorInfo.lastPage);
-  }
 
   const handleChange = (currentPage) => {
     fetchMore({
@@ -173,6 +178,8 @@ const Activity = () => {
             header={headerData}
             loading={loading}
             data={data ? data.getActivityLogs.data : []}
+            size={size}
+            handlePageSizeChange= {handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

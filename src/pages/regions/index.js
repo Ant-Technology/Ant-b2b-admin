@@ -12,7 +12,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
 import { DEL_REGION } from "apollo/mutuations";
 import { GET_REGIONS } from "apollo/queries";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import { customLoader } from "components/utilities/loader";
 import B2bTable from "components/reusable/b2bTable";
@@ -21,7 +21,7 @@ import RegionsAddModal from "components/Region/regionsAddModal";
 import RegionDetailModal from "components/Region/regionDetail";
 
 const Regions = () => {
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -36,21 +36,24 @@ const Regions = () => {
 
   const { data, loading } = useQuery(GET_REGIONS, {
     variables: {
-      first: size,
+      first: parseInt(size),
       page: activePage,
     },
   });
 
-  if (!total && data) {
-    setTotal(data.regions.paginatorInfo.lastPage);
-  }
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.regions.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
 
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
   };
-
-  // const [getWarehouse, { loading: singleWarehouseLoading }] =
-  //   useLazyQuery(GET_REGION);
 
   const [delRegion] = useMutation(DEL_REGION, {
     update(cache, { data: { deleteRegion } }) {
@@ -319,6 +322,8 @@ const Regions = () => {
             optionsData={optionsData}
             loading={loading}
             data={data ? data.regions.data : []}
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

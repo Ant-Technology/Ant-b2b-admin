@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { customLoader } from "components/utilities/loader";
 import { useMutation, useQuery } from "@apollo/client";
 import Controls from "../../components/controls/Controls";
@@ -27,7 +27,7 @@ import RetailerDetailModal from "components/Retailer/RetailerDetail";
 import { Tooltip } from "@mui/material";
 
 const Retailers = () => {
-  const [size] = useState(10);
+  const [size,setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -41,14 +41,21 @@ const Retailers = () => {
 
   const { data, loading } = useQuery(GET_RETAILERS, {
     variables: {
-      first: size,
+      first: parseInt(size),
       page: activePage,
     },
   });
 
-  if (!total && data) {
-    setTotal(data.retailers.paginatorInfo.lastPage);
-  }
+
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+  };
+  useEffect(() => {
+    if (data) {
+      setTotal(data.retailers.paginatorInfo.lastPage);
+    }
+  }, [data, size]); 
 
   const [delRetailer] = useMutation(DEL_RETAILER, {
     update(cache, { data: { deleteRetailer } }) {
@@ -320,6 +327,8 @@ const Retailers = () => {
             optionsData={optionsData}
             loading={loading}
             data={data ? data.retailers.data : []}
+            size={size}
+            handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>
       </Card>

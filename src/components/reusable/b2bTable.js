@@ -14,10 +14,12 @@ import {
   Pagination,
   Button,
   Tooltip,
+  Select,
 } from "@mantine/core";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { customLoader } from "components/utilities/loader";
 import { Plus, Search } from "tabler-icons-react";
+import { PAGE_SIZE_OPTIONS } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -132,10 +134,13 @@ const B2bTable = ({
   collapsible,
   selectedCollapse,
   setSelectedCollapse,
+  size,
+  handlePageSizeChange
 }) => {
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState(data);
   const [sortBy, setSortBy] = useState(null);
+
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
   const setSorting = (field) => {
@@ -263,17 +268,26 @@ const B2bTable = ({
           )}
         </tbody>
       </Table>
-      <Center>
-        <div style={{ paddingTop: "12px" }}>
-          <Container>
-            <Pagination
-              color="blue"
-              page={activePage}
-              onChange={handleChange}
-              total={total}
+      <Center mt="md">
+        <Group spacing="xs" position="center">
+          <Group spacing="sm">
+            <Text size="sm" mt="sm">
+            <span style={{color:"#FF6A00",marginBottom:"10px"}}>Show per page:</span>
+            </Text>
+            <Select
+              value={size}
+              onChange={handlePageSizeChange} // Call parent handler for page size change
+              data={PAGE_SIZE_OPTIONS}
+              style={{ width: 80,height:40 }}
             />
-          </Container>
-        </div>
+          </Group>
+          <Pagination
+            color="blue"
+            page={activePage}
+            onChange={handleChange}
+            total={total}
+          />
+        </Group>
       </Center>
     </ScrollArea>
   );
