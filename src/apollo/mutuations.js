@@ -864,6 +864,13 @@ export const DEL_USER = gql`
     }
   }
 `;
+export const DEL_PAYMENT_TYPE = gql`
+  mutation ($id: ID!) {
+    deletePaymentType(id: $id) {
+      id
+    }
+  }
+`;
 export const CHANGE_USER_STATUS = gql`
   mutation ChangeUserStatus($id: ID!, $status: Boolean!) {
     changeUserStatus(id: $id, status: $status) {
@@ -922,6 +929,33 @@ export const CREATE_USER = gql`
     }
   }
 `;
+export const CREATE_PAYMENT_TYPE = gql`
+  mutation($name: String!) {
+    createPaymentType(input: {
+      name: $name
+    }) {
+      id
+      name
+      status
+    }
+  }
+`;
+
+export const UPDATE_PAYMENT_TYPE = gql`
+  mutation (
+    $id: ID!
+    $name: String!
+  ) {
+    updatePaymentType(
+      id: $id
+      name: $name
+    ) {
+      id
+      name
+    }
+  }
+`;
+
 
 export const UPDATE_USER = gql`
   mutation (

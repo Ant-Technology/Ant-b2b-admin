@@ -24,7 +24,7 @@ import { FiEye } from "react-icons/fi";
 const Orders = () => {
   const [dropoffStatus, setDropoffStatus] = useState(null); // Track selected status
 
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
 
@@ -39,7 +39,7 @@ const Orders = () => {
       variables: dropoffStatus
         ? {
             status: dropoffStatus, // Ensure this matches exactly with backend
-            first: size, // Increase `first` to fetch more data
+            first: parseInt(size), // Pass size dynamically
             page: activePage,
             ordered_by: [
               {
@@ -48,7 +48,10 @@ const Orders = () => {
               },
             ],
           }
-        : { first: size, page: activePage },
+        : {
+            first: parseInt(size), // Pass size dynamically
+            page: activePage,
+          },
 
       onCompleted: (data) => {
         console.log("Query completed with data:", data);
@@ -77,33 +80,39 @@ const Orders = () => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
     });
-  
+
     const notificationChannel = pusher.subscribe("notification");
-  
+
     notificationChannel.bind("new-item-created", function (newOrder) {
-  
       if (!dropoffStatus || newOrder.state === dropoffStatus) {
-        refetch().then(({ data }) => {
-          const updatedOrders = data?.orders?.data || data?.getOrdersByOrderItemStatus?.data || [];
-          if (data?.getOrdersByOrderItemStatus) {
-            setTotal(data?.getOrdersByOrderItemStatus?.paginatorInfo.lastPage);
-          } else {
-            setTotal(data?.orders.paginatorInfo.lastPage);
-          }
-          setOrders(updatedOrders);
-        }).catch((error) => {
-          console.error("Error fetching updated orders:", error);
-        });
+        refetch()
+          .then(({ data }) => {
+            const updatedOrders =
+              data?.orders?.data ||
+              data?.getOrdersByOrderItemStatus?.data ||
+              [];
+            if (data?.getOrdersByOrderItemStatus) {
+              setTotal(
+                data?.getOrdersByOrderItemStatus?.paginatorInfo.lastPage
+              );
+            } else {
+              setTotal(data?.orders.paginatorInfo.lastPage);
+            }
+            setOrders(updatedOrders);
+          })
+          .catch((error) => {
+            console.error("Error fetching updated orders:", error);
+          });
       }
     });
-  
+
     return () => {
       pusher.disconnect();
     };
   }, [dropoffStatus, refetch]); // Include `refetch` in the dependencies array
-  
+
   // Define a state to store the list of orders
-  
+
   const [orders, setOrders] = useState([]);
 
   const clearFilter = () => {
