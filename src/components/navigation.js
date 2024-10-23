@@ -147,6 +147,7 @@ const data = [
       { link: "/roles", label: "Roles" },
       
       { link: "/config", label: "Configuration" },
+      {link:"/payment-types", label:"Payment Types"}
     ],
   },
   {

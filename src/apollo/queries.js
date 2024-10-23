@@ -10,6 +10,16 @@ export const AUTH = gql`
     }
   }
 `;
+export const PAYMENT_TYPES = gql`
+  query {
+    paymentTypesNonPaginated {
+      id
+      name
+      status
+    }
+  }
+`;
+
 //category queries
 
 export const GET_CATEGORIES = gql`

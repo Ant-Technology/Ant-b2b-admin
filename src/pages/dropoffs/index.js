@@ -2,21 +2,19 @@ import { useMutation, useQuery } from "@apollo/client";
 import { Card, Drawer, LoadingOverlay, ScrollArea } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
 import { IoIosCall } from "react-icons/io";
-
-import EditIcon from "@mui/icons-material/Edit";
+import { FaMapMarkerAlt } from "react-icons/fa";
 import { GET_DROPOFFS } from "apollo/queries";
 import { DropOffAddModal } from "components/Dropoff/DropOffAddModal";
 import ManageDropOffModal from "components/Dropoff/ManageDropOffModal";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import React, { useEffect, useState } from "react";
-import { ManualGearbox, Trash } from "tabler-icons-react";
 import Pusher from "pusher-js";
 import DropOffCard from "./card";
 import Controls from "components/controls/Controls";
-import CallIcon from "@mui/icons-material/Call";
 import { RECALL_DRIVER_FOR_PENDING_DROPOFF } from "apollo/mutuations";
 import { showNotification } from "@mantine/notifications";
+import DriverMapView from "components/Dropoff/TrackDirection";
 const DropOffs = () => {
   const [size,setSize] = useState("10");
   const [opened, setOpened] = useState(false);
@@ -25,6 +23,8 @@ const DropOffs = () => {
   const [isCall, setCall] = useState(false);
    const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [openedLocation, setOpenedLocation] = useState(false);
+
 
   const { data, loading, refetch } = useQuery(GET_DROPOFFS, {
     variables: {
@@ -47,7 +47,11 @@ const DropOffs = () => {
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
   };
+  
 
+  const handleGeoLocationClick = (lat, lng) => {
+    setOpenedLocation(true);
+  };
   const headerData = [
     {
       label: "id",
@@ -129,7 +133,15 @@ const DropOffs = () => {
               >
                 <IoIosCall fontSize="medium" />
               </Controls.ActionButton>
+              
       }
+                    <Controls.ActionButton
+                color="primary"
+                title="Track Driver"
+                onClick={() => handleRecallDriver(`${rowData.id}`)}
+              >
+                <FaMapMarkerAlt fontSize="medium" />
+              </Controls.ActionButton>
               </>
             )}
           </span>
@@ -243,6 +255,16 @@ const DropOffs = () => {
           setActivePage={setActivePage}
           setOpened={setOpened}
         />
+      </Drawer>
+      <Drawer
+        opened={openedLocation}
+        onClose={() => setOpenedLocation(false)}
+        title="Warehouse Location"
+        padding="xl"
+        size="80%"
+        position="bottom"
+      >
+        <DriverMapView />
       </Drawer>
       <Card shadow="sm" p="lg">
         <DropOffCard />
