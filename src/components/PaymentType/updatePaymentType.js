@@ -16,16 +16,14 @@ import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import {
-  CREATE_PAYMENT_TYPE,
-  CREATE_USER,
   UPDATE_PAYMENT_TYPE,
 } from "apollo/mutuations";
-import { GET_ALL_USERS, GET_ROLES } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 import React, { useState, useRef, useEffect } from "react";
 
 const PaymentTypeUpdateModal = ({ setOpened, data, editId, fetchDta }) => {
   const [files, setFiles] = useState([]);
+  const [initialProfileImage, setInitialProfileImage] = useState(null); // State for initial profile image
 
   const fileInputRef = useRef(null);
 
@@ -42,6 +40,9 @@ const PaymentTypeUpdateModal = ({ setOpened, data, editId, fetchDta }) => {
     form.setValues({
       name: data.name,
     });
+    if (data.logo) {
+      setInitialProfileImage(data.logo); // Set initial profile image if exists
+    }
 
     // eslint-disable-next-line
   }, [data]);
@@ -97,7 +98,12 @@ const PaymentTypeUpdateModal = ({ setOpened, data, editId, fetchDta }) => {
       />
     );
   });
-
+  if (initialProfileImage && files.length === 0) {
+    // Display the initial profile image if no new file is selected
+    previews.unshift(
+      <img key="initial" src={initialProfileImage} alt="Profile" width="130" />
+    );
+  }
   const { height } = useViewportSize();
   const theme = useMantineTheme();
 
@@ -135,7 +141,7 @@ const PaymentTypeUpdateModal = ({ setOpened, data, editId, fetchDta }) => {
                   variant="outline"
                   fullWidth
                 >
-                  Upload Image
+                  Upload Logo
                 </Button>
                 <input
                   type="file"
