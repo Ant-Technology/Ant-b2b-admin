@@ -16,6 +16,7 @@ import {
   SimpleGrid,
   Button,
   Modal,
+  Avatar,
 } from "@mantine/core";
 import EditIcon from "@mui/icons-material/Edit";
 import axios from "axios";
@@ -104,19 +105,16 @@ const PaymentTypes = () => {
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
-  const { data, loading,refetch } = useQuery(PAYMENT_TYPES, {});
+  const { data, loading, refetch } = useQuery(PAYMENT_TYPES, {});
   const [deleteID, setDeleteID] = useState(false);
 
-
-
   useEffect(() => {
-    if(data) {
+    if (data) {
       setSortedData(data.paymentTypesNonPaginated);
       setConfigs(data.paymentTypesNonPaginated);
- 
-  };
+    }
   }, [data]);
-  
+
   const handleSearchChange = (event) => {
     const { value } = event.currentTarget;
     setSearch(value);
@@ -179,18 +177,17 @@ const PaymentTypes = () => {
     setOpenedDelete(true);
     setDeleteID(id);
   };
-  
-  const [delPaymentType] = useMutation(DEL_PAYMENT_TYPE, {
-  });
+
+  const [delPaymentType] = useMutation(DEL_PAYMENT_TYPE, {});
   const deletePaymentType = () => {
-    console.log(deleteID)
+    console.log(deleteID);
     delPaymentType({
       variables: { id: deleteID },
-    
+
       onCompleted(data) {
         setOpenedDelete(false);
         setDeleteID(null);
-        refetch()
+        refetch();
         showNotification({
           color: "green",
           title: "Success",
@@ -209,13 +206,15 @@ const PaymentTypes = () => {
     });
   };
 
-
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
         <td>{row.name}</td>
         <td>{row.status}</td>
+        <td>
+          <Avatar src={row.logo} size={70} />
+        </td>
         <td>
           {" "}
           <Controls.ActionButton
@@ -226,12 +225,12 @@ const PaymentTypes = () => {
             <EditIcon style={{ fontSize: "1rem" }} />
           </Controls.ActionButton>
           <Controls.ActionButton
-              color="primary"
-              title="Delete"
-              onClick={() => handleDelete(row.id)}
-            >
-              <Trash size={17} />
-            </Controls.ActionButton>
+            color="primary"
+            title="Delete"
+            onClick={() => handleDelete(row.id)}
+          >
+            <Trash size={17} />
+          </Controls.ActionButton>
         </td>
       </tr>
     </Fragment>
@@ -277,7 +276,7 @@ const PaymentTypes = () => {
             size="40%"
             position="right"
           >
-            <PaymentTypeAddModal fetchDta={refetch}setOpened={setOpened} />
+            <PaymentTypeAddModal fetchDta={refetch} setOpened={setOpened} />
           </Drawer>
           <Drawer
             style={{ marginTop: "10px" }}
@@ -288,21 +287,25 @@ const PaymentTypes = () => {
             size="40%"
             position="right"
           >
-            <PaymentTypeUpdateModal data={editData} fetchDta={refetch}setOpened={setOpenedEdit} />
+            <PaymentTypeUpdateModal
+              data={editData}
+              fetchDta={refetch}
+              setOpened={setOpenedEdit}
+            />
           </Drawer>
           <Modal
-        opened={openedDelete}
-        onClose={() => setOpenedDelete(false)}
-        title="Warning"
-        centered
-      >
-        <p>Are you sure do you want to delete?</p>
-        <Group position="right">
-          <Button onClick={() => deletePaymentType()} color="red">
-            Delete
-          </Button>
-        </Group>
-      </Modal>
+            opened={openedDelete}
+            onClose={() => setOpenedDelete(false)}
+            title="Warning"
+            centered
+          >
+            <p>Are you sure do you want to delete?</p>
+            <Group position="right">
+              <Button onClick={() => deletePaymentType()} color="red">
+                Delete
+              </Button>
+            </Group>
+          </Modal>
           <Table
             highlightOnHover
             horizontalSpacing="md"
@@ -316,6 +319,9 @@ const PaymentTypes = () => {
                 </Th>
                 <Th sortable onSort={() => handleSort("status")}>
                   <span className={classes.th}>Status</span>
+                </Th>
+                <Th sortable={false}>
+                  <span className={classes.th}>Logo</span>
                 </Th>
                 <Th sortable={false}>
                   <span className={classes.th}>Actions</span>

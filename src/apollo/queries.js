@@ -15,6 +15,7 @@ export const PAYMENT_TYPES = gql`
     paymentTypesNonPaginated {
       id
       name
+      logo
       status
     }
   }

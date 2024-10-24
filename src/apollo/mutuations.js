@@ -930,9 +930,13 @@ export const CREATE_USER = gql`
   }
 `;
 export const CREATE_PAYMENT_TYPE = gql`
-  mutation($name: String!) {
+  mutation($name: String!
+      $logo: Upload
+
+  ) {
     createPaymentType(input: {
       name: $name
+      logo:$logo
     }) {
       id
       name

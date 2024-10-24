@@ -43,6 +43,7 @@ const PaymentTypeAddModal = ({ setOpened, fetchDta }) => {
     addPaymentType({
       variables: {
         name: form.getInputProps("name").value,
+        logo: files[files.length - 1],
       },
       onCompleted(data) {
         showNotification({
@@ -128,7 +129,7 @@ const PaymentTypeAddModal = ({ setOpened, fetchDta }) => {
                   variant="outline"
                   fullWidth
                 >
-                  Upload Image
+                  Upload Logo
                 </Button>
                 <input
                   type="file"
