@@ -42,6 +42,7 @@ import ManageStock from "components/Stock/ManageStock";
 import ProductSkuAddModal from "components/ProductSku/ProductSkuAddModal";
 import ProductSkuEditModal from "components/ProductSku/ProductSkuEditModal";
 import Controls from "components/controls/Controls";
+import { API } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -130,7 +131,7 @@ const Drivers = () => {
         },
       };
       const response = await axios.get(
-        `http://157.230.102.54:8081/api/product-skus?page=${page}`,
+        `${API}/product-skus?page=${page}`,
         config
       );
       if (response.data) {

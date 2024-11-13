@@ -1,4 +1,4 @@
-export const API = "http://157.230.102.54:8081/api";
+export const API = "https://b2b.ant.et/api";
 export const PAGE_SIZE_OPTIONS = [
   { value: "10", label: "10" },
   { value: "25", label: "25" },

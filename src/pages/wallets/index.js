@@ -30,6 +30,7 @@ import { ManualGearbox } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
+import { API } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -122,7 +123,7 @@ const Wallets = () => {
         },
       };
       const response = await axios.get(
-        `http://157.230.102.54:8081/api/deposit-slips?page=${page}`,
+        `${API}/deposit-slips?page=${page}`,
         config
       );
       if (response.data) {

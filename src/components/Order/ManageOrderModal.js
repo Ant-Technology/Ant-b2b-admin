@@ -19,6 +19,7 @@ import { customLoader } from "components/utilities/loader";
 import { GET_ORDER, GET_SHIPMENTS } from "apollo/queries";
 import { SHIP_ITEM } from "apollo/mutuations";
 import axios from "axios";
+import { API } from "utiles/url";
 
 function ManageOrderModal({ editId }) {
   // state variables
@@ -99,7 +100,7 @@ function ManageOrderModal({ editId }) {
         },
       };
       const { data } = await axios.patch(
-        `http://157.230.102.54:8081/api/my-orders/${itemId}/cancel`,
+        `${API}/my-orders/${itemId}/cancel`,
         {},
         config
       );

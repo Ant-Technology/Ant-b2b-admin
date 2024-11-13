@@ -99,6 +99,7 @@ const UserAddModal = ({
       name: "",
       email: "",
       password: "",
+      phone:"",
       password_confirmation: "",
       role: {
         connect: null,
@@ -111,6 +112,7 @@ const UserAddModal = ({
         name: form.getInputProps("name").value,
         email: form.getInputProps("email").value,
         password: form.getInputProps("password").value,
+        phone: form.getInputProps("phone").value,
         password_confirmation: form.getInputProps("password_confirmation")
           .value,
         profile_image: files[files.length - 1],
@@ -200,6 +202,13 @@ const UserAddModal = ({
                     placeholder="Email"
                     type="email"
                     {...form.getInputProps("email")}
+                  />
+                    <TextInput
+                    required
+                    label="Phone"
+                    placeholder="Phone"
+                    type="text"
+                    {...form.getInputProps("phone")}
                   />
                   <TextInput
                     required

@@ -910,6 +910,7 @@ export const CREATE_USER = gql`
     $name: String!
     $email: String!
     $password: String!
+    $phone: String!
     $profile_image: Upload
     $password_confirmation: String!
     $role: CreateRoleBelongsTo!
@@ -918,6 +919,7 @@ export const CREATE_USER = gql`
       input: {
         name: $name
         email: $email
+        phone:$phone
         password: $password
         password_confirmation: $password_confirmation
         role: $role

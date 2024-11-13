@@ -22,6 +22,7 @@ import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
 import { customLoader } from "components/utilities/loader";
+import { API } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -109,7 +110,7 @@ const Config = () => {
         },
       };
       const response = await axios.get(
-        `http://157.230.102.54:8081/api/configs`,
+        `${API}/configs`,
         config
       );
       if (response.data) {
@@ -189,7 +190,7 @@ const Config = () => {
         },
       };
       await axios.post(
-        `http://157.230.102.54:8081/api/configs/${editId}`,
+        `${API}/configs/${editId}`,
         { value: editValue },
         config
       );

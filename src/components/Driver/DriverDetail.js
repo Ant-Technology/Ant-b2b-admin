@@ -25,6 +25,7 @@ import { UserPlus, Discount2, Receipt2, Coin } from "tabler-icons-react";
 import { useViewportSize } from "@mantine/hooks";
 import axios from "axios";
 import { Box } from "@mui/material";
+import { API } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -82,7 +83,7 @@ function ProductDetailModal({ Id }) {
         },
       };
       const { data } = await axios.get(
-        `http://157.230.102.54:8081/api/drivers/${Id}`,
+        `${API}/drivers/${Id}`,
         config
       );
       if (data) {
