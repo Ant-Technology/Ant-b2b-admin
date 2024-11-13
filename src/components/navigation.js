@@ -244,7 +244,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
             )}
             <div style={{ overflow: "hidden" }}>
               {opened ? (
-                <span>
+              <span style={{ fontWeight: item.label === "Settings" || item.label === "Feedback" ? 'bold' : 'normal' }}>
                   {item.label}
                   <Badge
                     style={{ marginLeft: "10px" }}

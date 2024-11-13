@@ -17,6 +17,7 @@ import { DEPOSIT_SLIP, DEPOSIT_SLIPS } from "apollo/queries";
 import { showNotification } from "@mantine/notifications";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API } from "utiles/url";
 
 const ManageDepositSlip = ({
   editId,
@@ -45,7 +46,7 @@ const ManageDepositSlip = ({
         },
       };
       const { data } = await axios.get(
-        `http://157.230.102.54:8081/api/deposit-slips/${editId}`,
+        `${API}/deposit-slips/${editId}`,
         config
       );
       if (data) {

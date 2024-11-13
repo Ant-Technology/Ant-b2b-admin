@@ -201,7 +201,7 @@ const Feedbacks = () => {
         },
       };
       const response = await axios.delete(
-        `http://157.230.102.54:8081/api/drivers/${deleteID}`,
+        `${API}/drivers/${deleteID}`,
         config
       );
       if (response.data) {

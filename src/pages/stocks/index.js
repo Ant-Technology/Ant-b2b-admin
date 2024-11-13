@@ -36,6 +36,7 @@ import { DEL_STOCK } from "apollo/mutuations";
 import StockAddModal from "components/Stock/StockAddModal";
 import ManageStock from "components/Stock/ManageStock";
 import Controls from "components/controls/Controls";
+import { API } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -132,7 +133,7 @@ const Drivers = () => {
         },
       };
       const response = await axios.get(
-        `http://157.230.102.54:8081/api/stocks?page=${page}`,
+        `${API}/stocks?page=${page}`,
         config
       );
       if (response.data) {
