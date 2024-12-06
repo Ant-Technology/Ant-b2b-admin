@@ -54,7 +54,6 @@ const Orders = () => {
           },
 
       onCompleted: (data) => {
-        console.log("Query completed with data:", data);
         console.log(
           "Pagination Info:",
           data?.getOrdersByOrderItemStatus?.paginatorInfo

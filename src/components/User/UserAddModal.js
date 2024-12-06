@@ -101,9 +101,7 @@ const UserAddModal = ({
       password: "",
       phone:"",
       password_confirmation: "",
-      role: {
-        connect: null,
-      },
+      role_id: ""
     },
   });
   const submit = () => {
@@ -116,7 +114,7 @@ const UserAddModal = ({
         password_confirmation: form.getInputProps("password_confirmation")
           .value,
         profile_image: files[files.length - 1],
-        role: form.getInputProps("role").value,
+        role_id: form.getInputProps("role_id").value,
       },
       onCompleted(data) {
         showNotification({
@@ -168,7 +166,7 @@ const UserAddModal = ({
   const { height } = useViewportSize();
 
   const setRoleDropDownValue = (val) => {
-    form.setFieldValue("role.connect", val);
+    form.setFieldValue("role_id", val);
   };
   const theme = useMantineTheme();
 

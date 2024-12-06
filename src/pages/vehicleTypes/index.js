@@ -103,7 +103,7 @@ const VehicleTypes = () => {
       },
     ],
     onCompleted(data) {
-      const action = data.changeVehicleTypeStatus.status=== "ACTIVATED" ? "Activated" : "Deactivated";
+      const action = data.changeVehicleTypeStatus.status=== "ACTIVE" ? "Activated" : "Deactivated";
       showNotification({
         color: "green",
         title: "Success",
@@ -121,7 +121,7 @@ const VehicleTypes = () => {
   const handleVehicleTypStatusChange = (id, currentStatus) => {
     let status;
     if (currentStatus === 'DEACTIVATED') {
-      status = 'ACTIVATED'
+      status = 'ACTIVE'
     }
     else{
       status = "DEACTIVATED"
@@ -216,7 +216,7 @@ const VehicleTypes = () => {
       render: (rowData) => {
         return (
           <span>
-            {rowData.status === "ACTIVATED" ? (
+            {rowData.status === "ACTIVE" ? (
               <Badge variant="light" color="green">
                 Active
               </Badge>
@@ -290,10 +290,10 @@ const VehicleTypes = () => {
             </Controls.ActionButton>
             <Controls.ActionButton
               color="primary"
-              title={rowData?.status ==="ACTIVATED" ? "Deactivate" : "Activate"}
+              title={rowData?.status ==="ACTIVE" ? "Deactivate" : "Activate"}
               onClick={() => handleVehicleTypStatusChange(rowData.id,rowData.status)}
             >
-              {rowData.status==="ACTIVATED" ? (
+              {rowData.status==="ACTIVE" ? (
                 <CancelIcon size={17} />
               ) : (
                 <CheckCircleIcon size={17} />
