@@ -5,6 +5,8 @@ import {
   LoadingOverlay,
   ScrollArea,
   Select,
+  SimpleGrid,
+  Stack,
   Tabs,
   TextInput,
 } from "@mantine/core";
@@ -15,37 +17,52 @@ import { UPDATE_VEHICLE_TYPE } from "apollo/mutuations";
 import { GET_VEHICLE_TYPE } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 import { tabList } from "components/utilities/tablist";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Photo } from "tabler-icons-react";
 
 const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
   const form = useForm({});
-
   const [updateVehicleType] = useMutation(UPDATE_VEHICLE_TYPE);
   const [typeDropDownData, setTypeDropDownData] = useState([]);
+  const [file, setFile] = useState(null); // To store the uploaded image
+  const fileInputRef = useRef(null); // Ref for the file input
 
-  useEffect (()=>{
-   let types =  ["Shipment", "Dropoff"] ;
-       let type = [];
- 
-       // loop over regions data to structure the data for the use of drop down
-       types.forEach((item, index) => {
-         type.push({
-           label: item,
-           value: item,
-         });
-       });
- 
-       // put it on the state
-       setTypeDropDownData([...type]);
-  },[])
+  const previews = file
+    ? [
+        <img
+          key={0}
+          src={URL.createObjectURL(file)}
+          alt="Preview"
+          width="130"
+          onLoad={() => URL.revokeObjectURL(URL.createObjectURL(file))}
+        />,
+      ]
+    : null;
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]); // Set the uploaded image
+  };
+
+  useEffect(() => {
+    let types = ["Shipment", "Dropoff"];
+    let type = [];
+
+    types.forEach((item) => {
+      type.push({
+        label: item,
+        value: item,
+      });
+    });
+
+    setTypeDropDownData([...type]);
+  }, []);
 
   const { loading } = useQuery(GET_VEHICLE_TYPE, {
     variables: { id: editId },
     onCompleted(data) {
       form.setValues({
         id: editId,
-        starting_price:data.vehicleType.starting_price,
+        starting_price: data.vehicleType.starting_price,
         price_per_kilometer: data.vehicleType.price_per_kilometer,
         type: data.vehicleType.type,
         title: {
@@ -55,13 +72,11 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
       });
     },
   });
-  // to control the current active tab
+
   const [activeTab, setActiveTab] = useState(tabList[0].value);
-  const [file, setFile] = useState([]);
   const { height } = useViewportSize();
 
   const submit = () => {
-    // return;
     if (activeTab === tabList[tabList.length - 1].value) {
       updateVehicleType({
         variables: {
@@ -73,19 +88,14 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
             am: form.getInputProps("title.am").value,
             en: form.getInputProps("title.en").value,
           },
+          image: file, // Include the image in the mutation
         },
-
-        update(cache, data) {
-          // const { categories } = cache.readQuery({ query: GET_CATEGORIES });
-        },
-
         onCompleted() {
           showNotification({
             color: "green",
             title: "Success",
             message: "Vehicle type edited successfully",
           });
-          // refetch();
           form.reset();
           setOpenedEdit(false);
         },
@@ -101,9 +111,11 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
       setActiveTab(tabList[tabList.length - 1].value);
     }
   };
+
   const setTypeDropDownValue = (val) => {
     form.setFieldValue("type", val);
   };
+
   return (
     <Tabs color="blue" value={activeTab} onTabChange={setActiveTab}>
       <LoadingOverlay
@@ -113,70 +125,103 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
         loader={customLoader}
       />
       <Tabs.List>
-        {tabList.map((tab, i) => {
-          return (
-            <Tabs.Tab key={i} value={tab.value} icon={<Photo size={14} />}>
-              {tab.name}
-            </Tabs.Tab>
-          );
-        })}
+        {tabList.map((tab, i) => (
+          <Tabs.Tab key={i} value={tab.value} icon={<Photo size={14} />}>
+            {tab.name}
+          </Tabs.Tab>
+        ))}
       </Tabs.List>
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
-          {/* mapping the tablist */}
-          {tabList.map((tab, i) => {
-            return (
-              <Tabs.Panel key={i} value={tab.value} pt="xs">
-                <Grid grow>
+          {tabList.map((tab, i) => (
+            <Tabs.Panel key={i} value={tab.value} pt="xs">
+              <Stack>
+                <Grid>
                   <Grid.Col span={6}>
-                    <Grid.Col span={4}>
-                      <TextInput
-                        required
-                        label={tab.label}
-                        placeholder={tab.placeHolder}
-                        {...form.getInputProps("title." + tab.shortHand)}
-                      />
-                       <Select
-                  data={typeDropDownData}
-                  value={form.getInputProps("type")?.value?.toString()}
-                  onChange={setTypeDropDownValue}
-                  label="Type"
-                  placeholder="Pick a Type this Vehicle Type belongs to"
-                />
-                    </Grid.Col>
-
-                    <Grid.Col span={4}>
-                      <TextInput
-                        required
-                        label="Starting Price"
-                        placeholder="Starting Price"
-                        type="number"
-                        {...form.getInputProps("starting_price")}
-                      />
-                      <TextInput
-                        required
-                        label="Price Per Kilometer"
-                        placeholder="Price Per Kilometer"
-                        type="number"
-                        {...form.getInputProps("price_per_kilometer")}
-                      />
-                    </Grid.Col>
-                    <Grid.Col span={4}>
-                      <Button
-                        style={{ display: activeTab === 1 ? "none" : "" }}
-                        type="submit"
-                        color="blue"
-                        variant="outline"
-                        fullWidth
-                      >
-                        Submit
-                      </Button>
-                    </Grid.Col>
+                    <TextInput
+                      required
+                      label={tab.label}
+                      placeholder={tab.placeHolder}
+                      {...form.getInputProps("title." + tab.shortHand)}
+                    />
+                    <Select
+                      data={typeDropDownData}
+                      value={form.getInputProps("type")?.value?.toString()}
+                      onChange={setTypeDropDownValue}
+                      label="Type"
+                      placeholder="Pick a Type this Vehicle Type belongs to"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={4}>
+                    <TextInput
+                      required
+                      label="Starting Price"
+                      placeholder="Starting Price"
+                      type="number"
+                      {...form.getInputProps("starting_price")}
+                    />
+                    <TextInput
+                      required
+                      label="Price Per Kilometer"
+                      placeholder="Price Per Kilometer"
+                      type="number"
+                      {...form.getInputProps("price_per_kilometer")}
+                    />
                   </Grid.Col>
                 </Grid>
-              </Tabs.Panel>
-            );
-          })}
+                <Grid>
+                  <Grid.Col span={12}>
+                    <div>
+                      <Button
+                        onClick={() => fileInputRef.current.click()}
+                        style={{
+                          marginTop: "5px",
+                          width: "20%",
+                          backgroundColor: "#FF6A00",
+                          color: "#FFFFFF",
+                        }}
+                        fullWidth
+                        color="blue"
+                      >
+                        Upload Image
+                      </Button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={handleFileChange}
+                      />
+                      <SimpleGrid
+                        cols={4}
+                        breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                        mt={previews?.length > 0 ? "xl" : 0}
+                      >
+                        {previews}
+                      </SimpleGrid>
+                    </div>
+                  </Grid.Col>
+                </Grid>
+                <Grid>
+                  <Grid.Col span={12}>
+                    <Button
+                      type="submit"
+                      style={{
+                        marginTop: "10px",
+                        width: "20%",
+                        backgroundColor: "#FF6A00",
+                        color: "#FFFFFF",
+                      }}
+                      fullWidth
+                      color="blue"
+                    >
+                      Submit
+                    </Button>
+                  </Grid.Col>
+                </Grid>
+              </Stack>
+            </Tabs.Panel>
+          ))}
         </form>
       </ScrollArea>
     </Tabs>

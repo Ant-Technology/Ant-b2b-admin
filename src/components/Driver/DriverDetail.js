@@ -166,7 +166,7 @@ function ProductDetailModal({ Id }) {
                 Vehicle<span style={{ marginLeft: "5px" }}>:</span>
                 </span>
               </Text>
-              <Text className={classes.value}>{data?.vehicle?.name}</Text>
+              <Text className={classes.value}>{data?.vehicle?.owner_name}</Text>
             </Group>
             <Group align="flex-end" spacing="xs" mt={25}>
               <Text size="sm" weight={500} className={classes.diff}>

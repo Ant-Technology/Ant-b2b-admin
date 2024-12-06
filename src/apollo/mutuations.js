@@ -373,7 +373,6 @@ export const UPDATE_PRODUCT_SKUS = gql`
       product {
         name
       }
-    
     }
   }
 `;
@@ -622,7 +621,7 @@ export const CREATE_VEHICLE_TYPE = gql`
         title: $title
         type: $type
         starting_price: $starting_price
-        image:$image
+        image: $image
         price_per_kilometer: $price_per_kilometer
       }
     ) {
@@ -646,6 +645,7 @@ export const UPDATE_VEHICLE_TYPE = gql`
     $title: TranslatableInput!
     $type: String!
     $starting_price: Float
+    $image: Upload
     $price_per_kilometer: Float
   ) {
     updateVehicleType(
@@ -653,6 +653,7 @@ export const UPDATE_VEHICLE_TYPE = gql`
       input: {
         title: $title
         type: $type
+        image: $image
         starting_price: $starting_price
         price_per_kilometer: $price_per_kilometer
       }
@@ -660,6 +661,7 @@ export const UPDATE_VEHICLE_TYPE = gql`
       id
       title
       type
+      image
     }
   }
 `;
@@ -909,7 +911,7 @@ export const CREATE_USER = gql`
       input: {
         name: $name
         email: $email
-        phone:$phone
+        phone: $phone
         password: $password
         password_confirmation: $password_confirmation
         role_id: $role_id
@@ -922,14 +924,8 @@ export const CREATE_USER = gql`
   }
 `;
 export const CREATE_PAYMENT_TYPE = gql`
-  mutation($name: String!
-      $logo: Upload
-
-  ) {
-    createPaymentType(input: {
-      name: $name
-      logo:$logo
-    }) {
+  mutation ($name: String!, $logo: Upload) {
+    createPaymentType(input: { name: $name, logo: $logo }) {
       id
       name
       status
@@ -938,20 +934,13 @@ export const CREATE_PAYMENT_TYPE = gql`
 `;
 
 export const UPDATE_PAYMENT_TYPE = gql`
-  mutation (
-    $id: ID!
-    $name: String!
-  ) {
-    updatePaymentType(
-      id: $id
-      name: $name
-    ) {
+  mutation ($id: ID!, $name: String!) {
+    updatePaymentType(id: $id, name: $name) {
       id
       name
     }
   }
 `;
-
 
 export const UPDATE_USER = gql`
   mutation (
