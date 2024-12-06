@@ -16,15 +16,14 @@ import { RECALL_DRIVER_FOR_PENDING_DROPOFF } from "apollo/mutuations";
 import { showNotification } from "@mantine/notifications";
 import DriverMapView from "components/Dropoff/TrackDirection";
 const DropOffs = () => {
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [isCall, setCall] = useState(false);
-   const [activePage, setActivePage] = useState(1);
+  const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
   const [openedLocation, setOpenedLocation] = useState(false);
-
 
   const { data, loading, refetch } = useQuery(GET_DROPOFFS, {
     variables: {
@@ -32,7 +31,6 @@ const DropOffs = () => {
       page: activePage,
     },
   });
-
 
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
@@ -42,15 +40,15 @@ const DropOffs = () => {
     if (data) {
       setTotal(data.dropoffs.paginatorInfo.lastPage);
     }
-  }, [data, size]); 
+  }, [data, size]);
 
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
   };
-  
 
-  const handleGeoLocationClick = (lat, lng) => {
+  const handleGeoLocationClick = (id) => {
     setOpenedLocation(true);
+    setEditId(id);
   };
   const headerData = [
     {
@@ -119,30 +117,29 @@ const DropOffs = () => {
             </Controls.ActionButton>
             {rowData.status === "PENDING" && (
               <>
-              {isCall?
-               <Controls.ActionButton
-               color="primary"
-             >
-               Calling
-             </Controls.ActionButton>:
-              
+                {isCall ? (
+                  <Controls.ActionButton color="primary">
+                    Calling
+                  </Controls.ActionButton>
+                ) : (
+                  <Controls.ActionButton
+                    color="primary"
+                    title="Call Driver"
+                    onClick={() => handleRecallDriver(`${rowData.id}`)}
+                  >
+                    <IoIosCall fontSize="medium" />
+                  </Controls.ActionButton>
+                )}
+              </>
+            )}
+            {rowData.status === "STARTED" && (
               <Controls.ActionButton
                 color="primary"
-                title="Call Driver"
-                onClick={() => handleRecallDriver(`${rowData.id}`)}
-              >
-                <IoIosCall fontSize="medium" />
-              </Controls.ActionButton>
-              
-      }
-                    <Controls.ActionButton
-                color="primary"
                 title="Track Driver"
-                onClick={() => handleRecallDriver(`${rowData.id}`)}
+                onClick={() => handleGeoLocationClick(`${rowData?.driver?.id}`)}
               >
                 <FaMapMarkerAlt fontSize="medium" />
               </Controls.ActionButton>
-              </>
             )}
           </span>
         );
@@ -162,7 +159,7 @@ const DropOffs = () => {
         },
       ],
       onCompleted(data) {
-        setCall(false)
+        setCall(false);
         showNotification({
           color: "green",
           title: "Success",
@@ -170,7 +167,7 @@ const DropOffs = () => {
         });
       },
       onError(error) {
-        setCall(false)
+        setCall(false);
         showNotification({
           color: "red",
           title: "Error",
@@ -180,7 +177,7 @@ const DropOffs = () => {
     }
   );
   const handleRecallDriver = (id) => {
-    setCall(true)
+    setCall(true);
     recallDriverForPendingDropoff({ variables: { dropoff_id: id } });
   };
 
@@ -189,14 +186,13 @@ const DropOffs = () => {
     setEditId(id);
   };
 
-
   useEffect(() => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
     });
 
     const notificationChannel = pusher.subscribe("notification");
-
+    
     notificationChannel.bind("new-item-created", function (newOrder) {
       refetch()
         .then(({ data }) => {
@@ -260,11 +256,11 @@ const DropOffs = () => {
         opened={openedLocation}
         onClose={() => setOpenedLocation(false)}
         title="Warehouse Location"
-        padding="xl"
+        padding="xl" 
         size="80%"
         position="bottom"
       >
-        <DriverMapView />
+        <DriverMapView id={editId} />
       </Drawer>
       <Card shadow="sm" p="lg">
         <DropOffCard />

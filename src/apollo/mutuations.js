@@ -373,17 +373,7 @@ export const UPDATE_PRODUCT_SKUS = gql`
       product {
         name
       }
-      variants {
-        id
-        attribute {
-          id
-          name
-        }
-        attributeValue {
-          id
-          value
-        }
-      }
+    
     }
   }
 `;
@@ -913,7 +903,7 @@ export const CREATE_USER = gql`
     $phone: String!
     $profile_image: Upload
     $password_confirmation: String!
-    $role: CreateRoleBelongsTo!
+    $role_id: String!
   ) {
     createUser(
       input: {
@@ -922,7 +912,7 @@ export const CREATE_USER = gql`
         phone:$phone
         password: $password
         password_confirmation: $password_confirmation
-        role: $role
+        role_id: $role_id
         profile_image: $profile_image
       }
     ) {

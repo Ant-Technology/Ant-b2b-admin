@@ -52,9 +52,8 @@ const RetailerAddModal = ({
           email: "test@mail.com",
           password: "fafa",
           password_confirmation: "fafa",
-          role: {
-            connect: "3",
-          },
+          phone: "",
+         role_id: "5" 
         },
       },
     },
@@ -191,7 +190,7 @@ const RetailerAddModal = ({
         setOpened(false);
       },
       onError(error) {
-        setOpened(false);
+        setOpened(true);
         showNotification({
           color: "red",
           title: "Error",
@@ -290,6 +289,12 @@ const RetailerAddModal = ({
                   label="User Name"
                   placeholder="User Name"
                   {...form.getInputProps("user.create.name")}
+                />
+                  <TextInput
+                  required
+                  label="User Phone"
+                  placeholder="User Phone"
+                  {...form.getInputProps("user.create.phone")}
                 />
                 <TextInput
                   required

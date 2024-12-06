@@ -262,12 +262,12 @@ export const GET_REGION = gql`
 `;
 
 export const GET_ACTIVITY_LOGS = gql`
-  query GET_ACTIVITY_LOGS($first: Int!, $page: Int, $ordered_by: [OrderByInput]!) {
-    getActivityLogs(
-      first: $first
-      page: $page
-      orderBy: $ordered_by
-    ) {
+  query GET_ACTIVITY_LOGS(
+    $first: Int!
+    $page: Int
+    $ordered_by: [OrderByInput]!
+  ) {
+    getActivityLogs(first: $first, page: $page, orderBy: $ordered_by) {
       data {
         id
         log_name
@@ -293,7 +293,6 @@ export const GET_ACTIVITY_LOGS = gql`
     }
   }
 `;
-
 
 //products query
 
@@ -1094,6 +1093,7 @@ export const GET_DROPOFFS = gql`
         status
         cost
         driver {
+          id
           name
         }
         created_at

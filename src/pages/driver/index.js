@@ -240,7 +240,7 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.delete(`${Api}/drivers/${deleteID}`, config);
+      const response = await axios.delete(`${API}/drivers/${deleteID}`, config);
       if (response.data) {
         fetchData(activePage);
         setOpenedDelete(false);
