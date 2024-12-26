@@ -145,9 +145,9 @@ const data = [
     initiallyOpened: false,
     links: [
       { link: "/roles", label: "Roles" },
-      
+
       { link: "/config", label: "Configuration" },
-      {link:"/payment-types", label:"Payment Types"}
+      { link: "/payment-types", label: "Payment Types" },
     ],
   },
   {
@@ -244,7 +244,14 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
             )}
             <div style={{ overflow: "hidden" }}>
               {opened ? (
-              <span style={{ fontWeight: item.label === "Settings" || item.label === "Feedback" ? 'bold' : 'normal' }}>
+                <span
+                  style={{
+                    fontWeight:
+                      item.label === "Settings" || item.label === "Feedback"
+                        ? "bold"
+                        : "normal",
+                  }}
+                >
                   {item.label}
                   <Badge
                     style={{ marginLeft: "10px" }}
@@ -315,69 +322,69 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                   <span>
                     {item.label}{" "}
                     {item.link === "/orders" &&
-                      orderCount &&
-                      parseInt(orderCount) > 0 && (
-                        <Badge
-                          style={{
-                            backgroundColor: "#FF6A00",
-                            marginLeft: "15px",
-                            color: "#FFFFFF",
-                          }}
-                          size="md"
-                          variant="danger"
-                          circle
-                        >
-                          {orderCount}
-                        </Badge>
-                      )}
+                    orderCount &&
+                    parseInt(orderCount) > 0 ? (
+                      <Badge
+                        style={{
+                          backgroundColor: "#FF6A00",
+                          marginLeft:"40px",
+                          color: "#FFFFFF",
+                        }}
+                        size="md"
+                        variant="danger"
+                        circle
+                      >
+                        {orderCount}
+                      </Badge>
+                    ) : null}
                     {item.link === "/shipments" &&
-                      shipments &&
-                      parseInt(shipments) > 0 && (
-                        <Badge
-                          style={{
-                            backgroundColor: "#FF6A00",
-                            marginLeft: "15px",
-                            color: "#FFFFFF",
-                          }}
-                          size="md"
-                          variant="danger"
-                          circle
-                        >
-                          {shipments}
-                        </Badge>
-                      )}
+                    shipments &&
+                    parseInt(shipments) > 0 ? (
+                      <Badge
+                        style={{
+                          backgroundColor: "#FF6A00",
+                          marginLeft:"18px",
+                          color: "#FFFFFF",
+                        }}
+                        size="md"
+                        variant="danger"
+                        circle
+                      >
+                        {shipments}
+                      </Badge>
+                    ) : null}
                     {item.link === "/wallets" &&
-                      wallets &&
-                      parseInt(wallets) > 0 && (
-                        <Badge
-                          style={{
-                            backgroundColor: "#FF6A00",
-                            marginLeft: "15px",
-                            color: "#FFFFFF",
-                          }}
-                          size="md"
-                          variant="danger"
-                          circle
-                        >
-                          {wallets}
-                        </Badge>
-                      )}
+                    wallets &&
+                    parseInt(wallets) > 0 ? (
+                      <Badge
+                        style={{
+                          backgroundColor: "#FF6A00",
+                          marginLeft:"36px",
+                          color: "#FFFFFF",
+                        }}
+                        size="md"
+                        variant="danger"
+                        circle
+                      >
+                        {wallets}
+                      </Badge>
+                    ) : null}
                     {item.link === "/dropoffs" &&
-                      dropoffs &&
-                      parseInt(dropoffs) > 0 && (
-                        <Badge
-                          style={{
-                            backgroundColor: "#FF6A00",
-                            marginLeft: "15px",
-                            color: "#FFFFFF",
-                          }}
-                          size="md"
-                          variant="danger"
-                          circle
-                        >
-                          {dropoffs}
-                        </Badge>
-                      )}
+                    dropoffs &&
+                    parseInt(dropoffs) > 0 ? (
+                      <Badge
+                        style={{
+                          backgroundColor: "#FF6A00",
+                          marginLeft:"26px",
+                          color: "#FFFFFF",
+                        }}
+                        size="md"
+                        variant="danger"
+                        circle
+                      >
+                        {dropoffs}
+                      </Badge>
+                    ) : null}
                   </span>
                 ) : null}
               </div>

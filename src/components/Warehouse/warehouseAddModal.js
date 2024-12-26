@@ -252,6 +252,7 @@ export default function WarehouseAddModal({
             <Grid.Col span={6}>
             <Select
                 required
+                searchable
                 data={regionsDropDownData}
                 value={form.getInputProps("regionId")?.value}
                 onChange={setRegionDropDownValue}

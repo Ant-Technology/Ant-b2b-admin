@@ -60,7 +60,6 @@ const Shipments = () => {
     },
   });
 
-  const [delShipment, { loading: delshipLoading }] = useMutation(DEL_SHIPMENT);
 
   const handleChange = (currentPage) => {
     fetchMore({
@@ -222,6 +221,36 @@ const Shipments = () => {
     setOpenedDelete(true);
     setDeleteID(id);
   };
+
+  const [delShipment,{ loading: delshipLoading }] = useMutation(DEL_SHIPMENT, {
+    update(cache, { data: { deleteShipment } }) {
+      cache.updateQuery(
+        {
+          query: GET_SHIPMENTS,
+          variables: {
+            first: 10,
+            page: activePage,
+          },
+        },
+        (data) => {
+          if (data.shipments.data.length === 1) {
+            setTotal(total - 1);
+            setActivePage(activePage - 1);
+          } else {
+            return {
+              shipments: {
+                data: [
+                  ...data.shipments.data.filter(
+                    (shipment) => shipment.id !== deleteShipment.id
+                  ),
+                ],
+              },
+            };
+          }
+        }
+      );
+    },
+  });
 
   const deleteShipment = () => {
     delShipment({

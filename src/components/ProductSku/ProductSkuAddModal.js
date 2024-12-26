@@ -33,10 +33,24 @@ const ProductSkuAddModal = ({
   const form = useForm({
     initialValues: {
       sku: "",
-      price: null,
+      price: "",
       is_active: false,
       product: null,
       variants: [],
+    },
+    validate: {
+      price: (value) => {
+        if (value === "") {
+          return "Price is required";
+        }
+        if (isNaN(value)) {
+          return "Price must be a valid number";
+        }
+        if (parseFloat(value) <= 0) {
+          return "Price must be a positive number";
+        }
+        return null;
+      },
     },
   });
 
@@ -75,7 +89,7 @@ const ProductSkuAddModal = ({
 
   const { height } = useViewportSize();
   const [addProductSku, { loading: addingSkuLoading }] =
-    useMutation(CREATE_PRODUCT_SKUS);
+    useMutation(CREATE_PRODUCT_SKUS, {});
 
   const submit = () => {
     addProductSku({
@@ -141,6 +155,8 @@ const ProductSkuAddModal = ({
                 type="number"
                 placeholder="price"
                 label="PRICE"
+                error={form.errors.price}
+                onChange={(e) => form.setFieldValue("price", e.target.value)}
               />
               <div style={{ marginTop: "10px" }}>
                 <Checkbox
@@ -169,7 +185,6 @@ const ProductSkuAddModal = ({
                 placeholder="Pick a product"
                 styles={(theme) => ({
                   item: {
-                    // applies styles to selected item
                     "&[data-selected]": {
                       "&, &:hover": {
                         backgroundColor:
@@ -182,8 +197,6 @@ const ProductSkuAddModal = ({
                             : theme.colors.black,
                       },
                     },
-
-                    // applies styles to hovered item (with mouse or keyboard)
                     "&[data-hovered]": {
                       backgroundColor:
                         theme.colorScheme === "dark"
@@ -213,8 +226,17 @@ const ProductSkuAddModal = ({
             </Grid.Col>
           </Grid>
           <Grid>
-            <Grid.Col>
-              <Button type="submit" color="blue" variant="outline" fullWidth>
+            <Grid.Col span={4}>
+              <Button
+                style={{
+                  width: "25%",
+                  marginTop: "15px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                type="submit"
+                fullWidth
+              >
                 Submit
               </Button>
             </Grid.Col>

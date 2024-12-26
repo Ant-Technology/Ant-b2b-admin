@@ -196,23 +196,21 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
   };
 
   // attach uploaded image to ueform image value
-  const handleImageUpload = (image) => {
-    setFile(image);
-    form.setFieldValue("image", image[0]);
+  const handleImageUpload = (files) => {
+    if (files.length > 0) {
+      const image = files[0];
+      setFile(image);
+      form.setFieldValue("image", image);
+    }
   };
-
-  const imagePreview = () => {
-    const imageUrl = form.values.image
-      ? form.values.image
-      : file.length > 0
-      ? URL.createObjectURL(file[0])
-      : "";
+  const imagePreview = (imageFile) => {
+    const imageUrl = URL.createObjectURL(imageFile);
     return (
       <img
         src={imageUrl}
-        alt=""
         width="130"
-        imageprops={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
+        alt=""
+        onLoad={() => URL.revokeObjectURL(imageUrl)}
       />
     );
   };
@@ -333,7 +331,10 @@ const CategoryEditModal = ({ getCategory, setOpenedEdit, editId }) => {
                             {/* TODO: center the preview */}
                             <Grid>
                               <Grid.Col span={4}></Grid.Col>
-                              <Grid.Col span={4}>{imagePreview()}</Grid.Col>
+                              <Grid.Col span={4}>
+                                {" "}
+                                {file.length > 0 && imagePreview(file[0])}
+                              </Grid.Col>
                               <Grid.Col span={4}></Grid.Col>
                             </Grid>
                           </SimpleGrid>

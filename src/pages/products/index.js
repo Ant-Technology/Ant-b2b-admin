@@ -130,9 +130,9 @@ const Products = () => {
       render: (rowData) => {
         return (
           <Avatar.Group spacing="sm">
-            {rowData.images.slice(0, 3).map((item, index) => (
-              <Avatar key={index} src={item.original_url} radius="xl" />
-            ))}
+          
+              <Avatar src={rowData?.imageUrl} radius="xl" />
+            
           </Avatar.Group>
         );
       },

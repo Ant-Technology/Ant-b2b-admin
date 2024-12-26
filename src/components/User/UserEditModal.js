@@ -1,78 +1,71 @@
-import { useMutation, useQuery } from "@apollo/client";
+import React, { useEffect, useState } from "react";
 import {
-  Grid,
-  LoadingOverlay,
+  Button,
+  Flex,
   ScrollArea,
   Stack,
   TextInput,
-  Button,
-  Text,
-  Group,
-  SimpleGrid,
-  useMantineTheme,
-  Card,
-  Flex,
+  Select,
+  LoadingOverlay,
   Badge,
   ActionIcon,
-  Select,
+  Tabs,
+  SimpleGrid,
+  Text,
+  Grid,
+  Card,
   PasswordInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useViewportSize } from "@mantine/hooks";
+import { IconX } from "@tabler/icons-react";
+import { useQuery, useMutation } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
 import { Box } from "@mui/material";
-import { IconX } from "@tabler/icons";
 import { ATTACH_ROLE, DETTACH_ROLE, UPDATE_USER } from "apollo/mutuations";
 import { GET_ROLES } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
-import { useEffect, useState } from "react";
+import { useViewportSize } from "@mantine/hooks";
 
 const UserEditModal = ({ setOpenedEdit, editId, data }) => {
   const [roles, setRoles] = useState([]);
   const [currentRoles, setCurrentRoles] = useState([]);
-  const [initialProfileImage, setInitialProfileImage] = useState(null); // State for initial profile image
+  const [initialProfileImage, setInitialProfileImage] = useState(null);
+  const [files, setFiles] = useState([]);
+  const [activeTab, setActiveTab] = useState("generalInfo"); // Track active tab
 
   useEffect(() => {
-    data.forEach((data) => {
-      if (data.id === editId) {
-        form.setValues({
-          name: data.name,
-          email: data.email,
-        });
-        setCurrentRoles(data.roles);
-        if (data.profile_image) {
-          setInitialProfileImage(data.profile_image); // Set initial profile image if exists
-        }
-      }
-    });
-    // eslint-disable-next-line
-  }, []);
+    const userData = data.find((user) => user.id === editId);
+    console.log(userData)
 
-  // form state
+    if (userData) {
+      form.setValues({
+        name: userData.name,
+        email: userData.email,
+        phone:userData.phone
+      });
+      setCurrentRoles(userData.roles);
+      if (userData.profile_image) {
+        setInitialProfileImage(userData.profile_image);
+      }
+    }
+  }, [editId, data]);
+
   const form = useForm({
     initialValues: {
       name: "",
       email: "",
       password: "",
       password_confirmation: "",
+      phone:""
     },
   });
-
-  const [files, setFiles] = useState([]);
-
   const { loading: rolesListLoading } = useQuery(GET_ROLES, {
     onCompleted(data) {
-      let roles = data.roles;
-      let rolesArray = [];
-
-      roles.forEach((role) => {
-        rolesArray.push({
-          label: role.name,
-          value: role.name,
-        });
-      });
-
-      setRoles([...rolesArray]);
+      const rolesArray = data.roles.map((role) => ({
+        label: role.name,
+        value: role.name,
+      }));
+      setRoles(rolesArray);
     },
     onError(err) {
       showNotification({
@@ -83,7 +76,6 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
     },
   });
 
-  const theme = useMantineTheme();
   const { height } = useViewportSize();
 
   const previews = files.map((file, index) => {
@@ -94,28 +86,25 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
         src={imageUrl}
         alt=""
         width="130"
-        imageProps={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
+        onLoad={() => URL.revokeObjectURL(imageUrl)}
       />
     );
   });
 
   if (initialProfileImage && files.length === 0) {
-    // Display the initial profile image if no new file is selected
     previews.unshift(
       <img key="initial" src={initialProfileImage} alt="Profile" width="130" />
     );
   }
 
-  const removeButton = (val) => {
-    return (
-      <ActionIcon size="xs" color="blue" radius="xl" variant="transparent">
-        <IconX size={10} onClick={() => dettachRoleReq(val)} />
-      </ActionIcon>
-    );
-  };
+  const removeButton = (val) => (
+    <ActionIcon size="xs" color="blue" radius="xl" variant="transparent">
+      <IconX size={10} onClick={() => dettachRoleReq(val)} />
+    </ActionIcon>
+  );
 
-  const [attach, { loading: aload }] = useMutation(ATTACH_ROLE);
-  const [dettach, { loading: dload }] = useMutation(DETTACH_ROLE);
+  const [attach] = useMutation(ATTACH_ROLE);
+  const [dettach] = useMutation(DETTACH_ROLE);
 
   const setRoleDropDownValue = (val) => {
     attach({
@@ -125,18 +114,17 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
       },
       onCompleted(data) {
         showNotification({
-          color: "Green",
+          color: "green",
           title: "Success",
           message: "Role attached!",
         });
-
         setCurrentRoles(data.attachRole.roles);
       },
-      onError(data) {
+      onError() {
         showNotification({
           color: "red",
           title: "Error",
-          message: "Something went wrong while attaching a role!",
+          message: "Failed to attach role!",
         });
       },
     });
@@ -150,31 +138,30 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
       },
       onCompleted(data) {
         showNotification({
-          color: "Green",
+          color: "green",
           title: "Success",
-          message: "Role Detached!",
+          message: "Role detached!",
         });
-
         setCurrentRoles(data.detachRole.roles);
       },
-      onError(data) {
+      onError() {
         showNotification({
           color: "red",
           title: "Error",
-          message: "Something went wrong while detaching a role!",
+          message: "Failed to detach role!",
         });
       },
     });
   };
 
-  // mutation
-  const [editUser, { loading: updateUserLoading }] = useMutation(UPDATE_USER);
+  const [editUser] = useMutation(UPDATE_USER);
 
   const submit = () => {
     const variables = {
       id: editId,
       name: form.getInputProps("name").value,
       password: form.getInputProps("password").value,
+      phone:form.getInputProps("phone").value,
       password_confirmation: form.getInputProps("password_confirmation").value,
     };
     if (files.length > 0) {
@@ -192,7 +179,7 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
         setOpenedEdit(false);
       },
       onError(error) {
-        setOpenedEdit(false);
+        setOpenedEdit(true);
         showNotification({
           color: "red",
           title: "Error",
@@ -202,52 +189,49 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
     });
   };
 
-  // Filter out roles that are not included in the current roles
-  const availableRoles = roles.filter((role) => {
-    return !currentRoles.some((currentRole) => currentRole.name === role.value);
-  });
 
-  // Handle file selection
   const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
     setFiles(selectedFiles);
   };
 
+  const availableRoles = roles.filter(
+    (role) =>
+      !currentRoles.some((currentRole) => currentRole.name === role.value)
+  );
+
   return (
     <>
-      <LoadingOverlay
-        visible={rolesListLoading || aload || dload || updateUserLoading}
-        color="blue"
-        overlayBlur={2}
-        loader={customLoader}
-      />
-      <div>
-        <ScrollArea
-          style={{ height: height / 1.1 }}
-          type="auto"
-          offsetScrollbars
-        >
-          <form onSubmit={form.onSubmit(() => submit())}>
-            <Stack>
-              <Grid>
-                <Grid.Col span={12}>
-                  <TextInput
-                    required
-                    label="Name"
-                    placeholder="Name"
-                    {...form.getInputProps("name")}
-                  />
-                  <TextInput
-                    label="Email"
-                    placeholder="Email"
-                    type="email"
-                    disabled
-                    {...form.getInputProps("email")}
-                  />
-                </Grid.Col>
-              </Grid>
+      <LoadingOverlay visible={rolesListLoading} overlayBlur={2} />
+      <ScrollArea style={{ height: height / 1.1 }} type="auto" offsetScrollbars>
+        <Tabs value={activeTab} onTabChange={setActiveTab}>
+          <Tabs.List>
+            <Tabs.Tab value="generalInfo">General Info</Tabs.Tab>
+            <Tabs.Tab value="manageRoles">Manage Roles</Tabs.Tab>
+          </Tabs.List>
 
-              <Card>
+          <Tabs.Panel value="generalInfo" pt="xs">
+            <Stack>
+              <TextInput
+                required
+                label="Name"
+                placeholder="Name"
+                {...form.getInputProps("name")}
+              />
+              <TextInput
+                label="Email"
+                placeholder="Email"
+                type="email"
+                disabled
+                {...form.getInputProps("email")}
+              />
+                 <TextInput
+                required
+                label="Phone"
+                placeholder="Phone"
+                {...form.getInputProps("phone")}
+              />
+                 <Card>
                 <Text fz="xs">Change Password</Text>
 
                 <PasswordInput
@@ -262,91 +246,69 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
                   {...form.getInputProps("password_confirmation")}
                 />
               </Card>
-              <div>
-                <Flex
-                  align="center"
-                  justify="space-between" // Distributes space between items
-                  direction="row"
-                  p="xs"
-                  m="xs"
-                  bg="background.paper"
-                  style={{
-                    borderRadius: 8,
-                    height: "70px",
-                    overflow: "hidden",
-                  }}
+              <Flex align="center" gap="md">
+                <Button
+                  onClick={() => document.getElementById("fileInput").click()}
                 >
-                  <Button
-                    onClick={() => document.getElementById("fileInput").click()}
-                  >
-                    Upload Image
-                  </Button>
-
-                  <input
-                    type="file"
-                    id="fileInput"
-                    style={{ display: "none" }}
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
-
-                  <SimpleGrid>{previews}</SimpleGrid>
-                </Flex>
-              </div>
-
-              <Grid>
-                <Grid.Col span={12}>
-                  <Button
-                     style={{
-                      marginTop: "20px",
-                      width: "30%",
-
-                      backgroundColor: "#FF6A00",
-                      color: "#FFFFFF",
-                    }}
-                    fullWidth
-                    type="submit"
-                    color="blue"
-                  >
-                    Submit
-                  </Button>
-                </Grid.Col>
-              </Grid>
-              <>
-                <Text fz="sm">Current Roles: </Text>
-                <Flex
-                  gap="md"
-                  bg="rgba(0, 0, 0, .1)"
-                  justify="center"
-                  align="center"
-                  wrap="wrap"
-                  p="sm"
-                >
-                  {currentRoles &&
-                    currentRoles?.map((data, id) => (
-                      <Badge
-                        key={id}
-                        variant="outline"
-                        sx={{ paddingRight: 3 }}
-                        rightSection={removeButton(data.name)}
-                      >
-                        {data.name}
-                      </Badge>
-                    ))}
-                </Flex>
-              </>
-
-              <Select
-                data={availableRoles}
-                value={form.getInputProps("role.connect")?.value}
-                onChange={setRoleDropDownValue}
-                label="Attach Role"
-                placeholder="Pick a role this user belongs to"
-              />
+                  Upload Image
+                </Button>
+                <input
+                  type="file"
+                  id="fileInput"
+                  style={{ display: "none" }}
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+                <SimpleGrid>{previews}</SimpleGrid>
+              </Flex>
             </Stack>
-          </form>
-        </ScrollArea>
-      </div>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="manageRoles" pt="xs">
+            <Text size="sm">Current Roles:</Text>
+            <Flex gap="md" wrap="wrap" mt="sm">
+              {currentRoles.map((role, index) => (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  rightSection={removeButton(role.name)}
+                >
+                  {role.name}
+                </Badge>
+              ))}
+            </Flex>
+            <Select
+              searchable
+              data={availableRoles}
+              label="Attach Role"
+              placeholder="Pick a role"
+              onChange={setRoleDropDownValue}
+            />
+          </Tabs.Panel>
+        </Tabs>
+
+        {activeTab === "generalInfo" && (
+                  <Grid>
+                  <Grid.Col span={12}>
+                    <Button
+                    onClick={form.onSubmit(submit)}
+                       style={{
+                        marginTop: "20px",
+                        width: "30%",
+  
+                        backgroundColor: "#FF6A00",
+                        color: "#FFFFFF",
+                      }}
+                      fullWidth
+                      type="submit"
+                      color="blue"
+                    >
+                      Submit
+                    </Button>
+                  </Grid.Col>
+                </Grid>
+        )}
+      </ScrollArea>
     </>
   );
 };

@@ -946,8 +946,9 @@ export const UPDATE_USER = gql`
   mutation (
     $id: ID!
     $name: String!
-    $password: String!
-    $password_confirmation: String!
+    $phone: String!
+    $password: String
+    $password_confirmation: String
     $profile_image: Upload
   ) {
     updateUser(
@@ -955,12 +956,14 @@ export const UPDATE_USER = gql`
       input: {
         name: $name
         password: $password
+        phone:$phone
         password_confirmation: $password_confirmation
         profile_image: $profile_image
       }
     ) {
       id
       name
+      phone
       email
       profile_image
     }
@@ -982,7 +985,7 @@ export const ATTACH_ROLE = gql`
 `;
 
 export const DETTACH_ROLE = gql`
-  mutation ($user_id: ID!, $role: RoleEnum!) {
+  mutation ($user_id: ID!, $role: String!) {
     detachRole(user_id: $user_id, role: $role) {
       id
       name

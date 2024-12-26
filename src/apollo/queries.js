@@ -970,6 +970,7 @@ export const GET_VEHICLE_TYPE = gql`
       id
       title
       type
+      image
       starting_price
       price_per_kilometer
       title_translations {

@@ -24,37 +24,50 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
   const form = useForm({});
   const [updateVehicleType] = useMutation(UPDATE_VEHICLE_TYPE);
   const [typeDropDownData, setTypeDropDownData] = useState([]);
-  const [file, setFile] = useState(null); // To store the uploaded image
-  const fileInputRef = useRef(null); // Ref for the file input
+  const [existingImage, setExistingImage] = useState(null); // Existing image URL
+  const [file, setFile] = useState(null); // Uploaded image file
+  const fileInputRef = useRef(null); // Ref for file input
 
-  const previews = file
-    ? [
-        <img
-          key={0}
-          src={URL.createObjectURL(file)}
-          alt="Preview"
-          width="130"
-          onLoad={() => URL.revokeObjectURL(URL.createObjectURL(file))}
-        />,
-      ]
-    : null;
+  // Generate image previews
+  const previews = [];
+  if (file) {
+    previews.push(
+      <img
+        key="new"
+        src={URL.createObjectURL(file)}
+        alt="Preview"
+        width="130"
+        onLoad={() => URL.revokeObjectURL(URL.createObjectURL(file))}
+      />
+    );
+  }
+  if (existingImage && !file) {
+    previews.unshift(
+      <img key="existing" src={existingImage} alt="Existing Image" width="130" />
+    );
+  }
 
+  // Handle file input changes
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]); // Set the uploaded image
+    const selectedFile = event.target.files[0];
+    if (selectedFile && selectedFile.type.startsWith("image/")) {
+      setFile(selectedFile);
+    } else {
+      showNotification({
+        color: "red",
+        title: "Invalid File",
+        message: "Please select a valid image file.",
+      });
+    }
   };
 
   useEffect(() => {
     let types = ["Shipment", "Dropoff"];
-    let type = [];
-
-    types.forEach((item) => {
-      type.push({
-        label: item,
-        value: item,
-      });
-    });
-
-    setTypeDropDownData([...type]);
+    let type = types.map((item) => ({
+      label: item,
+      value: item,
+    }));
+    setTypeDropDownData(type);
   }, []);
 
   const { loading } = useQuery(GET_VEHICLE_TYPE, {
@@ -70,6 +83,7 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
           en: data.vehicleType.title_translations.en,
         },
       });
+      setExistingImage(data.vehicleType.image);
     },
   });
 
@@ -97,6 +111,7 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
             message: "Vehicle type edited successfully",
           });
           form.reset();
+          setFile(null); // Clear the file
           setOpenedEdit(false);
         },
         onError(err) {
@@ -199,6 +214,15 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
                       >
                         {previews}
                       </SimpleGrid>
+                      {file && (
+                        <Button
+                          onClick={() => setFile(null)}
+                          color="red"
+                          style={{ marginTop: "10px" }}
+                        >
+                          Clear Image
+                        </Button>
+                      )}
                     </div>
                   </Grid.Col>
                 </Grid>

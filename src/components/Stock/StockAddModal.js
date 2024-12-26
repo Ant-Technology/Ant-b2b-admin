@@ -158,7 +158,7 @@ const StockAddModal = ({
         <form onSubmit={form.onSubmit(() => submit())}>
           <Stack>
             <Grid>
-              <Grid.Col span={12}>
+              <Grid.Col span={6}>
                 <TextInput
                   required
                   type="number"
@@ -176,6 +176,8 @@ const StockAddModal = ({
                   placeholder="Pick a product sku"
                   searchable
                 />
+                </Grid.Col>
+                <Grid.Col span={6}>
                 <Select
                   data={warehousesDropDownData}
                   value={form
@@ -190,11 +192,20 @@ const StockAddModal = ({
             </Grid>
 
             <Grid>
-              <Grid.Col span={12}>
-                <Button type="submit" color="blue" variant="outline" fullWidth>
-                  Submit
-                </Button>
-              </Grid.Col>
+            <Grid.Col span={6}>
+              <Button
+                style={{
+                  width: "25%",
+                  marginTop: "15px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                type="submit"
+                fullWidth
+              >
+                Submit
+              </Button>
+            </Grid.Col>
             </Grid>
           </Stack>
         </form>
