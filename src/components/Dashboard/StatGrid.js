@@ -1,68 +1,96 @@
 import React from "react";
-import { createStyles, Group, Paper, SimpleGrid, Text } from "@mantine/core";
 import {
-  UserPlus,
+  createStyles,
+  Group,
+  Text,
+  Avatar,
+  Container,
+  Box,
+  Title,
+  Flex,
+} from "@mantine/core";
+import { useQuery } from "@apollo/client";
+import { GET_ANALYTICS } from "apollo/queries";
+import {
+  IconDashboard,
+  IconApps,
+  IconShoppingCart,
+  IconGeometry,
+  IconBuildingWarehouse,
+  IconCurrentLocation,
+  IconBrandShopee,
+  IconLayoutDistributeHorizontal,
+  IconBuildingStore,
+  IconShip,
+  IconWallet,
+  IconTruck,
+  IconTruckDelivery,
+  IconUser,
+  IconUsers,
+  IconTruckLoading,
+  IconChevronDown,
+  IconSettings,
+  IconHistory,
+  IconClipboardList,
+  IconTimeline,
+  IconChevronUp,
+} from "@tabler/icons";
+import {
   Discount2,
   Receipt2,
   Coin,
   ArrowUpRight,
   ArrowDownRight,
 } from "tabler-icons-react";
-import { Clock } from "tabler-icons-react"; // Import the Clock icon
-
-import { useQuery } from "@apollo/client";
-import { GET_ANALYTICS } from "apollo/queries";
+import UserStatus from "./userStatus";
 
 const useStyles = createStyles((theme) => ({
-  root: {
-    padding: theme.spacing.xl * 1.5,
-  },
-  paper: {
+  statBox: {
     display: "flex",
-    flexDirection: "column",
-    justifyContent: "center", // Center content vertically
-    alignItems: "center", // Center content horizontally
+    backgroundColor: "#f8f9fa",
     padding: theme.spacing.md,
-    backgroundColor: "#FF6A00",
-    color: "#FFFFFF",
-    borderRadius: theme.radius.md,
+    borderRadius: theme.radius.sm,
+    flex: "0 0 auto", // Prevents flex items from shrinking
+    maxWidth: "200px", // Ensures consistent width
+    margin: `${theme.spacing.xs}px 0`,
   },
-  value: {
-    fontSize: 15,
-    fontWeight: 650,
-    lineHeight: 1,
-  },
-
-  diff: {
-    lineHeight: 1,
-    display: "flex",
-    alignItems: "center",
-  },
-
- 
-
-  title: {
+  statTitle: {
+    fontSize: theme.fontSizes.sm,
     fontWeight: 700,
-    textTransform: "uppercase",
+    color:"#101F0C"
+  },
+  statValue: {
+    color:"#F36825",
+    fontSize: theme.fontSizes.lg,
+    fontWeight: 700,
+    marginTop: 4,
+  },
+  userStatusWrapper: {
+    flex: 1,
+    marginLeft: theme.spacing.md,
   },
 }));
 
 const icons = {
-  user: UserPlus,
+  user: IconShoppingCart,
   discount: Discount2,
-  receipt: Receipt2,
-  coin: Coin,
+  receipt: IconShoppingCart,
+  coin: IconShip,
 };
 
 export default function StatsGrid({ datas }) {
   const { data, loading } = useQuery(GET_ANALYTICS);
-
   const { classes } = useStyles();
+
   const fieldMap = {
-    "Orders": "orders",
-    "Shipments": "shipments",
+    Orders: "orders",
+    Shipments: "shipments",
     "Total Sales": "totalSales",
     "Total Active Products": "totalActiveProducts"
+  };
+  const formatNumber = (value) => {
+    if (value === null || value === undefined) return "0";
+    return new Intl.NumberFormat().format(value);
   };
   const stats = datas.map((stat) => {
     if (!loading && fieldMap[stat.title]) {
@@ -72,34 +100,37 @@ export default function StatsGrid({ datas }) {
     const DiffIcon = stat.diff > 0 ? ArrowUpRight : ArrowDownRight;
 
     return (
-      <Paper className={classes.paper}withBorder p="md" radius="md" key={stat.title}>
-        <Group position="apart">
-          <Text size="xs"  className={classes.title}>
-            {stat.title}
-          </Text>
-          <Icon  size={22} />
-        </Group>
-
-        <Group align="center" spacing="xs" mt={25}>
-          <Text className={classes.value}>{stat.value}</Text>
-        
-        </Group>
-
-      </Paper>
+      <Box className={classes.statBox} key={stat.title}>
+        <Avatar radius="sm" size="md" color="blue" style={{ marginRight: 12 }}>
+          <Icon size={24} />
+        </Avatar>
+        <div>
+          <Text className={classes.statTitle}>{stat.title}</Text>
+          <Text className={classes.statValue}>{formatNumber(stat.value)}</Text>
+        </div>
+      </Box>
     );
   });
+
   return (
-    <div className={classes.root}>
-      <SimpleGrid
-      
-        cols={4}
-        breakpoints={[
-          { maxWidth: "md", cols: 2 },
-          { maxWidth: "xs", cols: 1 },
-        ]}
+      <Flex
+        gap="md"
+        justify="space-between"
+        align="flex-start"
+        style={{ marginTop: "16px" }}
       >
-        {stats}
-      </SimpleGrid>
-    </div>
+        <Group
+          spacing="md"
+          position="apart"
+          noWrap
+          style={{ flex: 2, overflowX: "auto" }}
+        >
+          {stats}
+        </Group>
+
+        <div className={classes.userStatusWrapper}>
+          <UserStatus />
+        </div>
+      </Flex>
   );
 }

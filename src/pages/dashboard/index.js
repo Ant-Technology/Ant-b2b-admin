@@ -2,6 +2,7 @@ import { Card, Select } from "@mantine/core";
 import MapView from "components/Dashboard/mapView";
 import StatsGrid from "components/Dashboard/StatGrid";
 import { useState } from "react";
+import SalesDashboard from "components/Dashboard/report";
 const DistributerIcon = {
   url: "https://img.icons8.com/external-flaticons-lineal-color-flat-icons/40/000000/external-distributor-sales-flaticons-lineal-color-flat-icons.png",
 };
@@ -47,9 +48,10 @@ const Dashboard = () => {
     setValue(value);
   };
   return (
-    <>
+  
       <div style={{}}>
         <StatsGrid datas={data} />
+        <SalesDashboard/>
         <div style={{ width: "96%", marginLeft: 40 }}>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <div style={{marginRight:"15px"}}>
@@ -92,7 +94,6 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
-    </>
   );
 };
 

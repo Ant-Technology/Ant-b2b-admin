@@ -13,7 +13,7 @@ import { DatePicker, TimeInput } from "@mantine/dates";
 
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
-import { GET_DISTRIBUTORS, GET_WARE_HOUSES } from "apollo/queries";
+import { GET_DISTRIBUTORS, GET_SHIPMENTS, GET_WARE_HOUSES } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 import { CREATE_SHIPMENT } from "apollo/mutuations";
 import { useViewportSize } from "@mantine/hooks";
@@ -74,11 +74,52 @@ export const ShipmentAddModal = ({ setOpened }) => {
         },
       },
     },
+    validate: {
+      cost: (value) => {
+        if (value === "") {
+          return "Cost is required";
+        }
+        if (isNaN(value)) {
+          return "Cost must be a valid number";
+        }
+        if (parseFloat(value) <= 0) {
+          return "Cost must be a positive number";
+        }
+        return null;
+      },
+    },
   });
-
-  const [createShipment, { loading: shipmentCreateLoading }] =
-    useMutation(CREATE_SHIPMENT);
-
+  const [createShipment, { loading: shipmentCreateLoading }] = useMutation(CREATE_SHIPMENT, {
+    update(cache, { data: { createShipment } }) {
+      const { shipments } = cache.readQuery({
+        query: GET_SHIPMENTS,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+      });
+  
+      if (!shipments) {
+        return;
+      }
+  
+      const updatedShipment = [createShipment, ...shipments.data];
+  
+      cache.writeQuery({
+        query: GET_SHIPMENTS,
+        variables: {
+          first: 10,
+          page: 1,
+        },
+        data: {
+          shipments: {
+            ...shipments,
+            data: updatedShipment,
+          },
+        },
+      });
+    },
+  });
   const submit = () => {
     createShipment({
       variables: {
@@ -209,35 +250,48 @@ export const ShipmentAddModal = ({ setOpened }) => {
               </Grid.Col>
             </Grid>
             <Grid>
-              <Grid.Col span={12}>
+              <Grid.Col span={6}>
                 <TextInput
                   required
                   type="number"
                   label="Cost"
                   placeholder="Cost"
+                  error={form.errors.price}
                   {...form.getInputProps("cost")}
                 />
               </Grid.Col>
-              <Grid.Col span={12}>
+              <Grid.Col span={6}>
                 <Select
+                searchable
                   data={whdropdown}
                   onChange={setWareHouseValue}
                   label="Ware house"
                   placeholder="Pick the departure warehouse"
                 />
               </Grid.Col>
-              <Grid.Col span={12}>
+              <Grid.Col span={6}>
                 <Select
                   data={distDropDown}
                   onChange={setDistributorValue}
+                  searchable
                   label="Distributor"
                   placeholder="Pick reciving distributor"
                 />
               </Grid.Col>
             </Grid>
             <Grid>
-              <Grid.Col span={12}>
-                <Button type="submit" color="blue" variant="outline" fullWidth>
+              <Grid.Col span={4}>
+                <Button
+                  style={{
+                    width: "25%",
+                    marginTop: "15px",
+                    backgroundColor: "#FF6A00", 
+                    color: "#FFFFFF",
+                  }}
+                  type="submit"
+                  
+                  fullWidth
+                >
                   Submit
                 </Button>
               </Grid.Col>

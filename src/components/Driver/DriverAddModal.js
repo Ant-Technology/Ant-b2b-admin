@@ -216,8 +216,17 @@ export const DriverAddModal = ({
             </Grid> */}
 
             <Grid>
-              <Grid.Col span={12}>
-                <Button type="submit" color="blue" variant="outline" fullWidth>
+              <Grid.Col span={6}>
+                <Button
+                  style={{
+                    width: "25%",
+                    marginTop: "15px",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
+                  type="submit"
+                  fullWidth
+                >
                   Submit
                 </Button>
               </Grid.Col>
