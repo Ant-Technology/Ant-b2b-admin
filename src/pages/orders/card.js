@@ -1,71 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { createStyles, Group, Paper, SimpleGrid, Text } from "@mantine/core";
-import {
-  UserPlus,
-  Discount2,
-  Receipt2,
-  Coin,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "tabler-icons-react";
-import { useQuery } from "@apollo/client";
-import { GET_ANALYTICS } from "apollo/queries";
-import PendingIcon from "@mui/icons-material/Pending";
 import axios from "axios";
 import { API } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   root: {
-    padding: theme.spacing.xl * 1.5,
-    maxWidth: 800,
+    maxWidth: 660, // Adjust max width if necessary
   },
   paper: {
-    cursor:"pointer",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center", // Center content vertically
-    alignItems: "center", // Center content horizontally
-    padding: theme.spacing.md,
-    backgroundColor: "#FF6A00",
+    justifyContent: "center",
+    alignItems: "center",
     color: "#FFFFFF",
     borderRadius: theme.radius.md,
+    height: 60,
+    width: 105, 
+    cursor:"pointer",
+    margin: 2, 
   },
   value: {
-    fontSize: 15,
+    lineHeight: 1,
+    color: "#F36825",
+    fontSize: theme.fontSizes.md, 
     fontWeight: 700,
-    lineHeight: 1,
+    marginTop: 4,
   },
-
-  diff: {
-    lineHeight: 1,
-    display: "flex",
-    alignItems: "center",
-  },
-
-  icon: {
-    color:
-      theme.colorScheme === "dark"
-        ? theme.colors.dark[3]
-        : theme.colors.gray[4],
-  },
-
   title: {
-    fontWeight: 700,
     textTransform: "uppercase",
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.sm,
+    fontWeight: 700,
+    color: "#101F0C",
   },
 }));
-
-const icons = {
-  user: UserPlus,
-  discount: Discount2,
-  receipt: Receipt2,
-  coin: Coin,
-};
 
 export default function StatsGrid({ onCardClick }) {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     fetchDeposit();
   }, []);
@@ -95,73 +67,61 @@ export default function StatsGrid({ onCardClick }) {
   return (
     <div className={classes.root}>
       <SimpleGrid
-        cols={5} // Adjust the number of columns to match the number of papers
-        breakpoints={[
-          { maxWidth: "xl", cols: 4 },
-          { maxWidth: "md", cols: 3 },
-          { maxWidth: "sm", cols: 2 },
-          { maxWidth: "xs", cols: 1 },
-        ]}
+        cols={5} // Keep 5 columns to show all papers in one row
+        spacing="xs" // Adjust spacing as needed
       >
-        <Paper
-          onClick={() => onCardClick("CANCELED")} // Handle card click
-          className={classes.paper}
-          withBorder
-          p="md"
-          radius="md"
-        >
+        <Paper onClick={() => onCardClick("CANCELED")} className={classes.paper} withBorder>
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               CANCELED
             </Text>
           </Group>
-
-          <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>{data?.CANCELED}</Text>
+          <Group align="flex-end" spacing="xs" mt={10}>
+            <Text className={classes.value}>{data?.CANCELED > 0 ? data.CANCELED : 0}</Text>
           </Group>
         </Paper>
-        <Paper onClick={() => onCardClick("SHIPPED")} className={classes.paper} withBorder p="md" radius="md">
+        
+        <Paper onClick={() => onCardClick("SHIPPED")} className={classes.paper} withBorder>
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               SHIPPED
             </Text>
           </Group>
-
-          <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>{data?.SHIPPED}</Text>
+          <Group align="flex-end" spacing="xs" mt={10}>
+            <Text className={classes.value}>{data?.SHIPPED > 0 ? data.SHIPPED : 0}</Text>
           </Group>
         </Paper>
-        <Paper onClick={() => onCardClick("DELIVERED")} className={classes.paper} withBorder p="md" radius="md">
+        
+        <Paper onClick={() => onCardClick("DELIVERED")} className={classes.paper} withBorder>
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               DELIVERED
             </Text>
           </Group>
-
-          <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>{data?.DELIVERED}</Text>
+          <Group align="flex-end" spacing="xs" mt={10}>
+            <Text className={classes.value}>{data?.DELIVERED>0?data.DELIVERED:0}</Text>
           </Group>
         </Paper>
-        <Paper onClick={() => onCardClick("ORDERED")} className={classes.paper} withBorder p="md" radius="md">
+        
+        <Paper onClick={() => onCardClick("ORDERED")} className={classes.paper} withBorder>
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               ORDERED
             </Text>
           </Group>
-
-          <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>{data?.ORDERED}</Text>
+          <Group align="flex-end" spacing="xs" mt={10}>
+            <Text className={classes.value}>{data?.ORDERED>0?data.ORDERED:0}</Text>
           </Group>
         </Paper>
-        <Paper onClick={() => onCardClick("BACKORDERED")} className={classes.paper} withBorder p="md" radius="md">
+        
+        <Paper onClick={() => onCardClick("BACKORDERED")} className={classes.paper} withBorder>
           <Group position="apart">
             <Text size="xs" color="dimmed" className={classes.title}>
               BACKORDERED
             </Text>
           </Group>
-
-          <Group align="flex-end" spacing="xs" mt={25}>
-            <Text className={classes.value}>{data?.BACKORDERED}</Text>
+          <Group align="flex-end" spacing="xs" mt={10}>
+            <Text className={classes.value}>{data?.BACKORDERED > 0 ? data.BACKORDERED : 0}</Text>
           </Group>
         </Paper>
       </SimpleGrid>

@@ -224,7 +224,7 @@ const DropOffs = () => {
       loader={customLoader}
     />
   ) : (
-    <div style={{ width: "98%", margin: "auto" }}>
+    <div style={{ width: "98%"}}>
       {" "}
       <Drawer
         opened={openedEdit}

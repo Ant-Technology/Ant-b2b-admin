@@ -359,7 +359,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                       <Badge
                         style={{
                           backgroundColor: "#FF6A00",
-                          marginLeft:"36px",
+                          marginLeft:"43px",
                           color: "#FFFFFF",
                         }}
                         size="md"
