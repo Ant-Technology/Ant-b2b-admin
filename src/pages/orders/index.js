@@ -249,7 +249,7 @@ const Orders = () => {
           <Button
             onClick={clearFilter}
             style={{
-              marginLeft: "40px",
+              marginTop: "15px",
               width: "10%",
               backgroundColor: "#FF6A00",
               color: "#FFFFFF",
