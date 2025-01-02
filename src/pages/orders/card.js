@@ -1,38 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { createStyles, Group, Paper, SimpleGrid, Text } from "@mantine/core";
+import { Button, Group, Badge } from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
-
-const useStyles = createStyles((theme) => ({
-  root: {
-    maxWidth: 660, // Adjust max width if necessary
-  },
-  paper: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "#FFFFFF",
-    borderRadius: theme.radius.md,
-    height: 60,
-    width: 105, 
-    cursor:"pointer",
-    margin: 2, 
-  },
-  value: {
-    lineHeight: 1,
-    color: "#F36825",
-    fontSize: theme.fontSizes.md, 
-    fontWeight: 700,
-    marginTop: 4,
-  },
-  title: {
-    textTransform: "uppercase",
-    fontSize: theme.fontSizes.sm,
-    fontWeight: 700,
-    color: "#101F0C",
-  },
-}));
 
 export default function StatsGrid({ onCardClick }) {
   const [data, setData] = useState();
@@ -62,69 +31,149 @@ export default function StatsGrid({ onCardClick }) {
     }
   };
 
-  const { classes } = useStyles();
-
   return (
-    <div className={classes.root}>
-      <SimpleGrid
-        cols={5} // Keep 5 columns to show all papers in one row
-        spacing="xs" // Adjust spacing as needed
+    <Group spacing="xs" position="left" style={{ paddingBottom: 16 }}>
+      {/* Cancelled Button */}
+      <Button
+        onClick={() => onCardClick("CANCELED")}
+        color="green"
+        radius="xl"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "140px",
+            padding: "2px 10px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
       >
-        <Paper onClick={() => onCardClick("CANCELED")} className={classes.paper} withBorder>
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className={classes.title}>
-              CANCELED
-            </Text>
-          </Group>
-          <Group align="flex-end" spacing="xs" mt={10}>
-            <Text className={classes.value}>{data?.CANCELED > 0 ? data.CANCELED : 0}</Text>
-          </Group>
-        </Paper>
-        
-        <Paper onClick={() => onCardClick("SHIPPED")} className={classes.paper} withBorder>
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className={classes.title}>
-              SHIPPED
-            </Text>
-          </Group>
-          <Group align="flex-end" spacing="xs" mt={10}>
-            <Text className={classes.value}>{data?.SHIPPED > 0 ? data.SHIPPED : 0}</Text>
-          </Group>
-        </Paper>
-        
-        <Paper onClick={() => onCardClick("DELIVERED")} className={classes.paper} withBorder>
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className={classes.title}>
-              DELIVERED
-            </Text>
-          </Group>
-          <Group align="flex-end" spacing="xs" mt={10}>
-            <Text className={classes.value}>{data?.DELIVERED>0?data.DELIVERED:0}</Text>
-          </Group>
-        </Paper>
-        
-        <Paper onClick={() => onCardClick("ORDERED")} className={classes.paper} withBorder>
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className={classes.title}>
-              ORDERED
-            </Text>
-          </Group>
-          <Group align="flex-end" spacing="xs" mt={10}>
-            <Text className={classes.value}>{data?.ORDERED>0?data.ORDERED:0}</Text>
-          </Group>
-        </Paper>
-        
-        <Paper onClick={() => onCardClick("BACKORDERED")} className={classes.paper} withBorder>
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className={classes.title}>
-              BACKORDERED
-            </Text>
-          </Group>
-          <Group align="flex-end" spacing="xs" mt={10}>
-            <Text className={classes.value}>{data?.BACKORDERED > 0 ? data.BACKORDERED : 0}</Text>
-          </Group>
-        </Paper>
-      </SimpleGrid>
-    </div>
+        Cancelled
+        <Badge
+          color="green"
+          variant="filled"
+          size="xs"
+          style={{ marginLeft: 4, fontSize: "12px" }}
+        >
+          {data?.CANCELED > 0 ? data?.CANCELED : 0}
+        </Badge>
+      </Button>
+
+      {/* Delivered Button */}
+      <Button
+        onClick={() => onCardClick("DELIVERED")}
+        color="blue"
+        radius="xl"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "140px",
+            padding: "2px 10px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
+      >
+        Delivered
+        <Badge
+          color="blue"
+          variant="filled"
+          size="xs"
+          style={{ marginLeft: 4, fontSize: "12px" }}
+        >
+          {data?.DELIVERED > 0 ? data?.DELIVERED : 0}
+        </Badge>
+      </Button>
+
+      {/* Ordered Button */}
+      <Button
+        onClick={() => onCardClick("ORDERED")}
+        color="blue"
+        radius="xl"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "140px",
+            padding: "2px 10px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
+      >
+        Ordered
+        <Badge
+          color="blue"
+          variant="filled"
+          size="xs"
+          style={{ marginLeft: 4, fontSize: "12px" }}
+        >
+          {data?.ORDERED > 0 ? data?.ORDERED : 0}
+        </Badge>
+      </Button>
+
+      {/* Back Ordered Button */}
+      <Button
+        color="purple"
+        radius="xl"
+        styles={{
+          root: {
+            backgroundColor: "#225F4F",
+            fontWeight: "bold",
+            width: "140px",
+            padding: "2px 10px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
+      >
+        Back Ordered
+        <Badge
+          color="purple"
+          variant="filled"
+          size="xs"
+          style={{
+            backgroundColor: "#225F4F",
+            marginLeft: 4,
+            fontSize: "12px",
+          }}
+        >
+          {data?.BACKORDERED > 0 ? data?.BACKORDERED : 0}
+        </Badge>
+      </Button>
+
+      {/* Shipped Button */}
+      <Button
+        onClick={() => onCardClick("SHIPPED")}
+        radius="xl"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            backgroundColor: "#00688B",
+            width: "140px",
+            padding: "2px 10px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
+      >
+        Shipped
+        <Badge
+          variant="filled"
+          size="xs"
+          style={{
+            backgroundColor: "#00688B",
+            marginLeft: 4,
+            fontSize: "12px",
+          }}
+        >
+          {data?.SHIPPED > 0 ? data?.SHIPPED : 0}
+        </Badge>
+      </Button>
+    </Group>
   );
 }

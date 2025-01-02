@@ -1,41 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { createStyles, Group, Paper, SimpleGrid, Text } from "@mantine/core";
+import { Button, Group, Badge } from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
 
-const useStyles = createStyles((theme) => ({
-  root: {
-    maxWidth: 470,
-    marginBottom: 5,
-  },
-  paper: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "#FFFFFF",
-    borderRadius: theme.radius.md,
-    height: 60,
-    cursor:"pointer",
-    width: 100,
-    marginRight: 4,
-  },
-  value: {
-    lineHeight: 1,
-    color: "#F36825",
-    fontSize: theme.fontSizes.md,
-    fontWeight: 700,
-    marginTop: 4,
-  },
-  title: {
-    textTransform: "uppercase",
-    fontSize: theme.fontSizes.sm,
-    fontWeight: 700,
-    color: "#101F0C",
-  },
-}));
-
-export default function StatsGrid() {
+const StatusButtons = () => {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
 
@@ -63,62 +31,99 @@ export default function StatsGrid() {
     }
   };
 
-  const { classes } = useStyles();
+
 
   return (
-    <div className={classes.root}>
-      <SimpleGrid
-        cols={4}
-        spacing="xs"
-        breakpoints={[
-          { maxWidth: "md", cols: 2 },
-          { maxWidth: "xs", cols: 1 },
-        ]}
+    <Group spacing="sm" position="left" style={{ paddingBottom: 20 }}>
+      {/* Pending Button */}
+      <Button
+        color="orange"
+        radius="xl"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            backgroundColor: "#FF6A00",
+            width: "160px",
+            padding: "2px 10px",
+          },
+        }}
       >
-        <Paper className={classes.paper} withBorder>
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className={classes.title}>
-              CANCELED
-            </Text>
-          </Group>
-          <Group align="flex-end" spacing="xs" mt={10}>
-            <Text className={classes.value}>{data?.cancelled > 0 ? data.cancelled : 0}</Text>
-          </Group>
-        </Paper>
-        
-        <Paper className={classes.paper} withBorder>
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className={classes.title}>
-              SHIPPED
-            </Text>
-          </Group>
-          <Group align="flex-end" spacing="xs" mt={10}>
-            <Text className={classes.value}>{data?.shipped > 0 ? data.shipped : 0}</Text>
-          </Group>
-        </Paper>
-        
-        <Paper className={classes.paper} withBorder>
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className={classes.title}>
-              DELIVERED
-            </Text>
-          </Group>
-          <Group align="flex-end" spacing="xs" mt={10}>
-            <Text className={classes.value}>{data?.delivered > 0 ? data.delivered : 0}</Text>
-          </Group>
-        </Paper>
-        
-        <Paper className={classes.paper} withBorder>
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className={classes.title}>
-              PENDING
-            </Text>
-          </Group>
-          <Group align="flex-end" spacing="xs" mt={10}>
-            <Text className={classes.value}>{data?.pending > 0 ? data.pending : 0}</Text>
-          </Group>
-        </Paper>
-      </SimpleGrid>
-    </div>
+        Pending
+        <Badge
+          color="orange"
+          variant="filled"
+          size="sm"
+          style={{ backgroundColor: "#FF6A00", marginLeft: 6 }}
+        >
+          {data?.pending > 0 ? data?.pending : 0}
+        </Badge>
+      </Button>
+      <Button
+        color="green"
+        radius="xl"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "160px",
+            padding: "2px 10px",
+          },
+        }}
+      >
+        Cancelled
+        <Badge
+          color="green"
+          variant="filled"
+          size="sm"
+          style={{ marginLeft: 6 }}
+        >
+          {data?.cancelled > 0 ? data?.cancelled : 0}
+        </Badge>
+      </Button>
+
+      <Button
+        color="blue"
+        radius="xl"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "160px",
+            padding: "2px 10px",
+          },
+        }}
+      >
+        Delivered
+        <Badge
+          color="blue"
+          variant="filled"
+          size="sm"
+          style={{ marginLeft: 6 }}
+        >
+          {data?.delivered > 0 ? data?.delivered : 0}
+        </Badge>
+      </Button>
+      <Button
+        color="#00688B"
+        radius="xl"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            backgroundColor: "#00688B",
+            width: "160px",
+            padding: "2px 10px",
+          },
+        }}
+      >
+        Shipped
+        <Badge
+          variant="filled"
+          size="sm"
+          style={{ backgroundColor: "#00688B", marginLeft: 6 }}
+        >
+         {data?.shipped > 0 ? data?.shipped : 0}
+        </Badge>
+      </Button>
+    </Group>
   );
-}
+};
+
+export default StatusButtons;
