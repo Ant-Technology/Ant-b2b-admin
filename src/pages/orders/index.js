@@ -54,10 +54,6 @@ const Orders = () => {
           },
 
       onCompleted: (data) => {
-        console.log(
-          "Pagination Info:",
-          data?.getOrdersByOrderItemStatus?.paginatorInfo
-        );
         if (data?.getOrdersByOrderItemStatus) {
           setTotal(data?.getOrdersByOrderItemStatus?.paginatorInfo.lastPage);
         } else {
@@ -244,29 +240,17 @@ const Orders = () => {
       </Drawer>
 
       <Card shadow="sm" p="lg">
-        <OrderCard onCardClick={setDropoffStatus} />{" "}
-        {dropoffStatus && (
-          <Button
-            onClick={clearFilter}
-            style={{
-              marginTop: "15px",
-              width: "10%",
-              backgroundColor: "#FF6A00",
-              color: "#FFFFFF",
-            }}
-            fullWidth
-            type="submit"
-            color="blue"
-          >
-            Clear Filter
-          </Button>
-        )}
         <ScrollArea>
           <B2bTable
             total={total}
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
+             filterData={({ onCardClick }) => (
+              <OrderCard onCardClick={setDropoffStatus} />
+            )}
+            clearFilter={clearFilter}
+            dropoffStatus={dropoffStatus}
             loading={loading}
             data={
               orders.length

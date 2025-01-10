@@ -115,7 +115,7 @@ export const DriverAddModal = ({
         setOpened(false);
       },
       onError(error) {
-        setOpened(false);
+        setOpened(true);
         showNotification({
           color: "red",
           title: "Error",

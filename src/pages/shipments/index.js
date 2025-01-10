@@ -25,24 +25,27 @@ import { showNotification } from "@mantine/notifications";
 import { ShipmentAddModal } from "components/Shipment/ShipmentAddModal";
 import ShipmentManageModal from "components/Shipment/ShipmentManageModal";
 import { customLoader } from "components/utilities/loader";
-import { DEL_SHIPMENT, MARK_AS_DELIVERED_SELF_SHIPMENT } from "apollo/mutuations";
+import {
+  DEL_SHIPMENT,
+  MARK_AS_DELIVERED_SELF_SHIPMENT,
+} from "apollo/mutuations";
 import { IconMinus, IconPhone, IconPlus } from "@tabler/icons";
 import ShipmentCard from "./card";
 import Controls from "components/controls/Controls";
-import UpdateIcon from '@mui/icons-material/Update';
+import UpdateIcon from "@mui/icons-material/Update";
 import SalesDetailModal from "components/Sales/SalesDetailModal";
 import ShipmentDetail from "components/Shipment/ShipmentDetail";
 const Shipments = () => {
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
-  const[rowData,setRowData] = useState(null)
-  const handleShipmentDetail = (row) => {    
-    setRowData(row)
+  const [rowData, setRowData] = useState(null);
+  const handleShipmentDetail = (row) => {
+    setRowData(row);
     setOpenedDetail(true);
   };
   const [activePage, setActivePage] = useState(1);
@@ -53,13 +56,12 @@ const Shipments = () => {
 
   const theme = useMantineTheme();
 
-  const { data, loading, fetchMore,refetch } = useQuery(GET_SHIPMENTS, {
+  const { data, loading, fetchMore, refetch } = useQuery(GET_SHIPMENTS, {
     variables: {
-      first:parseInt(size),
+      first: parseInt(size),
       page: activePage,
     },
   });
-
 
   const handleChange = (currentPage) => {
     fetchMore({
@@ -98,7 +100,7 @@ const Shipments = () => {
       render: (rowData) => {
         return <span>{rowData.cost}</span>;
       },
-      style: { width: '100px' } // Set the desired width for the "Cost" column
+      style: { width: "100px" }, // Set the desired width for the "Cost" column
     },
     {
       label: "From",
@@ -146,7 +148,7 @@ const Shipments = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <div style={{display:"flex",width:"155px"}}>
+          <div style={{ display: "flex", width: "155px" }}>
             <Controls.ActionButton
               color="primary"
               title="Update"
@@ -161,24 +163,24 @@ const Shipments = () => {
             >
               <Trash size={17} />
             </Controls.ActionButton>
-            {rowData.self_shipment &&  rowData.status === "PENDING" &&
+            {rowData.self_shipment && rowData.status === "PENDING" && (
               <Controls.ActionButton
-              color="primary"
-              title="Update Status"
-              onClick={() => handleChangeShipmentStatus(`${rowData.id}`)}
-            >
-              <UpdateIcon style={{ fontSize: "1rem" }} />
-            </Controls.ActionButton>}
+                color="primary"
+                title="Update Status"
+                onClick={() => handleChangeShipmentStatus(`${rowData.id}`)}
+              >
+                <UpdateIcon style={{ fontSize: "1rem" }} />
+              </Controls.ActionButton>
+            )}
             <span style={{ marginLeft: "1px" }}>
-            <Controls.ActionButton
-              color="primary"
-              title="View Detail"
-              onClick={() => handleShipmentDetail(rowData)}
-
-            >
-              <FiEye fontSize="medium" />
-            </Controls.ActionButton>
-          </span>
+              <Controls.ActionButton
+                color="primary"
+                title="View Detail"
+                onClick={() => handleShipmentDetail(rowData)}
+              >
+                <FiEye fontSize="medium" />
+              </Controls.ActionButton>
+            </span>
           </div>
         );
       },
@@ -192,11 +194,11 @@ const Shipments = () => {
 
   const [markAsDelivered] = useMutation(MARK_AS_DELIVERED_SELF_SHIPMENT, {
     onCompleted: (data) => {
-      console.log('Shipment status updated:', data);
+      console.log("Shipment status updated:", data);
       refetch(); // Refetch shipments after successful update
     },
     onError: (error) => {
-      console.error('Error updating shipment status:', error);
+      console.error("Error updating shipment status:", error);
       // Handle error, e.g., show an error message
     },
   });
@@ -205,8 +207,8 @@ const Shipments = () => {
     markAsDelivered({
       variables: { shipment_id: shipmentId },
     });
-  };     
-  
+  };
+
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
@@ -215,14 +217,14 @@ const Shipments = () => {
     if (data) {
       setTotal(data.shipments.paginatorInfo.lastPage);
     }
-  }, [data, size]); 
+  }, [data, size]);
 
   const handleDelete = (id) => {
     setOpenedDelete(true);
     setDeleteID(id);
   };
 
-  const [delShipment,{ loading: delshipLoading }] = useMutation(DEL_SHIPMENT, {
+  const [delShipment, { loading: delshipLoading }] = useMutation(DEL_SHIPMENT, {
     update(cache, { data: { deleteShipment } }) {
       cache.updateQuery(
         {
@@ -290,7 +292,7 @@ const Shipments = () => {
       loader={customLoader}
     />
   ) : (
-    <div style={{ width:"1240px", overflowX: 'hidden' , margin: "auto" }}>
+    <div style={{ width: "1240px", overflowX: "hidden", margin: "auto" }}>
       <Modal
         opened={openedDelete}
         onClose={() => setOpenedDelete(false)}
@@ -326,7 +328,7 @@ const Shipments = () => {
           setOpened={setOpened}
         />
       </Drawer>
-      
+
       <Drawer
         opened={openedDetail}
         overlayColor={
@@ -342,7 +344,11 @@ const Shipments = () => {
         position="bottom"
         size="80%"
       >
-        <ShipmentDetail refetch ={refetch} setOpenedDetail={setOpenedDetail} row={rowData} />
+        <ShipmentDetail
+          refetch={refetch}
+          setOpenedDetail={setOpenedDetail}
+          row={rowData}
+        />
       </Drawer>
       <Drawer
         opened={openedEdit}
@@ -366,8 +372,7 @@ const Shipments = () => {
         />
       </Drawer>
       <Card shadow="sm" p="lg">
-        <ShipmentCard />
-        <ScrollArea style={{ overflowX: 'hidden' }}>
+        <ScrollArea style={{ overflowX: "hidden" }}>
           <B2bTable
             total={total}
             activePage={activePage}
@@ -377,6 +382,7 @@ const Shipments = () => {
             loading={loading}
             data={data ? data.shipments.data : []}
             collapsible={checked}
+            filterData={({ onCardClick }) => <ShipmentCard />}
             selectedCollapse={selectedCollapse}
             setSelectedCollapse={setSelectedCollapse}
             size={size}

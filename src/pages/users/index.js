@@ -91,15 +91,6 @@ const Users = () => {
 
   const headerData = [
     {
-      label: "id",
-      key: "id",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.id}</span>;
-      },
-    },
-    {
       label: "Avatar",
       key: "avatar",
       sortable: false,
@@ -115,6 +106,15 @@ const Users = () => {
       searchable: true,
       render: (rowData) => {
         return <span>{rowData.name}</span>;
+      },
+    },
+    {
+      label: "Phone",
+      key: "Phone",
+      sortable: false,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.phone}</span>;
       },
     },
     {

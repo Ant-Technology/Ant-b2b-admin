@@ -94,7 +94,6 @@ const ProductSkuAddModal = ({
   const submit = () => {
     addProductSku({
       variables: {
-        sku: form.values.sku,
         price: parseInt(form.values.price),
         is_active: form.values.is_active,
         product: form.values.product,
@@ -106,7 +105,7 @@ const ProductSkuAddModal = ({
           title: "Success",
           message: "ProductSKU Created Successfully",
         });
-        fetchData(totalPages);
+        fetchData(activePage);
         setOpened(false);
       },
       onError(err) {
@@ -144,12 +143,6 @@ const ProductSkuAddModal = ({
         <Stack>
           <Grid>
             <Grid.Col span={6}>
-              <TextInput
-                type="text"
-                {...form.getInputProps("sku")}
-                placeholder="Sku unique id"
-                label="SKU"
-              />
               <TextInput
                 {...form.getInputProps("price")}
                 type="number"

@@ -87,7 +87,9 @@ const ProductAddModal = ({
   const { height } = useViewportSize();
   const [dropDownData, setDropDownData] = useState({ enArr: [], amArr: [] });
   const [subcategories, setSubcategories] = useState([]);
-
+  const removeFile = (index) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
   // graphql queries
   const { loading: categoryLoading } = useQuery(NON_PAGINATED_CATEGORIES, {
     onCompleted(data) {
@@ -259,20 +261,47 @@ const ProductAddModal = ({
 
   const [activeTab, setActiveTab] = useState(tabList[0].value);
   const [files, setFiles] = useState([]);
-
   const previews = files.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
     return (
-      <img
+      <div
         key={index}
-        src={imageUrl}
-        alt=""
-        width="130"
-        imageProps={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
-      />
+        style={{
+          position: "relative",
+          width: "130px",
+          height: "130px",
+          margin: "10px",
+        }}
+      >
+        <img
+          src={imageUrl}
+          alt={`Preview ${index}`}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            borderRadius: "8px",
+          }}
+          onLoad={() => URL.revokeObjectURL(imageUrl)} // Revoke the URL once the image is loaded
+        />
+        <ActionIcon
+          color="red"
+          style={{
+            position: "absolute",
+            top: "5px",
+            right: "5px",
+            background: "white",
+            borderRadius: "50%",
+            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)",
+          }}
+          onClick={() => removeFile(index)}
+        >
+          <Trash size={20} />
+        </ActionIcon>
+      </div>
     );
   });
-
+  
   return (
     <Tabs color="blue" value={activeTab} onTabChange={setActiveTab}>
       <LoadingOverlay

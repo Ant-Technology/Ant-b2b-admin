@@ -1,129 +1,117 @@
 import React, { useEffect, useState } from "react";
-import { Button, Group, Badge } from "@mantine/core";
+import { Button, Group, Badge, Popover, Loader, Text } from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
 
-const StatusButtons = () => {
+const StatusDropdown = ({ onStatusChange }) => {
   const [data, setData] = useState();
+  const [selectedStatus, setSelectedStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [opened, setOpened] = useState(false);
 
   useEffect(() => {
-    fetchDeposit();
+    fetchShipmentData();
   }, []);
 
-  const fetchDeposit = async () => {
+  const fetchShipmentData = async () => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-      const { data } = await axios.get(`${API}/shipment/status-counts`, config);
-      if (data) {
-        setLoading(false);
-        setData(data);
-      }
+      const response = await axios.get(`${API}/shipment/status-counts`, config);
+      setData(response.data);
+      console.log(response.data);
     } catch (error) {
+    } finally {
       setLoading(false);
-      console.error("Error fetching data:", error);
     }
   };
 
+  const handleStatusChange = (value) => {
+    setSelectedStatus(value);
+    setOpened(false);
+    if (onStatusChange) {
+      onStatusChange(value);
+    }
+  };
 
+  const statuses = [
+    { value: "PENDING", label: "Pending", color: "#FF6A00" },
+    { value: "cancelled", label: "Cancelled", color: "green" },
+    { value: "delivered", label: "Delivered", color: "blue" },
+    { value: "shipped", label: "Shipped", color: "#00688B" },
+  ];
 
   return (
-    <Group spacing="sm" position="left" style={{ paddingBottom: 20 }}>
-      {/* Pending Button */}
-      <Button
-        color="orange"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            backgroundColor: "#FF6A00",
-            width: "160px",
-            padding: "2px 10px",
-          },
-        }}
+    <Group spacing="sm" position="left">
+      <Popover
+        opened={opened}
+        onClose={() => setOpened(false)}
+        position="bottom"
+        withArrow
       >
-        Pending
-        <Badge
-          color="orange"
-          variant="filled"
-          size="sm"
-          style={{ backgroundColor: "#FF6A00", marginLeft: 6 }}
-        >
-          {data?.pending > 0 ? data?.pending : 0}
-        </Badge>
-      </Button>
-      <Button
-        color="green"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "160px",
-            padding: "2px 10px",
-          },
-        }}
-      >
-        Cancelled
-        <Badge
-          color="green"
-          variant="filled"
-          size="sm"
-          style={{ marginLeft: 6 }}
-        >
-          {data?.cancelled > 0 ? data?.cancelled : 0}
-        </Badge>
-      </Button>
-
-      <Button
-        color="blue"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "160px",
-            padding: "2px 10px",
-          },
-        }}
-      >
-        Delivered
-        <Badge
-          color="blue"
-          variant="filled"
-          size="sm"
-          style={{ marginLeft: 6 }}
-        >
-          {data?.delivered > 0 ? data?.delivered : 0}
-        </Badge>
-      </Button>
-      <Button
-        color="#00688B"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            backgroundColor: "#00688B",
-            width: "160px",
-            padding: "2px 10px",
-          },
-        }}
-      >
-        Shipped
-        <Badge
-          variant="filled"
-          size="sm"
-          style={{ backgroundColor: "#00688B", marginLeft: 6 }}
-        >
-         {data?.shipped > 0 ? data?.shipped : 0}
-        </Badge>
-      </Button>
+        <Popover.Target>
+          <Button
+            onClick={() => setOpened((o) => !o)}
+            style={{
+              width: "160px",
+              justifyContent: "space-between",
+              display: "flex",
+              fontWeight: "bold",
+              fontSize: "14px",
+            }}
+          >
+            {selectedStatus
+              ? statuses.find((status) => status.value === selectedStatus)
+                  ?.label
+              : "Shipment Status"}
+          </Button>
+        </Popover.Target>
+        <Popover.Dropdown>
+          {loading ? (
+            <Loader size="sm" />
+          ) : (
+            statuses.map((status) => (
+              <div
+                key={status.value}
+                onClick={() => handleStatusChange(status.value)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  backgroundColor:
+                    selectedStatus === status.value ? "#f0f0f0" : "transparent",
+                }}
+              >
+                <Text
+                  style={{
+                    color: status.color,
+                    flexGrow: 1,
+                    textAlign: "left",
+                  }}
+                >
+                  {status.label}
+                </Text>
+                <Badge
+                  color={status.color}
+                  variant="filled"
+                  size="sm"
+                  style={{ marginLeft: "6px" }}
+                >
+                  {data?.[status.value] > 0 ? data?.[status.value] : 0}
+                </Badge>
+              </div>
+            ))
+          )}
+        </Popover.Dropdown>
+      </Popover>
     </Group>
   );
 };
 
-export default StatusButtons;
+export default StatusDropdown;

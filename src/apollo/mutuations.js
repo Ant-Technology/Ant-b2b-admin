@@ -334,7 +334,6 @@ export const DEL_PRODUCT = gql`
 
 export const CREATE_PRODUCT_SKUS = gql`
   mutation (
-    $sku: String!
     $price: Float!
     $is_active: Boolean!
     $product: ID!
@@ -342,7 +341,6 @@ export const CREATE_PRODUCT_SKUS = gql`
   ) {
     createProductSku(
       input: {
-        sku: $sku
         price: $price
         is_active: $is_active
         product: { connect: $product }
@@ -947,8 +945,8 @@ export const UPDATE_USER = gql`
     $id: ID!
     $name: String!
     $phone: String!
-    $password: String
-    $password_confirmation: String
+    $password: String!
+    $password_confirmation: String!
     $profile_image: Upload
   ) {
     updateUser(

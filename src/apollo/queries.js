@@ -87,6 +87,57 @@ export const GET_CATEGORIES_ALL = gql`
   }
 `;
 
+export const FILTER_PRODUCT_BY_CATEGORY = gql`
+  query FilterProductByCategory(
+    $categoryId: String!
+    $first: Int!
+    $page: Int
+    $ordered_by: [OrderByInput]!
+  ) {
+    filterProductByCategory(
+      categoryId: $categoryId
+      first: $first
+      page: $page
+      orderBy: $ordered_by
+    ) {
+      data {
+        id
+        name
+        category {
+          id
+          name
+        }
+        productSkusCount
+        imageUrl
+        description
+        short_description
+        images {
+          id
+          original_url
+        }
+        attributes {
+          id
+          name
+          values {
+            id
+            value
+          }
+        }
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
+
 export const GET_CATEGORY = gql`
   query ($id: ID!) {
     category(id: $id) {
@@ -1173,6 +1224,7 @@ export const GET_ALL_USERS = gql`
         name
         status
         email
+        phone
         profile_image
         roles {
           id

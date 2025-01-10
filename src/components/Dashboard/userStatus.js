@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Text,
@@ -9,24 +9,50 @@ import {
   Container,
 } from "@mantine/core";
 import { IconTruckDelivery, IconBuildingStore } from "@tabler/icons-react";
+import axios from "axios";
+import { API } from "utiles/url";
 
 const UserStatus = () => {
+  const [result, setData] = useState();
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const { data } = await axios.get(`${API}/users-stats`, config);
+      if (data) {
+        setLoading(false);
+        setData(data.userStatistics);
+      }
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
   const data = [
     {
       title: "Admin",
-      value: 253,
+      value: result?.admin_count,
       icon: <IconTruckDelivery size={24} color="white" />,
       color: "orange",
     },
     {
       title: "Driver",
-      value: 253,
+      value:  result?.driver_count,
       icon: <IconTruckDelivery size={24} color="white" />,
       color: "orange",
     },
     {
       title: "Retailers",
-      value: 3968,
+      value: result?.retailer_count,
       icon: <IconBuildingStore size={24} color="white" />,
       color: "blue",
     },
@@ -77,7 +103,7 @@ const UserStatus = () => {
                   {item.title}
                 </Text>
                 <Text size="lg" weight={700}>
-                  {item.value.toLocaleString()}
+                  {item.value}
                 </Text>
               </div>
             </Box>
