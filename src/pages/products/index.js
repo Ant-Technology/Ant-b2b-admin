@@ -11,11 +11,11 @@ import {
   Drawer,
 } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 
 import { showNotification } from "@mantine/notifications";
 import { DEL_PRODUCT } from "apollo/mutuations";
-import { GET_PRODUCTS } from "apollo/queries";
+import { FILTER_PRODUCT_BY_CATEGORY, GET_PRODUCTS } from "apollo/queries";
 import ProductDetailModal from "components/Product/ProductDetail";
 import ProductAddModal from "components/Product/productAddModal";
 import ProductEditModal from "components/Product/productEditModal";
@@ -24,9 +24,11 @@ import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import React, { useEffect, useState } from "react";
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
+import CategoryFilter from "./categoryfilter";
 
 const Products = () => {
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
+  const [categoryId, setCategoryId] = useState(null);
   const [total, setTotal] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [hasMounted, setHasMounted] = useState(false);
@@ -43,24 +45,44 @@ const Products = () => {
     setEditId(id);
     setOpenedDetail(true);
   };
+  const { data, loading, fetchMore, refetch } = useQuery(
+    categoryId ? FILTER_PRODUCT_BY_CATEGORY : GET_PRODUCTS,
+    {
+      variables: categoryId
+        ? {
+            categoryId: categoryId, // Ensure this matches exactly with backend
+            first: parseInt(size), // Pass size dynamically
+            page: activePage,
+            ordered_by: [
+              {
+                column: "CREATED_AT",
+                order: "DESC",
+              },
+            ],
+          }
+        : {
+            first: parseInt(size), // Pass size dynamically
+            page: activePage,
+          },
 
-  const { data, loading, fetchMore } = useQuery(GET_PRODUCTS, {
-    // fetchPolicy: "no-cache",
-    variables: {
-      first: parseInt(size), // Pass size dynamically
-      page: activePage,
-    },
-  });
+      onCompleted: (data) => {
+        if (data?.filterProductByCategory) {
+          setTotal(data?.filterProductByCategory?.paginatorInfo.lastPage);
+        } else {
+          setTotal(data?.products.paginatorInfo.lastPage);
+        }
+      },
+
+      onError: (error) => {
+        console.error("Query encountered an error:", error);
+      },
+    }
+  );
+
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
   };
-  useEffect(() => {
-    if (data) {
-      setTotal(data.products.paginatorInfo.lastPage);
-    }
-  }, [data, size]); 
-
 
   const [delProduct] = useMutation(DEL_PRODUCT, {
     update(cache, { data: { deleteProduct } }) {
@@ -96,7 +118,6 @@ const Products = () => {
     setHasMounted(true);
   }, []);
 
-
   const handleChange = (currentPage) => {
     fetchMore({
       variables: {
@@ -130,9 +151,7 @@ const Products = () => {
       render: (rowData) => {
         return (
           <Avatar.Group spacing="sm">
-          
-              <Avatar src={rowData?.imageUrl} radius="xl" />
-            
+            <Avatar src={rowData?.imageUrl} radius="xl" />
           </Avatar.Group>
         );
       },
@@ -172,12 +191,12 @@ const Products = () => {
       render: (rowData) => {
         return (
           <>
-           <Controls.ActionButton
+            <Controls.ActionButton
               color="primary"
               title="Update"
               onClick={() => handleEditProduct(`${rowData.id}`)}
             >
-              <EditIcon style={{ fontSize: '1rem' }}/>
+              <EditIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>
             <span style={{ marginLeft: "1px" }}>
               <Controls.ActionButton
@@ -195,7 +214,6 @@ const Products = () => {
             >
               <Trash size={17} />
             </Controls.ActionButton>
-          
           </>
         );
       },
@@ -240,7 +258,7 @@ const Products = () => {
     setOpenedEdit(true);
     setEditId(id);
   };
-
+  const handleCategoryFilterClick = (categoryId) => {};
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -339,7 +357,12 @@ const Products = () => {
             header={headerData}
             optionsData={optionsData}
             loading={loading}
-            data={data ? data.products.data : []}
+            filterData={({ onCardClick }) => (
+              <CategoryFilter onCardClick={setCategoryId} />
+            )}
+            data={
+              data?.products?.data || data?.filterProductByCategory?.data || []
+            }
             size={size}
             handlePageSizeChange={handlePageSizeChange}
           />

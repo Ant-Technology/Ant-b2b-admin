@@ -66,7 +66,7 @@ function Th({ children, reversed, sorted, onSort }) {
 }
 function filterData(data, search) {
   const query = search.toLowerCase().trim();
-  
+
   return data.filter((item) => {
     return Object.keys(item).some((key) => {
       const value = item[key];
@@ -75,14 +75,14 @@ function filterData(data, search) {
         return value.toLowerCase().includes(query);
       }
 
-      if (key === 'causer' && value && typeof value === "object") {
+      if (key === "causer" && value && typeof value === "object") {
         // Specifically check for causer.name
         return value.name?.toLowerCase().includes(query);
       }
 
       if (typeof value === "object" && value !== null) {
-        return Object.values(value).some(val =>
-          typeof val === "string" && val.toLowerCase().includes(query)
+        return Object.values(value).some(
+          (val) => typeof val === "string" && val.toLowerCase().includes(query)
         );
       }
 
@@ -102,20 +102,24 @@ function sortData(data, payload) {
       let bValue = b[payload.sortBy];
 
       // Special case for causer.name
-      if (payload.sortBy === 'causer') {
-        aValue = a.causer?.name || '';  // Get causer.name or empty string
-        bValue = b.causer?.name || '';
+      if (payload.sortBy === "causer") {
+        aValue = a.causer?.name || ""; // Get causer.name or empty string
+        bValue = b.causer?.name || "";
       }
 
-      const aStr = aValue !== null && aValue !== undefined ? String(aValue) : '';
-      const bStr = bValue !== null && bValue !== undefined ? String(bValue) : '';
+      const aStr =
+        aValue !== null && aValue !== undefined ? String(aValue) : "";
+      const bStr =
+        bValue !== null && bValue !== undefined ? String(bValue) : "";
 
       if (payload.sortBy === "cost" || payload.sortBy === "total_price") {
         const aNum = parseFloat(aStr);
         const bNum = parseFloat(bStr);
         return payload.reversed ? bNum - aNum : aNum - bNum;
       } else {
-        return payload.reversed ? bStr.localeCompare(aStr) : aStr.localeCompare(bStr);
+        return payload.reversed
+          ? bStr.localeCompare(aStr)
+          : aStr.localeCompare(bStr);
       }
     }),
     payload.search
@@ -135,7 +139,10 @@ const B2bTable = ({
   selectedCollapse,
   setSelectedCollapse,
   size,
-  handlePageSizeChange
+  handlePageSizeChange,
+  filterData,
+  clearFilter,
+  dropoffStatus,
 }) => {
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState(data);
@@ -175,12 +182,12 @@ const B2bTable = ({
   useEffect(() => {
     setSortedData(data);
   }, [data]);
-
+  const handleCategoryFilterClick = (categoryId) => {};
   return (
     <ScrollArea>
       <SimpleGrid cols={3}>
         {optionsData ? (
-          <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <Button
               onClick={() => optionsData.setAddModal(true)}
               style={{ backgroundColor: "#FF6A00", color: "#FFFFFF" }}
@@ -188,9 +195,36 @@ const B2bTable = ({
             >
               {optionsData.actionLabel}
             </Button>
+            {filterData && (
+              <div style={{ flex: 1 }}>
+                {filterData({ onCardClick: handleCategoryFilterClick })}
+              </div>
+            )}
           </div>
         ) : (
-          <div></div>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {filterData && (
+              <div>
+                {filterData({ onCardClick: handleCategoryFilterClick })}
+              </div>
+            )}
+            {clearFilter && dropoffStatus && (
+              <Button
+                onClick={clearFilter}
+                style={{
+                  flex: 1,
+                  width: "10px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                
+                type="submit"
+                color="blue"
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
         )}
         <div> </div>
         <div>
@@ -272,13 +306,15 @@ const B2bTable = ({
         <Group spacing="xs" position="center">
           <Group spacing="sm">
             <Text size="sm" mt="sm">
-            <span style={{color:"#FF6A00",marginBottom:"10px"}}>Show per page:</span>
+              <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                Show per page:
+              </span>
             </Text>
             <Select
               value={size}
               onChange={handlePageSizeChange} // Call parent handler for page size change
               data={PAGE_SIZE_OPTIONS}
-              style={{ width: 80,height:40 }}
+              style={{ width: 80, height: 40 }}
             />
           </Group>
           <Pagination

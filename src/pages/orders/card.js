@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Button, Group, Badge } from "@mantine/core";
+import { Badge, Group, Popover, Button, Loader } from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
 
 export default function StatsGrid({ onCardClick }) {
   const [data, setData] = useState();
+  const [status, setStatus] = useState(null);
+  const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -14,7 +16,7 @@ export default function StatsGrid({ onCardClick }) {
   const fetchDeposit = async () => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -31,149 +33,107 @@ export default function StatsGrid({ onCardClick }) {
     }
   };
 
+  const handleStatusChange = (value) => {
+    setStatus(value);
+    setOpened(false);
+    if (onCardClick) {
+      onCardClick(value);
+    }
+    console.log("Selected Value:", value);
+  };
+  const options = [
+    {
+      value: "CANCELED",
+      label: "Cancelled",
+      color: "red", // Updated to red
+    },
+    {
+      value: "DELIVERED",
+      label: "Delivered",
+      color: "green", // Updated to green
+    },
+    {
+      value: "ORDERED",
+      label: "Ordered",
+      color: "blue", // Updated to blue
+    },
+    {
+      value: "BACKORDERED",
+      label: "Back Ordered",
+      color: "orange", // Updated to orange
+    },
+    {
+      value: "SHIPPED",
+      label: "Shipped",
+      color: "teal", // Updated to teal
+    },
+  ];
+
   return (
-    <Group spacing="xs" position="left" style={{ paddingBottom: 16 }}>
-      {/* Cancelled Button */}
-      <Button
-        onClick={() => onCardClick("CANCELED")}
-        color="green"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "140px",
-            padding: "2px 10px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
+    <Group spacing="xs" position="left">
+      <Popover
+        opened={opened}
+        onClose={() => setOpened(false)}
+        position="bottom"
+        withArrow
       >
-        Cancelled
-        <Badge
-          color="green"
-          variant="filled"
-          size="xs"
-          style={{ marginLeft: 4, fontSize: "12px" }}
-        >
-          {data?.CANCELED > 0 ? data?.CANCELED : 0}
-        </Badge>
-      </Button>
-
-      {/* Delivered Button */}
-      <Button
-        onClick={() => onCardClick("DELIVERED")}
-        color="blue"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "140px",
-            padding: "2px 10px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
-      >
-        Delivered
-        <Badge
-          color="blue"
-          variant="filled"
-          size="xs"
-          style={{ marginLeft: 4, fontSize: "12px" }}
-        >
-          {data?.DELIVERED > 0 ? data?.DELIVERED : 0}
-        </Badge>
-      </Button>
-
-      {/* Ordered Button */}
-      <Button
-        onClick={() => onCardClick("ORDERED")}
-        color="blue"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "140px",
-            padding: "2px 10px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
-      >
-        Ordered
-        <Badge
-          color="blue"
-          variant="filled"
-          size="xs"
-          style={{ marginLeft: 4, fontSize: "12px" }}
-        >
-          {data?.ORDERED > 0 ? data?.ORDERED : 0}
-        </Badge>
-      </Button>
-
-      {/* Back Ordered Button */}
-      <Button
-        color="purple"
-        radius="xl"
-        styles={{
-          root: {
-            backgroundColor: "#225F4F",
-            fontWeight: "bold",
-            width: "140px",
-            padding: "2px 10px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
-      >
-        Back Ordered
-        <Badge
-          color="purple"
-          variant="filled"
-          size="xs"
-          style={{
-            backgroundColor: "#225F4F",
-            marginLeft: 4,
-            fontSize: "12px",
-          }}
-        >
-          {data?.BACKORDERED > 0 ? data?.BACKORDERED : 0}
-        </Badge>
-      </Button>
-
-      {/* Shipped Button */}
-      <Button
-        onClick={() => onCardClick("SHIPPED")}
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            backgroundColor: "#00688B",
-            width: "140px",
-            padding: "2px 10px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
-      >
-        Shipped
-        <Badge
-          variant="filled"
-          size="xs"
-          style={{
-            backgroundColor: "#00688B",
-            marginLeft: 4,
-            fontSize: "12px",
-          }}
-        >
-          {data?.SHIPPED > 0 ? data?.SHIPPED : 0}
-        </Badge>
-      </Button>
+        <Popover.Target>
+          <Button
+            onClick={() => setOpened((o) => !o)}
+            style={{
+              width: "160px",
+              justifyContent: "space-between",
+              display: "flex",
+              fontWeight: "bold",
+              fontSize: "14px",
+            }}
+          >
+            {status || "Order Status"}
+          </Button>
+        </Popover.Target>
+        <Popover.Dropdown>
+          {loading ? (
+            <Loader size="sm" />
+          ) : (
+            options.map((option) => (
+              <div
+                key={option.value}
+                onClick={() => handleStatusChange(option.value)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  backgroundColor:
+                    status === option.value ? "#f0f0f0" : "transparent",
+                  width: "100%",
+                }}
+              >
+                <span
+                  style={{
+                    color: option.color,
+                    flexGrow: 1, // Pushes the Badge to the right
+                    textAlign: "left",
+                  }}
+                >
+                  {option.label}
+                </span>
+                <Badge
+                  color={option.color}
+                  variant="filled"
+                  size="xs"
+                  style={{
+                    marginLeft: "25px",
+                    textAlign: "right", // Ensures alignment to the right
+                  }}
+                >
+                  {data?.[option.value] > 0 ? data?.[option.value] : 0}
+                </Badge>
+              </div>
+            ))
+          )}
+        </Popover.Dropdown>
+      </Popover>
     </Group>
   );
 }

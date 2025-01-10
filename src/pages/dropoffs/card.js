@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Button, Group, Badge } from "@mantine/core";
+import { Badge, Group, Popover, Button, Loader } from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
 
-const StatusButtons = () => {
+export default function StatsGrid({ onCardClick }) {
   const [data, setData] = useState();
+  const [status, setStatus] = useState(null);
+  const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -14,13 +16,13 @@ const StatusButtons = () => {
   const fetchDeposit = async () => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
-      const { data } = await axios.get(`${API}/dropoff/status-counts`, config);
+      const { data } = await axios.get(`${API}/dropoff/status-counts`, config); // Correct API endpoint
       if (data) {
         setLoading(false);
         setData(data);
@@ -31,97 +33,102 @@ const StatusButtons = () => {
     }
   };
 
-  return (
-    <Group spacing="sm" position="left" style={{ paddingBottom: 0 }}>
-      {/* Pending Button */}
-      <Button
-        color="orange"
-        radius="xl"
-        styles={{
-          root: {
-            backgroundColor: "#FF6A00",
-            fontWeight: "bold",
-            width: "160px",
-            padding: "2px 10px",
-          },
-        }}
-      >
-        Pending
-        <Badge
-          color="orange"
-          variant="filled"
-          size="sm"
-          style={{ backgroundColor: "#FF6A00", marginLeft: 6 }}
-        >
-          {data?.PENDING > 0 ? data?.PENDING : 0}
-        </Badge>
-      </Button>
-      <Button
-        color="green"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "160px",
-            padding: "2px 10px",
-          },
-        }}
-      >
-        Accepted
-        <Badge
-          color="green"
-          variant="filled"
-          size="sm"
-          style={{ marginLeft: 6 }}
-        >
-          {data?.DRIVER_ACCEPTED > 0 ? data?.DRIVER_ACCEPTED : 0}
-        </Badge>
-      </Button>
+  const handleStatusChange = (value) => {
+    setStatus(value);
+    setOpened(false);
+    if (onCardClick) {
+      onCardClick(value);
+    }
+    console.log("Selected Value:", value);
+  };
 
-      <Button
-        color="blue"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "160px",
-            padding: "2px 10px",
-          },
-        }}
+  const options = [
+    {
+      value: "PENDING",
+      label: "Pending",
+      color: "#FF6A00",
+    },
+    {
+      value: "DRIVER_ACCEPTED",
+      label: "Accepted",
+      color: "green",
+    },
+    {
+      value: "FINISHED",
+      label: "Finished",
+      color: "blue",
+    },
+    {
+      value: "STARTED",
+      label: "Started",
+      color: "#00688B",
+    },
+  ];
+  return (
+    <Group spacing="xs" position="left">
+      <Popover
+        opened={opened}
+        onClose={() => setOpened(false)}
+        position="bottom"
+        withArrow
       >
-        Finished
-        <Badge
-          color="blue"
-          variant="filled"
-          size="sm"
-          style={{ marginLeft: 6 }}
-        >
-          {data?.FINISHED > 0 ? data?.FINISHED : 0}
-        </Badge>
-      </Button>
-      <Button
-        color="#00688B"
-        radius="xl"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            backgroundColor: "#00688B",
-            width: "160px",
-            padding: "2px 10px",
-          },
-        }}
-      >
-        Started
-        <Badge
-          variant="filled"
-          size="sm"
-          style={{ backgroundColor: "#00688B", marginLeft: 6 }}
-        >
-          {data?.STARTED > 0 ? data?.STARTED : 0}
-        </Badge>
-      </Button>
+        <Popover.Target>
+          <Button
+            onClick={() => setOpened((o) => !o)}
+            style={{
+              width: "160px",
+              justifyContent: "space-between",
+              display: "flex",
+              fontWeight: "bold",
+              fontSize: "14px",
+            }}
+          >
+            {status || "DropOff Status"}
+          </Button>
+        </Popover.Target>
+        <Popover.Dropdown>
+          {loading ? (
+            <Loader size="sm" />
+          ) : (
+            options.map((option) => (
+              <div
+                key={option.value}
+                onClick={() => handleStatusChange(option.value)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  backgroundColor:
+                    status === option.value ? "#f0f0f0" : "transparent",
+                  width: "100%",
+                }}
+              >
+                <span
+                  style={{
+                    color: option.color,
+                    flexGrow: 1,
+                    textAlign: "left",
+                  }}
+                >
+                  {option.label}
+                </span>
+                <Badge
+                  color={option.color}
+                  variant="filled"
+                  size="xs"
+                  style={{
+                    marginLeft: "25px",
+                    textAlign: "right",
+                  }}
+                >
+                  {data?.[option.value] > 0 ? data?.[option.value] : 0}
+                </Badge>
+              </div>
+            ))
+          )}
+        </Popover.Dropdown>
+      </Popover>
     </Group>
   );
-};
-
-export default StatusButtons;
+}

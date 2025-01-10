@@ -192,7 +192,7 @@ const DropOffs = () => {
     });
 
     const notificationChannel = pusher.subscribe("notification");
-    
+
     notificationChannel.bind("new-item-created", function (newOrder) {
       refetch()
         .then(({ data }) => {
@@ -224,7 +224,7 @@ const DropOffs = () => {
       loader={customLoader}
     />
   ) : (
-    <div style={{ width: "98%"}}>
+    <div style={{ width: "98%" }}>
       {" "}
       <Drawer
         opened={openedEdit}
@@ -256,20 +256,20 @@ const DropOffs = () => {
         opened={openedLocation}
         onClose={() => setOpenedLocation(false)}
         title="Warehouse Location"
-        padding="xl" 
+        padding="xl"
         size="80%"
         position="bottom"
       >
         <DriverMapView id={editId} />
       </Drawer>
       <Card shadow="sm" p="lg">
-        <DropOffCard />
         <ScrollArea>
           <B2bTable
             total={total}
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
+            filterData={({ onCardClick }) => <DropOffCard />}
             loading={loading}
             data={dropOffs.length ? dropOffs : data.dropoffs.data || []}
             size={size}

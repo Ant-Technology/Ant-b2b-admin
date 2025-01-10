@@ -48,12 +48,12 @@ const RetailerAddModal = ({
       },
       user: {
         create: {
-          name: "fafa",
-          email: "test@mail.com",
-          password: "fafa",
-          password_confirmation: "fafa",
+          name: "",
+          email: "",
+          password: "",
+          password_confirmation: "",
           phone: "",
-         role_id: "5" 
+          role_id: "5",
         },
       },
     },
@@ -63,7 +63,6 @@ const RetailerAddModal = ({
   const [addRetailer, { loading: retailerLoading }] = useMutation(
     CREATE_RETAILER,
     {
-     
       update(cache, { data: { createRetailer } }) {
         // Read the existing data from the cache
         const { retailers } = cache.readQuery({
@@ -244,6 +243,7 @@ const RetailerAddModal = ({
                 />
                 <Select
                   data={regionsDropDownData}
+                  searchable
                   value={form.getInputProps("region.connect")?.value.toString()}
                   onChange={setRegionDropDownValue}
                   label="Region"
@@ -290,7 +290,7 @@ const RetailerAddModal = ({
                   placeholder="User Name"
                   {...form.getInputProps("user.create.name")}
                 />
-                  <TextInput
+                <TextInput
                   required
                   label="User Phone"
                   placeholder="User Phone"

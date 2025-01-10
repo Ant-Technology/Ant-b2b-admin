@@ -1,4 +1,8 @@
 export const API = "https://b2b.ant.et/api";
+export const formatNumber =(value)=>{
+  if (value === null || value === undefined) return "0";
+  return new Intl.NumberFormat().format(value);
+}
 export const PAGE_SIZE_OPTIONS = [
   { value: "10", label: "10" },
   { value: "25", label: "25" },
