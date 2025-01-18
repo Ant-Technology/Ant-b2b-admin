@@ -13,20 +13,42 @@ import { showNotification } from "@mantine/notifications";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import { useState, useEffect } from "react";
-import { API, allPermissions } from "utiles/url";
+import { API} from "utiles/url";
 
 export const RoleAddModal = ({ setOpened, fetchData }) => {
   const [loading, setLoading] = useState(false);
   const [checkedPermissions, setCheckedPermissions] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
+  const[allPermissions, setAllPermissions] = useState([])
   const form = useForm({
     initialValues: {
       name: "",
       permissions: [], // Array to store selected permissions
     },
   });
-
+useEffect(() => {
+    fetchDataPermissions();
+  }, []);
   const { height } = useViewportSize();
+  const fetchDataPermissions = async () => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(`${API}/permissions`, config);
+      if (response.data) {
+        setAllPermissions(response.data.permissions);
+        console.log(response.data.permissions)
+        setLoading(false);
+      }
+    } catch (error) {
+      setLoading(false);
+    }
+  };
 
   const submit = async () => {
     setLoading(true);

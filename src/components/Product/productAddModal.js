@@ -16,10 +16,17 @@ import {
   useMantineTheme,
   Select,
 } from "@mantine/core";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery, gql } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
-import { Photo, Plus, Trash, Ban, Upload, PictureInPicture } from "tabler-icons-react";
+import {
+  Photo,
+  Plus,
+  Trash,
+  Ban,
+  Upload,
+  PictureInPicture,
+} from "tabler-icons-react";
 import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
@@ -46,7 +53,7 @@ const ProductAddModal = ({
             page: 1,
           },
         }) || { products: { data: [], paginatorInfo: { total: 0 } } };
-  
+
         const updatedProduct = [createProduct, ...products.data];
         cache.writeQuery({
           query: GET_PRODUCTS,
@@ -65,7 +72,7 @@ const ProductAddModal = ({
             },
           },
         });
-  
+
         // Update the total count and reset the active page
         const newTotal = products.paginatorInfo.total + 1;
         setTotal(newTotal);
@@ -83,7 +90,7 @@ const ProductAddModal = ({
       });
     },
   });
-  
+
   const { height } = useViewportSize();
   const [dropDownData, setDropDownData] = useState({ enArr: [], amArr: [] });
   const [subcategories, setSubcategories] = useState([]);
@@ -131,12 +138,12 @@ const ProductAddModal = ({
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
     },
   });
-
-  const handleAttributeCards = (value) => {
-    const attributeCards = form.values.attributes.create.map((item, index) => (
+  const handleAttributeCards = () => {
+    return form.values.attributes.create.map((item, index) => (
       <Card key={index} shadow="sm" p="lg" radius="md" withBorder mt="xl">
         <Stack>
-          <Group position="right">
+          <Group position="apart">
+            <Text weight={500}>Attribute {index + 1}</Text>
             <ActionIcon
               color="red"
               onClick={() => form.removeListItem("attributes.create", index)}
@@ -149,17 +156,21 @@ const ProductAddModal = ({
             <Grid.Col span={6}>
               <TextInput
                 required
-                label="Name"
+                label="Attribute Name (English)"
                 placeholder="Attribute Name"
-                {...form.getInputProps(
-                  value === "am"
-                    ? `attributes.create.${index}.name.am`
-                    : `attributes.create.${index}.name.en`
-                )}
+                {...form.getInputProps(`attributes.create.${index}.name.en`)}
               />
             </Grid.Col>
             <Grid.Col span={6}>
-              <Group mt="xl" position="right">
+              <TextInput
+                required
+                label="Attribute Name (Amharic)"
+                placeholder="Attribute Name"
+                {...form.getInputProps(`attributes.create.${index}.name.am`)}
+              />
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <Group position="apart" mt="xl">
                 <Button
                   onClick={() =>
                     form.insertListItem(
@@ -167,96 +178,95 @@ const ProductAddModal = ({
                       { value: { en: "", am: "" } }
                     )
                   }
-                  fullWidth
                   variant="outline"
                   leftIcon={<Plus />}
                   color="blue"
+                  size="xs" // Set the size to 'xs'
+                  compact // Make the button more compact
                 >
-                  Add value
+                  Add Value
                 </Button>
               </Group>
-              {form.values.attributes.create[index].values.create.length > 0 ? (
-                form.values.attributes.create[index].values.create.map(
-                  (attr, idx) => (
-                    <Group key={idx} mt="xs">
-                      <TextInput
-                        placeholder="Attribute Value"
-                        required
-                        sx={{ flex: 1 }}
-                        {...form.getInputProps(
-                          value === "am"
-                            ? `attributes.create.${index}.values.create.${idx}.value.am`
-                            : `attributes.create.${index}.values.create.${idx}.value.en`
-                        )}
-                      />
-
-                      <ActionIcon
-                        color="#ed522f"
-                        onClick={() =>
-                          form.removeListItem(
-                            `attributes.create.${index}.values.create`,
-                            idx
-                          )
-                        }
-                      >
-                        <Trash size={24} />
-                      </ActionIcon>
-                    </Group>
-                  )
-                )
+              {item.values.create.length > 0 ? (
+                item.values.create.map((attr, idx) => (
+                  <Group key={idx} mt="xs">
+                    <TextInput
+                      placeholder="Value (English)"
+                      required
+                      sx={{ flex: 1 }}
+                      {...form.getInputProps(
+                        `attributes.create.${index}.values.create.${idx}.value.en`
+                      )}
+                    />
+                    <TextInput
+                      placeholder="Value (Amharic)"
+                      required
+                      sx={{ flex: 1 }}
+                      {...form.getInputProps(
+                        `attributes.create.${index}.values.create.${idx}.value.am`
+                      )}
+                    />
+                    <ActionIcon
+                      color="#ed522f"
+                      onClick={() =>
+                        form.removeListItem(
+                          `attributes.create.${index}.values.create`,
+                          idx
+                        )
+                      }
+                    >
+                      <Trash size={24} />
+                    </ActionIcon>
+                  </Group>
+                ))
               ) : (
-                <p>no added attr</p>
+                <Text color="dimmed">No values added</Text>
               )}
             </Grid.Col>
           </Grid>
         </Stack>
       </Card>
     ));
-
-    return attributeCards;
   };
-
   const handleCategoryChange = (val) => {
     form.setFieldValue("category.connect", val);
-    const selectedCategory = dropDownData.enArr.find((cat) => cat.value === val);
+    const selectedCategory = dropDownData.enArr.find(
+      (cat) => cat.value === val
+    );
     setSubcategories(selectedCategory ? selectedCategory.children : []);
     form.setFieldValue("subcategory.connect", ""); // Reset subcategory
   };
 
   const submit = () => {
-    if (activeTab === tabList[tabList.length - 1].value) {
-      addProduct({
-        variables: {
-          name: form.getInputProps("name").value,
-          short_description: form.getInputProps("short_description").value,
-          description: form.getInputProps("description").value,
-          is_active: form.getInputProps("is_active").value,
-          attributes: form.getInputProps("attributes").value,
-          images: [...files],
-          //category: form.getInputProps("category").value,
-          category: form.getInputProps("subcategory").value,
-        },
-        onCompleted() {
-          showNotification({
-            color: "green",
-            title: "Success",
-            message: "Product Created Successfully",
-          });
+    addProduct({
+      variables: {
+        name: form.getInputProps("name").value,
+        short_description: form.getInputProps("short_description").value,
+        description: form.getInputProps("description").value,
+        is_active: form.getInputProps("is_active").value,
+        attributes: form.getInputProps("attributes").value,
+        images: [...files],
+        //category: form.getInputProps("category").value,
+        category: form.getInputProps("subcategory").value,
+      },
+      onCompleted() {
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: "Product Created Successfully",
+        });
 
-          setOpened(false);
-        },
-        onError() {
-          setOpened(false);
-          showNotification({
-            color: "red",
-            title: "Error",
-            message: "Product Not Created Successfully",
-          });
-        },
-      });
-    } else {
-      setActiveTab(tabList[tabList.length - 1].value);
-    }
+        setOpened(false);
+      },
+      onError() {
+        setOpened(true);
+        showNotification({
+          color: "red",
+          title: "Error",
+          message: "Product Not Created Successfully",
+        });
+      },
+    });
   };
 
   const [activeTab, setActiveTab] = useState(tabList[0].value);
@@ -301,7 +311,13 @@ const ProductAddModal = ({
       </div>
     );
   });
-  
+  const fileInputRef = useRef(null); // Create a reference for the file input
+
+  const handleFileChange = (event) => {
+    const selectedFiles = Array.from(event.target.files);
+    setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+  };
+
   return (
     <Tabs color="blue" value={activeTab} onTabChange={setActiveTab}>
       <LoadingOverlay
@@ -310,186 +326,173 @@ const ProductAddModal = ({
         overlayBlur={2}
         loader={customLoader}
       />
-      <Tabs.List>
-        {tabList.map((tab, i) => (
-          <Tabs.Tab key={i} value={tab.value} icon={<Photo size={14} />}>
-            {tab.name}
-          </Tabs.Tab>
-        ))}
-      </Tabs.List>
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
         <form onSubmit={form.onSubmit(() => submit())}>
-          {tabList.map((tab, i) => (
-            <Tabs.Panel key={i} value={tab.value} pt="xs">
-              <Stack>
-                <Grid>
-                  <Grid.Col span={6}>
-                    <TextInput
-                      required
-                      label="Name"
-                      placeholder="Product Name"
-                      {...form.getInputProps("name." + tab.shortHand)}
-                    />
-                    <Textarea
-                      placeholder="Short Description"
-                      label="Short Description"
-                      required
-                      {...form.getInputProps(
-                        "short_description." + tab.shortHand
-                      )}
-                    />
-                    <Textarea
-                      placeholder="Description"
-                      label="Description"
-                      required
-                      {...form.getInputProps("description." + tab.shortHand)}
-                    />
-                    <Group position="left">
-                      <div style={{ marginTop: "10px" }}>
-                        <Checkbox
-                          color="blue"
-                          size="lg"
-                          checked={form.values.is_active}
-                          label="Is active"
-                          onChange={(event) => {
-                            form.setFieldValue(
-                              "is_active",
-                              event.currentTarget.checked
-                            );
-                          }}
-                        />
-                      </div>
-                    </Group>
-                    <Select
-                      searchable
-                      data={
-                        tab.shortHand === "en"
-                          ? dropDownData.enArr
-                          : dropDownData.amArr
-                      }
-                      value={form
-                        .getInputProps("category.connect")
-                        .value.toString()}
-                      onChange={handleCategoryChange}
-                      label="Category"
-                      placeholder="Pick a category this product belongs to"
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={6}>
-                    <ScrollArea style={{ height: 300 }}>
-                      <div style={{ marginTop: "25px" }}>
-                        <Dropzone accept={IMAGE_MIME_TYPE} onDrop={setFiles}>
-                          <Group
-                            position="center"
-                            spacing="xl"
-                            style={{ minHeight: 200, pointerEvents: "none" }}
-                          >
-                            <Dropzone.Accept>
-                              <Upload
-                                size={50}
-                                stroke={1.5}
-                                color={
-                                  theme.colors[theme.primaryColor][
-                                    theme.colorScheme === "dark" ? 4 : 6
-                                  ]
-                                }
-                              />
-                            </Dropzone.Accept>
-                            <Dropzone.Reject>
-                              <PictureInPicture
-                                size={50}
-                                stroke={1.5}
-                                color={
-                                  theme.colors.red[
-                                    theme.colorScheme === "dark" ? 4 : 6
-                                  ]
-                                }
-                              />
-                            </Dropzone.Reject>
-                            <Dropzone.Idle>
-                              <PictureInPicture size={50} stroke={1.5} />
-                            </Dropzone.Idle>
+          <Stack>
+            <Grid>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Product Name (English)"
+                  placeholder="Enter product name in English"
+                  {...form.getInputProps("name.en")}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Product Name (Amharic)"
+                  placeholder="Enter product name in Amharic"
+                  {...form.getInputProps("name.am")}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Textarea
+                  placeholder="Short Description"
+                  label="Short Description (English)"
+                  required
+                  {...form.getInputProps("short_description.en")}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Textarea
+                  placeholder="Short Description"
+                  label="Short Description (Amharic)"
+                  required
+                  {...form.getInputProps("short_description.am")}
+                />
+              </Grid.Col>
 
-                            <div>
-                              <Text size="xl" inline>
-                                Drag images here or click to select files
-                              </Text>
-                              <Text size="sm" color="dimmed" inline mt={7}>
-                                Attach as many files as you like, each file
-                                should not exceed 5mb
-                              </Text>
-                            </div>
-                          </Group>
-                        </Dropzone>
+              <Grid.Col span={6}>
+                <Textarea
+                  placeholder="Description"
+                  label="Description (English)"
+                  required
+                  {...form.getInputProps("description.en")}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Textarea
+                  placeholder="Description"
+                  label="Description (Amharic)"
+                  required
+                  {...form.getInputProps("description.am")}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Select
+                  searchable
+                  data={dropDownData.enArr}
+                  value={form
+                    .getInputProps("category.connect")
+                    .value.toString()}
+                  onChange={handleCategoryChange}
+                  label="Category"
+                  placeholder="Pick a category this product belongs to"
+                />{" "}
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Select
+                  searchable
+                  data={subcategories.map((sub) => ({
+                    label: sub.name,
+                    value: sub.id,
+                  }))}
+                  value={form
+                    .getInputProps("subcategory.connect")
+                    .value.toString()}
+                  onChange={(val) =>
+                    form.setFieldValue("subcategory.connect", val)
+                  }
+                  label="Subcategory"
+                  placeholder="Pick a subcategory this product belongs to"
+                  disabled={subcategories.length === 0}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Group position="left">
+                  <Checkbox
+                    color="blue"
+                    size="lg"
+                    checked={form.values.is_active}
+                    label="Is active"
+                    onChange={(event) => {
+                      form.setFieldValue(
+                        "is_active",
+                        event.currentTarget.checked
+                      );
+                    }}
+                  />
+                </Group>
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Button
+                  onClick={() => fileInputRef.current.click()} // Trigger file input on button click
+                  variant="outline"
+                  color="blue"
+                  fullWidth
+                >
+                  Upload Images
+                </Button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  ref={fileInputRef}
+                  style={{ display: "none" }} // Hide the file input
+                  onChange={handleFileChange} // Handle file selection
+                />
+                <SimpleGrid
+                  cols={4}
+                  breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                  mt={previews.length > 0 ? "xl" : 0}
+                >
+                  {previews}
+                </SimpleGrid>
+              </Grid.Col>
+            </Grid>
 
-                        <SimpleGrid
-                          cols={4}
-                          breakpoints={[{ maxWidth: "sm", cols: 1 }]}
-                          mt={previews.length > 0 ? "xl" : 0}
-                        >
-                          {previews}
-                        </SimpleGrid>
-                      </div>
-                    </ScrollArea>
-                    <Select
-                      style={{ marginBottom: "20px" }}
-                      searchable
-                      data={subcategories.map((sub) => ({
-                        label: sub.name,
-                        value: sub.id,
-                      }))}
-                      value={form
-                        .getInputProps("subcategory.connect")
-                        .value.toString()}
-                      onChange={(val) =>
-                        form.setFieldValue("subcategory.connect", val)
-                      }
-                      label="Subcategory"
-                      placeholder="Pick a subcategory this product belongs to"
-                      disabled={subcategories.length === 0}
-                    />
-                  </Grid.Col>
-                </Grid>
-                <Grid>
-                  <Grid.Col span={12}>
-                    <Group position="apart">
-                      <Text weight={500}>Attributes</Text>
-                      <Button
-                        variant="blue"
-                        color="blue"
-                        leftIcon={<Plus size={14} />}
-                        onClick={() =>
-                          form.insertListItem("attributes.create", {
-                            name: { en: "", am: "" },
-                            values: {
-                              create: [{ value: { en: "", am: "" } }],
-                            },
-                          })
-                        }
-                      >
-                        Adding an Attribute
-                      </Button>
-                    </Group>
-                    {handleAttributeCards(tab.shortHand)}
-                  </Grid.Col>
-                </Grid>
-                <Grid>
-                  <Grid.Col span={4}>
-                    <Button
-                      style={{ display: activeTab === 1 ? "none" : "" }}
-                      type="submit"
-                      color="blue"
-                      variant="outline"
-                      fullWidth
-                      onClick={(e) => submit()}
-                    >
-                      Submit
-                    </Button>
-                  </Grid.Col>
-                </Grid>
-              </Stack>
-            </Tabs.Panel>
-          ))}
+            <Grid>
+              <Grid.Col span={12}>
+                <Group position="apart">
+                  <Text weight={500}>Attributes</Text>
+                  <Button
+                    variant="blue"
+                    color="blue"
+                    leftIcon={<Plus size={14} />}
+                    onClick={() =>
+                      form.insertListItem("attributes.create", {
+                        name: { en: "", am: "" },
+                        values: {
+                          create: [{ value: { en: "", am: "" } }],
+                        },
+                      })
+                    }
+                  >
+                    Add Attribute
+                  </Button>
+                </Group>
+                {handleAttributeCards()}
+              </Grid.Col>
+            </Grid>
+
+            <Grid>
+              <Grid.Col span={4}>
+                <Button
+                  style={{
+                    width: "25%",
+                    marginTop: "15px",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
+                  type="submit"
+                  fullWidth
+                >
+                  Submit
+                </Button>
+              </Grid.Col>
+            </Grid>
+          </Stack>
         </form>
       </ScrollArea>
     </Tabs>
