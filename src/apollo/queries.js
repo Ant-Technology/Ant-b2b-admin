@@ -89,13 +89,13 @@ export const GET_CATEGORIES_ALL = gql`
 
 export const FILTER_PRODUCT_BY_CATEGORY = gql`
   query FilterProductByCategory(
-    $categoryId: String!
+    $category_id: String!
     $first: Int!
     $page: Int
     $ordered_by: [OrderByInput]!
   ) {
-    filterProductByCategory(
-      categoryId: $categoryId
+    filterProducts(
+      category_id: $category_id
       first: $first
       page: $page
       orderBy: $ordered_by

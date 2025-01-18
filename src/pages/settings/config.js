@@ -23,6 +23,7 @@ import { Plus, Search } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
 import { customLoader } from "components/utilities/loader";
 import { API } from "utiles/url";
+import AddConfig from "components/Config/addConfig";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -89,7 +90,7 @@ const Config = () => {
   const { classes } = useStyles();
   const [loading, setLoading] = useState(false);
   const [configs, setConfigs] = useState([]);
-  const [openedEdit, setOpenedEdit] = useState(false);
+  const [opened, setOpened] = useState(false);
   const [editId, setEditId] = useState(null);
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState([]);
@@ -109,10 +110,7 @@ const Config = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(
-        `${API}/configs`,
-        config
-      );
+      const response = await axios.get(`${API}/configs`, config);
       if (response.data) {
         setConfigs(response.data.configs);
         setSortedData(response.data.configs); // Ensure sorting is applied when data is fetched
@@ -254,10 +252,35 @@ const Config = () => {
     />
   ) : (
     <div style={{ width: "98%", margin: "auto" }}>
+      
+            <Drawer
+              opened={opened}
+              onClose={() => setOpened(false)}
+              title="Adding Config"
+              padding="xl"
+              size="80%"
+              position="bottom"
+            >
+              <AddConfig
+                setOpened={setOpened}
+                fetchData={fetchData}
+              />
+            </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
           <SimpleGrid cols={3}>
-            <div></div>
+            <div>
+              <Button
+                onClick={() => setOpened(true)}
+                style={{
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                leftIcon={<Plus size={14} />}
+              >
+                Add Config
+              </Button>
+            </div>
             <div> </div>
             <div>
               <TextInput

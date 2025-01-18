@@ -50,7 +50,7 @@ const Products = () => {
     {
       variables: categoryId
         ? {
-            categoryId: categoryId, // Ensure this matches exactly with backend
+          category_id: categoryId, // Ensure this matches exactly with backend
             first: parseInt(size), // Pass size dynamically
             page: activePage,
             ordered_by: [
@@ -66,8 +66,8 @@ const Products = () => {
           },
 
       onCompleted: (data) => {
-        if (data?.filterProductByCategory) {
-          setTotal(data?.filterProductByCategory?.paginatorInfo.lastPage);
+        if (data?.filterProducts) {
+          setTotal(data?.filterProducts?.paginatorInfo.lastPage);
         } else {
           setTotal(data?.products.paginatorInfo.lastPage);
         }
@@ -361,7 +361,7 @@ const Products = () => {
               <CategoryFilter onCardClick={setCategoryId} />
             )}
             data={
-              data?.products?.data || data?.filterProductByCategory?.data || []
+              data?.products?.data || data?.filterProducts?.data || []
             }
             size={size}
             handlePageSizeChange={handlePageSizeChange}
