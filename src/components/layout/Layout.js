@@ -70,6 +70,7 @@ const Layout = ({ children, setPosition }) => {
     signout({
       onCompleted() {
         localStorage.removeItem("auth_token");
+        localStorage.removeItem("permissions")
         navigate("/login");
         showNotification({
           color: "green",

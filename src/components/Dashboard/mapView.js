@@ -8,6 +8,7 @@ import {
 import ContentLoader from "react-content-loader";
 import { useQuery } from "@apollo/client";
 import { GET_ALL_GEO_LOCATIONS } from "apollo/queries";
+import { showNotification } from "@mantine/notifications";
 
 // TODO: change map key env variable
 
@@ -58,7 +59,16 @@ const MapView = ({ value }) => {
 
   const { data, loading } = useQuery(GET_ALL_GEO_LOCATIONS, {
     fetchPolicy: "no-cache",
+    onError: (error) => {
+      const errorMessage = error?.message || "An unexpected error occurred.";
+      showNotification({
+        title: "Error",
+        message: errorMessage,
+        color: "red",
+      });
+    },
   });
+  
 
   const handleActiveMarker = (marker, _geo) => {
     if (marker === activeMarker) {
@@ -69,23 +79,27 @@ const MapView = ({ value }) => {
   };
 
   const mapLoadHandler = (map) => {
+    if (!data) return;
+  
     const bounds = new window.google.maps.LatLngBounds();
     let geo = [];
-
+  
     if (value === 'Retailer' || value === null) {
-      geo = geo.concat(data.retailersNonPaginated.filter(({ _geo }) => _geo));
+      geo = geo.concat(data?.retailersNonPaginated?.filter(item => item?._geo) || []);
     }
     if (value === 'Distributor' || value === null) {
-      geo = geo.concat(data.distributorsNonPaginated.filter(({ _geo }) => _geo));
+      geo = geo.concat(data?.distributorsNonPaginated?.filter(item => item?._geo) || []);
     }
     if (value === 'Warehouse' || value === null) {
-      geo = geo.concat(data.warehousesNonPaginated.filter(({ _geo }) => _geo));
+      geo = geo.concat(data?.warehousesNonPaginated?.filter(item => item?._geo) || []);
     }
-    
+  
     geo.forEach(({ _geo }) => bounds.extend(_geo));
-    map.fitBounds(bounds);
+    if (geo.length > 0) {
+      map.fitBounds(bounds);
+    }
   };
-
+  
   const renderMap = () => {
     const retailers = data?.retailersNonPaginated?.filter(({ _geo }) => _geo) || [];
     const distributors = data?.distributorsNonPaginated?.filter(({ _geo }) => _geo) || [];
