@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Badge, Group, Popover, Button, Loader } from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
+import { IconChevronDown } from "@tabler/icons-react";
 
 export default function StatsGrid({ onCardClick }) {
   const [data, setData] = useState();
@@ -89,6 +90,7 @@ export default function StatsGrid({ onCardClick }) {
             }}
           >
             {status || "Order Status"}
+            <IconChevronDown size={16} style={{ marginLeft: "8px" }} />
           </Button>
         </Popover.Target>
         <Popover.Dropdown>

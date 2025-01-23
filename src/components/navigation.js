@@ -75,20 +75,15 @@ const useStyles = createStyles((theme, _params, getRef) => {
       borderRadius: theme.radius.sm,
       fontWeight: 600,
       "&:hover": {
-        backgroundColor:
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[6]
-            : theme.colors.gray[2],
-        color: theme.colorScheme === "dark" ? theme.white : "#333333",
+        color: theme.colorScheme === "dark" ? theme.white : "#FF6A00",
         [`& .${icon}`]: {
-          color: theme.colorScheme === "dark" ? theme.white : "#333333",
+          color: theme.colorScheme === "dark" ? theme.white : "#FF6A00",
         },
       },
     },
     linkIcon: {
       ref: icon,
-      color:
-        theme.colorScheme === "dark" ? theme.colors.dark[2] : "rgb(20, 61, 89)",
+      color: theme.colorScheme === "dark" ? theme.colors.dark[2] : "#FF6A00",
       marginRight: theme.spacing.sm,
     },
     linkIconShort: {
@@ -110,55 +105,108 @@ const useStyles = createStyles((theme, _params, getRef) => {
     },
   };
 });
+const permissions = JSON.parse(localStorage.getItem("permissions"));
 
 const data = [
   { link: "/", label: "Dashboard", icon: IconDashboard },
-  { link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading },
-  { link: "/orders", label: "Orders", icon: IconShoppingCart },
+  ...(permissions.some((perm) => perm.name === "dropoffs-show")
+    ? [{ link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "orders-show")
+    ? [{ link: "/orders", label: "Orders", icon: IconShoppingCart }]
+    : []),
   { link: "/shipments", label: "Shipments", icon: IconShip },
-  { link: "/wallets", label: "Wallet", icon: IconWallet },
+  { link: "/wallets", label: "Deposit Slip", icon: IconWallet },
   { link: "/users", label: "User Management", icon: IconUsers },
-  { link: "/categories", label: "Categories", icon: IconApps },
-  { link: "/products", label: "Products", icon: IconShoppingCart },
-  { link: "/productvariants", label: "Product Variant", icon: IconGeometry },
-  { link: "/warehouses", label: "Ware House", icon: IconBuildingWarehouse },
-  { link: "/regions", label: "Regions", icon: IconCurrentLocation },
-  { link: "/retailers", label: "Retailers", icon: IconBrandShopee },
-  { link: "/drivers", label: "Drivers", icon: IconUser },
-  { link: "/vehicle_types", label: "Vehicle Types", icon: IconTruck },
-  { link: "/vehicles", label: "Vehicles", icon: IconTruckDelivery },
-  {
-    link: "/distributors",
-    label: "Distributers",
-    icon: IconLayoutDistributeHorizontal,
-  },
-  { link: "/stocks", label: "Stocks", icon: IconBuildingStore },
-  { link: "/sales", label: "Sales", icon: IconUser },
-  {
-    link: "/activities",
-    label: "Activities Log",
-    icon: IconTimeline,
-  },
-  {
-    label: "Settings",
-    icon: IconSettings,
-    initiallyOpened: false,
-    links: [
-      { link: "/roles", label: "Roles" },
+  ...(permissions.some((perm) => perm.name === "categories-show")
+    ? [{ link: "/categories", label: "Categories", icon: IconApps }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "products-show")
+    ? [{ link: "/products", label: "Products", icon: IconShoppingCart }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "productvariants-view")
+    ? [
+        {
+          link: "/productvariants",
+          label: "Product Variant",
+          icon: IconGeometry,
+        },
+      ]
+    : []),
+  ...(permissions.some((perm) => perm.name === "warehouses-view")
+    ? [
+        {
+          link: "/warehouses",
+          label: "Ware House",
+          icon: IconBuildingWarehouse,
+        },
+      ]
+    : []),
+  ...(permissions.some((perm) => perm.name === "regions-show")
+    ? [{ link: "/regions", label: "Regions", icon: IconCurrentLocation }]
+    : []),
 
-      { link: "/config", label: "Configuration" },
-      { link: "/payment-types", label: "Payment Types" },
-    ],
-  },
-  {
-    label: "Feedback",
-    icon: FeedbackIcon,
-    initiallyOpened: false,
-    links: [
-      { link: "/feedbacks", label: "Feedbacks" },
-      { link: "/feedback-types", label: "Feedback Types" },
-    ],
-  },
+  ...(permissions.some((perm) => perm.name === "retailers-show")
+    ? [{ link: "/retailers", label: "Retailers", icon: IconBrandShopee }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "drivers-show")
+    ? [{ link: "/drivers", label: "Drivers", icon: IconUser }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "vehicle_types-show")
+    ? [{ link: "/vehicle_types", label: "Vehicle Types", icon: IconTruck }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "vehicles-view")
+    ? [{ link: "/vehicles", label: "Vehicles", icon: IconTruckDelivery }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "distributors-show")
+    ? [{ link: "/distributors", label: "Distributers", icon: IconApps }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "stocks-view")
+    ? [{ link: "/stocks", label: "Stocks", icon: IconBuildingStore }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "sales-show")
+    ? [{ link: "/sales", label: "Sales", icon: IconUser }]
+    : []),
+  ...(permissions.some((perm) => perm.name === "roles-view") ||
+  permissions.some((perm) => perm.name === "configs-view") ||
+  permissions.some((perm) => perm.name === "permissions-view")
+    ? [
+        {
+          label: "Settings",
+          icon: IconSettings,
+          initiallyOpened: false,
+          links: [
+            ...(permissions.some((perm) => perm.name === "roles-view")
+              ? [{ link: "/roles", label: "Roles" }]
+              : []),
+            ...(permissions.some((perm) => perm.name === "configs-view")
+              ? [{ link: "/config", label: "Configuration" }]
+              : []),
+            ...(permissions.some((perm) => perm.name === "permissions-view")
+              ? [{ link: "/payment-types", label: "Payment Types" }]
+              : []),
+          ],
+        },
+      ]
+    : []),
+  ...(permissions.some((perm) => perm.name === "feedbacks-view") ||
+  permissions.some((perm) => perm.name === "feedback-types-show")
+    ? [
+        {
+          label: "Feedback",
+          icon: FeedbackIcon,
+          initiallyOpened: false,
+          links: [
+            ...(permissions.some((perm) => perm.name === "feedbacks-view")
+              ? [{ link: "/feedbacks", label: "Feedbacks" }]
+              : []),
+            ...(permissions.some((perm) => perm.name === "feedback-types-show")
+              ? [{ link: "/feedback-types", label: "Feedback Types" }]
+              : []),
+          ],
+        },
+      ]
+    : []),
 ];
 
 const NavbarSimple = ({ opened, setOpened, setPosition }) => {
@@ -170,6 +218,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const [orderCount, setOrderCount] = useState(
     localStorage.getItem("orderCount") || 0
   );
+  console.log(JSON.parse(localStorage.getItem("permissions")));
   const [shipments, setShipments] = useState(
     localStorage.getItem("shipments") || 0
   );
@@ -224,6 +273,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const handleSectionToggle = (sectionLabel) => {
     setOpenSection(openSection === sectionLabel ? "" : sectionLabel);
   };
+  const permissions = JSON.parse(localStorage.getItem("permissions")) || []; // Get permissions
 
   const links = data.map((item, index) => (
     <React.Fragment key={index}>
@@ -327,7 +377,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                       <Badge
                         style={{
                           backgroundColor: "#FF6A00",
-                          marginLeft:"40px",
+                          marginLeft: "40px",
                           color: "#FFFFFF",
                         }}
                         size="md"
@@ -343,7 +393,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                       <Badge
                         style={{
                           backgroundColor: "#FF6A00",
-                          marginLeft:"18px",
+                          marginLeft: "18px",
                           color: "#FFFFFF",
                         }}
                         size="md"
@@ -359,7 +409,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                       <Badge
                         style={{
                           backgroundColor: "#FF6A00",
-                          marginLeft:"43px",
+                          marginLeft: "15px",
                           color: "#FFFFFF",
                         }}
                         size="md"
@@ -375,7 +425,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                       <Badge
                         style={{
                           backgroundColor: "#FF6A00",
-                          marginLeft:"26px",
+                          marginLeft: "26px",
                           color: "#FFFFFF",
                         }}
                         size="md"

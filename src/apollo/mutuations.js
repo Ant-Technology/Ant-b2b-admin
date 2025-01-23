@@ -4,6 +4,9 @@ export const LOGIN = gql`
   mutation ($email: String!, $password: String!) {
     login(input: { email: $email, password: $password }) {
       token
+      permissions {
+        name
+      }
     }
   }
 `;
@@ -954,7 +957,7 @@ export const UPDATE_USER = gql`
       input: {
         name: $name
         password: $password
-        phone:$phone
+        phone: $phone
         password_confirmation: $password_confirmation
         profile_image: $profile_image
       }

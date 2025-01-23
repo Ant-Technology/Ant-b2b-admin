@@ -6,6 +6,7 @@ import {
   TextInput,
   Stack,
   Checkbox,
+  Accordion,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
@@ -13,23 +14,26 @@ import { showNotification } from "@mantine/notifications";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import { useState, useEffect } from "react";
-import { API} from "utiles/url";
+import { API } from "utiles/url";
 
 export const RoleAddModal = ({ setOpened, fetchData }) => {
   const [loading, setLoading] = useState(false);
   const [checkedPermissions, setCheckedPermissions] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const[allPermissions, setAllPermissions] = useState([])
+  const [allPermissions, setAllPermissions] = useState({});
   const form = useForm({
     initialValues: {
       name: "",
-      permissions: [], // Array to store selected permissions
+      permissions: [],
     },
   });
-useEffect(() => {
+
+  useEffect(() => {
     fetchDataPermissions();
   }, []);
+
   const { height } = useViewportSize();
+
   const fetchDataPermissions = async () => {
     setLoading(true);
     try {
@@ -42,7 +46,6 @@ useEffect(() => {
       const response = await axios.get(`${API}/permissions`, config);
       if (response.data) {
         setAllPermissions(response.data.permissions);
-        console.log(response.data.permissions)
         setLoading(false);
       }
     } catch (error) {
@@ -61,12 +64,7 @@ useEffect(() => {
       };
       const formData = new FormData();
       formData.append("name", form.getInputProps("name").value);
-
-      // Append permissions array to formData
-      formData.append(
-        "permissions",
-        JSON.stringify(checkedPermissions) // Use checkedPermissions state here
-      );
+      formData.append("permissions", JSON.stringify(checkedPermissions));
 
       const { data } = await axios.post(`${API}/roles`, formData, config);
       if (data) {
@@ -84,9 +82,7 @@ useEffect(() => {
       showNotification({
         color: "red",
         title: "Error",
-        message: error?.response?.data?.message
-          ? error.response.data.message
-          : "Role Not Created!",
+        message: error?.response?.data?.message || "Role Not Created!",
       });
     }
   };
@@ -96,16 +92,21 @@ useEffect(() => {
       setCheckedPermissions([]);
       form.setFieldValue("permissions", []);
     } else {
-      setCheckedPermissions(allPermissions);
-      form.setFieldValue("permissions", allPermissions);
+      const allPerms = Object.values(allPermissions)
+        .flat()
+        .map((p) => p.name);
+      setCheckedPermissions(allPerms);
+      form.setFieldValue("permissions", allPerms);
     }
     setIsAllChecked(!isAllChecked);
   };
 
   useEffect(() => {
-    // Update isAllChecked based on checkedPermissions
+    const allPerms = Object.values(allPermissions)
+      .flat()
+      .map((p) => p.name);
     setIsAllChecked(
-      allPermissions.length > 0 && checkedPermissions.length === allPermissions.length
+      allPerms.length > 0 && checkedPermissions.length === allPerms.length
     );
   }, [checkedPermissions]);
 
@@ -130,39 +131,52 @@ useEffect(() => {
                 />
               </Grid.Col>
             </Grid>
-
-            {/* Display Permissions in 4 columns */}
-            <Grid>
-              <Grid.Col span={12}>
-                <Checkbox.Group
-                  label="Permissions"
-                  value={checkedPermissions} // Set value to managed state
-                  onChange={(value) => {
-                    setCheckedPermissions(value); // Update state on change
-                    form.setFieldValue("permissions", value);
-                  }}
-                >
-                  <Grid>
-                    {allPermissions.map((permission) => (
-                      <Grid.Col span={3} key={permission}>
-                        <Checkbox value={permission} label={permission} />
-                      </Grid.Col>
-                    ))}
-                  </Grid>
-                </Checkbox.Group>
-                <Button onClick={handleToggleAll}
-                 style={{
-                  width: "8%",
-                  marginTop: "15px",
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-                fullWidth
-                >
-                  {isAllChecked ? "Uncheck All" : "Check All"}
-                </Button>
-              </Grid.Col>
+            <Grid gutter="md">
+              {Object.entries(allPermissions).map(
+                ([group, permissions], index) => (
+                  <Grid.Col span={3} key={group}>
+                    <Accordion variant="contained" multiple>
+                      <Accordion.Item value={group}>
+                        <Accordion.Control>{group}</Accordion.Control>
+                        <Accordion.Panel>
+                          <Checkbox.Group
+                            value={checkedPermissions}
+                            onChange={(value) => {
+                              setCheckedPermissions(value);
+                              form.setFieldValue("permissions", value);
+                            }}
+                          >
+                            <Grid>
+                              {permissions.map((perm) => (
+                                <Grid.Col span={12} key={perm.name}>
+                                  <Checkbox
+                                    value={perm.name}
+                                    label={perm.display_name}
+                                  />
+                                </Grid.Col>
+                              ))}
+                            </Grid>
+                          </Checkbox.Group>
+                        </Accordion.Panel>
+                      </Accordion.Item>
+                    </Accordion>
+                  </Grid.Col>
+                )
+              )}
             </Grid>
+
+            <Button
+              onClick={handleToggleAll}
+              style={{
+                width: "8%",
+                marginTop: "15px",
+                backgroundColor: "#FF6A00",
+                color: "#FFFFFF",
+              }}
+              fullWidth
+            >
+              {isAllChecked ? "Uncheck All" : "Check All"}
+            </Button>
 
             <Grid>
               <Grid.Col span={4}>
