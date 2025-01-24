@@ -105,7 +105,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
     },
   };
 });
-const permissions = JSON.parse(localStorage.getItem("permissions"));
+const permissions = JSON.parse(localStorage.getItem("permissions")) || [];
 
 const data = [
   { link: "/", label: "Dashboard", icon: IconDashboard },
