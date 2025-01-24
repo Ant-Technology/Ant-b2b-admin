@@ -105,26 +105,26 @@ const useStyles = createStyles((theme, _params, getRef) => {
     },
   };
 });
-const permissions = JSON.parse(localStorage.getItem("permissions"));
+const permissions = JSON.parse(localStorage.getItem("permissions")) || [];
 
 const data = [
   { link: "/", label: "Dashboard", icon: IconDashboard },
-  ...(permissions.some((perm) => perm.name === "dropoffs-show")
+  ...(permissions?.some((perm) => perm.name === "dropoffs-show")
     ? [{ link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading }]
     : []),
-  ...(permissions.some((perm) => perm.name === "orders-show")
+  ...(permissions?.some((perm) => perm.name === "orders-show")
     ? [{ link: "/orders", label: "Orders", icon: IconShoppingCart }]
     : []),
   { link: "/shipments", label: "Shipments", icon: IconShip },
   { link: "/wallets", label: "Deposit Slip", icon: IconWallet },
   { link: "/users", label: "User Management", icon: IconUsers },
-  ...(permissions.some((perm) => perm.name === "categories-show")
+  ...(permissions?.some((perm) => perm.name === "categories-show")
     ? [{ link: "/categories", label: "Categories", icon: IconApps }]
     : []),
   ...(permissions.some((perm) => perm.name === "products-show")
     ? [{ link: "/products", label: "Products", icon: IconShoppingCart }]
     : []),
-  ...(permissions.some((perm) => perm.name === "productvariants-view")
+  ...(permissions?.some((perm) => perm.name === "productvariants-view")
     ? [
         {
           link: "/productvariants",
@@ -133,7 +133,7 @@ const data = [
         },
       ]
     : []),
-  ...(permissions.some((perm) => perm.name === "warehouses-view")
+  ...(permissions?.some((perm) => perm.name === "warehouses-view")
     ? [
         {
           link: "/warehouses",
@@ -142,34 +142,34 @@ const data = [
         },
       ]
     : []),
-  ...(permissions.some((perm) => perm.name === "regions-show")
+  ...(permissions?.some((perm) => perm.name === "regions-show")
     ? [{ link: "/regions", label: "Regions", icon: IconCurrentLocation }]
     : []),
 
-  ...(permissions.some((perm) => perm.name === "retailers-show")
+  ...(permissions?.some((perm) => perm.name === "retailers-show")
     ? [{ link: "/retailers", label: "Retailers", icon: IconBrandShopee }]
     : []),
-  ...(permissions.some((perm) => perm.name === "drivers-show")
+  ...(permissions?.some((perm) => perm.name === "drivers-show")
     ? [{ link: "/drivers", label: "Drivers", icon: IconUser }]
     : []),
-  ...(permissions.some((perm) => perm.name === "vehicle_types-show")
+  ...(permissions?.some((perm) => perm.name === "vehicle_types-show")
     ? [{ link: "/vehicle_types", label: "Vehicle Types", icon: IconTruck }]
     : []),
-  ...(permissions.some((perm) => perm.name === "vehicles-view")
+  ...(permissions?.some((perm) => perm.name === "vehicles-view")
     ? [{ link: "/vehicles", label: "Vehicles", icon: IconTruckDelivery }]
     : []),
-  ...(permissions.some((perm) => perm.name === "distributors-show")
+  ...(permissions?.some((perm) => perm.name === "distributors-show")
     ? [{ link: "/distributors", label: "Distributers", icon: IconApps }]
     : []),
-  ...(permissions.some((perm) => perm.name === "stocks-view")
+  ...(permissions?.some((perm) => perm.name === "stocks-view")
     ? [{ link: "/stocks", label: "Stocks", icon: IconBuildingStore }]
     : []),
-  ...(permissions.some((perm) => perm.name === "sales-show")
+  ...(permissions?.some((perm) => perm.name === "sales-show")
     ? [{ link: "/sales", label: "Sales", icon: IconUser }]
     : []),
-  ...(permissions.some((perm) => perm.name === "roles-view") ||
-  permissions.some((perm) => perm.name === "configs-view") ||
-  permissions.some((perm) => perm.name === "permissions-view")
+  ...(permissions?.some((perm) => perm.name === "roles-view") ||
+  permissions?.some((perm) => perm.name === "configs-view") ||
+  permissions?.some((perm) => perm.name === "permissions-view")
     ? [
         {
           label: "Settings",
@@ -189,8 +189,8 @@ const data = [
         },
       ]
     : []),
-  ...(permissions.some((perm) => perm.name === "feedbacks-view") ||
-  permissions.some((perm) => perm.name === "feedback-types-show")
+  ...(permissions?.some((perm) => perm.name === "feedbacks-view") ||
+  permissions?.some((perm) => perm.name === "feedback-types-show")
     ? [
         {
           label: "Feedback",
