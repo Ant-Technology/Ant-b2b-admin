@@ -105,109 +105,8 @@ const useStyles = createStyles((theme, _params, getRef) => {
     },
   };
 });
-const permissions = JSON.parse(localStorage.getItem("permissions")) || [];
 
-const data = [
-  { link: "/", label: "Dashboard", icon: IconDashboard },
-  ...(permissions?.some((perm) => perm.name === "dropoffs-show")
-    ? [{ link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading }]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "orders-show")
-    ? [{ link: "/orders", label: "Orders", icon: IconShoppingCart }]
-    : []),
-  { link: "/shipments", label: "Shipments", icon: IconShip },
-  { link: "/wallets", label: "Deposit Slip", icon: IconWallet },
-  { link: "/users", label: "User Management", icon: IconUsers },
-  ...(permissions?.some((perm) => perm.name === "categories-show")
-    ? [{ link: "/categories", label: "Categories", icon: IconApps }]
-    : []),
-  ...(permissions.some((perm) => perm.name === "products-show")
-    ? [{ link: "/products", label: "Products", icon: IconShoppingCart }]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "productvariants-view")
-    ? [
-        {
-          link: "/productvariants",
-          label: "Product Variant",
-          icon: IconGeometry,
-        },
-      ]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "warehouses-view")
-    ? [
-        {
-          link: "/warehouses",
-          label: "Ware House",
-          icon: IconBuildingWarehouse,
-        },
-      ]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "regions-show")
-    ? [{ link: "/regions", label: "Regions", icon: IconCurrentLocation }]
-    : []),
 
-  ...(permissions?.some((perm) => perm.name === "retailers-show")
-    ? [{ link: "/retailers", label: "Retailers", icon: IconBrandShopee }]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "drivers-show")
-    ? [{ link: "/drivers", label: "Drivers", icon: IconUser }]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "vehicle_types-show")
-    ? [{ link: "/vehicle_types", label: "Vehicle Types", icon: IconTruck }]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "vehicles-view")
-    ? [{ link: "/vehicles", label: "Vehicles", icon: IconTruckDelivery }]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "distributors-show")
-    ? [{ link: "/distributors", label: "Distributers", icon: IconApps }]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "stocks-view")
-    ? [{ link: "/stocks", label: "Stocks", icon: IconBuildingStore }]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "sales-show")
-    ? [{ link: "/sales", label: "Sales", icon: IconUser }]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "roles-view") ||
-  permissions?.some((perm) => perm.name === "configs-view") ||
-  permissions?.some((perm) => perm.name === "permissions-view")
-    ? [
-        {
-          label: "Settings",
-          icon: IconSettings,
-          initiallyOpened: false,
-          links: [
-            ...(permissions.some((perm) => perm.name === "roles-view")
-              ? [{ link: "/roles", label: "Roles" }]
-              : []),
-            ...(permissions.some((perm) => perm.name === "configs-view")
-              ? [{ link: "/config", label: "Configuration" }]
-              : []),
-            ...(permissions.some((perm) => perm.name === "permissions-view")
-              ? [{ link: "/payment-types", label: "Payment Types" }]
-              : []),
-          ],
-        },
-      ]
-    : []),
-  ...(permissions?.some((perm) => perm.name === "feedbacks-view") ||
-  permissions?.some((perm) => perm.name === "feedback-types-show")
-    ? [
-        {
-          label: "Feedback",
-          icon: FeedbackIcon,
-          initiallyOpened: false,
-          links: [
-            ...(permissions.some((perm) => perm.name === "feedbacks-view")
-              ? [{ link: "/feedbacks", label: "Feedbacks" }]
-              : []),
-            ...(permissions.some((perm) => perm.name === "feedback-types-show")
-              ? [{ link: "/feedback-types", label: "Feedback Types" }]
-              : []),
-          ],
-        },
-      ]
-    : []),
-];
 
 const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const { width } = useViewportSize();
@@ -218,7 +117,6 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const [orderCount, setOrderCount] = useState(
     localStorage.getItem("orderCount") || 0
   );
-  console.log(JSON.parse(localStorage.getItem("permissions")));
   const [shipments, setShipments] = useState(
     localStorage.getItem("shipments") || 0
   );
@@ -231,7 +129,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
 
   const navigate = useNavigate();
   const [signout] = useMutation(LOGOUT);
-
+  const [permissions, setPermissions] = useState([]);
   const [collapseOpened, setCollapseOpened] = useState(false);
 
   useEffect(() => {
@@ -273,8 +171,121 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const handleSectionToggle = (sectionLabel) => {
     setOpenSection(openSection === sectionLabel ? "" : sectionLabel);
   };
-  const permissions = JSON.parse(localStorage.getItem("permissions")) || []; // Get permissions
-
+  useEffect(() => {
+    const storedPermissions = JSON.parse(localStorage.getItem("permissions")) || [];
+    setPermissions(storedPermissions);
+  }, []);
+  if (permissions.length === 0) {
+    return <div>Loading...</div>; // Show loading state
+  }
+  let data = [];
+  if (permissions.length > 0) {
+    data.push({ link: "/", label: "Dashboard", icon: IconDashboard });
+  
+    if (permissions.some((perm) => perm.name === "dropoffs-show")) {
+      data.push({ link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading });
+    }
+  
+    if (permissions.some((perm) => perm.name === "orders-show")) {
+      data.push({ link: "/orders", label: "Orders", icon: IconShoppingCart });
+    }
+  
+    data.push({ link: "/shipments", label: "Shipments", icon: IconShip });
+    data.push({ link: "/wallets", label: "Deposit Slip", icon: IconWallet });
+    data.push({ link: "/users", label: "User Management", icon: IconUsers });
+  
+    if (permissions.some((perm) => perm.name === "categories-view")) {
+      data.push({ link: "/categories", label: "Categories", icon: IconApps });
+    }
+  
+    if (permissions.some((perm) => perm.name === "products-show")) {
+      data.push({ link: "/products", label: "Products", icon: IconShoppingCart });
+    }
+  
+    if (permissions.some((perm) => perm.name === "productvariants-view")) {
+      data.push({ link: "/productvariants", label: "Product Variant", icon: IconGeometry });
+    }
+  
+    if (permissions.some((perm) => perm.name === "warehouses-view")) {
+      data.push({ link: "/warehouses", label: "Ware House", icon: IconBuildingWarehouse });
+    }
+  
+    if (permissions.some((perm) => perm.name === "regions-show")) {
+      data.push({ link: "/regions", label: "Regions", icon: IconCurrentLocation });
+    }
+  
+    if (permissions.some((perm) => perm.name === "retailers-show")) {
+      data.push({ link: "/retailers", label: "Retailers", icon: IconBrandShopee });
+    }
+  
+    if (permissions.some((perm) => perm.name === "drivers-show")) {
+      data.push({ link: "/drivers", label: "Drivers", icon: IconUser });
+    }
+  
+    if (permissions.some((perm) => perm.name === "vehicle_types-show")) {
+      data.push({ link: "/vehicle_types", label: "Vehicle Types", icon: IconTruck });
+    }
+  
+    if (permissions.some((perm) => perm.name === "vehicles-view")) {
+      data.push({ link: "/vehicles", label: "Vehicles", icon: IconTruckDelivery });
+    }
+  
+    if (permissions.some((perm) => perm.name === "distributors-show")) {
+      data.push({ link: "/distributors", label: "Distributers", icon: IconApps });
+    }
+  
+    if (permissions.some((perm) => perm.name === "stocks-view")) {
+      data.push({ link: "/stocks", label: "Stocks", icon: IconBuildingStore });
+    }
+  
+    if (permissions.some((perm) => perm.name === "sales-show")) {
+      data.push({ link: "/sales", label: "Sales", icon: IconUser });
+    }
+  
+    if (
+      permissions.some((perm) => perm.name === "roles-view") ||
+      permissions.some((perm) => perm.name === "configs-view") ||
+      permissions.some((perm) => perm.name === "permissions-view")
+    ) {
+      data.push({
+        label: "Settings",
+        icon: IconSettings,
+        initiallyOpened: false,
+        links: [
+          ...(permissions.some((perm) => perm.name === "roles-view")
+            ? [{ link: "/roles", label: "Roles" }]
+            : []),
+          ...(permissions.some((perm) => perm.name === "configs-view")
+            ? [{ link: "/config", label: "Configuration" }]
+            : []),
+          ...(permissions.some((perm) => perm.name === "permissions-view")
+            ? [{ link: "/payment-types", label: "Payment Types" }]
+            : []),
+        ],
+      });
+    }
+  
+    if (
+      permissions.some((perm) => perm.name === "feedbacks-view") ||
+      permissions.some((perm) => perm.name === "feedback-types-show")
+    ) {
+      data.push({
+        label: "Feedback",
+        icon: FeedbackIcon,
+        initiallyOpened: false,
+        links: [
+          ...(permissions.some((perm) => perm.name === "feedbacks-view")
+            ? [{ link: "/feedbacks", label: "Feedbacks" }]
+            : []),
+          ...(permissions.some((perm) => perm.name === "feedback-types-show")
+            ? [{ link: "/feedback-types", label: "Feedback Types" }]
+            : []),
+        ],
+      });
+    }
+  }
+  
+  
   const links = data.map((item, index) => (
     <React.Fragment key={index}>
       {item.links ? (

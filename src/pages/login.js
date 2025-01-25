@@ -70,8 +70,16 @@ const Login = () => {
       onCompleted(data) {
         if (data.login.token) {
           localStorage.setItem("auth_token", data.login.token);
-          localStorage.setItem("permissions", JSON.stringify(data.login.permissions))
+          localStorage.setItem(
+            "permissions",
+            JSON.stringify(data.login.permissions)
+          );
           const tok = localStorage.getItem("auth_token");
+          let permissions = localStorage.setItem(
+            "permissions",
+            JSON.stringify(data.login.permissions)
+          );
+
           authdata({
             onCompleted(data) {
               console.log("ayuuuuu", data);
