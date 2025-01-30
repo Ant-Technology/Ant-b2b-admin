@@ -39,77 +39,92 @@ const StatusDropdown = ({ onStatusChange }) => {
     }
   };
 
-  const statuses = [
-    { value: "PENDING", label: "Pending", color: "#FF6A00" },
-    { value: "cancelled", label: "Cancelled", color: "green" },
-    { value: "delivered", label: "Delivered", color: "blue" },
-    { value: "shipped", label: "Shipped", color: "#00688B" },
-  ];
-
   return (
-    <Group spacing="sm" position="left">
-      <Popover
-        opened={opened}
-        onClose={() => setOpened(false)}
-        position="bottom"
-        withArrow
+    <Group spacing="sm" position="left" style={{ paddingBottom: 20 }}>
+      <Button
+        color="orange"
+        radius="md"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            backgroundColor: "#FF6A00",
+            width: "120px",
+            padding: "2px 5px",
+          },
+        }}
       >
-        <Popover.Target>
-          <Button
-            onClick={() => setOpened((o) => !o)}
-            style={{
-              width: "160px",
-              justifyContent: "space-between",
-              display: "flex",
-              fontWeight: "bold",
-              fontSize: "14px",
-            }}
-          >
-            {selectedStatus
-              ? statuses.find((status) => status.value === selectedStatus)
-                  ?.label
-              : "Shipment Status"}
-          </Button>
-        </Popover.Target>
-        <Popover.Dropdown>
-          {loading ? (
-            <Loader size="sm" />
-          ) : (
-            statuses.map((status) => (
-              <div
-                key={status.value}
-                onClick={() => handleStatusChange(status.value)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "8px 12px",
-                  cursor: "pointer",
-                  backgroundColor:
-                    selectedStatus === status.value ? "#f0f0f0" : "transparent",
-                }}
-              >
-                <Text
-                  style={{
-                    color: status.color,
-                    flexGrow: 1,
-                    textAlign: "left",
-                  }}
-                >
-                  {status.label}
-                </Text>
-                <Badge
-                  color={status.color}
-                  variant="filled"
-                  size="sm"
-                  style={{ marginLeft: "6px" }}
-                >
-                  {data?.[status.value] > 0 ? data?.[status.value] : 0}
-                </Badge>
-              </div>
-            ))
-          )}
-        </Popover.Dropdown>
-      </Popover>
+        Pending
+        <Badge
+          color="orange"
+          variant="filled"
+          size="sm"
+          style={{ backgroundColor: "#FF6A00", marginLeft: 6 }}
+        >
+          {data?.pending > 0 ? data?.pending : 0}
+        </Badge>
+      </Button>
+      <Button
+        color="green"
+        radius="md"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "120px",
+            padding: "2px 5px",
+          },
+        }}
+      >
+        Cancelled
+        <Badge
+          color="green"
+          variant="filled"
+          size="sm"
+          style={{ marginLeft: 6 }}
+        >
+          {data?.cancelled > 0 ? data?.cancelled : 0}
+        </Badge>
+      </Button>
+      <Button
+        color="blue"
+        radius="md"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "120px",
+            padding: "2px 5px",
+          },
+        }}
+      >
+        Delivered
+        <Badge
+          color="blue"
+          variant="filled"
+          size="sm"
+          style={{ marginLeft: 6 }}
+        >
+          {data?.delivered > 0 ? data?.delivered : 0}
+        </Badge>
+      </Button>
+      <Button
+        color="#00688B"
+        radius="md"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            backgroundColor: "#00688B",
+            width: "120px",
+            padding: "2px 5px",
+          },
+        }}>
+             Shipped
+        <Badge
+          variant="filled"
+          size="sm"
+          style={{ backgroundColor: "#00688B", marginLeft: 6 }}
+        >
+         {data?.shipped > 0 ? data?.shipped : 0}
+        </Badge>
+        </Button>
     </Group>
   );
 };

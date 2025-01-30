@@ -39,6 +39,7 @@ const StockAddModal = ({
       warehouse: {
         connect: "",
       },
+      minimum_stock_level: 0,
     },
   });
 
@@ -115,6 +116,7 @@ const StockAddModal = ({
         quantity: parseInt(form.values.quantity),
         product_sku: parseInt(form.values.product_sku.connect),
         warehouse: parseInt(form.values.warehouse.connect),
+        minimum_stock_level:parseInt(form.values.minimum_stock_level)
       },
       onCompleted(data) {
         showNotification({
@@ -126,7 +128,7 @@ const StockAddModal = ({
         setOpened(false);
       },
       onError(error) {
-        setOpened(false);
+        setOpened(true);
         showNotification({
           color: "red",
           title: "Error",
@@ -176,8 +178,21 @@ const StockAddModal = ({
                   placeholder="Pick a product sku"
                   searchable
                 />
-                </Grid.Col>
-                <Grid.Col span={6}>
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  type="number"
+                  label="Minimum Stock Level"
+                  placeholder="Minimum Stock Level"
+                  {...form.getInputProps("minimum_stock_level")}
+                  styles={{
+                    input: {
+                      border: "1px solid red", // Set the border color to red
+                      backgroundColor: "rgba(255, 0, 0, 0.1)", // Light red background for warning
+                    },
+                  }}
+                />
                 <Select
                   data={warehousesDropDownData}
                   value={form
@@ -192,20 +207,20 @@ const StockAddModal = ({
             </Grid>
 
             <Grid>
-            <Grid.Col span={6}>
-              <Button
-                style={{
-                  width: "25%",
-                  marginTop: "15px",
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-                type="submit"
-                fullWidth
-              >
-                Submit
-              </Button>
-            </Grid.Col>
+              <Grid.Col span={6}>
+                <Button
+                  style={{
+                    width: "25%",
+                    marginTop: "15px",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
+                  type="submit"
+                  fullWidth
+                >
+                  Submit
+                </Button>
+              </Grid.Col>
             </Grid>
           </Stack>
         </form>

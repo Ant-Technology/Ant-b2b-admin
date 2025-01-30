@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Group, Popover, Button, Loader } from "@mantine/core";
+import {
+  Badge,
+  Group,
+  Popover,
+  Button,
+  Loader,
+  LoadingOverlay,
+} from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
 import { IconChevronDown } from "@tabler/icons-react";
+import { customLoader } from "components/utilities/loader";
 
-export default function StatsGrid({ onCardClick }) {
+export default function StatsGrid({ onCardClick, handelSearch, clearFilter }) {
   const [data, setData] = useState();
   const [status, setStatus] = useState(null);
   const [opened, setOpened] = useState(false);
@@ -33,109 +41,167 @@ export default function StatsGrid({ onCardClick }) {
       console.error("Error fetching data:", error);
     }
   };
-
-  const handleStatusChange = (value) => {
-    setStatus(value);
-    setOpened(false);
-    if (onCardClick) {
-      onCardClick(value);
-    }
-    console.log("Selected Value:", value);
+  const handelOnClick = (status) => {
+    onCardClick(status);
+    handelSearch(null);
   };
-  const options = [
-    {
-      value: "CANCELED",
-      label: "Cancelled",
-      color: "red", // Updated to red
-    },
-    {
-      value: "DELIVERED",
-      label: "Delivered",
-      color: "green", // Updated to green
-    },
-    {
-      value: "ORDERED",
-      label: "Ordered",
-      color: "blue", // Updated to blue
-    },
-    {
-      value: "BACKORDERED",
-      label: "Back Ordered",
-      color: "orange", // Updated to orange
-    },
-    {
-      value: "SHIPPED",
-      label: "Shipped",
-      color: "teal", // Updated to teal
-    },
-  ];
-
   return (
-    <Group spacing="xs" position="left">
-      <Popover
-        opened={opened}
-        onClose={() => setOpened(false)}
-        position="bottom"
-        withArrow
+    <Group spacing="xs" position="left" style={{ paddingBottom: 16 }}>
+      <LoadingOverlay
+        visible={loading}
+        color="blue"
+        overlayBlur={2}
+        loader={customLoader}
+      />
+      {/* Cancelled Button */}
+      <Button
+        onClick={() => handelOnClick("CANCELED")}
+        color="green"
+        radius="md"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "120px",
+            padding: "2px 5px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
       >
-        <Popover.Target>
-          <Button
-            onClick={() => setOpened((o) => !o)}
-            style={{
-              width: "160px",
-              justifyContent: "space-between",
-              display: "flex",
-              fontWeight: "bold",
-              fontSize: "14px",
-            }}
-          >
-            {status || "Order Status"}
-            <IconChevronDown size={16} style={{ marginLeft: "8px" }} />
-          </Button>
-        </Popover.Target>
-        <Popover.Dropdown>
-          {loading ? (
-            <Loader size="sm" />
-          ) : (
-            options.map((option) => (
-              <div
-                key={option.value}
-                onClick={() => handleStatusChange(option.value)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "8px 12px",
-                  cursor: "pointer",
-                  backgroundColor:
-                    status === option.value ? "#f0f0f0" : "transparent",
-                  width: "100%",
-                }}
-              >
-                <span
-                  style={{
-                    color: option.color,
-                    flexGrow: 1, // Pushes the Badge to the right
-                    textAlign: "left",
-                  }}
-                >
-                  {option.label}
-                </span>
-                <Badge
-                  color={option.color}
-                  variant="filled"
-                  size="xs"
-                  style={{
-                    marginLeft: "25px",
-                    textAlign: "right", // Ensures alignment to the right
-                  }}
-                >
-                  {data?.[option.value] > 0 ? data?.[option.value] : 0}
-                </Badge>
-              </div>
-            ))
-          )}
-        </Popover.Dropdown>
-      </Popover>
+        Cancelled
+        <Badge
+          color="green"
+          variant="filled"
+          size="xs"
+          style={{ marginLeft: 4, fontSize: "12px" }}
+        >
+          {data?.CANCELED > 0 ? data?.CANCELED : 0}
+        </Badge>
+      </Button>
+      <Button
+        onClick={() => handelOnClick("DELIVERED")}
+        color="blue"
+        radius="md"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "120px",
+            padding: "2px 5px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
+      >
+        Delivered
+        <Badge
+          color="blue"
+          variant="filled"
+          size="xs"
+          style={{ marginLeft: 4, fontSize: "12px" }}
+        >
+          {data?.DELIVERED > 0 ? data?.DELIVERED : 0}
+        </Badge>
+      </Button>
+      <Button
+        onClick={() => handelOnClick("ORDERED")}
+        color="blue"
+        radius="md"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            width: "120px",
+            padding: "2px 5px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
+      >
+        Ordered
+        <Badge
+          color="blue"
+          variant="filled"
+          size="xs"
+          style={{ marginLeft: 4, fontSize: "12px" }}
+        >
+          {data?.ORDERED > 0 ? data?.ORDERED : 0}
+        </Badge>
+      </Button>
+      <Button
+        onClick={() => handelOnClick("BACKORDERED")}
+        color="purple"
+        radius="md"
+        styles={{
+          root: {
+            backgroundColor: "#225F4F",
+            fontWeight: "bold",
+            width: "130px",
+            padding: "2px 5px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
+      >
+        Back Ordered
+        <Badge
+          color="purple"
+          variant="filled"
+          size="xs"
+          style={{
+            backgroundColor: "#225F4F",
+            marginLeft: 4,
+            fontSize: "12px",
+          }}
+        >
+          {data?.BACKORDERED > 0 ? data?.BACKORDERED : 0}
+        </Badge>
+      </Button>
+      <Button
+        onClick={() => handelOnClick("SHIPPED")}
+        radius="md"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            backgroundColor: "#00688B",
+            width: "120px",
+            padding: "2px 5px",
+          },
+          label: {
+            fontSize: "14px",
+          },
+        }}
+      >
+        Shipped
+        <Badge
+          variant="filled"
+          size="xs"
+          style={{
+            backgroundColor: "#00688B",
+            marginLeft: 4,
+            fontSize: "12px",
+          }}
+        >
+          {data?.SHIPPED > 0 ? data?.SHIPPED : 0}
+        </Badge>
+      </Button>
+      <Button
+        color="gray"
+        onClick={clearFilter}
+        radius="md"
+        styles={{
+          root: {
+            fontWeight: "bold",
+            backgroundColor: "#808080", // Neutral gray color
+            width: "60px",
+            padding: "2px 5px",
+          },
+        }}
+      >
+        All
+      </Button>
     </Group>
   );
 }

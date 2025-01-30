@@ -106,8 +106,6 @@ const useStyles = createStyles((theme, _params, getRef) => {
   };
 });
 
-
-
 const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const { width } = useViewportSize();
   const { classes, cx, theme } = useStyles();
@@ -172,7 +170,8 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
     setOpenSection(openSection === sectionLabel ? "" : sectionLabel);
   };
   useEffect(() => {
-    const storedPermissions = JSON.parse(localStorage.getItem("permissions")) || [];
+    const storedPermissions =
+      JSON.parse(localStorage.getItem("permissions")) || [];
     setPermissions(storedPermissions);
   }, []);
   if (permissions.length === 0) {
@@ -181,67 +180,107 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   let data = [];
   if (permissions.length > 0) {
     data.push({ link: "/", label: "Dashboard", icon: IconDashboard });
-  
-    if (permissions.some((perm) => perm.name === "dropoffs-show")) {
-      data.push({ link: "/dropoffs", label: "Drop Offs", icon: IconTruckLoading });
+
+    if (permissions.some((perm) => perm.name === "dropoffs-view")) {
+      data.push({
+        link: "/dropoffs",
+        label: "Drop Offs",
+        icon: IconTruckLoading,
+      });
     }
-  
-    if (permissions.some((perm) => perm.name === "orders-show")) {
+
+    if (permissions.some((perm) => perm.name === "orders-view")) {
       data.push({ link: "/orders", label: "Orders", icon: IconShoppingCart });
     }
-  
-    data.push({ link: "/shipments", label: "Shipments", icon: IconShip });
-    data.push({ link: "/wallets", label: "Deposit Slip", icon: IconWallet });
-    data.push({ link: "/users", label: "User Management", icon: IconUsers });
-  
+    if (permissions.some((perm) => perm.name === "shipments-view")) {
+      data.push({ link: "/shipments", label: "Shipments", icon: IconShip });
+    }
+    if (permissions.some((perm) => perm.name === "users-view")) {
+      data.push({ link: "/users", label: "User Management", icon: IconUsers });
+    }
+    if (permissions.some((perm) => perm.name === "wallets-view")) {
+      data.push({ link: "/wallets", label: "Deposit Slip", icon: IconWallet });
+    }
     if (permissions.some((perm) => perm.name === "categories-view")) {
       data.push({ link: "/categories", label: "Categories", icon: IconApps });
     }
-  
-    if (permissions.some((perm) => perm.name === "products-show")) {
-      data.push({ link: "/products", label: "Products", icon: IconShoppingCart });
+
+    if (permissions.some((perm) => perm.name === "products-view")) {
+      data.push({
+        link: "/products",
+        label: "Products",
+        icon: IconShoppingCart,
+      });
     }
-  
+
     if (permissions.some((perm) => perm.name === "productvariants-view")) {
-      data.push({ link: "/productvariants", label: "Product Variant", icon: IconGeometry });
+      data.push({
+        link: "/productvariants",
+        label: "Product Variant",
+        icon: IconGeometry,
+      });
     }
-  
+
     if (permissions.some((perm) => perm.name === "warehouses-view")) {
-      data.push({ link: "/warehouses", label: "Ware House", icon: IconBuildingWarehouse });
+      data.push({
+        link: "/warehouses",
+        label: "Ware House",
+        icon: IconBuildingWarehouse,
+      });
     }
-  
-    if (permissions.some((perm) => perm.name === "regions-show")) {
-      data.push({ link: "/regions", label: "Regions", icon: IconCurrentLocation });
+
+    if (permissions.some((perm) => perm.name === "regions-view")) {
+      data.push({
+        link: "/regions",
+        label: "Regions",
+        icon: IconCurrentLocation,
+      });
     }
-  
-    if (permissions.some((perm) => perm.name === "retailers-show")) {
-      data.push({ link: "/retailers", label: "Retailers", icon: IconBrandShopee });
+
+    if (permissions.some((perm) => perm.name === "retailers-view")) {
+      data.push({
+        link: "/retailers",
+        label: "Retailers",
+        icon: IconBrandShopee,
+      });
     }
-  
-    if (permissions.some((perm) => perm.name === "drivers-show")) {
+
+    if (permissions.some((perm) => perm.name === "drivers-view")) {
       data.push({ link: "/drivers", label: "Drivers", icon: IconUser });
     }
-  
-    if (permissions.some((perm) => perm.name === "vehicle_types-show")) {
-      data.push({ link: "/vehicle_types", label: "Vehicle Types", icon: IconTruck });
+
+    if (permissions.some((perm) => perm.name === "vehicle_types-view")) {
+      data.push({
+        link: "/vehicle_types",
+        label: "Vehicle Types",
+        icon: IconTruck,
+      });
     }
-  
+
     if (permissions.some((perm) => perm.name === "vehicles-view")) {
-      data.push({ link: "/vehicles", label: "Vehicles", icon: IconTruckDelivery });
+      data.push({
+        link: "/vehicles",
+        label: "Vehicles",
+        icon: IconTruckDelivery,
+      });
     }
-  
-    if (permissions.some((perm) => perm.name === "distributors-show")) {
-      data.push({ link: "/distributors", label: "Distributers", icon: IconApps });
+
+    if (permissions.some((perm) => perm.name === "distributors-view")) {
+      data.push({
+        link: "/distributors",
+        label: "Distributers",
+        icon: IconApps,
+      });
     }
-  
+
     if (permissions.some((perm) => perm.name === "stocks-view")) {
       data.push({ link: "/stocks", label: "Stocks", icon: IconBuildingStore });
     }
-  
+
     if (permissions.some((perm) => perm.name === "sales-show")) {
       data.push({ link: "/sales", label: "Sales", icon: IconUser });
     }
-  
+
     if (
       permissions.some((perm) => perm.name === "roles-view") ||
       permissions.some((perm) => perm.name === "configs-view") ||
@@ -264,7 +303,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         ],
       });
     }
-  
+
     if (
       permissions.some((perm) => perm.name === "feedbacks-view") ||
       permissions.some((perm) => perm.name === "feedback-types-show")
@@ -284,8 +323,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       });
     }
   }
-  
-  
+
   const links = data.map((item, index) => (
     <React.Fragment key={index}>
       {item.links ? (

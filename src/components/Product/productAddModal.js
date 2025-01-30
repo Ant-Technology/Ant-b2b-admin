@@ -380,7 +380,7 @@ const ProductAddModal = ({
                 />
               </Grid.Col>
               <Grid.Col span={6}>
-                <Select
+              <Select
                   searchable
                   data={dropDownData.enArr}
                   value={form

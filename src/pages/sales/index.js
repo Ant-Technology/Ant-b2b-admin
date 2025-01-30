@@ -1,4 +1,6 @@
 import { useQuery } from "@apollo/client";
+import { X } from "tabler-icons-react"; // Import a close icon
+
 import {
   Badge,
   Card,
@@ -21,7 +23,7 @@ import {
   Modal,
 } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import axios from "axios";
@@ -61,11 +63,38 @@ const useStyles = createStyles((theme) => ({
     borderRadius: 21,
   },
   thh: {
-      color: "#666666",
-      fontFamily: "'__Inter_aaf875','__Inter_Fallback_aaf875'",
-      fontSize: "10px",
-      textTransform: "uppercase",
-      fontWeight: "bold",
+    color: "#666666",
+    fontFamily: "'__Inter_aaf875','__Inter_Fallback_aaf875'",
+    fontSize: "10px",
+    textTransform: "uppercase",
+    fontWeight: "bold",
+  },
+  
+
+  searchContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+  },
+  searchInput: {
+    flexGrow: 1,
+    paddingRight: "50px", // Add padding to avoid text overlap with button
+  },
+  searchButton: {
+    position: "absolute",
+    right: 0,
+    borderRadius: "0 4px 4px 0",
+    height: "70%",
+    width: "40px", // Fixed width for the button
+    backgroundColor: "#FF6A00",
+    color: "#FFFFFF",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+    cursor: "pointer",
   },
 }));
 
@@ -249,13 +278,13 @@ const Drivers = () => {
         <td>{row.phone}</td>
         <td>{row.retailers_count}</td>
         <td>
-        <>
+          <>
             <Controls.ActionButton
               color="primary"
               title="Update"
               onClick={() => handleEditSales(`${row.id}`)}
             >
-              <EditIcon style={{ fontSize: '1rem' }}/>
+              <EditIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>
             <span style={{ marginLeft: "1px" }}>
               <Controls.ActionButton
@@ -274,7 +303,6 @@ const Drivers = () => {
               <Trash size={17} />
             </Controls.ActionButton>
           </>
-
         </td>
       </tr>
     </Fragment>
@@ -358,18 +386,39 @@ const Drivers = () => {
                 }}
                 leftIcon={<Plus size={14} />}
               >
-              Add Sales
+                Add Sales
               </Button>
             </div>
             <div></div>
-            <div>
+
+            <div className={classes.searchContainer}>
               <TextInput
-                placeholder="Search by any field"
+                placeholder="Search"
                 mb="md"
                 icon={<Search size={14} />}
                 value={search}
-                onChange={handleSearchChange}
+                onChange={(event) => setSearch(event.currentTarget.value)}
+                className={classes.searchInput}
+                rightSection={
+                  search && ( // Show clear icon only if there's text in the input
+                    <UnstyledButton
+                      onClick={() => {
+                        setSearch(""); // Clear the search input
+                        fetchData(activePage); // Fetch all drivers again
+                      }}
+                      style={{ padding: 5 }} // Adjust padding for better click area
+                    >
+                      <X size={16} color="red" /> {/* Clear icon */}
+                    </UnstyledButton>
+                  )
+                }
               />
+              <button
+                className={classes.searchButton}
+                onClick={handleSearchChange}
+              >
+                <Search size={16} />
+              </button>
             </div>
           </SimpleGrid>
           <Table
@@ -379,9 +428,7 @@ const Drivers = () => {
             sx={{ tableLayout: "fixed", minWidth: 700 }}
           >
             <thead>
-              <tr
-              style={{ backgroundColor: "#F1F1F1" }}
-              >
+              <tr style={{ backgroundColor: "#F1F1F1" }}>
                 <Th sortable onSort={() => handleSort("name")}>
                   <span className={classes.thh}> Name </span>
                 </Th>

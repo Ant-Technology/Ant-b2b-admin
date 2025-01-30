@@ -137,7 +137,6 @@ export const FILTER_PRODUCT_BY_CATEGORY = gql`
   }
 `;
 
-
 export const GET_CATEGORY = gql`
   query ($id: ID!) {
     category(id: $id) {
@@ -630,6 +629,9 @@ export const GET_ORDER = gql`
           price
           sku
           is_active
+          product {
+            name
+          }
         }
       }
       shipment_items {
@@ -668,12 +670,15 @@ export const GET_ORDER = gql`
 `;
 
 export const GET_ORDERS = gql`
-  query ($first: Int!, $page: Int) {
-    orders(first: $first, page: $page) {
+  query ($search: String, $first: Int!, $page: Int) {
+    orders(search: $search,first: $first, page: $page) {
       data {
         id
         total_price
         created_at_human
+        warehouse {
+          name
+        }
         created_at
         retailer {
           id
@@ -727,6 +732,9 @@ export const GET_ORDERS_BY_STATUS = gql`
         total_price
         created_at_human
         created_at
+        warehouse {
+          name
+        }
         retailer {
           id
           name
@@ -1138,12 +1146,19 @@ export const GET_VEHICLE = gql`
 //dropoffs
 
 export const GET_DROPOFFS = gql`
-  query ($first: Int!, $page: Int) {
-    dropoffs(first: $first, page: $page) {
+  query ($status: String, $search: String, $first: Int!, $page: Int) {
+    dropoffs(status: $status, search: $search, first: $first, page: $page) {
       data {
         id
         status
         cost
+        dropoff_order {
+          order {
+            retailer {
+              name
+            }
+          }
+        }
         driver {
           id
           name

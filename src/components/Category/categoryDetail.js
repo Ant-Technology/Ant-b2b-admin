@@ -122,6 +122,7 @@ function CategoryDetailModal({ Id }) {
                   <thead>
                     <tr>
                       <th>Name</th>
+                      <th>Product Count</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -130,6 +131,7 @@ function CategoryDetailModal({ Id }) {
                         {category.children.map((item) => (
                           <tr key={item.id}>
                             <td>{item.name_translations.en}</td>
+                            <td>{item?.products?.length}</td>
                           </tr>
                         ))}
                       </>

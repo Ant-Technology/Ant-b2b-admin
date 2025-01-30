@@ -471,10 +471,16 @@ export const DEL_RETAILER = gql`
 //stock
 
 export const CREATE_STOCK = gql`
-  mutation CREATE_STOCK($quantity: Int!, $product_sku: ID!, $warehouse: ID!) {
+  mutation CREATE_STOCK(
+    $quantity: Int!
+    $minimum_stock_level: Int!
+    $product_sku: ID!
+    $warehouse: ID!
+  ) {
     createStock(
       input: {
         quantity: $quantity
+        minimum_stock_level: $minimum_stock_level
         product_sku: { connect: $product_sku }
         warehouse: { connect: $warehouse }
       }
@@ -493,6 +499,7 @@ export const ACCEPT_SHIPMENT_REQUEST = gql`
 export const MANAGE_STOCK = gql`
   mutation MANAGE_STOCK(
     $stock_id: ID!
+    $minimum_stock_level: Int!
     $type: StockManagementActionType!
     $reason: String!
     $quantity: Int!
@@ -503,6 +510,7 @@ export const MANAGE_STOCK = gql`
         type: $type
         reason: $reason
         quantity: $quantity
+        minimum_stock_level: $minimum_stock_level
       }
     ) {
       id
@@ -935,8 +943,8 @@ export const CREATE_PAYMENT_TYPE = gql`
 `;
 
 export const UPDATE_PAYMENT_TYPE = gql`
-  mutation ($id: ID!, $name: String!) {
-    updatePaymentType(id: $id, name: $name) {
+  mutation ($id: ID!, $name: String!, $logo: Upload) {
+    updatePaymentType(id: $id, name: $name, logo: $logo) {
       id
       name
     }

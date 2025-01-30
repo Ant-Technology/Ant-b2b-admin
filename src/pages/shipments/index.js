@@ -372,6 +372,7 @@ const Shipments = () => {
         />
       </Drawer>
       <Card shadow="sm" p="lg">
+      <ShipmentCard />
         <ScrollArea style={{ overflowX: "hidden" }}>
           <B2bTable
             total={total}
@@ -382,7 +383,6 @@ const Shipments = () => {
             loading={loading}
             data={data ? data.shipments.data : []}
             collapsible={checked}
-            filterData={({ onCardClick }) => <ShipmentCard />}
             selectedCollapse={selectedCollapse}
             setSelectedCollapse={setSelectedCollapse}
             size={size}

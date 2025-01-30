@@ -24,11 +24,15 @@ const DropOffs = () => {
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
   const [openedLocation, setOpenedLocation] = useState(false);
+  const [dropoffStatus, setDropoffStatus] = useState(null); // Track selected status
+  const [search, setSearch] = useState(null); // Track selected status
 
   const { data, loading, refetch } = useQuery(GET_DROPOFFS, {
     variables: {
+      search: search,
       first: parseInt(size), // Pass size dynamically
       page: activePage,
+      status: dropoffStatus,
     },
   });
 
@@ -86,9 +90,18 @@ const DropOffs = () => {
       render: (rowData) => {
         return (
           <span>
-            {rowData.driver !== null ? rowData.driver?.name : "Unknown Driver"}
+            {rowData.driver !== null ? rowData.driver?.name : "Not Assigned"}
           </span>
         );
+      },
+    },
+    {
+      label: "Retailer",
+      key: "retailer",
+      sortable: true,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.dropoff_order[0].order.retailer.name}</span>;
       },
     },
     {
@@ -215,7 +228,13 @@ const DropOffs = () => {
   // Define a state to store the list of orders
 
   const [dropOffs, setDropOffs] = useState([]);
-
+  const clearFilter = () => {
+    console.log("tt")
+    setDropoffStatus(""); // Clear the filter
+    refetch(); // Refetch data using GET_ORDERS
+    setActivePage(1); // Reset to the first page
+    setSearch("")
+  };
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -229,10 +248,15 @@ const DropOffs = () => {
       <Drawer
         opened={openedEdit}
         onClose={() => setOpenedEdit(false)}
-        title="Managing Dropoff"
         padding="xl"
         size="50%"
         position="right"
+        styles={{
+          closeButton: {
+            color: "black",
+            marginTop: "50px",
+          },
+        }}
       >
         <ManageDropOffModal setOpenedEdit={setOpenedEdit} editId={editId} />
       </Drawer>
@@ -263,13 +287,14 @@ const DropOffs = () => {
         <DriverMapView id={editId} />
       </Drawer>
       <Card shadow="sm" p="lg">
+        <DropOffCard onCardClick={setDropoffStatus} handelSearch={setSearch} clearFilter={clearFilter} />
         <ScrollArea>
           <B2bTable
             total={total}
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
-            filterData={({ onCardClick }) => <DropOffCard />}
+            handelSearch={setSearch}
             loading={loading}
             data={dropOffs.length ? dropOffs : data.dropoffs.data || []}
             size={size}
