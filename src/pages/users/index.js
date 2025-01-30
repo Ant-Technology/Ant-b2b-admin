@@ -302,11 +302,16 @@ const Users = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Adding a User"
         padding="xl"
         onClose={() => setOpened(false)}
         position="left"
         size="40%"
+        styles={{
+          closeButton: {
+            color: "black",
+            marginTop: "50px",
+          },
+        }}
       >
         <UserAddModal
           total={total}
@@ -325,7 +330,12 @@ const Users = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Editing a User"
+        styles={{
+          closeButton: {
+            color: "black",
+            marginTop: "50px",
+          },
+        }}
         padding="xl"
         onClose={() => setOpenedEdit(false)}
         position="right"

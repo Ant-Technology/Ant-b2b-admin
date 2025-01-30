@@ -271,10 +271,14 @@ const PaymentTypes = () => {
             style={{ marginTop: "10px" }}
             opened={opened}
             onClose={() => setOpened(false)}
-            title="Adding Payment Type"
             padding="xl"
             size="40%"
-            position="right"
+            styles={{
+              closeButton: {
+                color: "black",
+                marginTop: "50px",
+              }}}
+            position="bottom"
           >
             <PaymentTypeAddModal fetchDta={refetch} setOpened={setOpened} />
           </Drawer>
@@ -282,10 +286,14 @@ const PaymentTypes = () => {
             style={{ marginTop: "10px" }}
             opened={openedEdit}
             onClose={() => setOpenedEdit(false)}
-            title="Update Payment Type"
             padding="xl"
             size="40%"
             position="right"
+            styles={{
+              closeButton: {
+                color: "black",
+                marginTop: "50px",
+              }}}
           >
             <PaymentTypeUpdateModal
               data={editData}

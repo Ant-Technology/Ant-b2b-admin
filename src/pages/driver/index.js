@@ -1,4 +1,5 @@
 import { useQuery } from "@apollo/client";
+import { X } from "tabler-icons-react"; // Import a close icon
 import {
   Badge,
   Card,
@@ -25,11 +26,8 @@ import { Api, Edit, Trash } from "tabler-icons-react";
 import { FiEdit, FiEye } from "react-icons/fi";
 import EditIcon from "@mui/icons-material/Edit";
 import axios from "axios";
-import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import React, { Fragment, useEffect, useState } from "react";
-import { ManualGearbox } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
@@ -37,7 +35,7 @@ import DriverDetailModal from "components/Driver/DriverDetail";
 import { DriverEditModal } from "components/Driver/DriverEditModal";
 import { DriverAddModal } from "components/Driver/DriverAddModal";
 import Controls from "components/controls/Controls";
-import { API } from "utiles/url";
+import { API, formatNumber } from "utiles/url";
 import MapView from "./mapView";
 import { Box } from "@mui/material";
 import Demo from "./activeDrivers";
@@ -73,7 +71,36 @@ const useStyles = createStyles((theme) => ({
     fontWeight: "bold",
   },
   idColumn: {
-    width: "10%",
+    width: "3%",
+  },
+  cityColumn: {
+    width: "4%",
+  },
+
+  searchContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+  },
+  searchInput: {
+    flexGrow: 1,
+    paddingRight: "50px", // Add padding to avoid text overlap with button
+  },
+  searchButton: {
+    position: "absolute",
+    right: 0,
+    borderRadius: "0 4px 4px 0",
+    height: "70%",
+    width: "40px", // Fixed width for the button
+    backgroundColor: "#FF6A00",
+    color: "#FFFFFF",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+    cursor: "pointer",
   },
 }));
 
@@ -148,6 +175,7 @@ const Drivers = () => {
   }, []);
 
   const fetchData = async (page) => {
+    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -161,22 +189,38 @@ const Drivers = () => {
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
+        setLoading(false);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error fetching data:", error);
     }
   };
 
-  const handleSearchChange = (event) => {
-    const { value } = event.currentTarget;
-    setSearch(value);
-    setSortedData(
-      sortData(drivers, {
-        sortBy,
-        reversed: reverseSortDirection,
-        search: value,
-      })
-    );
+  const handleSearchChange = async () => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(
+        `${API}/drivers?search=${search}?page=${activePage}`,
+        config
+      );
+      if (response.data) {
+        setDrivers(response.data.data);
+        setSortedData(response.data.data);
+        setTotal(response.data?.links);
+        setTotalPages(response.data.last_page);
+        setLoading(false);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching data:", error);
+    }
   };
 
   const sortData = (data, payload) => {
@@ -283,34 +327,35 @@ const Drivers = () => {
         <td>{row.name}</td>
         <td>{row.email}</td>
         <td>{row.phone}</td>
-        <td>{row.region?.name?.en}</td>
+        <td className={classes.cityColumn}>{row.region?.name?.en}</td>
         <td>{row.city}</td>
-        <td style={{width:"10%"}}>{row.address}</td>
+        <td style={{ width: "10%" }}>{row.vehicle?.vehicle_type?.title.en}</td>
+        <td>{formatNumber(row.wallet?.balance)}</td>
         <td>
-          <div style={{display:"flex"}}>
-          <Controls.ActionButton
-            color="primary"
-            title="Update"
-            onClick={() => handleEditDriver(row)}
-          >
-            <EditIcon style={{ fontSize: "1rem" }} />
-          </Controls.ActionButton>
-          <span style={{ marginLeft: "1px" }}>
+          <div style={{ display: "flex" }}>
             <Controls.ActionButton
               color="primary"
-              title="View Detail"
-              onClick={() => handleManageDriver(`${row.id}`)}
+              title="Update"
+              onClick={() => handleEditDriver(row)}
             >
-              <FiEye fontSize="medium" />
+              <EditIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>
-          </span>
-          <Controls.ActionButton
-            color="primary"
-            title="Delete"
-            onClick={() => handleDelete(`${row.id}`)}
-          >
-            <Trash size={17} />
-          </Controls.ActionButton>
+            <span style={{ marginLeft: "1px" }}>
+              <Controls.ActionButton
+                color="primary"
+                title="View Detail"
+                onClick={() => handleManageDriver(`${row.id}`)}
+              >
+                <FiEye fontSize="medium" />
+              </Controls.ActionButton>
+            </span>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${row.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
           </div>
         </td>
       </tr>
@@ -444,25 +489,45 @@ const Drivers = () => {
                   </Button>
                 </div>
                 <div></div>
-                <div>
+                <div className={classes.searchContainer}>
                   <TextInput
-                    placeholder="Search by any field"
+                    placeholder="Search"
                     mb="md"
                     icon={<Search size={14} />}
                     value={search}
-                    onChange={handleSearchChange}
+                    onChange={(event) => setSearch(event.currentTarget.value)}
+                    className={classes.searchInput}
+                    rightSection={
+                      search && ( // Show clear icon only if there's text in the input
+                        <UnstyledButton
+                          onClick={() => {
+                            setSearch(""); // Clear the search input
+                            fetchData(activePage); // Fetch all drivers again
+                          }}
+                          style={{ padding: 5 }} // Adjust padding for better click area
+                        >
+                          <X size={16} color="red" /> {/* Clear icon */}
+                        </UnstyledButton>
+                      )
+                    }
                   />
+                  <button
+                    className={classes.searchButton}
+                    onClick={handleSearchChange}
+                  >
+                    <Search size={16} />
+                  </button>
                 </div>
               </SimpleGrid>
               <Table
                 highlightOnHover
                 horizontalSpacing="md"
                 verticalSpacing="xs"
-                sx={{  minWidth: 700 }}
+                sx={{ minWidth: 700 }}
               >
                 <thead>
                   <tr style={{ backgroundColor: "#F1F1F1" }}>
-                    <Th  sortable={false} onSort={() => handleSort("id")}>
+                    <Th sortable={false} onSort={() => handleSort("id")}>
                       <span className={classes.thh}>ID</span>
                     </Th>
                     <Th sortable={false} onSort={() => handleSort("name")}>
@@ -481,8 +546,11 @@ const Drivers = () => {
                     <Th sortable onSort={() => handleSort("email")}>
                       <span className={classes.thh}> City</span>
                     </Th>
-                    <Th sortable onSort={() => handleSort("phone")}>
-                      <span className={classes.thh}> Address</span>
+                    <Th sortable={false}>
+                      <span className={classes.thh}>Vehicle Type</span>
+                    </Th>
+                    <Th sortable={false}>
+                      <span className={classes.thh}>Balance</span>
                     </Th>
                     <Th sortable={false}>
                       {" "}

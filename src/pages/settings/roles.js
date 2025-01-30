@@ -38,6 +38,7 @@ import { DriverEditModal } from "components/Driver/DriverEditModal";
 import { RoleAddModal } from "components/Role/AddRole";
 import Controls from "components/controls/Controls";
 import { API } from "utiles/url";
+import { RoleUpdateModal } from "components/Role/UpdateRole";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -117,6 +118,10 @@ const Roles = () => {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
+  const handleEditRole = (row) => {
+    setEditRow(row);
+    setOpenedEdit(true);
+  };
 
   useEffect(() => {
     fetchData();
@@ -253,6 +258,13 @@ const Roles = () => {
             <span style={{ marginLeft: "1px" }}>
               <Controls.ActionButton
                 color="primary"
+                title="Update"
+                onClick={() => handleEditRole(row)}
+              >
+                <EditIcon style={{ fontSize: "1rem" }} />
+              </Controls.ActionButton>
+              <Controls.ActionButton
+                color="primary"
                 title="View Detail"
                 onClick={() => handleManageDriver(`${row.id}`)}
               >
@@ -296,10 +308,10 @@ const Roles = () => {
         position="bottom"
         size="80%"
       >
-        <DriverEditModal
+        <RoleUpdateModal
           fetchData={fetchData}
           editRow={editRow}
-          setOpenedEdit={setOpenedEdit}
+          setOpened={setOpenedEdit}
           editId={editId}
         />
       </Drawer>

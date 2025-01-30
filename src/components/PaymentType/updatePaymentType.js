@@ -51,6 +51,8 @@ const PaymentTypeUpdateModal = ({ setOpened, data, editId, fetchDta }) => {
       variables: {
         id: data.id,
         name: form.getInputProps("name").value,
+        logo: files[files.length - 1],
+
       },
       onCompleted(data) {
         showNotification({

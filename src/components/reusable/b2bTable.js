@@ -40,6 +40,31 @@ const useStyles = createStyles((theme) => ({
     height: 21,
     borderRadius: 21,
   },
+  searchContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+  },
+  searchInput: {
+    flexGrow: 1,
+    paddingRight: "50px", // Add padding to avoid text overlap with button
+  },
+  searchButton: {
+    position: "absolute",
+    right: 0,
+    borderRadius: "0 4px 4px 0",
+    height: "70%",
+    width: "40px", // Fixed width for the button
+    backgroundColor: "#FF6A00",
+    color: "#FFFFFF",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+    cursor: "pointer",
+  },
 }));
 
 function Th({ children, reversed, sorted, onSort }) {
@@ -143,7 +168,9 @@ const B2bTable = ({
   filterData,
   clearFilter,
   dropoffStatus,
+  handelSearch,
 }) => {
+  const { classes } = useStyles();
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState(data);
   const [sortBy, setSortBy] = useState(null);
@@ -158,12 +185,7 @@ const B2bTable = ({
   };
 
   const handleSearchChange = (event) => {
-    const { value } = event.currentTarget;
-    console.log("Search input:", value); // Debugging log
-    setSearch(value);
-    setSortedData(
-      sortData(data, { sortBy, reversed: reverseSortDirection, search: value })
-    );
+    handelSearch(search);
   };
 
   const rows = sortedData.map((row) => (
@@ -217,7 +239,6 @@ const B2bTable = ({
                   backgroundColor: "#FF6A00",
                   color: "#FFFFFF",
                 }}
-                
                 type="submit"
                 color="blue"
               >
@@ -227,14 +248,21 @@ const B2bTable = ({
           </div>
         )}
         <div> </div>
-        <div>
+        <div className={classes.searchContainer}>
           <TextInput
-            placeholder="Search by any field"
+            placeholder="Search"
             mb="md"
             icon={<Search size={14} />}
             value={search}
-            onChange={handleSearchChange}
+            onChange={(event) => setSearch(event.currentTarget.value)}
+            className={classes.searchInput}
           />
+          <button
+            className={classes.searchButton}
+            onClick={handleSearchChange}
+          >
+            <Search size={16} />
+          </button>
         </div>
       </SimpleGrid>
       <Table

@@ -33,13 +33,15 @@ const Orders = () => {
   //pagination states
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState(null); // Track selected status
   const { data, loading, fetchMore, refetch } = useQuery(
     dropoffStatus ? GET_ORDERS_BY_STATUS : GET_ORDERS,
     {
       variables: dropoffStatus
         ? {
-            status: dropoffStatus, // Ensure this matches exactly with backend
-            first: parseInt(size), // Pass size dynamically
+            status: dropoffStatus,
+            search: search,
+            first: parseInt(size),
             page: activePage,
             ordered_by: [
               {
@@ -51,6 +53,7 @@ const Orders = () => {
         : {
             first: parseInt(size), // Pass size dynamically
             page: activePage,
+            search: search,
           },
 
       onCompleted: (data) => {
@@ -114,6 +117,7 @@ const Orders = () => {
     setDropoffStatus(null); // Clear the filter
     refetch(); // Refetch data using GET_ORDERS
     setActivePage(1); // Reset to the first page
+    setSearch(null)
   };
   const headerData = [
     {
@@ -168,6 +172,15 @@ const Orders = () => {
       searchable: true,
       render: (rowData) => {
         return <span>{rowData.total_price}</span>;
+      },
+    },
+    {
+      label: "Warehouse",
+      key: "warehouse",
+      sortable: true,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData?.warehouse.name}</span>;
       },
     },
     {
@@ -240,16 +253,14 @@ const Orders = () => {
       </Drawer>
 
       <Card shadow="sm" p="lg">
+        <OrderCard onCardClick={setDropoffStatus} handelSearch={setSearch} clearFilter={clearFilter} />
         <ScrollArea>
           <B2bTable
             total={total}
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
-             filterData={({ onCardClick }) => (
-              <OrderCard onCardClick={setDropoffStatus} />
-            )}
-            clearFilter={clearFilter}
+            handelSearch={setSearch}
             dropoffStatus={dropoffStatus}
             loading={loading}
             data={

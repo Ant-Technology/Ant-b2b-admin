@@ -37,6 +37,9 @@ import StockAddModal from "components/Stock/StockAddModal";
 import ManageStock from "components/Stock/ManageStock";
 import Controls from "components/controls/Controls";
 import { API } from "utiles/url";
+import StockDetailModal from "components/Stock/StockDetail";
+import { FiEdit, FiEye } from "react-icons/fi";
+import { X } from "tabler-icons-react"; // Import a close icon
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -66,6 +69,32 @@ const useStyles = createStyles((theme) => ({
     fontSize: "10px",
     textTransform: "uppercase",
     fontWeight: "bold",
+  },
+
+  searchContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+  },
+  searchInput: {
+    flexGrow: 1,
+    paddingRight: "50px", // Add padding to avoid text overlap with button
+  },
+  searchButton: {
+    position: "absolute",
+    right: 0,
+    borderRadius: "0 4px 4px 0",
+    height: "70%",
+    width: "40px", // Fixed width for the button
+    backgroundColor: "#FF6A00",
+    color: "#FFFFFF",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+    cursor: "pointer",
   },
 }));
 
@@ -132,10 +161,7 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(
-        `${API}/stocks?page=${page}`,
-        config
-      );
+      const response = await axios.get(`${API}/stocks?page=${page}`, config);
       if (response.data) {
         setLoading(false);
         setDrivers(response.data.data);
@@ -194,7 +220,7 @@ const Drivers = () => {
     setEditRow(row);
   };
   const [isHovered, setIsHovered] = useState(false);
-  const handleManageDriver = (id) => {
+  const handleDetailStock = (id) => {
     setEditId(id);
     setOpenedDetail(true);
   };
@@ -249,22 +275,28 @@ const Drivers = () => {
         <td>{row.product_sku?.sku}</td>
         <td>{row.quantity}</td>
         <td>
-        <Controls.ActionButton
-              color="primary"
-              title="Update"
-              onClick={() => handleEditDriver(`${row.id}`)}
-            >
-              <EditIcon style={{ fontSize: "1rem" }} />
-            </Controls.ActionButton>
+          <Controls.ActionButton
+            color="primary"
+            title="Update"
+            onClick={() => handleEditDriver(`${row.id}`)}
+          >
+            <EditIcon style={{ fontSize: "1rem" }} />
+          </Controls.ActionButton>
 
-            <Controls.ActionButton
-              color="primary"
-              title="Delete"
-              onClick={() => handleDelete(`${row.id}`)}
-            >
-              <Trash size={17} />
-            </Controls.ActionButton>
-
+          <Controls.ActionButton
+            color="primary"
+            title="Delete"
+            onClick={() => handleDelete(`${row.id}`)}
+          >
+            <Trash size={17} />
+          </Controls.ActionButton>
+          <Controls.ActionButton
+            color="primary"
+            title="View Detail"
+            onClick={() => handleDetailStock(`${row.id}`)}
+          >
+            <FiEye fontSize="medium" />
+          </Controls.ActionButton>
         </td>
       </tr>
     </Fragment>
@@ -331,20 +363,13 @@ const Drivers = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Driver Detail"
+        title="Stock Detail"
         padding="xl"
         onClose={() => setOpenedDetail(false)}
         position="bottom"
         size="80%"
       >
-        <DriverDetailModal
-          total={total}
-          setTotal={setTotal}
-          activePage={activePage}
-          setActivePage={setActivePage}
-          setOpenedDetail={setOpenedDetail}
-          Id={editId}
-        />
+        <StockDetailModal Id={editId} />
       </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
@@ -360,14 +385,34 @@ const Drivers = () => {
               </Button>
             </div>
             <div></div>
-            <div>
+            <div className={classes.searchContainer}>
               <TextInput
-                placeholder="Search by any field"
+                placeholder="Search"
                 mb="md"
                 icon={<Search size={14} />}
                 value={search}
-                onChange={handleSearchChange}
+                onChange={(event) => setSearch(event.currentTarget.value)}
+                className={classes.searchInput}
+                rightSection={
+                  search && ( // Show clear icon only if there's text in the input
+                    <UnstyledButton
+                      onClick={() => {
+                        setSearch(""); // Clear the search input
+                        fetchData(activePage); // Fetch all drivers again
+                      }}
+                      style={{ padding: 5 }} // Adjust padding for better click area
+                    >
+                      <X size={16} color="red" /> {/* Clear icon */}
+                    </UnstyledButton>
+                  )
+                }
               />
+              <button
+                className={classes.searchButton}
+                onClick={handleSearchChange}
+              >
+                <Search size={16} />
+              </button>
             </div>
           </SimpleGrid>
           <Table

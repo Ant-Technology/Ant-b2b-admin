@@ -11,16 +11,16 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Photo, Trash } from "tabler-icons-react";
+import { Trash } from "tabler-icons-react";
 import { useMutation } from "@apollo/client";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
-import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
+import { IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import { tabList } from "components/utilities/tablist";
 import { customLoader } from "components/utilities/loader";
-import { CREATE_CATEGORY } from "apollo/mutuations";
 import { GET_CATEGORIES } from "apollo/queries";
+import { CREATE_CATEGORY } from "apollo/mutuations";
 
 export default function CategoryAddModal({
   setOpened,
@@ -29,10 +29,19 @@ export default function CategoryAddModal({
   activePage,
   setActivePage,
 }) {
-  // to control the current active tab
   const [activeTab, setActiveTab] = useState(tabList[0].value);
-  const [file, setFile] = useState([]);
-  const [subCategoryFiles, setSubCategoryFiles] = useState({});
+  const [mainCategoryFile, setMainCategoryFile] = useState(null);
+  const [subCategoryFiles, setSubCategoryFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
+  const fileInputRef = useRef(null);
+
+  const form = useForm({
+    initialValues: {
+      name: { en: "", am: "" },
+      image: "",
+      children: [],
+    },
+  });
 
   const imagePreview = (imageFile) => {
     const imageUrl = URL.createObjectURL(imageFile);
@@ -46,64 +55,80 @@ export default function CategoryAddModal({
     );
   };
 
-  //form initialization and validation
-  const form = useForm({
-    initialValues: {
-      name: { en: "", am: "" },
-      image: "",
-      children: [],
-    },
-  });
+  const handleMainFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    setMainCategoryFile(files[0]);
+    form.setFieldValue("image", files[0]);
+  };
 
-  const handleFields = (value) => {
-    let fields = form.values.children.map((item, index) => {
-      return (
-        <Group key={item.key} mt="xs">
+  const handleSubCategoryFileChange = (event, index) => {
+    const files = Array.from(event.target.files);
+    const newSubCategoryFiles = [...subCategoryFiles];
+    newSubCategoryFiles[index] = files[0];
+    setSubCategoryFiles(newSubCategoryFiles);
+    form.setFieldValue(`children.${index}.image`, files[0]);
+  };
+
+  const handleFields = () => {
+    return form.values.children.map((item, index) => (
+      <Grid>
+        <Grid.Col span={4}>
           <TextInput
-            placeholder="Subcategory"
+            placeholder="Subcategory (English)"
             required
-            label={`Subcategory ${index + 1}`}
+            label={`Subcategory ${index + 1} (English)`}
             sx={{ flex: 1 }}
-            {...form.getInputProps(
-              value === "am"
-                ? `children.${index}.name.am`
-                : `children.${index}.name.en`
-            )}
+            {...form.getInputProps(`children.${index}.name.en`)}
           />
-          <Dropzone
-            accept={IMAGE_MIME_TYPE}
-            onDrop={(files) => handleSubCategoryImageUpload(files, index)}
-          >
-            <Group
-              position="center"
-              spacing="xl"
-              style={{ minHeight: 100, pointerEvents: "none" }}
-            >
-              <div>
-                <Text size="sm" inline>
-                  Drag image here or click to select file
-                </Text>
-              </div>
-            </Group>
-          </Dropzone>
-          {subCategoryFiles[index] && imagePreview(subCategoryFiles[index])}
-          <ActionIcon
-            color="#ed522f"
-            onClick={() => form.removeListItem("children", index)}
-            style={{ marginTop: "30px", padding: "2px" }}
-          >
-            <Trash size={24} />
-          </ActionIcon>
-        </Group>
-      );
-    });
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <TextInput
+            placeholder="Subcategory (Amharic)"
+            required
+            label={`Subcategory ${index + 1} (Amharic)`}
+            sx={{ flex: 1 }}
+            {...form.getInputProps(`children.${index}.name.am`)}
+          />
+        </Grid.Col>
+        <Grid.Col span={3}>
+          <Button
+            onClick={() => fileInputRef.current.click()} // Trigger file input on button click
+            variant="outline"
+            color="blue"
+            fullWidth
+            style={{ marginTop: "25px" }}
 
-    return fields;
+          >
+            Upload Image
+          </Button>
+          <input
+            type="file"
+            accept={IMAGE_MIME_TYPE}
+            ref={fileInputRef}
+            style={{ display: "none" }} // Hide the file input
+            onChange={(e) => handleSubCategoryFileChange(e, index)} // Handle file selection
+          />
+          <SimpleGrid
+            cols={4}
+            breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+            mt={subCategoryFiles[index] ? "xl" : 0}
+          >
+            {subCategoryFiles[index] && imagePreview(subCategoryFiles[index])}
+          </SimpleGrid>
+        </Grid.Col>
+        <ActionIcon
+          color="#ed522f"
+          onClick={() => form.removeListItem("children", index)}
+          style={{ marginTop: "30px", padding: "2px" }}
+        >
+          <Trash size={24} />
+        </ActionIcon>
+      </Grid>
+    ));
   };
 
   const [addCategory, { loading }] = useMutation(CREATE_CATEGORY, {
     update(cache, { data: { createCategory } }) {
-      // Read the existing data from the cache
       const { categories } = cache.readQuery({
         query: GET_CATEGORIES,
         variables: {
@@ -111,9 +136,8 @@ export default function CategoryAddModal({
           page: 1,
         },
       });
-      if (!categories) {
-        return;
-      }
+      if (!categories) return;
+
       const updatedDropoffs = [createCategory, ...categories.data];
 
       cache.writeQuery({
@@ -137,61 +161,36 @@ export default function CategoryAddModal({
   });
 
   const submit = () => {
-    console.log(form.getInputProps("children").value.map((child, index) => ({
-      ...child,
-      image: subCategoryFiles[index],
-    })),)
-    console.log(form.getInputProps("image").value)
-    if (activeTab === tabList[tabList.length - 1].value) {
-      addCategory({
-        variables: {
-          name: form.getInputProps("name").value,
-          image: form.getInputProps("image").value,
-          children: form.getInputProps("children").value.map((child, index) => ({
-            ...child,
-            image: subCategoryFiles[index],
-          })),
-        },
-
-        onCompleted() {
-          showNotification({
-            color: "green",
-            title: "Success",
-            message: "Category Created Successfully",
-          });
-          setOpened(false);
-        },
-        onError(error) {
-          showNotification({
-            color: "red",
-            title: "Error",
-            message: `${error}`,
-          });
-        },
-      });
-    } else {
-      setActiveTab(tabList[tabList.length - 1].value);
-    }
+    addCategory({
+      variables: {
+        name: form.getInputProps("name").value,
+        image: mainCategoryFile,
+        children: form.getInputProps("children").value.map((child, index) => ({
+          ...child,
+          image: subCategoryFiles[index],
+        })),
+      },
+      onCompleted() {
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: "Category Created Successfully",
+        });
+        setOpened(false);
+      },
+      onError(error) {
+        showNotification({
+          color: "red",
+          title: "Error",
+          message: `${error}`,
+        });
+      },
+    });
   };
 
   const { height } = useViewportSize();
 
-  // attach uploaded image to ueform image value
-  const handleImageUpload = (image) => {
-    setFile(image);
-    form.setFieldValue("image", image[0]);
-  };
-
-  const handleSubCategoryImageUpload = (files, index) => {
-    setSubCategoryFiles((prev) => ({
-      ...prev,
-      [index]: files[0],
-    }));
-    form.setFieldValue(`children.${index}.image`, files[0]);
-  };
-
   return (
-    //mapping the header icon and title
     <Tabs color="blue" value={activeTab} onTabChange={setActiveTab}>
       <LoadingOverlay
         visible={loading}
@@ -199,122 +198,82 @@ export default function CategoryAddModal({
         overlayBlur={2}
         loader={customLoader}
       />
-      <Tabs.List>
-        {tabList.map((tab, i) => {
-          return (
-            <Tabs.Tab key={i} value={tab.value} icon={<Photo size={14} />}>
-              {tab.name}
-            </Tabs.Tab>
-          );
-        })}
-      </Tabs.List>
+
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
-          {/* mapping the tablist */}
-          {tabList.map((tab, i) => {
-            return (
-              <Tabs.Panel key={i} value={tab.value} pt="xs">
-                <Grid grow>
-                  <Grid.Col span={6}>
-                    <Grid.Col span={4}>
-                      <TextInput
-                        required
-                        label={tab.label}
-                        placeholder={tab.placeHolder}
-                        {...form.getInputProps("name." + tab.shortHand)}
-                      />
-                      <ScrollArea style={{ height: 300 }}>
-                        <div style={{ marginTop: "25px" }}>
-                          <Dropzone
-                            accept={IMAGE_MIME_TYPE}
-                            onDrop={handleImageUpload}
-                            style={{ width: 320, height: 200 }}
-
-                          >
-                            <Group
-                              position="center"
-                              spacing="xl"
-                              style={{ minHeight: 200, pointerEvents: "none" }}
-                            >
-                              <div>
-                                <Text size="xl" inline>
-                                  Drag image here or click to select file
-                                </Text>
-                                <Text size="sm" color="dimmed" inline>
-                                  Attach one image for the category
-                                </Text>
-                              </div>
-                            </Group>
-                          </Dropzone>
-
-                          <SimpleGrid
-                            cols={4}
-                            breakpoints={[{ maxWidth: "sm", cols: 1 }]}
-                            mt={"xl"}
-                          >
-                            {/* TODO: center the preview */}
-                            <Grid>
-                              <Grid.Col span={4}></Grid.Col>
-                              <Grid.Col span={4}>
-                                {file.length > 0 && imagePreview(file[0])}
-                              </Grid.Col>
-                              <Grid.Col span={4}></Grid.Col>
-                            </Grid>
-                          </SimpleGrid>
-                        </div>
-                      </ScrollArea>
-                    </Grid.Col>
-
-                    <Grid.Col span={4}>
-                      <Button
-                        style={{ display: activeTab === 1 ? "none" : "" }}
-                        type="submit"
-                        color="blue"
-                        variant="outline"
-                        fullWidth
-                      >
-                        Submit
-                      </Button>
-                    </Grid.Col>
-                  </Grid.Col>
-
-                  <Grid.Col span={6}>
-                    <ScrollArea
-                      style={{ height: height / 1.8 }}
-                      type="auto"
-                      offsetScrollbars
-                    >
-                      {handleFields(tab.shortHand).length > 0 ? (
-                        <Group mb="xs"></Group>
-                      ) : (
-                        <Text color="dimmed" align="center">
-                          No sub category Added Yet...
-                        </Text>
-                      )}
-
-                      {handleFields(tab.shortHand)}
-
-                      <Group position="center" mt="md">
-                        <Button
-                          color="blue"
-                          variant="outline"
-                          fullWidth
-                          onClick={() =>
-                            form.insertListItem("children", {
-                              name: { en: "", am: "" },
-                              image: "",
-                            })
-                          }
-                        >
-                          Add new sub category
-                        </Button>
-                      </Group>
-                    </ScrollArea>
-                  </Grid.Col>
-                </Grid>
-              </Tabs.Panel>
-            );
-          })}
+          <Grid>
+            <Grid.Col span={4}>
+              <TextInput
+                required
+                label="Category Name (English)"
+                placeholder="Enter Category name in English"
+                {...form.getInputProps("name.en")}
+              />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <TextInput
+                required
+                label="Category Name (Amharic)"
+                placeholder="Enter Category name in Amharic"
+                {...form.getInputProps("name.am")}
+              />
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <Button
+                onClick={() => fileInputRef.current.click()} // Trigger file input on button click
+                variant="outline"
+                color="blue"
+                style={{ marginTop: "25px" }}
+                fullWidth
+              >
+                Upload Main Image
+              </Button>
+              <input
+                type="file"
+                accept={IMAGE_MIME_TYPE}
+                ref={fileInputRef}
+                style={{ display: "none" }} // Hide the file input
+                onChange={handleMainFileChange} // Handle main image selection
+              />
+              {mainCategoryFile && imagePreview(mainCategoryFile)}
+            </Grid.Col>
+            <Grid.Col span={12}>
+              {handleFields()}
+              <Group position="start" mt="md">
+                <Button
+                  color="blue"
+                  variant="outline"
+                  fullWidth
+                  style={{
+                    width: "200px", // Set a specific width for the button
+                  }}
+                  onClick={() => {
+                    form.insertListItem("childrens.create", {
+                      name: { en: "", am: "" },
+                      image: "",
+                    });
+                  }}
+                >
+                  Add New Subcategory
+                </Button>
+              </Group>
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <Button
+               style={{
+                width: "25%",
+                marginTop: "15px",
+                backgroundColor: "#FF6A00",
+                color: "#FFFFFF",
+              }}
+                type="submit"
+                color="blue"
+                fullWidth
+              >
+                Submit
+              </Button>
+            </Grid.Col>
+          </Grid>
         </form>
       </ScrollArea>
     </Tabs>

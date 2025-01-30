@@ -28,6 +28,7 @@ const ManageStock = ({
       quantity: null,
       reason: "",
       type: null,
+      minimum_stock_level: 0,
     },
   });
 
@@ -41,6 +42,7 @@ const ManageStock = ({
         type: form.values.type,
         reason: form.values.reason,
         quantity: parseInt(form.values.quantity),
+        minimum_stock_level: parseInt(form.values.minimum_stock_level),
       },
       onCompleted(data) {
         showNotification({
@@ -52,7 +54,7 @@ const ManageStock = ({
         setOpenedEdit(false);
       },
       onError(error) {
-        setOpenedEdit(false);
+        setOpenedEdit(true);
         showNotification({
           color: "red",
           title: "Error",
@@ -78,7 +80,7 @@ const ManageStock = ({
       <form onSubmit={form.onSubmit(() => submit())}>
         <Stack>
           <Grid>
-            <Grid.Col span={12}>
+            <Grid.Col span={6}>
               <TextInput
                 required
                 type="number"
@@ -91,6 +93,21 @@ const ManageStock = ({
                 label="Your reason"
                 required
                 {...form.getInputProps("reason")}
+              />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <TextInput
+                required
+                type="number"
+                label="Minimum Stock Level"
+                placeholder="Minimum Stock Level"
+                {...form.getInputProps("minimum_stock_level")}
+                styles={{
+                  input: {
+                    border: "1px solid red",
+                    backgroundColor: "rgba(255, 0, 0, 0.1)",
+                  },
+                }}
               />
               <Select
                 data={[
@@ -110,8 +127,17 @@ const ManageStock = ({
           </Grid>
 
           <Grid>
-            <Grid.Col span={12}>
-              <Button type="submit" color="blue" variant="outline" fullWidth>
+            <Grid.Col span={6}>
+              <Button
+                style={{
+                  width: "25%",
+                  marginTop: "15px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                type="submit"
+                fullWidth
+              >
                 Submit
               </Button>
             </Grid.Col>

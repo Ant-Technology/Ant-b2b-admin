@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  Table,
   ScrollArea,
   Card,
   LoadingOverlay,
@@ -8,41 +7,50 @@ import {
   Group,
   Text,
   Grid,
+  Collapse,
+  UnstyledButton,
 } from "@mantine/core";
 import { customLoader } from "components/utilities/loader";
-import { UserPlus, Discount2, Receipt2, Coin } from "tabler-icons-react";
 import { useViewportSize } from "@mantine/hooks";
 import axios from "axios";
 import { API } from "utiles/url";
 import { Box } from "@mui/material";
+import { ChevronDown, ChevronUp } from "tabler-icons-react"; // Import icons for expand/collapse
 
 const useStyles = createStyles((theme) => ({
   root: {
     padding: theme.spacing.xl * 1.5,
   },
-
   value: {
     fontSize: 17,
     fontWeight: 500,
     lineHeight: 1,
   },
-
   diff: {
     lineHeight: 1,
     display: "flex",
     alignItems: "center",
   },
-
-  icon: {
-    color:
-      theme.colorScheme === "dark"
-        ? theme.colors.dark[3]
-        : theme.colors.gray[4],
-  },
-
   title: {
     fontWeight: 700,
     textTransform: "uppercase",
+  },
+  groupTitle: {
+    marginTop: theme.spacing.md,
+    fontWeight: 600,
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+  },
+  collapseList: {
+    marginTop: theme.spacing.sm,
+    paddingLeft: theme.spacing.md,
+  },
+  listItem: {
+    textTransform: "capitalize",
+  },
+  gridCol: {
+    paddingBottom: theme.spacing.sm, // Space between rows
   },
 }));
 
@@ -50,6 +58,7 @@ function RoleDetailModal({ Id }) {
   const { classes } = useStyles();
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState();
+  const [openedGroups, setOpenedGroups] = useState({}); // State to manage opened groups
 
   useEffect(() => {
     fetchData();
@@ -77,17 +86,12 @@ function RoleDetailModal({ Id }) {
 
   const { height } = useViewportSize();
 
-  // Helper function to split the permissions array into two equal parts
-  const splitPermissions = (permissions) => {
-    const middleIndex = Math.ceil(permissions.length / 2);
-    const firstHalf = permissions.slice(0, middleIndex);
-    const secondHalf = permissions.slice(middleIndex);
-    return [firstHalf, secondHalf];
+  const toggleGroup = (group) => {
+    setOpenedGroups((prev) => ({
+      ...prev,
+      [group]: !prev[group],
+    }));
   };
-
-  const [firstColumn, secondColumn] = role?.permissions
-    ? splitPermissions(role.permissions)
-    : [[], []];
 
   return (
     <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
@@ -98,7 +102,7 @@ function RoleDetailModal({ Id }) {
           overlayBlur={2}
           loader={customLoader}
         />
-          <Box
+        <Box
           sx={{
             display: "flex",
             alignItems: "center",
@@ -109,79 +113,63 @@ function RoleDetailModal({ Id }) {
             borderRadius: 1,
           }}
         >
-        <Card style={{ width: "40%" }} shadow="sm" radius="md" withBorder>
-          <div style={{ paddingLeft: "20px" }}>
-            <Group align="flex-end" spacing="xs" mt={25}>
-              <Text size="sm" weight={500} className={classes.diff}>
-                <span>
-                  Name<span style={{ marginLeft: "5px" }}>:</span>
-                </span>
-              </Text>
-              <Text className={classes.value}>{role?.name}</Text>
-            </Group>
-            <Group align="flex-end" spacing="xs" mt={25}>
-              <Text size="sm" weight={500} className={classes.diff}>
-                <span>
-                  Guard Name<span style={{ marginLeft: "5px" }}>:</span>
-                </span>
-              </Text>
-              <Text className={classes.value}>{role?.guard_name}</Text>
-            </Group>
-          </div>
-        </Card>
-</Box>
-        <Card style={{ marginTop: "30px"}} shadow="sm" p="lg">
+          <Card style={{ width: "40%" }} shadow="sm" radius="md" withBorder>
+            <div style={{ paddingLeft: "20px" }}>
+              <Group align="flex-end" spacing="xs" mt={25}>
+                <Text size="sm" weight={500} className={classes.diff}>
+                  <span>
+                    Name<span style={{ marginLeft: "5px" }}>:</span>
+                  </span>
+                </Text>
+                <Text className={classes.value}>{role?.name}</Text>
+              </Group>
+              <Group align="flex-end" spacing="xs" mt={25}>
+                <Text size="sm" weight={500} className={classes.diff}>
+                  <span>
+                    Guard Name<span style={{ marginLeft: "5px" }}>:</span>
+                  </span>
+                </Text>
+                <Text className={classes.value}>{role?.guard_name}</Text>
+              </Group>
+            </div>
+          </Card>
+        </Box>
+
+        <Card style={{ marginTop: "30px" }} shadow="sm" p="lg">
           <ScrollArea style={{ overflow: 'hidden' }}>
             <Text size="md" weight={500} className={classes.diff}>
               <span>All Permissions</span>
             </Text>
 
-            {/* Grid with two equal columns for permissions */}
+            {/* Iterate over permissions grouped by category */}
             <Grid>
-              <Grid.Col span={6}>
-                <Table
-                  horizontalSpacing="md"
-                  verticalSpacing="xs"
-                  sx={{ width: "100%", tableLayout: "auto" }} // Adjusted for auto layout
-                  >
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {firstColumn.map((item) => (
-                      <tr key={item.id}>
-                        <td style={{ textTransform: "capitalize" }}>
-                          {item.name}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Table
-                  horizontalSpacing="md"
-                  verticalSpacing="xs"
-                  sx={{ width: "100%", tableLayout: "auto" }} // Adjusted for auto layout
-                >
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {secondColumn.map((item) => (
-                      <tr key={item.id}>
-                        <td style={{ textTransform: "capitalize" }}>
-                          {item.name}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Grid.Col>
+              {role?.permissions &&
+                Object.entries(role.permissions).map(([group, permissions]) => (
+                  <Grid.Col span={3} key={group} className={classes.gridCol}>
+                    <div>
+                      <div
+                        className={classes.groupTitle}
+                        onClick={() => toggleGroup(group)}
+                      >
+                        <Text>{group}</Text>
+                        {openedGroups[group] ? (
+                          <ChevronUp size={16} />
+                        ) : (
+                          <ChevronDown size={16} />
+                        )}
+                      </div>
+                      <Collapse in={openedGroups[group]}>
+                        <div className={classes.collapseList}>
+                          {permissions.map((item) => (
+                            <Text key={item.id} className={classes.listItem}>
+                              • {item.name}
+                            </Text>
+                          ))}
+                        </div>
+                      </Collapse>
+                    </div>
+                  </Grid.Col>
+                ))}
             </Grid>
           </ScrollArea>
         </Card>

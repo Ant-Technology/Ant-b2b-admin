@@ -62,11 +62,12 @@ export const RoleAddModal = ({ setOpened, fetchData }) => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const formData = new FormData();
-      formData.append("name", form.getInputProps("name").value);
-      formData.append("permissions", JSON.stringify(checkedPermissions));
-
-      const { data } = await axios.post(`${API}/roles`, formData, config);
+    
+      const newRole = {
+        name: form.getInputProps("name").value,
+        permissions: checkedPermissions,
+      };
+      const { data } = await axios.post(`${API}/roles`, newRole, config);
       if (data) {
         showNotification({
           color: "green",

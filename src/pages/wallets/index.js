@@ -115,6 +115,7 @@ const Wallets = () => {
   }, [activePage]);
 
   const fetchData = async (page) => {
+    setLoading(true)
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -131,8 +132,10 @@ const Wallets = () => {
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
+        setLoading(false)
       }
     } catch (error) {
+      setLoading(true)
       console.error("Error fetching data:", error);
     }
   };
@@ -255,11 +258,16 @@ const Wallets = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Managing Wallet"
         padding="xl"
         onClose={() => setOpenedEdit(false)}
         position="right"
         size="40%"
+        styles={{
+          closeButton: {
+            color: "black",
+            marginTop: "50px",
+          },
+        }}
       >
         <ManageDepositSlip
           total={total}
