@@ -499,7 +499,6 @@ export const ACCEPT_SHIPMENT_REQUEST = gql`
 export const MANAGE_STOCK = gql`
   mutation MANAGE_STOCK(
     $stock_id: ID!
-    $minimum_stock_level: Int!
     $type: StockManagementActionType!
     $reason: String!
     $quantity: Int!
@@ -510,7 +509,6 @@ export const MANAGE_STOCK = gql`
         type: $type
         reason: $reason
         quantity: $quantity
-        minimum_stock_level: $minimum_stock_level
       }
     ) {
       id

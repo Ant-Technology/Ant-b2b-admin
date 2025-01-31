@@ -70,7 +70,9 @@ const useStyles = createStyles((theme) => ({
     textTransform: "uppercase",
     fontWeight: "bold",
   },
-
+  idColumn: {
+    width: "3%",
+  },
   searchContainer: {
     position: "relative",
     display: "flex",
@@ -270,7 +272,7 @@ const Drivers = () => {
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
-        <td>{row.id}</td>
+        <td className={classes.idColumn}>{row.id}</td>
         <td>{row.warehouse?.name}</td>
         <td>{row.product_sku?.sku}</td>
         <td>{row.quantity}</td>
@@ -435,6 +437,10 @@ const Drivers = () => {
                 </Th>
                 <Th sortable onSort={() => handleSort("quantity")}>
                   <span className={classes.thh}> Quantity </span>
+                </Th>
+                
+                <Th sortable onSort={() => handleSort("minimum_stock_level")}>
+                  <span className={classes.thh}>Stock Level </span>
                 </Th>
                 <Th sortable={false}>
                   {" "}
