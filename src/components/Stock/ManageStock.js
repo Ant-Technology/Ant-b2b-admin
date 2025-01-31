@@ -42,7 +42,6 @@ const ManageStock = ({
         type: form.values.type,
         reason: form.values.reason,
         quantity: parseInt(form.values.quantity),
-        minimum_stock_level: parseInt(form.values.minimum_stock_level),
       },
       onCompleted(data) {
         showNotification({
@@ -96,19 +95,6 @@ const ManageStock = ({
               />
             </Grid.Col>
             <Grid.Col span={6}>
-              <TextInput
-                required
-                type="number"
-                label="Minimum Stock Level"
-                placeholder="Minimum Stock Level"
-                {...form.getInputProps("minimum_stock_level")}
-                styles={{
-                  input: {
-                    border: "1px solid red",
-                    backgroundColor: "rgba(255, 0, 0, 0.1)",
-                  },
-                }}
-              />
               <Select
                 data={[
                   { label: "RELEASE", value: "RELEASE" },
