@@ -4,11 +4,11 @@ import {
   ScrollArea,
   Card,
   Button,
-  Modal,
   LoadingOverlay,
   Grid,
   Stack,
   Select,
+  TextInput,
   createStyles,
   Group,
   Paper,
@@ -16,58 +16,54 @@ import {
   Text,
   Image,
 } from "@mantine/core";
-import { useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { customLoader } from "components/utilities/loader";
-import { GET_PRODUCT, GET_SHIPMENTS } from "apollo/queries";
 import { UserPlus, Discount2, Receipt2, Coin } from "tabler-icons-react";
 import { useViewportSize } from "@mantine/hooks";
 import { useEffect } from "react";
 import axios from "axios";
 import { API } from "utiles/url";
+import { showNotification } from "@mantine/notifications";
+import { useForm } from "@mantine/form";
+import { UPDATE_MINIMUM_STOCK_LEVEL } from "apollo/mutuations";
 
 const useStyles = createStyles((theme) => ({
   root: {
     padding: theme.spacing.xl * 1.5,
   },
-
   value: {
     fontSize: 17,
     fontWeight: 500,
     lineHeight: 1,
   },
-
   diff: {
     lineHeight: 1,
     display: "flex",
     alignItems: "center",
   },
-
   icon: {
     color:
       theme.colorScheme === "dark"
         ? theme.colors.dark[3]
         : theme.colors.gray[4],
   },
-
   title: {
     fontWeight: 700,
     textTransform: "uppercase",
   },
 }));
 
-const icons = {
-  user: UserPlus,
-  discount: Discount2,
-  receipt: Receipt2,
-  coin: Coin,
-};
-
 function StockDetailModal({ Id }) {
-  // state variables
+  const form = useForm({
+    initialValues: {
+      minimum_stock_level: 0,
+    },
+  });
   const { classes } = useStyles();
   const [stock, setStock] = useState();
-
   const [loading, setLoading] = useState(false);
+  const [editStockLevel] = useMutation(UPDATE_MINIMUM_STOCK_LEVEL);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -85,11 +81,40 @@ function StockDetailModal({ Id }) {
       if (response.data) {
         setLoading(false);
         setStock(response.data);
+        form.setValues({ 
+          minimum_stock_level: response.data.minimum_stock_level 
+        });
       }
     } catch (error) {
       setLoading(false);
-      console.error("Error fetching data:", error);
     }
+  };
+
+  const submit = () => {
+    const variables = {
+      id: Id,
+      input: {
+        minimum_stock_level: parseInt(form.values.minimum_stock_level),
+      },
+    };
+    editStockLevel({
+      variables,
+      onCompleted() {
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: "Stock Level Updated Successfully",
+        });
+        fetchData();
+      },
+      onError() {
+        showNotification({
+          color: "red",
+          title: "Error",
+          message: "Stock Level Not Updated!",
+        });
+      },
+    });
   };
 
   const { height } = useViewportSize();
@@ -128,6 +153,25 @@ function StockDetailModal({ Id }) {
               </Text>
               <Text className={classes.value}>{stock?.warehouse.name}</Text>
             </Group>
+            <Group align="center" spacing="xs" mt={25}>
+              <Text size="sm" weight={500} className={classes.diff}>
+                <span>
+                  Minimum Stock Level<span style={{ marginLeft: "5px" }}>:</span>
+                </span>
+              </Text>
+              <TextInput
+                {...form.getInputProps("minimum_stock_level")}
+                type="number"
+                style={{ width: 100 }}
+              />
+              <Button
+                onClick={submit}
+                size="sm"
+                style={{ marginLeft: 10 }}
+              >
+                Update
+              </Button>
+            </Group>
           </div>
         </Card>
         <Card style={{ marginTop: "30px" }} shadow="sm" p="lg">
@@ -143,30 +187,28 @@ function StockDetailModal({ Id }) {
               <thead>
                 <tr>
                   <th>Type</th>
-                  <th> Before quantity</th>
-                  <th> After quantity</th>
+                  <th>Before quantity</th>
+                  <th>After quantity</th>
                   <th>Quantity</th>
                   <th>Date</th>
                 </tr>
               </thead>
               <tbody>
                 {stock?.transactions?.length > 0 ? (
-                  <>
-                    {stock?.transactions?.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.type}</td>
-                        <td>{item.before_quantity}</td>
-                        <td>{item.after_quantity}</td>
-                        <td>{item.quantity}</td>
-                        <td>{ new Date(item.created_at).toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </>
+                  stock.transactions.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.type}</td>
+                      <td>{item.before_quantity}</td>
+                      <td>{item.after_quantity}</td>
+                      <td>{item.quantity}</td>
+                      <td>{new Date(item.created_at).toLocaleString()}</td>
+                    </tr>
+                  ))
                 ) : (
                   <tr>
-                    <td colSpan={4}>
+                    <td colSpan={5}>
                       <Text weight={500} align="center">
-                        Nothing Found Transactions
+                        No Transactions Found
                       </Text>
                     </td>
                   </tr>

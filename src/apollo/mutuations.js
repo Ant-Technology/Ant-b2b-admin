@@ -943,13 +943,23 @@ export const CREATE_PAYMENT_TYPE = gql`
 `;
 
 export const UPDATE_PAYMENT_TYPE = gql`
-  mutation ($id: ID!, $name: String!, $logo: Upload) {
-    updatePaymentType(id: $id, name: $name, logo: $logo) {
+  mutation ($input: UpdatePaymentTypeInput!) {
+    updatePaymentType(input: $input) {
       id
       name
+      logo
     }
   }
 `;
+export const UPDATE_MINIMUM_STOCK_LEVEL = gql`
+  mutation ($id: ID!, $input: UpdateStockInput!) {
+    updateStock(id: $id, input: $input) {
+      id
+      minimum_stock_level
+    }
+  }
+`;
+
 
 export const UPDATE_USER = gql`
   mutation (

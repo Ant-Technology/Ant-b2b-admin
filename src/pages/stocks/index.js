@@ -274,6 +274,7 @@ const Drivers = () => {
         <td>{row.warehouse?.name}</td>
         <td>{row.product_sku?.sku}</td>
         <td>{row.quantity}</td>
+        <td>{row.minimum_stock_level}</td>
         <td>
           <Controls.ActionButton
             color="primary"

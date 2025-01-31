@@ -15,9 +15,7 @@ import {
 import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
-import {
-  UPDATE_PAYMENT_TYPE,
-} from "apollo/mutuations";
+import { UPDATE_PAYMENT_TYPE } from "apollo/mutuations";
 import { customLoader } from "components/utilities/loader";
 import React, { useState, useRef, useEffect } from "react";
 
@@ -41,18 +39,17 @@ const PaymentTypeUpdateModal = ({ setOpened, data, editId, fetchDta }) => {
       name: data.name,
     });
     if (data.logo) {
-      setInitialProfileImage(data.logo); // Set initial profile image if exists
+      setInitialProfileImage(data.logo); 
     }
-
-    // eslint-disable-next-line
   }, [data]);
   const submit = () => {
     editPayment({
       variables: {
-        id: data.id,
-        name: form.getInputProps("name").value,
-        logo: files[files.length - 1],
-
+        input: {
+          id: parseInt(data.id),
+          name: form.getInputProps("name").value,
+          logo: files.length > 0 ? files[files.length - 1] : null,
+        },
       },
       onCompleted(data) {
         showNotification({
@@ -60,7 +57,7 @@ const PaymentTypeUpdateModal = ({ setOpened, data, editId, fetchDta }) => {
           title: "Success",
           message: "Payment Type Updated Successfully",
         });
-        // fetchDta();
+        fetchDta();
         setOpened(false);
       },
       onError(error) {
@@ -82,12 +79,10 @@ const PaymentTypeUpdateModal = ({ setOpened, data, editId, fetchDta }) => {
     });
   };
 
-  // handle file change
   const handleFileChange = (event) => {
     setFiles(Array.from(event.target.files));
   };
 
-  // set previews
   const previews = files.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
     return (
