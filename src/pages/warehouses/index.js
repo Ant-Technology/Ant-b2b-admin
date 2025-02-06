@@ -8,9 +8,9 @@ import { Trash, Edit } from "tabler-icons-react";
 import WarehouseAddModal from "components/Warehouse/warehouseAddModal";
 import WarehouseEditModal from "components/Warehouse/warehouseEditModal";
 import { showNotification } from "@mantine/notifications";
-import EditIcon from '@mui/icons-material/Edit';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from "@mui/icons-material/Edit";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { customLoader } from "components/utilities/loader";
 import { GET_WARE_HOUSE, GET_WARE_HOUSES } from "apollo/queries";
 import { CHANGE_WAREHOUSE_STATUS, DEL_WAREHOUSE } from "apollo/mutuations";
@@ -19,7 +19,7 @@ import ShowWarehouseLocation from "components/Warehouse/showWarehouseLocation";
 import Controls from "components/controls/Controls";
 
 const Warehouses = () => {
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -31,15 +31,16 @@ const Warehouses = () => {
   //pagination states
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [searchValue, setSearchValue] = useState("");
 
   const { data, loading, refetch } = useQuery(GET_WARE_HOUSES, {
     variables: {
       first: parseInt(size),
       page: activePage,
+      search: searchValue,
     },
   });
 
-  
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
@@ -48,7 +49,7 @@ const Warehouses = () => {
     if (data) {
       setTotal(data.warehouses.paginatorInfo.lastPage);
     }
-  }, [data, size]); 
+  }, [data, size]);
 
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
@@ -119,7 +120,7 @@ const Warehouses = () => {
     setEditId(id);
     setOpenedEdit(true);
   };
-  
+
   const [changeWarehouseStatus] = useMutation(CHANGE_WAREHOUSE_STATUS, {
     refetchQueries: [
       {
@@ -131,7 +132,10 @@ const Warehouses = () => {
       },
     ],
     onCompleted(data) {
-      const action = data.changeWarehouseStatus.status=== "ACTIVE" ? "Activated" : "Deactivated";
+      const action =
+        data.changeWarehouseStatus.status === "ACTIVE"
+          ? "Activated"
+          : "Deactivated";
       showNotification({
         color: "green",
         title: "Success",
@@ -148,15 +152,14 @@ const Warehouses = () => {
   });
   const handleWarehouseStatusChange = (id, currentStatus) => {
     let status;
-    if (currentStatus === 'DEACTIVATED') {
-      status = 'ACTIVE'
-    }
-    else{
-      status = "DEACTIVATED"
+    if (currentStatus === "DEACTIVATED") {
+      status = "ACTIVE";
+    } else {
+      status = "DEACTIVATED";
     }
     changeWarehouseStatus({
       variables: {
-        id: id,  // Ensure id is an integer
+        id: id, // Ensure id is an integer
         status: status, // Toggle the status
       },
     });
@@ -212,15 +215,15 @@ const Warehouses = () => {
             [{lat}, {lng}]
             <div
               onClick={() => handleGeoLocationClick(lat, lng)}
-              style={{ cursor: "pointer", color:"rgb(20, 61, 93)"}}
+              style={{ cursor: "pointer", color: "rgb(20, 61, 93)" }}
             >
-             View Map
+              View Map
             </div>
           </span>
         );
       },
     },
-    
+
     {
       label: "Status",
       key: "status",
@@ -249,15 +252,15 @@ const Warehouses = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <div style={{display:"flex"}}>
-                  <Controls.ActionButton
+          <div style={{ display: "flex" }}>
+            <Controls.ActionButton
               color="primary"
               title="Update"
               onClick={() => handleEditCategory(`${rowData.id}`)}
             >
-              <EditIcon style={{ fontSize: '1rem' }}/>
+              <EditIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>
-          
+
             <Controls.ActionButton
               color="primary"
               title="Delete"
@@ -265,19 +268,20 @@ const Warehouses = () => {
             >
               <Trash size={17} />
             </Controls.ActionButton>
-          
+
             <Controls.ActionButton
               color="primary"
-              title={rowData?.status ==="ACTIVE" ? "Deactivate" : "Activate"}
-              onClick={() => handleWarehouseStatusChange(rowData.id,rowData.status)}
+              title={rowData?.status === "ACTIVE" ? "Deactivate" : "Activate"}
+              onClick={() =>
+                handleWarehouseStatusChange(rowData.id, rowData.status)
+              }
             >
-              {rowData.status==="ACTIVE" ? (
+              {rowData.status === "ACTIVE" ? (
                 <CancelIcon size={15} />
               ) : (
                 <CheckCircleIcon size={15} />
               )}
             </Controls.ActionButton>
-
           </div>
         );
       },
@@ -290,7 +294,15 @@ const Warehouses = () => {
   };
 
   const theme = useMantineTheme();
+  const [confirmedSearch, setConfirmedSearch] = useState("");
 
+  const handleManualSearch = (searchTerm) => {
+    setSearchValue(searchTerm);
+  };
+  const clearInput = () => {
+    setSearchValue("");
+    setConfirmedSearch("");
+  };
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -372,6 +384,10 @@ const Warehouses = () => {
             total={total}
             activePage={activePage}
             handleChange={handleChange}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             header={headerData}
             data={data.warehouses.data}
             loading={loading}

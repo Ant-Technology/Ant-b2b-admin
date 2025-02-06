@@ -11,7 +11,6 @@ import {
   IconBuildingWarehouse,
   IconCurrentLocation,
   IconBrandShopee,
-  IconLayoutDistributeHorizontal,
   IconBuildingStore,
   IconShip,
   IconWallet,
@@ -22,10 +21,8 @@ import {
   IconTruckLoading,
   IconChevronDown,
   IconSettings,
-  IconHistory,
-  IconClipboardList,
-  IconTimeline,
   IconChevronUp,
+  IconReport,
 } from "@tabler/icons";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -268,7 +265,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
     if (permissions.some((perm) => perm.name === "distributors-view")) {
       data.push({
         link: "/distributors",
-        label: "Distributers",
+        label: "Distributors",
         icon: IconApps,
       });
     }
@@ -303,7 +300,6 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         ],
       });
     }
-
     if (
       permissions.some((perm) => perm.name === "feedbacks-view") ||
       permissions.some((perm) => perm.name === "feedback-types-show")
@@ -322,6 +318,20 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         ],
       });
     }
+
+    data.push({
+      label: "Report",
+      icon: IconReport,
+      initiallyOpened: false,
+      links: [
+        ...(permissions.some((perm) => perm.name === "reports-sales")
+          ? [{ link: "/sales-report", label: "Sales" }]
+          : []),
+        ...(permissions.some((perm) => perm.name === "reports-retailers")
+          ? [{ link: "/retailer-report", label: "Retailer" }]
+          : []),
+      ],
+    });
   }
 
   const links = data.map((item, index) => (
@@ -346,7 +356,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 <span
                   style={{
                     fontWeight:
-                      item.label === "Settings" || item.label === "Feedback"
+                      item.label === "Settings" || item.label === "Feedback" || "Report"
                         ? "bold"
                         : "normal",
                   }}

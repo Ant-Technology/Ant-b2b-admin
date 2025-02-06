@@ -339,12 +339,14 @@ export const CREATE_PRODUCT_SKUS = gql`
   mutation (
     $price: Float!
     $is_active: Boolean!
+    $buy_price: Float!
     $product: ID!
     $variants: [CreateProductVariantInput!]!
   ) {
     createProductSku(
       input: {
         price: $price
+        buy_price: $buy_price
         is_active: $is_active
         product: { connect: $product }
         variants: { create: $variants }
@@ -800,30 +802,29 @@ export const CREATE_VEHICLE = gql`
 export const UPDATE_VEHICLE = gql`
   mutation (
     $id: ID!
-    $name: String!
     $model: String!
     $plate_number: String!
     $color: String!
     $owner_name: String!
     $owner_phone: String!
+    $region: CreateRegionBelongsTo!
     $driver: CreateDriverBelongsTo!
     $vehicle_type: CreateVehicleTypeBelongsTo!
   ) {
     updateVehicle(
       id: $id
       input: {
-        name: $name
         model: $model
         plate_number: $plate_number
         color: $color
         owner_name: $owner_name
         owner_phone: $owner_phone
+        region: $region
         driver: $driver
         vehicle_type: $vehicle_type
       }
     ) {
       id
-      name
       color
       owner_name
       owner_phone
@@ -941,8 +942,8 @@ export const CREATE_PAYMENT_TYPE = gql`
 `;
 
 export const UPDATE_PAYMENT_TYPE = gql`
-  mutation ($input: UpdatePaymentTypeInput!) {
-    updatePaymentType(input: $input) {
+  mutation ($id: ID!, $input: UpdatePaymentTypeInput!) {
+    updatePaymentType(id: $id, input: $input) {
       id
       name
       logo
@@ -957,7 +958,6 @@ export const UPDATE_MINIMUM_STOCK_LEVEL = gql`
     }
   }
 `;
-
 
 export const UPDATE_USER = gql`
   mutation (

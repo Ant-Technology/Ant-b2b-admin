@@ -24,12 +24,12 @@ export const PAYMENT_TYPES = gql`
 //category queries
 
 export const GET_CATEGORIES = gql`
-  query GET_CATEGORIES($first: Int!, $page: Int) {
+  query GET_CATEGORIES($first: Int!, $page: Int, $ordered_by: [OrderByInput]!) {
     categories(
       first: $first
       page: $page
       parentOnly: true
-      orderBy: { column: NAME, order: DESC }
+      orderBy:$ordered_by
     ) {
       data {
         id
@@ -176,8 +176,8 @@ export const GET_CATEGORY = gql`
 
 // warehouse queries
 export const GET_WARE_HOUSES = gql`
-  query GET_WARE_HOUSES($first: Int!, $page: Int!) {
-    warehouses(first: $first, page: $page) {
+  query GET_WARE_HOUSES($first: Int!, $search: String, $page: Int!) {
+    warehouses(first: $first, search: $search, page: $page) {
       data {
         id
         name
@@ -274,8 +274,8 @@ export const GET_DISTRIBUTORS = gql`
 //regions
 
 export const GET_REGIONS = gql`
-  query ($first: Int!, $page: Int) {
-    regions(first: $first, page: $page) {
+  query ($first: Int!, $search: String, $page: Int) {
+    regions(first: $first, search: $search, page: $page) {
       data {
         id
         name
@@ -347,8 +347,8 @@ export const GET_ACTIVITY_LOGS = gql`
 //products query
 
 export const GET_PRODUCTS = gql`
-  query GET_PRODUCTS($first: Int!, $page: Int) {
-    products(first: $first, page: $page) {
+  query GET_PRODUCTS($first: Int!, $search: String, $page: Int) {
+    products(search: $search, first: $first, page: $page) {
       data {
         id
         name
@@ -554,6 +554,10 @@ export const GET_RETAILERS = gql`
           lat
           lng
         }
+        wallet {
+          id
+          balance
+        }
         city
         region {
           id
@@ -671,7 +675,7 @@ export const GET_ORDER = gql`
 
 export const GET_ORDERS = gql`
   query ($search: String, $first: Int!, $page: Int) {
-    orders(search: $search,first: $first, page: $page) {
+    orders(search: $search, first: $first, page: $page) {
       data {
         id
         total_price
@@ -836,8 +840,8 @@ export const GET_SHIPMENT = gql`
 `;
 
 export const GET_SHIPMENTS = gql`
-  query ($first: Int!, $page: Int) {
-    shipments(first: $first, page: $page) {
+  query ($search: String, $status: String, $first: Int!, $page: Int) {
+    shipments(search: $search, status: $status, first: $first, page: $page) {
       data {
         id
         departure_time
@@ -1088,7 +1092,7 @@ export const GET_VEHICLES = gql`
   query (
     $first: Int!
     $page: Int
-    $ordered_by: [QueryVehiclesOrderByOrderByClause!]!
+    $ordered_by: [OrderByInput]!
   ) {
     vehicles(first: $first, page: $page, orderBy: $ordered_by) {
       data {
@@ -1134,6 +1138,10 @@ export const GET_VEHICLE = gql`
       vehicle_type {
         id
         title
+      }
+      region {
+        id
+        name
       }
       driver {
         id
@@ -1232,14 +1240,14 @@ export const GET_DROPOFF = gql`
 //general users query
 
 export const GET_ALL_USERS = gql`
-  query ($first: Int!, $page: Int) {
-    users(first: $first, page: $page) {
+  query ($first: Int!, $search: String, $page: Int) {
+    users(first: $first, search: $search, page: $page) {
       data {
         id
         name
         status
         email
-        phone
+
         profile_image
         roles {
           id

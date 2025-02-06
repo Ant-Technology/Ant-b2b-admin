@@ -328,7 +328,7 @@ const VehicleTypes = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Editing a Category"
+        title="Editing a VehicleType"
         padding="xl"
         onClose={() => setOpenedEdit(false)}
         position="bottom"

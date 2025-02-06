@@ -261,7 +261,7 @@ const Vehicles = () => {
         overlayOpacity={0.55}
         overlayBlur={3}
         onClose={() => setOpenedEdit(false)}
-        title="Editing a Product"
+        title="Editing a Vehicle"
         padding="xl"
         size="80%"
         position="bottom"

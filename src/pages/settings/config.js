@@ -103,6 +103,7 @@ const Config = () => {
   }, []);
 
   const fetchData = async () => {
+    setLoading(true)
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -112,10 +113,12 @@ const Config = () => {
       };
       const response = await axios.get(`${API}/configs`, config);
       if (response.data) {
+        setLoading(false)
         setConfigs(response.data.configs);
         setSortedData(response.data.configs); // Ensure sorting is applied when data is fetched
       }
     } catch (error) {
+      setLoading(false)
       console.error("Error fetching data:", error);
     }
   };

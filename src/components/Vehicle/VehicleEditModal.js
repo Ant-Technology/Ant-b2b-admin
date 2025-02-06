@@ -10,14 +10,20 @@ import {
 } from "@mantine/core";
 import { UPDATE_VEHICLE } from "apollo/mutuations";
 import { useForm } from "@mantine/form";
-import { GET_DRIVERS, GET_VEHICLE, GET_VEHICLE_TYPES } from "apollo/queries";
+import {
+  GET_DRIVERS,
+  GET_REGIONS,
+  GET_VEHICLE,
+  GET_VEHICLE_TYPES,
+} from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 import { showNotification } from "@mantine/notifications";
 
 const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
   const [updateVehicle, { loading: updateVehicleLoading }] =
-  useMutation(UPDATE_VEHICLE);
-  
+    useMutation(UPDATE_VEHICLE);
+  const [regionDropDownData, setRegionDropDownData] = useState([]);
+
   const [vehicleTypeDropDownData, setVehicleTypeDropDownData] = useState([]);
   const [driverDropDownData, setDriverDropDownData] = useState([]);
 
@@ -26,8 +32,7 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
   const { loading } = useQuery(GET_VEHICLE, {
     variables: { id: editId },
     onCompleted(data) {
-      //   console.log(data.vehicle.vehicle_type.id)
-
+      console.log(data);
       form.setValues({
         model: data.vehicle.model,
         owner_name: data.vehicle.owner_name,
@@ -36,6 +41,7 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
         owner_phone: data.vehicle.owner_phone,
         vehicle_type: { connect: parseInt(data.vehicle.vehicle_type.id) },
         driver: { connect: parseInt(data.vehicle.driver.id) },
+        region: { connect: parseInt(data.vehicle.region.id) },
       });
     },
     onError(err) {
@@ -85,12 +91,29 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
     },
   });
 
+  const { loading: region_loading } = useQuery(GET_REGIONS, {
+    variables: { first: 100, page: 1 },
+    onCompleted(data) {
+      const newArr = data.regions.data.map((element) => ({
+        label: element.name,
+        value: element.id,
+      }));
+      setRegionDropDownData(newArr);
+    },
+    onError() {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: "Something went wrong while fetching regions!",
+      });
+    },
+  });
+
   const submit = () => {
     console.log(form.values);
     updateVehicle({
       variables: {
         id: editId,
-        name: form.getInputProps("name").value,
         model: form.getInputProps("model").value,
         plate_number: form.getInputProps("plate_number").value,
         color: form.getInputProps("color").value,
@@ -98,6 +121,7 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
         owner_phone: form.getInputProps("owner_phone").value,
         driver: form.getInputProps("driver").value,
         vehicle_type: form.getInputProps("vehicle_type").value,
+        region: form.getInputProps("region").value,
       },
       onCompleted() {
         showNotification({
@@ -116,7 +140,6 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
           message: "Something went wrong while editing vehicle",
         });
       },
-
     });
   };
 
@@ -127,7 +150,9 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
   const setDriverDropDownValue = (val) => {
     form.setFieldValue("driver.connect", val);
   };
-
+  const setRegionDropDownValue = (val) => {
+    form.setFieldValue("region.connect", val);
+  };
   return (
     <>
       <LoadingOverlay
@@ -165,6 +190,14 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
                 {...form.getInputProps("color")}
                 withAsterisk
               />
+              <Select
+                label="Select Region"
+                searchable
+                placeholder="Pick one"
+                data={regionDropDownData}
+                value={form.getInputProps("region.connect").value?.toString()}
+                onChange={setRegionDropDownValue}
+              />
             </Grid.Col>
             <Grid.Col span={6}>
               <TextInput
@@ -189,7 +222,6 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
                   .value?.toString()}
                 onChange={setVehicleTypeDropDownValue}
               />
-              {/* pick driver  */}
               <Select
                 label="Select Driver"
                 placeholder="Pick one"
@@ -201,7 +233,17 @@ const VehicleEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
           </Grid>
           <Grid>
             <Grid.Col span={12}>
-              <Button type="submit" color="blue" variant="outline" fullWidth>
+              <Button
+                type="submit"
+                style={{
+                  marginTop: "20px",
+                  width: "20%",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                fullWidth
+                color="blue"
+              >
                 Submit
               </Button>
             </Grid.Col>

@@ -60,9 +60,9 @@ const Shipments = () => {
   const { data, loading, fetchMore, refetch } = useQuery(GET_SHIPMENTS, {
     variables: {
       first: parseInt(size),
-      status: dropoffStatus,
+      status:dropoffStatus,
       page: activePage,
-      search: searchValue,
+      search:searchValue
     },
   });
   const handleChange = (currentPage) => {
@@ -285,22 +285,15 @@ const Shipments = () => {
     setOpenedEdit(true);
     setEditId(id);
   };
-  const [confirmedSearch, setConfirmedSearch] = useState("");
-
   const clearFilter = () => {
-    setDropoffStatus(null);
-    setSearchValue("");
-    setConfirmedSearch("")
+    setDropoffStatus(null)
+    refetch();
+    setSearchValue(null)
   };
-
-  const handleManualSearch = (searchTerm) => {
-    setSearchValue(searchTerm);
-  };
-  const clearInput = () => {
-    setSearchValue("");
-    setDropoffStatus(null);
-    setConfirmedSearch("")
-  };
+  const clearInput =()=>{
+    refetch();
+    setSearchValue(null)
+  }
 
   return loading ? (
     <LoadingOverlay
@@ -390,11 +383,7 @@ const Shipments = () => {
         />
       </Drawer>
       <Card shadow="sm" p="lg">
-        <ShipmentCard
-          onCardClick={setDropoffStatus}
-          handelSearch={setSearchValue}
-          clearFilter={clearFilter}
-        />
+      <ShipmentCard onCardClick={setDropoffStatus} handelSearch={setSearchValue} clearFilter={clearFilter} />
         <ScrollArea style={{ overflowX: "hidden" }}>
           <B2bTable
             total={total}
@@ -403,9 +392,9 @@ const Shipments = () => {
             header={headerData}
             optionsData={optionsData}
             clearInput={clearInput}
-            handelSearch={handleManualSearch}
-            searchValue={confirmedSearch}
-            onSearchChange={setConfirmedSearch}
+            searchValue={searchValue}
+            handelSearch={setSearchValue}
+            onSearchChange={setSearchValue}
             loading={loading}
             data={data ? data.shipments.data : []}
             collapsible={checked}

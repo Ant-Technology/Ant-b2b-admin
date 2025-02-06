@@ -18,13 +18,16 @@ import Vehicles from "pages/vehicles";
 import Drivers from "pages/driver";
 import Users from "pages/users";
 import DropOffs from "pages/dropoffs";
-import Sales from "pages/sales"
-import Feedbacks from "pages/feedbacks"
+import Sales from "pages/sales";
+import Feedbacks from "pages/feedbacks";
 import Config from "pages/settings/config";
 import FeedbackTypes from "pages/feedbacks/feedback_type";
 import Activity from "pages/activityLogs";
 import Roles from "pages/settings/roles";
 import PaymentTypes from "pages/settings/payment_types";
+import SalesReport from "pages/report/salesReport";
+import RetailerReport from "pages/report/retailerReport";
+
 const RoutesComp = () => {
   return (
     <Routes>
@@ -48,13 +51,14 @@ const RoutesComp = () => {
       <Route path="/dropoffs" element={<DropOffs />} />
       <Route path="/login" element={<Login />} />
       <Route path="/sales" element={<Sales />} />
-      <Route path="/feedbacks" element={<Feedbacks/>}/>
-      <Route path="/feedback-types" element = {<FeedbackTypes/>}/>
-      <Route path="/config" element = {<Config/>}/>
-      <Route path="/activities" element = {<Activity/>} />
-      <Route path="/roles" element = {<Roles/>}/>
-      <Route path="/payment-types" element = {<PaymentTypes/>}/>
-
+      <Route path="/feedbacks" element={<Feedbacks />} />
+      <Route path="/feedback-types" element={<FeedbackTypes />} />
+      <Route path="/config" element={<Config />} />
+      <Route path="/activities" element={<Activity />} />
+      <Route path="/roles" element={<Roles />} />
+      <Route path="/payment-types" element={<PaymentTypes />} />
+      <Route path="/sales-report" element={<SalesReport />} />
+      <Route path="/retailer-report" element={<RetailerReport />} />
     </Routes>
   );
 };

@@ -207,7 +207,7 @@ const Drivers = () => {
         },
       };
       const response = await axios.get(
-        `${API}/drivers?search=${search}?page=${activePage}`,
+        `${API}/drivers?search=${search}& page=${activePage}`,
         config
       );
       if (response.data) {

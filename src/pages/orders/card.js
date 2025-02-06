@@ -47,12 +47,6 @@ export default function StatsGrid({ onCardClick, handelSearch, clearFilter }) {
   };
   return (
     <Group spacing="xs" position="left" style={{ paddingBottom: 16 }}>
-      <LoadingOverlay
-        visible={loading}
-        color="blue"
-        overlayBlur={2}
-        loader={customLoader}
-      />
       {/* Cancelled Button */}
       <Button
         onClick={() => handelOnClick("CANCELED")}

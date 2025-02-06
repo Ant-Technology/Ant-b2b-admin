@@ -76,7 +76,6 @@ const VehicleAddModal = ({
       setRegionDropDownData(newArr);
     },
     onError() {
-      setOpened(false);
       showNotification({
         color: "red",
         title: "Error",

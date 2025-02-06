@@ -43,7 +43,12 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
   }
   if (existingImage && !file) {
     previews.unshift(
-      <img key="existing" src={existingImage} alt="Existing Image" width="130" />
+      <img
+        key="existing"
+        src={existingImage}
+        alt="Existing Image"
+        width="130"
+      />
     );
   }
 
@@ -91,40 +96,36 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
   const { height } = useViewportSize();
 
   const submit = () => {
-    if (activeTab === tabList[tabList.length - 1].value) {
-      updateVehicleType({
-        variables: {
-          id: form.getInputProps("id").value,
-          type: form.getInputProps("type").value,
-          starting_price: parseFloat(form.values.starting_price),
-          price_per_kilometer: parseFloat(form.values.price_per_kilometer),
-          title: {
-            am: form.getInputProps("title.am").value,
-            en: form.getInputProps("title.en").value,
-          },
-          image: file, // Include the image in the mutation
+    updateVehicleType({
+      variables: {
+        id: form.getInputProps("id").value,
+        type: form.getInputProps("type").value,
+        starting_price: parseFloat(form.values.starting_price),
+        price_per_kilometer: parseFloat(form.values.price_per_kilometer),
+        title: {
+          am: form.getInputProps("title.am").value,
+          en: form.getInputProps("title.en").value,
         },
-        onCompleted() {
-          showNotification({
-            color: "green",
-            title: "Success",
-            message: "Vehicle type edited successfully",
-          });
-          form.reset();
-          setFile(null); // Clear the file
-          setOpenedEdit(false);
-        },
-        onError(err) {
-          showNotification({
-            color: "red",
-            title: "Error",
-            message: `${err}`,
-          });
-        },
-      });
-    } else {
-      setActiveTab(tabList[tabList.length - 1].value);
-    }
+        image: file, // Include the image in the mutation
+      },
+      onCompleted() {
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: "Vehicle type edited successfully",
+        });
+        form.reset();
+        setFile(null); // Clear the file
+        setOpenedEdit(false);
+      },
+      onError(err) {
+        showNotification({
+          color: "red",
+          title: "Error",
+          message: `${err}`,
+        });
+      },
+    });
   };
 
   const setTypeDropDownValue = (val) => {
@@ -148,104 +149,118 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
       </Tabs.List>
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
-          {tabList.map((tab, i) => (
-            <Tabs.Panel key={i} value={tab.value} pt="xs">
-              <Stack>
-                <Grid>
-                  <Grid.Col span={6}>
-                    <TextInput
-                      required
-                      label={tab.label}
-                      placeholder={tab.placeHolder}
-                      {...form.getInputProps("title." + tab.shortHand)}
-                    />
-                    <Select
-                      data={typeDropDownData}
-                      value={form.getInputProps("type")?.value?.toString()}
-                      onChange={setTypeDropDownValue}
-                      label="Type"
-                      placeholder="Pick a Type this Vehicle Type belongs to"
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={4}>
-                    <TextInput
-                      required
-                      label="Starting Price"
-                      placeholder="Starting Price"
-                      type="number"
-                      {...form.getInputProps("starting_price")}
-                    />
-                    <TextInput
-                      required
-                      label="Price Per Kilometer"
-                      placeholder="Price Per Kilometer"
-                      type="number"
-                      {...form.getInputProps("price_per_kilometer")}
-                    />
-                  </Grid.Col>
-                </Grid>
-                <Grid>
-                  <Grid.Col span={12}>
-                    <div>
-                      <Button
-                        onClick={() => fileInputRef.current.click()}
-                        style={{
-                          marginTop: "5px",
-                          width: "20%",
-                          backgroundColor: "#FF6A00",
-                          color: "#FFFFFF",
-                        }}
-                        fullWidth
-                        color="blue"
-                      >
-                        Upload Image
-                      </Button>
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        accept="image/*"
-                        style={{ display: "none" }}
-                        onChange={handleFileChange}
-                      />
-                      <SimpleGrid
-                        cols={4}
-                        breakpoints={[{ maxWidth: "sm", cols: 1 }]}
-                        mt={previews?.length > 0 ? "xl" : 0}
-                      >
-                        {previews}
-                      </SimpleGrid>
-                      {file && (
-                        <Button
-                          onClick={() => setFile(null)}
-                          color="red"
-                          style={{ marginTop: "10px" }}
-                        >
-                          Clear Image
-                        </Button>
-                      )}
-                    </div>
-                  </Grid.Col>
-                </Grid>
-                <Grid>
-                  <Grid.Col span={12}>
+          <Stack>
+            <Grid>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Vehicle Type (English)"
+                  placeholder="Enter Vehicle Type in English"
+                  {...form.getInputProps("title.en")}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Vehicle Type (Amharic)"
+                  placeholder="Enter Vehicle Type in Amharic"
+                  {...form.getInputProps("title.am")}
+                />
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Select
+                  data={typeDropDownData}
+                  value={form.getInputProps("type")?.value?.toString()}
+                  onChange={setTypeDropDownValue}
+                  label="Type"
+                  placeholder="Pick a Type this Vehicle Type belongs to"
+                />
+                <TextInput
+                  required
+                  label="Starting Price"
+                  placeholder="Starting Price"
+                  type="number"
+                  {...form.getInputProps("starting_price")}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Starting Price"
+                  placeholder="Starting Price"
+                  type="number"
+                  {...form.getInputProps("starting_price")}
+                />
+                <TextInput
+                  required
+                  label="Price Per Kilometer"
+                  placeholder="Price Per Kilometer"
+                  type="number"
+                  {...form.getInputProps("price_per_kilometer")}
+                />
+              </Grid.Col>
+            </Grid>
+            <Grid>
+              <Grid.Col span={12}>
+                <div>
+                  <Button
+                    onClick={() => fileInputRef.current.click()}
+                    style={{
+                      marginTop: "5px",
+                      width: "20%",
+                      backgroundColor: "#FF6A00",
+                      color: "#FFFFFF",
+                    }}
+                    fullWidth
+                    color="blue"
+                  >
+                    Upload Image
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleFileChange}
+                  />
+                  <SimpleGrid
+                    cols={4}
+                    breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                    mt={previews?.length > 0 ? "xl" : 0}
+                  >
+                    {previews}
+                  </SimpleGrid>
+                  {file && (
                     <Button
-                      type="submit"
-                      style={{
-                        marginTop: "10px",
-                        width: "20%",
-                        backgroundColor: "#FF6A00",
-                        color: "#FFFFFF",
-                      }}
-                      fullWidth
-                      color="blue"
+                      onClick={() => setFile(null)}
+                      color="red"
+                      style={{ marginTop: "10px" }}
                     >
-                      Submit
+                      Clear Image
                     </Button>
-                  </Grid.Col>
-                </Grid>
-              </Stack>
-            </Tabs.Panel>
-          ))}
+                  )}
+                </div>
+              </Grid.Col>
+            </Grid>
+            <Grid>
+              <Grid.Col span={12}>
+                <Button
+                  type="submit"
+                  style={{
+                    marginTop: "10px",
+                    width: "20%",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
+                  fullWidth
+                  color="blue"
+                >
+                  Submit
+                </Button>
+              </Grid.Col>
+            </Grid>
+          </Stack>
         </form>
       </ScrollArea>
     </Tabs>
