@@ -24,16 +24,17 @@ import UserEditModal from "components/User/UserEditModal";
 import { customLoader } from "components/utilities/loader";
 import React, { useEffect } from "react";
 import { useState } from "react";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const Users = () => {
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   //pagination states
   const [activePage, setActivePage] = useState(1);
@@ -43,10 +44,10 @@ const Users = () => {
     variables: {
       first: parseInt(size),
       page: activePage,
+      search: searchValue,
     },
   });
 
- 
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
@@ -55,7 +56,7 @@ const Users = () => {
     if (data) {
       setTotal(data.users.paginatorInfo.lastPage);
     }
-  }, [data, size]); 
+  }, [data, size]);
 
   const [delUser] = useMutation(DEL_USER, {
     update(cache, { data: { deleteUser } }) {
@@ -165,7 +166,7 @@ const Users = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <div style={{display:"flex"}}>
+          <div style={{ display: "flex" }}>
             <Controls.ActionButton
               color="primary"
               title="Update"
@@ -183,7 +184,7 @@ const Users = () => {
             <Controls.ActionButton
               color="primary"
               title={rowData.status ? "Deactivate" : "Activate"}
-              onClick={() => handleUserStatusChange(rowData.id,rowData.status)}
+              onClick={() => handleUserStatusChange(rowData.id, rowData.status)}
             >
               {rowData.status ? (
                 <CancelIcon size={17} />
@@ -223,11 +224,10 @@ const Users = () => {
     },
   });
 
-
   const handleUserStatusChange = (id, currentStatus) => {
     changeUserStatus({
       variables: {
-        id: id,  // Ensure id is an integer
+        id: id, // Ensure id is an integer
         status: !currentStatus, // Toggle the status
       },
     });
@@ -283,7 +283,15 @@ const Users = () => {
       },
     });
   };
+    const [confirmedSearch, setConfirmedSearch] = useState("");
 
+  const handleManualSearch = (searchTerm) => {
+    setSearchValue(searchTerm);
+  };
+  const clearInput = () => {
+    setSearchValue("");
+    setConfirmedSearch("")
+  };
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -367,6 +375,10 @@ const Users = () => {
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             optionsData={optionsData}
             loading={loading}
             data={data ? data.users.data : []}

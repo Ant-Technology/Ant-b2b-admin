@@ -16,6 +16,7 @@ import {
   Tooltip,
   Select,
 } from "@mantine/core";
+import { X } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { customLoader } from "components/utilities/loader";
 import { Plus, Search } from "tabler-icons-react";
@@ -169,23 +170,32 @@ const B2bTable = ({
   clearFilter,
   dropoffStatus,
   handelSearch,
+  clearInput,
+  searchValue, // Receive search value from parent
+  onSearchChange,
 }) => {
   const { classes } = useStyles();
-  const [search, setSearch] = useState("");
+  const [localSearch, setLocalSearch] = useState("");
+
   const [sortedData, setSortedData] = useState(data);
   const [sortBy, setSortBy] = useState(null);
 
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-
+  const handleClearSearch = () => {
+    setLocalSearch("");
+    clearInput();
+  };
   const setSorting = (field) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(sortData(data, { sortBy: field, reversed, search }));
+    setSortedData(
+      sortData(data, { sortBy: field, reversed, search: searchValue })
+    );
   };
 
-  const handleSearchChange = (event) => {
-    handelSearch(search);
+  const handleSearchChange = () => {
+    handelSearch(searchValue);
   };
 
   const rows = sortedData.map((row) => (
@@ -250,16 +260,24 @@ const B2bTable = ({
         <div> </div>
         <div className={classes.searchContainer}>
           <TextInput
+            className={classes.searchInput}
             placeholder="Search"
             mb="md"
-            icon={<Search size={14} />}
-            value={search}
-            onChange={(event) => setSearch(event.currentTarget.value)}
-            className={classes.searchInput}
+            value={searchValue} // Use prop value
+            onChange={(event) => onSearchChange(event.currentTarget.value)}
+            rightSection={
+              searchValue && (
+                <UnstyledButton onClick={handleClearSearch}>
+                  {" "}
+                  {/* Clear the input */}
+                  <X size={16} color="red" />
+                </UnstyledButton>
+              )
+            }
           />
           <button
             className={classes.searchButton}
-            onClick={handleSearchChange}
+            onClick={handleSearchChange} // This will not clear the input
           >
             <Search size={16} />
           </button>

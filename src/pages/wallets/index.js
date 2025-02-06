@@ -31,6 +31,7 @@ import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
 import { API } from "utiles/url";
+import { X } from "tabler-icons-react"; // Import a close icon
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -61,6 +62,32 @@ const useStyles = createStyles((theme) => ({
     fontSize: "10px",
     textTransform: "uppercase",
     fontWeight: "bold",
+  },
+
+  searchContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+  },
+  searchInput: {
+    flexGrow: 1,
+    paddingRight: "50px", // Add padding to avoid text overlap with button
+  },
+  searchButton: {
+    position: "absolute",
+    right: 0,
+    borderRadius: "0 4px 4px 0",
+    height: "70%",
+    width: "40px", // Fixed width for the button
+    backgroundColor: "#FF6A00",
+    color: "#FFFFFF",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+    cursor: "pointer",
   },
 }));
 
@@ -115,7 +142,7 @@ const Wallets = () => {
   }, [activePage]);
 
   const fetchData = async (page) => {
-    setLoading(true)
+    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -132,24 +159,38 @@ const Wallets = () => {
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
-        setLoading(false)
+        setLoading(false);
       }
     } catch (error) {
-      setLoading(true)
+      setLoading(true);
       console.error("Error fetching data:", error);
     }
   };
 
-  const handleSearchChange = (event) => {
-    const { value } = event.currentTarget;
-    setSearch(value);
-    setSortedData(
-      sortData(Wallets, {
-        sortBy,
-        reversed: reverseSortDirection,
-        search: value,
-      })
-    );
+  const handleSearchChange = async (event) => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(
+        `${API}/deposit-slips?search=${search}& page=${activePage}`,
+        config
+      );
+      if (response.data) {
+        setWallets(response.data.data);
+        setSortedData(response.data.data);
+        setTotal(response.data?.links);
+        setTotalPages(response.data.last_page);
+        setLoading(false);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching data:", error);
+    }
   };
 
   const sortData = (data, payload) => {
@@ -206,7 +247,9 @@ const Wallets = () => {
     <Fragment key={row.id}>
       <tr>
         <td>{row.reference_number}</td>
-        <td>{row.amount} <span style={{marginLeft:"7px"}}>ETB</span></td>
+        <td>
+          {row.amount} <span style={{ marginLeft: "7px" }}>ETB</span>
+        </td>
         <td>
           {row.confirmed_at
             ? new Date(row.confirmed_at).toLocaleDateString()
@@ -226,15 +269,15 @@ const Wallets = () => {
           )}
         </td>
         <td>
-        <span style={{ marginLeft: "1px" }}>
-              <Controls.ActionButton
-                color="primary"
-                title="View Detail"
-                onClick={() => handleManageDepositSlip(`${row.id}`)}
-              >
-                <FiEye fontSize="medium" />
-              </Controls.ActionButton>
-            </span>
+          <span style={{ marginLeft: "1px" }}>
+            <Controls.ActionButton
+              color="primary"
+              title="View Detail"
+              onClick={() => handleManageDepositSlip(`${row.id}`)}
+            >
+              <FiEye fontSize="medium" />
+            </Controls.ActionButton>
+          </span>
         </td>
       </tr>
     </Fragment>
@@ -284,14 +327,34 @@ const Wallets = () => {
           <SimpleGrid cols={3}>
             <div></div>
             <div> </div>
-            <div>
+            <div className={classes.searchContainer}>
               <TextInput
-                placeholder="Search by any field"
+                placeholder="Search"
                 mb="md"
                 icon={<Search size={14} />}
                 value={search}
-                onChange={handleSearchChange}
+                onChange={(event) => setSearch(event.currentTarget.value)}
+                className={classes.searchInput}
+                rightSection={
+                  search && ( // Show clear icon only if there's text in the input
+                    <UnstyledButton
+                      onClick={() => {
+                        setSearch(""); // Clear the search input
+                        fetchData(activePage); // Fetch all drivers again
+                      }}
+                      style={{ padding: 5 }} // Adjust padding for better click area
+                    >
+                      <X size={16} color="red" /> {/* Clear icon */}
+                    </UnstyledButton>
+                  )
+                }
               />
+              <button
+                className={classes.searchButton}
+                onClick={handleSearchChange}
+              >
+                <Search size={16} />
+              </button>
             </div>
           </SimpleGrid>
           <Table
@@ -301,16 +364,12 @@ const Wallets = () => {
             sx={{ tableLayout: "fixed", minWidth: 700 }}
           >
             <thead>
-              <tr
-               style={{ backgroundColor: "#F1F1F1" }}
-              >
+              <tr style={{ backgroundColor: "#F1F1F1" }}>
                 <Th
                   sortable={false}
                   onSort={() => handleSort("reference_number")}
                 >
-                  <span className={classes.th}>
-                    Reference Number
-                  </span>
+                  <span className={classes.th}>Reference Number</span>
                 </Th>
                 <Th sortable onSort={() => handleSort("amount")}>
                   <span className={classes.th}>Amount</span>

@@ -153,6 +153,7 @@ const Drivers = () => {
   }, [activePage]);
 
   const fetchData = async (page) => {
+    setLoading(true)
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -162,12 +163,14 @@ const Drivers = () => {
       };
       const response = await axios.get(`${API}/sales?page=${page}`, config);
       if (response.data) {
+        setLoading(false)
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
       }
     } catch (error) {
+      setLoading(false)
       console.error("Error fetching data:", error);
     }
   };

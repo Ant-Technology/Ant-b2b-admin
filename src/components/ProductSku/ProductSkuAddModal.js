@@ -36,6 +36,7 @@ const ProductSkuAddModal = ({
       price: "",
       is_active: false,
       product: null,
+      buy_price: "",
       variants: [],
     },
     validate: {
@@ -48,6 +49,18 @@ const ProductSkuAddModal = ({
         }
         if (parseFloat(value) <= 0) {
           return "Price must be a positive number";
+        }
+        return null;
+      },
+      buy_price: (value) => {
+        if (value === "") {
+          return "Buy price is required";
+        }
+        if (isNaN(value)) {
+          return "Buy price  must be a valid number";
+        }
+        if (parseFloat(value) <= 0) {
+          return "Buy price  must be a positive number";
         }
         return null;
       },
@@ -98,6 +111,7 @@ const ProductSkuAddModal = ({
         is_active: form.values.is_active,
         product: form.values.product,
         variants: form.values.variants,
+        buy_price: parseFloat(form.values.buy_price)
       },
       onCompleted(data) {
         showNotification({
@@ -109,6 +123,7 @@ const ProductSkuAddModal = ({
         setOpened(false);
       },
       onError(err) {
+        setOpened(true)
         showNotification({
           color: "red",
           title: "Error",
@@ -119,6 +134,7 @@ const ProductSkuAddModal = ({
   };
 
   const setProductToSelect = (val) => {
+    console.log(val)
     form.setFieldValue("product", parseInt(val));
     setSelectedProduct(data.products.data.find((item) => item.id === val));
   };
@@ -147,7 +163,7 @@ const ProductSkuAddModal = ({
                 {...form.getInputProps("price")}
                 type="number"
                 placeholder="price"
-                label="PRICE"
+                label="Price"
                 error={form.errors.price}
                 onChange={(e) => form.setFieldValue("price", e.target.value)}
               />
@@ -168,6 +184,14 @@ const ProductSkuAddModal = ({
               </div>
             </Grid.Col>
             <Grid.Col span={6}>
+            <TextInput
+                {...form.getInputProps("buy_price")}
+                type="number"
+                placeholder="Buy price"
+                label="Buy price"
+                error={form.errors.buy_price}
+                onChange={(e) => form.setFieldValue("buy_price", e.target.value)}
+              />
               <Select
                 searchable
                 data={dropDownData}

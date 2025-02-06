@@ -152,7 +152,7 @@ export const RoleAddModal = ({ setOpened, fetchData }) => {
                                 <Grid.Col span={12} key={perm.name}>
                                   <Checkbox
                                     value={perm.name}
-                                    label={perm.display_name}
+                                    label={perm.display_name?perm.display_name:perm.name}
                                   />
                                 </Grid.Col>
                               ))}

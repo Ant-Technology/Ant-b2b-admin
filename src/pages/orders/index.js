@@ -33,14 +33,14 @@ const Orders = () => {
   //pagination states
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [search, setSearch] = useState(null); // Track selected status
+  const [searchValue, setSearchValue] = useState("");
   const { data, loading, fetchMore, refetch } = useQuery(
     dropoffStatus ? GET_ORDERS_BY_STATUS : GET_ORDERS,
     {
       variables: dropoffStatus
         ? {
             status: dropoffStatus,
-            search: search,
+            search: searchValue,
             first: parseInt(size),
             page: activePage,
             ordered_by: [
@@ -53,7 +53,7 @@ const Orders = () => {
         : {
             first: parseInt(size), // Pass size dynamically
             page: activePage,
-            search: search,
+            search: searchValue,
           },
 
       onCompleted: (data) => {
@@ -109,15 +109,19 @@ const Orders = () => {
     };
   }, [dropoffStatus, refetch]); // Include `refetch` in the dependencies array
 
-  // Define a state to store the list of orders
+  const [confirmedSearch, setConfirmedSearch] = useState("");
 
   const [orders, setOrders] = useState([]);
 
   const clearFilter = () => {
-    setDropoffStatus(null); // Clear the filter
-    refetch(); // Refetch data using GET_ORDERS
-    setActivePage(1); // Reset to the first page
-    setSearch(null)
+    setDropoffStatus(null);
+    setSearchValue("");
+  };
+
+  const clearInput = () => {
+    setSearchValue("");
+    setDropoffStatus(null);
+    setConfirmedSearch("")
   };
   const headerData = [
     {
@@ -218,6 +222,9 @@ const Orders = () => {
     setOpenedEdit(true);
     setEditId(id);
   };
+  const handleManualSearch = (searchTerm) => {
+    setSearchValue(searchTerm);
+  };
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -253,14 +260,21 @@ const Orders = () => {
       </Drawer>
 
       <Card shadow="sm" p="lg">
-        <OrderCard onCardClick={setDropoffStatus} handelSearch={setSearch} clearFilter={clearFilter} />
+        <OrderCard
+          onCardClick={setDropoffStatus}
+          handelSearch={setSearchValue}
+          clearFilter={clearFilter}
+        />
         <ScrollArea>
           <B2bTable
             total={total}
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
-            handelSearch={setSearch}
+            handelSearch={handleManualSearch}
+            clearInput={clearInput}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             dropoffStatus={dropoffStatus}
             loading={loading}
             data={

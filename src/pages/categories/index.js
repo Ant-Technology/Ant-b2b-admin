@@ -44,6 +44,12 @@ const Categories = () => {
     variables: {
       first: parseInt(size), // Pass size dynamically
       page: activePage,
+      ordered_by: [
+        {
+          column: "NAME",
+          order: "DESC",
+        },
+      ],
     },
   });
 

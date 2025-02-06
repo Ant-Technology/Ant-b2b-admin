@@ -242,10 +242,14 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
                 fullWidth
                 style={{ width: "200px" }} // Set a specific width for the button
                 onClick={() => {
-                  form.insertListItem("childrens.create", {
+                  form.insertListItem("childrens.update", {
                     name: { en: "", am: "" },
                     image: "",
                   });
+                  setSubCategoryFiles((prev) => ({
+                    ...prev,
+                    [form.values.childrens.update.length]: null,
+                  }));
                 }}
               >
                 Add new sub category

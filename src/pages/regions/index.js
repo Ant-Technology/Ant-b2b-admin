@@ -29,6 +29,7 @@ const Regions = () => {
   const [deleteID, setDeleteID] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
   const [region, setRegion] = useState();
+  const [searchValue, setSearchValue] = useState("");
 
   //pagination states
   const [activePage, setActivePage] = useState(1);
@@ -38,6 +39,7 @@ const Regions = () => {
     variables: {
       first: parseInt(size),
       page: activePage,
+      search: searchValue
     },
   });
 
@@ -230,7 +232,15 @@ const Regions = () => {
   };
 
   const theme = useMantineTheme();
+  const [confirmedSearch, setConfirmedSearch] = useState("");
 
+  const handleManualSearch = (searchTerm) => {
+    setSearchValue(searchTerm);
+  };
+  const clearInput = () => {
+    setSearchValue("");
+    setConfirmedSearch("")
+  };
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -319,6 +329,10 @@ const Regions = () => {
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             optionsData={optionsData}
             loading={loading}
             data={data ? data.regions.data : []}

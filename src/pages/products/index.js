@@ -34,7 +34,8 @@ const Products = () => {
   const [hasMounted, setHasMounted] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
-  //
+  const [searchValue, setSearchValue] = useState("");
+  const [confirmedSearch, setConfirmedSearch] = useState("");
   const [opened, setOpened] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
@@ -50,7 +51,7 @@ const Products = () => {
     {
       variables: categoryId
         ? {
-          category_id: categoryId, // Ensure this matches exactly with backend
+            category_id: categoryId, // Ensure this matches exactly with backend
             first: parseInt(size), // Pass size dynamically
             page: activePage,
             ordered_by: [
@@ -59,10 +60,12 @@ const Products = () => {
                 order: "DESC",
               },
             ],
+            search: searchValue,
           }
         : {
-            first: parseInt(size), // Pass size dynamically
+            first: parseInt(size),
             page: activePage,
+            search: searchValue,
           },
 
       onCompleted: (data) => {
@@ -258,7 +261,16 @@ const Products = () => {
     setOpenedEdit(true);
     setEditId(id);
   };
-  const handleCategoryFilterClick = (categoryId) => {};
+
+  const handleManualSearch = (searchTerm) => {
+    setSearchValue(searchTerm);
+  };
+  console.log(categoryId);
+  const clearInput = () => {
+    setSearchValue("");
+    setConfirmedSearch("");
+  };
+
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -355,14 +367,16 @@ const Products = () => {
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             optionsData={optionsData}
             loading={loading}
             filterData={({ onCardClick }) => (
-              <CategoryFilter onCardClick={setCategoryId} />
+              <CategoryFilter category={categoryId} onCardClick={setCategoryId} />
             )}
-            data={
-              data?.products?.data || data?.filterProducts?.data || []
-            }
+            data={data?.products?.data || data?.filterProducts?.data || []}
             size={size}
             handlePageSizeChange={handlePageSizeChange}
           />

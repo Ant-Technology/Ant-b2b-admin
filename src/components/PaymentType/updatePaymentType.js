@@ -45,8 +45,9 @@ const PaymentTypeUpdateModal = ({ setOpened, data, editId, fetchDta }) => {
   const submit = () => {
     editPayment({
       variables: {
+        id:data.id,
         input: {
-          id: parseInt(data.id),
+          //id: parseInt(data.id),
           name: form.getInputProps("name").value,
           logo: files.length > 0 ? files[files.length - 1] : null,
         },

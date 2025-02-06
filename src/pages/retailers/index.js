@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import { showNotification } from "@mantine/notifications";
 import { DEL_RETAILER } from "apollo/mutuations";
 import { GET_RETAILERS } from "apollo/queries";
@@ -25,9 +25,10 @@ import RetailerEditModal from "components/Retailer/RetailerEditModal";
 import RetailerDetailModal from "components/Retailer/RetailerDetail";
 
 import { Tooltip } from "@mui/material";
+import { formatNumber } from "utiles/url";
 
 const Retailers = () => {
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -46,7 +47,6 @@ const Retailers = () => {
     },
   });
 
-
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
@@ -55,7 +55,7 @@ const Retailers = () => {
     if (data) {
       setTotal(data.retailers.paginatorInfo.lastPage);
     }
-  }, [data, size]); 
+  }, [data, size]);
 
   const [delRetailer] = useMutation(DEL_RETAILER, {
     update(cache, { data: { deleteRetailer } }) {
@@ -194,6 +194,15 @@ const Retailers = () => {
       },
     },
     {
+      label: "Balance",
+      key: "balance",
+      sortable: false,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.wallet ? formatNumber(rowData.wallet.balance) : 0}</span>;
+      },
+    },
+    {
       label: "Actions",
       key: "actions",
       sortable: false,
@@ -206,7 +215,7 @@ const Retailers = () => {
               title="Update"
               onClick={() => handleEditRetailer(`${rowData.id}`)}
             >
-              <EditIcon style={{ fontSize: '1rem' }}/>
+              <EditIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>
             <span style={{ marginLeft: "1px" }}>
               <Controls.ActionButton

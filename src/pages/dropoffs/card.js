@@ -63,7 +63,7 @@ export default function StatsGrid({ onCardClick, handelSearch,clearFilter }) {
       <Button
         color="#00688B"
         radius="md"
-        onClick={() => onCardClick("STARTED")}
+        onClick={() => handelOnClick("STARTED")}
         styles={{
           root: {
             fontWeight: "bold",
@@ -83,7 +83,7 @@ export default function StatsGrid({ onCardClick, handelSearch,clearFilter }) {
         </Badge>
       </Button>
       <Button
-        onClick={() => onCardClick("FINISHED")}
+        onClick={() => handelOnClick("FINISHED")}
         color="blue"
         radius="md"
         styles={{
@@ -106,7 +106,7 @@ export default function StatsGrid({ onCardClick, handelSearch,clearFilter }) {
       </Button>
       <Button
         color="green"
-        onClick={() => onCardClick("DRIVER_ACCEPTED")}
+        onClick={() => handelOnClick("DRIVER_ACCEPTED")}
         radius="md"
         styles={{
           root: {

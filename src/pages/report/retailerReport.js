@@ -1,4 +1,6 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
+import { X } from "tabler-icons-react"; // Import a close icon
+
 import {
   Badge,
   Card,
@@ -20,21 +22,23 @@ import {
   Tooltip,
   Modal,
 } from "@mantine/core";
-import { Edit, Trash } from "tabler-icons-react";
-import axios from "axios";
+import { FiEdit, FiEye } from "react-icons/fi";
 import EditIcon from "@mui/icons-material/Edit";
-import { X } from "tabler-icons-react"; // Import a close icon
+
+import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
+import axios from "axios";
+import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
+import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
-
-import { DEL_PRODUCT_SKU, DEL_STOCK } from "apollo/mutuations";
-import ProductSkuAddModal from "components/ProductSku/ProductSkuAddModal";
-import ProductSkuEditModal from "components/ProductSku/ProductSkuEditModal";
-import Controls from "components/controls/Controls";
+import SalesDetailModal from "components/Sales/SalesDetailModal";
+import { SalesEditModal } from "components/Sales/SalesUpdateModal";
+import { SalesAddModal } from "components/Sales/SalesAddModal";
 import { API } from "utiles/url";
+import Controls from "components/controls/Controls";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -58,7 +62,15 @@ const useStyles = createStyles((theme) => ({
     height: 21,
     borderRadius: 21,
   },
+  thh: {
+    color: "#666666",
+    fontFamily: "'__Inter_aaf875','__Inter_Fallback_aaf875'",
+    fontSize: "10px",
+    textTransform: "uppercase",
+    fontWeight: "bold",
+  },
   
+
   searchContainer: {
     position: "relative",
     display: "flex",
@@ -115,7 +127,8 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
   );
 }
 
-const Drivers = () => {
+const RetailerReport = () => {
+  const { classes } = useStyles();
   const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
@@ -123,7 +136,7 @@ const Drivers = () => {
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState([]);
-  const { classes } = useStyles();
+
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [editRow, setEditRow] = useState();
@@ -140,7 +153,7 @@ const Drivers = () => {
   }, [activePage]);
 
   const fetchData = async (page) => {
-    setLoading(true);
+    setLoading(true)
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -148,47 +161,30 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(
-        `${API}/product-skus?page=${page}`,
-        config
-      );
+      const response = await axios.get(`${API}/sales?page=${page}`, config);
       if (response.data) {
-        setLoading(false);
+        setLoading(false)
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
       }
     } catch (error) {
-      setLoading(false);
+      setLoading(false)
       console.error("Error fetching data:", error);
     }
   };
 
-  const handleSearchChange = async(event) => {
-    setLoading(true);
-    try {
-      let token = localStorage.getItem("auth_token");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      const response = await axios.get(
-        `${API}/product-skus?search=${search}& page=${activePage}`,
-        config
-      );
-      if (response.data) {
-        setDrivers(response.data.data);
-        setSortedData(response.data.data);
-        setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
-        setLoading(false);
-      }
-    } catch (error) {
-      setLoading(false);
-      console.error("Error fetching data:", error);
-    }
+  const handleSearchChange = (event) => {
+    const { value } = event.currentTarget;
+    setSearch(value);
+    setSortedData(
+      sortData(drivers, {
+        sortBy,
+        reversed: reverseSortDirection,
+        search: value,
+      })
+    );
   };
 
   const sortData = (data, payload) => {
@@ -218,6 +214,16 @@ const Drivers = () => {
     setSortBy(field);
     setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
   };
+  const handleEditSales = (id, row) => {
+    setOpenedEdit(true);
+    setEditId(id);
+    setEditRow(row);
+  };
+  const [isHovered, setIsHovered] = useState(false);
+  const handleManageSales = (id) => {
+    setEditId(id);
+    setOpenedDetail(true);
+  };
 
   const filterData = (data, search) => {
     const query = search.toLowerCase().trim();
@@ -234,75 +240,72 @@ const Drivers = () => {
     setOpenedDelete(true);
     setDeleteID(id);
   };
-  const [delProductSku, { loading: delLoading }] = useMutation(DEL_PRODUCT_SKU);
 
-  const deleteSku = () => {
-    delProductSku({
-      variables: { id: deleteID },
-      onCompleted(data) {
+  const deleteSales = async () => {
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.delete(`${API}/sales/${deleteID}`, config);
+      if (response.data) {
         fetchData(activePage);
         setOpenedDelete(false);
         setDeleteID(null);
         showNotification({
           color: "green",
           title: "Success",
-          message: "Product variant Deleted!",
+          message: "Sales Deleted Successfully",
         });
-      },
-      onError(data) {
-        setOpenedDelete(false);
-        showNotification({
-          color: "red",
-          title: "Error",
-          message: "Product variant Not Deleted!",
-        });
-      },
-    });
-  };
-  const handleEdit = (id) => {
-    setOpenedEdit(true);
-    setEditId(id);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setOpenedDelete(false);
+      setDeleteID(null);
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `Sales Not Deleted Successfully`,
+      });
+    }
   };
 
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
-        <td>{row.id}</td>
-        <td>{row.sku}</td>
-        <td>{row.variants?.length}</td>
-        <td>{row.product?.name.en}</td>
-        <td>{row.product?.category?.name.en}</td>
-        <td>{row.order_items_count}</td>
-        <td>{row.price}</td>
-        <td>{row.buy_price}</td>
+        <td>{row.name}</td>
+        <td>{row.email}</td>
+        <td>{row.phone}</td>
+        <td>{row.retailers_count}</td>
         <td>
-          {row.is_active === 1 ? (
-            <Badge variant="light" color="green">
-              Active
-            </Badge>
-          ) : (
-            <Badge variant="light" color="red">
-              Not Active
-            </Badge>
-          )}
-        </td>
-        <td>
-          <Controls.ActionButton
-            color="primary"
-            title="Update"
-            onClick={() => handleEdit(`${row.id}`)}
-          >
-            <EditIcon style={{ fontSize: "1rem" }} />
-          </Controls.ActionButton>
-
-          <Controls.ActionButton
-            color="primary"
-            title="Delete"
-            onClick={() => handleDelete(`${row.id}`)}
-          >
-            <Trash size={17} />
-          </Controls.ActionButton>
+          <>
+            <Controls.ActionButton
+              color="primary"
+              title="Update"
+              onClick={() => handleEditSales(`${row.id}`)}
+            >
+              <EditIcon style={{ fontSize: "1rem" }} />
+            </Controls.ActionButton>
+            <span style={{ marginLeft: "1px" }}>
+              <Controls.ActionButton
+                color="primary"
+                title="View Detail"
+                onClick={() => handleManageSales(`${row.id}`)}
+              >
+                <FiEye fontSize="medium" />
+              </Controls.ActionButton>
+            </span>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${row.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
+          </>
         </td>
       </tr>
     </Fragment>
@@ -310,7 +313,7 @@ const Drivers = () => {
 
   return loading ? (
     <LoadingOverlay
-      visible={loading || delLoading}
+      visible={loading}
       color="blue"
       overlayBlur={2}
       loader={customLoader}
@@ -319,11 +322,6 @@ const Drivers = () => {
     <div style={{ width: "98%", margin: "auto" }}>
       <Drawer
         opened={openedEdit}
-        onClose={() => setOpenedEdit(false)}
-        title="Editing Product Variant"
-        padding="xl"
-        size="60%"
-        position="bottom"
         overlayColor={
           theme.colorScheme === "dark"
             ? theme.colors.dark[9]
@@ -331,50 +329,67 @@ const Drivers = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
+        title="Editing a Sales"
+        padding="xl"
+        onClose={() => setOpenedEdit(false)}
+        position="bottom"
+        size="80%"
       >
-        <ProductSkuEditModal
+        <SalesEditModal
+          activePage={activePage}
+          fetchData={fetchData}
+          editRow={editRow}
           setOpenedEdit={setOpenedEdit}
           editId={editId}
-          fetchData={fetchData}
-          activePage={activePage}
         />
       </Drawer>
-
       <Drawer
         opened={opened}
         onClose={() => setOpened(false)}
-        title="Adding Product Variant"
+        title="Adding a Sales"
         padding="xl"
-        size="60%"
+        size="80%"
         position="bottom"
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
       >
-        <ProductSkuAddModal
+        <SalesAddModal
           total={total}
+          setTotal={setTotal}
           activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}
           fetchData={fetchData}
-          totalPages={totalPages}
         />
       </Drawer>
-
+      <Drawer
+        opened={openedDetail}
+        overlayColor={
+          theme.colorScheme === "dark"
+            ? theme.colors.dark[9]
+            : theme.colors.gray[2]
+        }
+        overlayOpacity={0.55}
+        overlayBlur={3}
+        title="Sales Detail"
+        padding="xl"
+        onClose={() => setOpenedDetail(false)}
+        position="bottom"
+        size="80%"
+      >
+        <SalesDetailModal Id={editId} />
+      </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
           <SimpleGrid cols={3}>
             <div>
               <Button
                 onClick={() => setOpened(true)}
-                style={{ backgroundColor: "#FF6A00", color: "#FFFFFF" }}
+                style={{
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
                 leftIcon={<Plus size={14} />}
               >
-                Add Product Sku
+                Add Sales
               </Button>
             </div>
             <div></div>
@@ -388,15 +403,15 @@ const Drivers = () => {
                 onChange={(event) => setSearch(event.currentTarget.value)}
                 className={classes.searchInput}
                 rightSection={
-                  search && ( 
+                  search && ( // Show clear icon only if there's text in the input
                     <UnstyledButton
                       onClick={() => {
-                        setSearch(""); 
-                        fetchData(activePage);
+                        setSearch(""); // Clear the search input
+                        fetchData(activePage); // Fetch all drivers again
                       }}
-                      style={{ padding: 5 }}
+                      style={{ padding: 5 }} // Adjust padding for better click area
                     >
-                      <X size={16} color="red" />
+                      <X size={16} color="red" /> {/* Clear icon */}
                     </UnstyledButton>
                   )
                 }
@@ -416,35 +431,23 @@ const Drivers = () => {
             sx={{ tableLayout: "fixed", minWidth: 700 }}
           >
             <thead>
-              <tr>
-                <Th sortable={false} onSort={() => handleSort("id")}>
-                  ID
+              <tr style={{ backgroundColor: "#F1F1F1" }}>
+                <Th sortable onSort={() => handleSort("name")}>
+                  <span className={classes.thh}> Name </span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("name")}>
-                  SKU
+                <Th sortable onSort={() => handleSort("email")}>
+                  <span className={classes.thh}> Email</span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("email")}>
-                  Variant
+                <Th sortable onSort={() => handleSort("phone")}>
+                  <span className={classes.thh}> Phone</span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("phone")}>
-                  Product Name
+                <Th sortable onSort={() => handleSort("retailers_count")}>
+                  <span className={classes.thh}> Retailers Count</span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("email")}>
-                  Category
+                <Th sortable={false}>
+                  {" "}
+                  <span className={classes.thh}>Actions</span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("phone")}>
-                  Order Count
-                </Th>
-                <Th sortable={false} onSort={() => handleSort("email")}>
-                  Price
-                </Th>
-                <Th sortable={false} onSort={() => handleSort("email")}>
-                  Buy Price
-                </Th>
-                <Th sortable={false} onSort={() => handleSort("phone")}>
-                  Is Active
-                </Th>
-                <Th sortable={false}>Actions</Th>
               </tr>
             </thead>
             <tbody>
@@ -480,9 +483,9 @@ const Drivers = () => {
           title="Warning"
           centered
         >
-          <p>Are you sure do you want to delete this Product variant?</p>
+          <p>Are you sure do you want to delete this Sales?</p>
           <Group position="right">
-            <Button onClick={() => deleteSku()} color="red">
+            <Button onClick={() => deleteSales()} color="red">
               Delete
             </Button>
           </Group>
@@ -492,4 +495,4 @@ const Drivers = () => {
   );
 };
 
-export default Drivers;
+export default RetailerReport;

@@ -25,11 +25,11 @@ const DropOffs = () => {
   const [total, setTotal] = useState(0);
   const [openedLocation, setOpenedLocation] = useState(false);
   const [dropoffStatus, setDropoffStatus] = useState(null); // Track selected status
-  const [search, setSearch] = useState(null); // Track selected status
+  const [searchValue, setSearchValue] = useState("");
 
   const { data, loading, refetch } = useQuery(GET_DROPOFFS, {
     variables: {
-      search: search,
+      search: searchValue,
       first: parseInt(size), // Pass size dynamically
       page: activePage,
       status: dropoffStatus,
@@ -225,15 +225,22 @@ const DropOffs = () => {
     };
   }, [refetch]); // Include `refetch` in the dependencies array
 
-  // Define a state to store the list of orders
+  const [confirmedSearch, setConfirmedSearch] = useState("");
 
   const [dropOffs, setDropOffs] = useState([]);
   const clearFilter = () => {
-    console.log("tt")
-    setDropoffStatus(""); // Clear the filter
-    refetch(); // Refetch data using GET_ORDERS
-    setActivePage(1); // Reset to the first page
-    setSearch("")
+    setDropoffStatus(null);
+    setSearchValue("");
+    setConfirmedSearch("")
+  };
+
+  const handleManualSearch = (searchTerm) => {
+    setSearchValue(searchTerm);
+  };
+  const clearInput = () => {
+    setSearchValue("");
+    setDropoffStatus(null);
+    setConfirmedSearch("");
   };
   return loading ? (
     <LoadingOverlay
@@ -287,14 +294,21 @@ const DropOffs = () => {
         <DriverMapView id={editId} />
       </Drawer>
       <Card shadow="sm" p="lg">
-        <DropOffCard onCardClick={setDropoffStatus} handelSearch={setSearch} clearFilter={clearFilter} />
+        <DropOffCard
+          onCardClick={setDropoffStatus}
+          handelSearch={setSearchValue}
+          clearFilter={clearFilter}
+        />
         <ScrollArea>
           <B2bTable
             total={total}
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
-            handelSearch={setSearch}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             loading={loading}
             data={dropOffs.length ? dropOffs : data.dropoffs.data || []}
             size={size}

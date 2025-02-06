@@ -32,7 +32,6 @@ export default function CategoryAddModal({
   const [activeTab, setActiveTab] = useState(tabList[0].value);
   const [mainCategoryFile, setMainCategoryFile] = useState(null);
   const [subCategoryFiles, setSubCategoryFiles] = useState([]);
-  const [previews, setPreviews] = useState([]);
   const fileInputRef = useRef(null);
 
   const form = useForm({
@@ -71,7 +70,7 @@ export default function CategoryAddModal({
 
   const handleFields = () => {
     return form.values.children.map((item, index) => (
-      <Grid>
+      <Grid key={index}>
         <Grid.Col span={4}>
           <TextInput
             placeholder="Subcategory (English)"
@@ -97,7 +96,6 @@ export default function CategoryAddModal({
             color="blue"
             fullWidth
             style={{ marginTop: "25px" }}
-
           >
             Upload Image
           </Button>
@@ -248,7 +246,7 @@ export default function CategoryAddModal({
                     width: "200px", // Set a specific width for the button
                   }}
                   onClick={() => {
-                    form.insertListItem("childrens.create", {
+                    form.insertListItem("children", { // Correct path
                       name: { en: "", am: "" },
                       image: "",
                     });
@@ -260,12 +258,12 @@ export default function CategoryAddModal({
             </Grid.Col>
             <Grid.Col span={4}>
               <Button
-               style={{
-                width: "25%",
-                marginTop: "15px",
-                backgroundColor: "#FF6A00",
-                color: "#FFFFFF",
-              }}
+                style={{
+                  width: "25%",
+                  marginTop: "15px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
                 type="submit"
                 color="blue"
                 fullWidth
