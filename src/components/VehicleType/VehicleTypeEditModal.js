@@ -140,13 +140,6 @@ const VehicleTypeEditModal = ({ setOpenedEdit, editId }) => {
         overlayBlur={2}
         loader={customLoader}
       />
-      <Tabs.List>
-        {tabList.map((tab, i) => (
-          <Tabs.Tab key={i} value={tab.value} icon={<Photo size={14} />}>
-            {tab.name}
-          </Tabs.Tab>
-        ))}
-      </Tabs.List>
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
         <form onSubmit={form.onSubmit(() => submit())} noValidate>
           <Stack>

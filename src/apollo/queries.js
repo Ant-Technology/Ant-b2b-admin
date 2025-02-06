@@ -24,7 +24,7 @@ export const PAYMENT_TYPES = gql`
 //category queries
 
 export const GET_CATEGORIES = gql`
-  query GET_CATEGORIES($first: Int!, $page: Int, $ordered_by: [OrderByInput]!) {
+  query GET_CATEGORIES($first: Int!, $page: Int, $ordered_by: [OrderByInput]) {
     categories(
       first: $first
       page: $page
