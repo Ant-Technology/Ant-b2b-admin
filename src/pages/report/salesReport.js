@@ -322,7 +322,7 @@ const SalesReport = () => {
                   <span className={classes.thh}>Price</span>
                 </Th>
                 <Th>
-                  <span className={classes.thh}>Total </span>
+                  <span className={classes.thh}>Total Price </span>
                 </Th>
                 <Th>
                   <span className={classes.thh}>Quantity</span>

@@ -327,6 +327,9 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         ...(permissions.some((perm) => perm.name === "reports-sales")
           ? [{ link: "/sales-report", label: "Sales Report" }]
           : []),
+        ...(permissions.some((perm) => perm.name === "reports-retailers")
+          ? [{ link: "/retailer-report", label: "Retailer Report" }]
+          : []),
       ],
     });
   }
