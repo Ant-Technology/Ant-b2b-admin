@@ -15,7 +15,10 @@ import { showNotification } from "@mantine/notifications";
 
 import axios from "axios";
 import { FiEdit, FiEye } from "react-icons/fi";
-import { CHANGE_VEHICLE_TYPE_STATUS, DEL_VEHICLE_TYPES } from "apollo/mutuations";
+import {
+  CHANGE_VEHICLE_TYPE_STATUS,
+  DEL_VEHICLE_TYPES,
+} from "apollo/mutuations";
 import { GET_VEHICLE_TYPES } from "apollo/queries";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
@@ -25,17 +28,17 @@ import React, { useEffect, useState } from "react";
 import { Edit, Trash } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
 import EditIcon from "@mui/icons-material/Edit";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const VehicleTypes = () => {
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -44,6 +47,7 @@ const VehicleTypes = () => {
     variables: {
       first: parseInt(size),
       page: activePage,
+      search: searchValue
     },
   });
 
@@ -55,7 +59,7 @@ const VehicleTypes = () => {
     if (data) {
       setTotal(data.vehicleTypes.paginatorInfo.lastPage);
     }
-  }, [data, size]); 
+  }, [data, size]);
 
   const [delVehicleType] = useMutation(DEL_VEHICLE_TYPES, {
     update(cache, { data: { deleteVehicleType } }) {
@@ -103,7 +107,10 @@ const VehicleTypes = () => {
       },
     ],
     onCompleted(data) {
-      const action = data.changeVehicleTypeStatus.status=== "ACTIVE" ? "Activated" : "Deactivated";
+      const action =
+        data.changeVehicleTypeStatus.status === "ACTIVE"
+          ? "Activated"
+          : "Deactivated";
       showNotification({
         color: "green",
         title: "Success",
@@ -120,15 +127,14 @@ const VehicleTypes = () => {
   });
   const handleVehicleTypStatusChange = (id, currentStatus) => {
     let status;
-    if (currentStatus === 'DEACTIVATED') {
-      status = 'ACTIVE'
-    }
-    else{
-      status = "DEACTIVATED"
+    if (currentStatus === "DEACTIVATED") {
+      status = "ACTIVE";
+    } else {
+      status = "DEACTIVATED";
     }
     changeVehicleTypeStatus({
       variables: {
-        id: id,  // Ensure id is an integer
+        id: id, // Ensure id is an integer
         status: status, // Toggle the status
       },
     });
@@ -178,7 +184,6 @@ const VehicleTypes = () => {
   const theme = useMantineTheme();
 
   const headerData = [
-
     {
       label: "Title",
       key: "title",
@@ -188,7 +193,7 @@ const VehicleTypes = () => {
         return <span>{rowData.title}</span>;
       },
     },
-   
+
     {
       label: "Vehicles",
       key: "title",
@@ -207,7 +212,7 @@ const VehicleTypes = () => {
         return <span>{rowData.type}</span>;
       },
     },
-    
+
     {
       label: "Status",
       key: "status",
@@ -272,7 +277,7 @@ const VehicleTypes = () => {
       searchable: false,
       render: (rowData) => {
         return (
-          <div style={{ display: "flex", width: "115px",}}>
+          <div style={{ display: "flex", width: "115px" }}>
             <Controls.ActionButton
               color="primary"
               title="Update"
@@ -290,10 +295,12 @@ const VehicleTypes = () => {
             </Controls.ActionButton>
             <Controls.ActionButton
               color="primary"
-              title={rowData?.status ==="ACTIVE" ? "Deactivate" : "Activate"}
-              onClick={() => handleVehicleTypStatusChange(rowData.id,rowData.status)}
+              title={rowData?.status === "ACTIVE" ? "Deactivate" : "Activate"}
+              onClick={() =>
+                handleVehicleTypStatusChange(rowData.id, rowData.status)
+              }
             >
-              {rowData.status==="ACTIVE" ? (
+              {rowData.status === "ACTIVE" ? (
                 <CancelIcon size={17} />
               ) : (
                 <CheckCircleIcon size={17} />
@@ -309,7 +316,15 @@ const VehicleTypes = () => {
     actionLabel: "Add vehicle type",
     setAddModal: setOpened,
   };
+  const [confirmedSearch, setConfirmedSearch] = useState("");
 
+  const handleManualSearch = (searchTerm) => {
+    setSearchValue(searchTerm);
+  };
+  const clearInput = () => {
+    setSearchValue("");
+    setConfirmedSearch("");
+  };
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -385,6 +400,10 @@ const VehicleTypes = () => {
             activePage={activePage}
             handleChange={handleChange}
             header={headerData}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             optionsData={optionsData}
             loading={loading}
             data={data ? data.vehicleTypes.data : []}

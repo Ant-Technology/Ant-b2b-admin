@@ -81,8 +81,8 @@ function StockDetailModal({ Id }) {
       if (response.data) {
         setLoading(false);
         setStock(response.data);
-        form.setValues({ 
-          minimum_stock_level: response.data.minimum_stock_level 
+        form.setValues({
+          minimum_stock_level: response.data.minimum_stock_level,
         });
       }
     } catch (error) {
@@ -156,7 +156,8 @@ function StockDetailModal({ Id }) {
             <Group align="center" spacing="xs" mt={25}>
               <Text size="sm" weight={500} className={classes.diff}>
                 <span>
-                  Minimum Stock Level<span style={{ marginLeft: "5px" }}>:</span>
+                  Minimum Stock Level
+                  <span style={{ marginLeft: "5px" }}>:</span>
                 </span>
               </Text>
               <TextInput
@@ -164,11 +165,7 @@ function StockDetailModal({ Id }) {
                 type="number"
                 style={{ width: 100 }}
               />
-              <Button
-                onClick={submit}
-                size="sm"
-                style={{ marginLeft: 10 }}
-              >
+              <Button onClick={submit} size="sm" style={{ marginLeft: 10 }}>
                 Update
               </Button>
             </Group>
@@ -187,6 +184,7 @@ function StockDetailModal({ Id }) {
               <thead>
                 <tr>
                   <th>Type</th>
+                  <th>Reason</th>
                   <th>Before quantity</th>
                   <th>After quantity</th>
                   <th>Quantity</th>
@@ -197,7 +195,8 @@ function StockDetailModal({ Id }) {
                 {stock?.transactions?.length > 0 ? (
                   stock.transactions.map((item) => (
                     <tr key={item.id}>
-                      <td>{item.type}</td>
+                      <td>{item.transactionable?.type}</td>
+                      <td>{item.transactionable?.reason}</td>
                       <td>{item.before_quantity}</td>
                       <td>{item.after_quantity}</td>
                       <td>{item.quantity}</td>

@@ -8,7 +8,7 @@ export default function CategoryFilter({ onCardClick,category }) {
   const [dropDownData, setDropDownData] = useState([]);
   const form = useForm({
     initialValues: {
-      category: null, // Initialize with null
+      category: null,
     },
   });
 
@@ -18,27 +18,17 @@ export default function CategoryFilter({ onCardClick,category }) {
         label: item.name,
         value: String(item.id), // Ensure value is a string
       }));
-      console.log("Fetched dropdown data:", productArr); // Debug fetched data
       setDropDownData(productArr);
     },
   });
 
-  useEffect(() => {
-    console.log("Updated form value:", form.values.category);
-  }, [form.values.category]);
-
   const handleCategorySelect = (value) => {
-    console.log("Selected value:", value);
     form.setFieldValue("category", value);
     form.setValues({ category: value }); // Ensure form state updates
-    console.log("Setting category to:", value);
-
     if (onCardClick) {
       onCardClick(value);
     }
   };
-
-  console.log("Current form value before render:", form.values.category);
 
   return (
     <Select
