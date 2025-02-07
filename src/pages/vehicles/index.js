@@ -23,12 +23,14 @@ import { Edit, Trash } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
 
 const Vehicles = () => {
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
   const [total, setTotal] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [hasMounted, setHasMounted] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
-  //
+  const [searchValue, setSearchValue] = useState("");
+  const [confirmedSearch, setConfirmedSearch] = useState("");
+
   const [opened, setOpened] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
@@ -39,7 +41,7 @@ const Vehicles = () => {
   const { data, loading, fetchMore } = useQuery(GET_VEHICLES, {
     // fetchPolicy: "no-cache",
     variables: {
-      first:parseInt(size),
+      first: parseInt(size),
       page: activePage,
       ordered_by: [
         {
@@ -47,6 +49,7 @@ const Vehicles = () => {
           order: "DESC",
         },
       ],
+      search: searchValue,
     },
   });
 
@@ -89,7 +92,7 @@ const Vehicles = () => {
   useEffect(() => {
     setHasMounted(true);
   }, []);
-   
+
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
@@ -98,7 +101,7 @@ const Vehicles = () => {
     if (data) {
       setTotal(data.vehicles.paginatorInfo.lastPage);
     }
-  }, [data, size]); 
+  }, [data, size]);
 
   const handleChange = (currentPage) => {
     fetchMore({
@@ -228,6 +231,14 @@ const Vehicles = () => {
     setOpenedEdit(true);
     setEditId(id);
   };
+  
+    const handleManualSearch = (searchTerm) => {
+      setSearchValue(searchTerm);
+    };
+    const clearInput = () => {
+      setSearchValue("");
+      setConfirmedSearch("");
+    };
 
   return loading ? (
     <LoadingOverlay
@@ -301,6 +312,10 @@ const Vehicles = () => {
             total={total}
             activePage={activePage}
             handleChange={handleChange}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             header={headerData}
             optionsData={optionsData}
             loading={loading}

@@ -1,6 +1,5 @@
 import { useQuery } from "@apollo/client";
 import { X } from "tabler-icons-react"; // Import a close icon
-
 import {
   Badge,
   Card,
@@ -21,10 +20,10 @@ import {
   Button,
   Tooltip,
   Modal,
+  Select,
 } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
 import EditIcon from "@mui/icons-material/Edit";
-
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import axios from "axios";
 import B2bTable from "components/reusable/b2bTable";
@@ -39,16 +38,18 @@ import { SalesEditModal } from "components/Sales/SalesUpdateModal";
 import { SalesAddModal } from "components/Sales/SalesAddModal";
 import { API } from "utiles/url";
 import Controls from "components/controls/Controls";
+import { DatePicker } from "@mantine/dates";
+import ProductFilter from "./product";
+import RetailerFilter from "./retailer";
+import WarehouseFilter from "./warehouse";
 
 const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
   },
-
   control: {
     width: "100%",
     padding: `${theme.spacing.xs}px ${theme.spacing.md}px`,
-
     "&:hover": {
       backgroundColor:
         theme.colorScheme === "dark"
@@ -56,9 +57,8 @@ const useStyles = createStyles((theme) => ({
           : theme.colors.gray[0],
     },
   },
-
   icon: {
-    width: 21,
+    width: 15,
     height: 21,
     borderRadius: 21,
   },
@@ -68,33 +68,6 @@ const useStyles = createStyles((theme) => ({
     fontSize: "10px",
     textTransform: "uppercase",
     fontWeight: "bold",
-  },
-  
-
-  searchContainer: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    width: "100%",
-  },
-  searchInput: {
-    flexGrow: 1,
-    paddingRight: "50px", // Add padding to avoid text overlap with button
-  },
-  searchButton: {
-    position: "absolute",
-    right: 0,
-    borderRadius: "0 4px 4px 0",
-    height: "70%",
-    width: "40px", // Fixed width for the button
-    backgroundColor: "#FF6A00",
-    color: "#FFFFFF",
-    border: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: "14px",
-    cursor: "pointer",
   },
 }));
 
@@ -112,7 +85,9 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
         onClick={sortable ? onSort : null}
         className={classes.control}
       >
-        <Group position="apart">
+        <Group position="apart" spacing={5}>
+          {" "}
+          {/* Adjusted spacing here */}
           <Text weight={500} size="sm">
             {children}
           </Text>
@@ -133,27 +108,22 @@ const SalesReport = () => {
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [opened, setOpened] = useState(false);
+  const [product, setSetProduct] = useState("");
+  const [retailer, setSetRetailer] = useState("");
+  const [warehouse, setSetWarhouse] = useState("");
   const [loading, setLoading] = useState(false);
+  const [timeRange, setTimeRange] = useState(null);
   const [drivers, setDrivers] = useState([]);
+  const [selectedStartDate, setSelectedStartDate] = useState(null);
+  const [selectedEndDate, setSelectedEndDate] = useState(null);
 
-  const [openedEdit, setOpenedEdit] = useState(false);
-  const [editId, setEditId] = useState();
-  const [editRow, setEditRow] = useState();
-  const [deleteID, setDeleteID] = useState(false);
-  const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState([]);
-  const [sortBy, setSortBy] = useState(null);
-  const [reverseSortDirection, setReverseSortDirection] = useState(false);
-  const [openedDetail, setOpenedDetail] = useState(false);
-  const [openedDelete, setOpenedDelete] = useState(false);
-
   useEffect(() => {
     fetchData(activePage);
   }, [activePage]);
 
   const fetchData = async (page) => {
-    setLoading(true)
+    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -161,87 +131,24 @@ const SalesReport = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/sales?page=${page}`, config);
+      const response = await axios.get(
+        `${API}/reports/sales?period=custom&startDate=2024-01-01&endDate=2025-01-31&product=&warehouse=Skylight&retailer=`,
+        config
+      );
       if (response.data) {
-        setLoading(false)
-        setDrivers(response.data.data);
-        setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
+        setLoading(false);
+        setDrivers(response.data.salesTransactions);
+        setSortedData(response.data.salesTransactions);
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
       }
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       console.error("Error fetching data:", error);
     }
   };
-
-  const handleSearchChange = (event) => {
-    const { value } = event.currentTarget;
-    setSearch(value);
-    setSortedData(
-      sortData(drivers, {
-        sortBy,
-        reversed: reverseSortDirection,
-        search: value,
-      })
-    );
-  };
-
-  const sortData = (data, payload) => {
-    if (!payload.sortBy) {
-      return filterData(data, payload.search);
-    }
-
-    return filterData(
-      [...data].sort((a, b) => {
-        if (payload.reversed) {
-          return b[payload.sortBy].localeCompare(a[payload.sortBy]);
-        }
-
-        return a[payload.sortBy].localeCompare(b[payload.sortBy]);
-      }),
-      payload.search
-    );
-  };
-
-  const handleChange = (page) => {
-    setActivePage(page);
-  };
-
-  const handleSort = (field) => {
-    const reversed = field === sortBy ? !reverseSortDirection : false;
-    setReverseSortDirection(reversed);
-    setSortBy(field);
-    setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
-  };
-  const handleEditSales = (id, row) => {
-    setOpenedEdit(true);
-    setEditId(id);
-    setEditRow(row);
-  };
-  const [isHovered, setIsHovered] = useState(false);
-  const handleManageSales = (id) => {
-    setEditId(id);
-    setOpenedDetail(true);
-  };
-
-  const filterData = (data, search) => {
-    const query = search.toLowerCase().trim();
-    return data.filter((item) =>
-      Object.keys(item).some(
-        (key) =>
-          typeof item[key] === "string" &&
-          item[key] &&
-          item[key].toLowerCase().includes(query)
-      )
-    );
-  };
-  const handleDelete = (id) => {
-    setOpenedDelete(true);
-    setDeleteID(id);
-  };
-
-  const deleteSales = async () => {
+  const handleFilter = async () => {
+    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -249,204 +156,191 @@ const SalesReport = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.delete(`${API}/sales/${deleteID}`, config);
+      const startDate = selectedStartDate
+        ? selectedStartDate.toISOString().slice(0, 10)
+        : "";
+      const endDate = selectedEndDate
+        ? selectedEndDate.toISOString().slice(0, 10)
+        : "";
+
+      const response = await axios.get(
+        `${API}/reports/sales?period=${
+          timeRange ? timeRange : "custom"
+        }&startDate=${startDate}&endDate=${endDate}&product=${product}&warehouse=${warehouse}&retailer=${retailer}`,
+        config
+      );
+
       if (response.data) {
-        fetchData(activePage);
-        setOpenedDelete(false);
-        setDeleteID(null);
-        showNotification({
-          color: "green",
-          title: "Success",
-          message: "Sales Deleted Successfully",
-        });
+        setLoading(false);
+        setDrivers(response.data.salesTransactions);
+        setSortedData(response.data.salesTransactions);
+        setTotal(response.data?.links);
+        setTotalPages(response.data.last_page);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error fetching data:", error);
-      setOpenedDelete(false);
-      setDeleteID(null);
-      showNotification({
-        color: "red",
-        title: "Error",
-        message: `Sales Not Deleted Successfully`,
-      });
     }
   };
 
-  const theme = useMantineTheme();
+  const handleReset = () => {
+    setSelectedStartDate(null);
+    setSelectedEndDate(null);
+    setSetProduct("");
+    setTimeRange(null)
+    setSetRetailer("");
+    setSetWarhouse("");
+    fetchData();
+  };
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
-        <td>{row.name}</td>
-        <td>{row.email}</td>
-        <td>{row.phone}</td>
-        <td>{row.retailers_count}</td>
-        <td>
-          <>
-            <Controls.ActionButton
-              color="primary"
-              title="Update"
-              onClick={() => handleEditSales(`${row.id}`)}
-            >
-              <EditIcon style={{ fontSize: "1rem" }} />
-            </Controls.ActionButton>
-            <span style={{ marginLeft: "1px" }}>
-              <Controls.ActionButton
-                color="primary"
-                title="View Detail"
-                onClick={() => handleManageSales(`${row.id}`)}
-              >
-                <FiEye fontSize="medium" />
-              </Controls.ActionButton>
-            </span>
-            <Controls.ActionButton
-              color="primary"
-              title="Delete"
-              onClick={() => handleDelete(`${row.id}`)}
-            >
-              <Trash size={17} />
-            </Controls.ActionButton>
-          </>
-        </td>
+        <td style={{ width: "80px" }}>{row.productSku}</td>
+        <td style={{ width: "120px" }}>{row.productName}</td>
+        <td style={{ width: "20px" }}>{row.quantity}</td>
+        <td style={{ width: "30px" }}>{row.unitPrice}</td>
+        <td style={{ width: "70px" }}>{row.subtotal}</td>
+        <td style={{ width: "100px" }}>{row.warehouse}</td>
+        <td style={{ width: "100px" }}>{row.warehouseRegion}</td>
+        <td style={{ width: "100px" }}>{row.date}</td>
+        <td style={{ width: "100px" }}>{row.retailer}</td>
+        <td style={{ width: "100px" }}>{row.retailerRegion}</td>
       </tr>
     </Fragment>
   ));
-
-  return loading ? (
-    <LoadingOverlay
-      visible={loading}
-      color="blue"
-      overlayBlur={2}
-      loader={customLoader}
-    />
-  ) : (
+  return (
     <div style={{ width: "98%", margin: "auto" }}>
-      <Drawer
-        opened={openedEdit}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Editing a Sales"
-        padding="xl"
-        onClose={() => setOpenedEdit(false)}
-        position="bottom"
-        size="80%"
-      >
-        <SalesEditModal
-          activePage={activePage}
-          fetchData={fetchData}
-          editRow={editRow}
-          setOpenedEdit={setOpenedEdit}
-          editId={editId}
-        />
-      </Drawer>
-      <Drawer
-        opened={opened}
-        onClose={() => setOpened(false)}
-        title="Adding a Sales"
-        padding="xl"
-        size="80%"
-        position="bottom"
-      >
-        <SalesAddModal
-          total={total}
-          setTotal={setTotal}
-          activePage={activePage}
-          setActivePage={setActivePage}
-          setOpened={setOpened}
-          fetchData={fetchData}
-        />
-      </Drawer>
-      <Drawer
-        opened={openedDetail}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Sales Detail"
-        padding="xl"
-        onClose={() => setOpenedDetail(false)}
-        position="bottom"
-        size="80%"
-      >
-        <SalesDetailModal Id={editId} />
-      </Drawer>
+      <LoadingOverlay
+        visible={loading}
+        color="blue"
+        overlayBlur={2}
+        loader={customLoader}
+      />
+
+      <div>
+        <SimpleGrid cols={6}>
+          <div>
+            <Select
+              data={[
+                { value: "daily", label: "Daily" },
+                { value: "weekly", label: "Weekly" },
+                { value: "monthly", label: "Monthly" },
+                { value: "annual", label: "Annual" },
+              ]}
+              value={timeRange}
+              onChange={setTimeRange}
+              label="Select Period"
+              placeholder="Select Range"
+              withinPortal
+              clearable // Allow clearing the selection
+            />
+          </div>
+          <div>
+            <DatePicker
+              value={selectedStartDate}
+              onChange={setSelectedStartDate}
+              placeholder="Pick a date"
+              label="Select Start Date"
+              clearable
+            />
+          </div>
+          <div>
+            <DatePicker
+              value={selectedEndDate}
+              onChange={setSelectedEndDate}
+              placeholder="Pick a date"
+              label="Select End Date"
+              clearable
+            />
+          </div>
+          <div>
+            <ProductFilter category={product} onCardClick={setSetProduct} />
+          </div>
+          <div>
+            <RetailerFilter category={retailer} onCardClick={setSetRetailer} />
+          </div>
+          <div>
+            <WarehouseFilter
+              category={warehouse}
+              onCardClick={setSetWarhouse}
+            />
+          </div>
+        </SimpleGrid>
+        {(timeRange ||
+          selectedEndDate ||
+          selectedStartDate ||
+          warehouse ||
+          retailer) && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: "10px",
+            }}
+          >
+            <Button
+              onClick={handleReset}
+              style={{
+                width: "80px",
+                marginRight: "10px",
+                backgroundColor: "#FF6A00",
+                color: "#FFFFFF",
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleFilter}
+              style={{
+                width: "80px",
+                backgroundColor: "#FF6A00",
+                color: "#FFFFFF",
+              }}
+            >
+              Filter
+            </Button>
+          </div>
+        )}
+      </div>
       <Card shadow="sm" p="lg">
         <ScrollArea>
-          <SimpleGrid cols={3}>
-            <div>
-              <Button
-                onClick={() => setOpened(true)}
-                style={{
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-                leftIcon={<Plus size={14} />}
-              >
-                Add Sales
-              </Button>
-            </div>
-            <div></div>
-
-            <div className={classes.searchContainer}>
-              <TextInput
-                placeholder="Search"
-                mb="md"
-                icon={<Search size={14} />}
-                value={search}
-                onChange={(event) => setSearch(event.currentTarget.value)}
-                className={classes.searchInput}
-                rightSection={
-                  search && ( // Show clear icon only if there's text in the input
-                    <UnstyledButton
-                      onClick={() => {
-                        setSearch(""); // Clear the search input
-                        fetchData(activePage); // Fetch all drivers again
-                      }}
-                      style={{ padding: 5 }} // Adjust padding for better click area
-                    >
-                      <X size={16} color="red" /> {/* Clear icon */}
-                    </UnstyledButton>
-                  )
-                }
-              />
-              <button
-                className={classes.searchButton}
-                onClick={handleSearchChange}
-              >
-                <Search size={16} />
-              </button>
-            </div>
-          </SimpleGrid>
           <Table
             highlightOnHover
             horizontalSpacing="md"
             verticalSpacing="xs"
-            sx={{ tableLayout: "fixed", minWidth: 700 }}
+            sx={{ minWidth: 700, marginTop: "10px" }}
           >
             <thead>
               <tr style={{ backgroundColor: "#F1F1F1" }}>
-                <Th sortable onSort={() => handleSort("name")}>
-                  <span className={classes.thh}> Name </span>
+                <Th>
+                  <span className={classes.thh}> Sku </span>
                 </Th>
-                <Th sortable onSort={() => handleSort("email")}>
-                  <span className={classes.thh}> Email</span>
+                <Th>
+                  <span className={classes.thh}> Product Name</span>
                 </Th>
-                <Th sortable onSort={() => handleSort("phone")}>
-                  <span className={classes.thh}> Phone</span>
+                <Th>
+                  <span className={classes.thh}>Price</span>
                 </Th>
-                <Th sortable onSort={() => handleSort("retailers_count")}>
-                  <span className={classes.thh}> Retailers Count</span>
+                <Th>
+                  <span className={classes.thh}>Total </span>
+                </Th>
+                <Th>
+                  <span className={classes.thh}>Quantity</span>
+                </Th>
+                <Th>
+                  <span className={classes.thh}>Warehouse</span>
                 </Th>
                 <Th sortable={false}>
-                  {" "}
-                  <span className={classes.thh}>Actions</span>
+                  <span className={classes.thh}>Warehouse Region</span>
+                </Th>
+                <Th>
+                  <span className={classes.thh}>Date</span>
+                </Th>
+                <Th>
+                  <span className={classes.thh}>Retailer</span>
+                </Th>
+                <Th>
+                  <span className={classes.thh}>Retailer Region</span>
                 </Th>
               </tr>
             </thead>
@@ -455,7 +349,7 @@ const SalesReport = () => {
                 rows
               ) : (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={10}>
                     <Text weight={500} align="center">
                       Nothing found
                     </Text>
@@ -464,32 +358,7 @@ const SalesReport = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
-                />
-              </Container>
-            </div>
-          </Center>
         </ScrollArea>
-        <Modal
-          opened={openedDelete}
-          onClose={() => setOpenedDelete(false)}
-          title="Warning"
-          centered
-        >
-          <p>Are you sure do you want to delete this Sales?</p>
-          <Group position="right">
-            <Button onClick={() => deleteSales()} color="red">
-              Delete
-            </Button>
-          </Group>
-        </Modal>
       </Card>
     </div>
   );

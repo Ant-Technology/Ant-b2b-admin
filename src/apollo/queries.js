@@ -29,7 +29,7 @@ export const GET_CATEGORIES = gql`
       first: $first
       page: $page
       parentOnly: true
-      orderBy:$ordered_by
+      orderBy: $ordered_by
     ) {
       data {
         id
@@ -1001,8 +1001,8 @@ export const DEPOSIT_SLIP = gql`
 
 //vehicle types
 export const GET_VEHICLE_TYPES = gql`
-  query ($first: Int!, $page: Int) {
-    vehicleTypes(first: $first, page: $page) {
+  query ($first: Int!, $page: Int, $search: String) {
+    vehicleTypes(first: $first, search: $search, page: $page) {
       data {
         id
         title
@@ -1092,9 +1092,15 @@ export const GET_VEHICLES = gql`
   query (
     $first: Int!
     $page: Int
+    $search: String
     $ordered_by: [OrderByInput]!
   ) {
-    vehicles(first: $first, page: $page, orderBy: $ordered_by) {
+    vehicles(
+      first: $first
+      page: $page
+      search: $search
+      orderBy: $ordered_by
+    ) {
       data {
         id
         owner_name

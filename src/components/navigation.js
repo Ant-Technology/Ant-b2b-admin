@@ -325,10 +325,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       initiallyOpened: false,
       links: [
         ...(permissions.some((perm) => perm.name === "reports-sales")
-          ? [{ link: "/sales-report", label: "Sales" }]
-          : []),
-        ...(permissions.some((perm) => perm.name === "reports-retailers")
-          ? [{ link: "/retailer-report", label: "Retailer" }]
+          ? [{ link: "/sales-report", label: "Sales Report" }]
           : []),
       ],
     });

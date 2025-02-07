@@ -175,16 +175,27 @@ const Drivers = () => {
     }
   };
 
-  const handleSearchChange = (event) => {
-    const { value } = event.currentTarget;
-    setSearch(value);
-    setSortedData(
-      sortData(drivers, {
-        sortBy,
-        reversed: reverseSortDirection,
-        search: value,
-      })
-    );
+  const handleSearchChange = async(event) => {
+    setLoading(true)
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(`${API}/sales?search=${search}&page=${activePage}`, config);
+      if (response.data) {
+        setLoading(false)
+        setDrivers(response.data.data);
+        setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
+        setTotal(response.data?.links);
+        setTotalPages(response.data.last_page);
+      }
+    } catch (error) {
+      setLoading(false)
+      console.error("Error fetching data:", error);
+    }
   };
 
   const sortData = (data, payload) => {
