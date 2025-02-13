@@ -35,13 +35,13 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
 
   useEffect(() => {
     const userData = data.find((user) => user.id === editId);
-    console.log(userData)
+    console.log(userData);
 
     if (userData) {
       form.setValues({
         name: userData.name,
         email: userData.email,
-        phone:userData.phone
+        phone: userData.phone,
       });
       setCurrentRoles(userData.roles);
       if (userData.profile_image) {
@@ -56,7 +56,7 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
       email: "",
       password: "",
       password_confirmation: "",
-      phone:""
+      phone: "",
     },
   });
   const { loading: rolesListLoading } = useQuery(GET_ROLES, {
@@ -161,7 +161,7 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
       id: editId,
       name: form.getInputProps("name").value,
       password: form.getInputProps("password").value,
-      phone:form.getInputProps("phone").value,
+      phone: form.getInputProps("phone").value,
       password_confirmation: form.getInputProps("password_confirmation").value,
     };
     if (files.length > 0) {
@@ -189,7 +189,6 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
     });
   };
 
-
   const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
     setFiles(selectedFiles);
@@ -203,7 +202,8 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
   return (
     <>
       <LoadingOverlay visible={rolesListLoading} overlayBlur={2} />
-      <ScrollArea style={{ height: height / 1.1 }} type="auto" offsetScrollbars>
+      <ScrollArea style={{ height: height / 1.4 }} type="auto" offsetScrollbars>
+        {" "}
         <Tabs value={activeTab} onTabChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="generalInfo">General Info</Tabs.Tab>
@@ -225,13 +225,13 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
                 disabled
                 {...form.getInputProps("email")}
               />
-                 <TextInput
+              <TextInput
                 required
                 label="Phone"
                 placeholder="Phone"
                 {...form.getInputProps("phone")}
               />
-                 <Card>
+              <Card>
                 <Text fz="xs">Change Password</Text>
 
                 <PasswordInput
@@ -286,27 +286,26 @@ const UserEditModal = ({ setOpenedEdit, editId, data }) => {
             />
           </Tabs.Panel>
         </Tabs>
-
         {activeTab === "generalInfo" && (
-                  <Grid>
-                  <Grid.Col span={12}>
-                    <Button
-                    onClick={form.onSubmit(submit)}
-                       style={{
-                        marginTop: "20px",
-                        width: "30%",
-  
-                        backgroundColor: "#FF6A00",
-                        color: "#FFFFFF",
-                      }}
-                      fullWidth
-                      type="submit"
-                      color="blue"
-                    >
-                      Submit
-                    </Button>
-                  </Grid.Col>
-                </Grid>
+          <Grid>
+            <Grid.Col span={12}>
+              <Button
+                onClick={form.onSubmit(submit)}
+                style={{
+                  marginTop: "10px",
+                  width: "30%",
+
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                fullWidth
+                type="submit"
+                color="blue"
+              >
+                Submit
+              </Button>
+            </Grid.Col>
+          </Grid>
         )}
       </ScrollArea>
     </>

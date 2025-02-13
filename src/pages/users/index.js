@@ -66,6 +66,7 @@ const Users = () => {
           variables: {
             first: 10,
             page: activePage,
+            search: "",
           },
         },
         (data) => {
@@ -283,14 +284,14 @@ const Users = () => {
       },
     });
   };
-    const [confirmedSearch, setConfirmedSearch] = useState("");
+  const [confirmedSearch, setConfirmedSearch] = useState("");
 
   const handleManualSearch = (searchTerm) => {
     setSearchValue(searchTerm);
   };
   const clearInput = () => {
     setSearchValue("");
-    setConfirmedSearch("")
+    setConfirmedSearch("");
   };
   return loading ? (
     <LoadingOverlay
