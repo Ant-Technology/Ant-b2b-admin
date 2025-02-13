@@ -68,38 +68,32 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
       form.setFieldValue("image", files[0]);
     }
   };
-
-  const handleSubCategoryImageUpload = (files, index) => {
+  const handleSubCategoryImageUpload = (files, type, index) => {
     if (files.length > 0) {
-      const file = files[0]; // Get the file object
-      setSubCategoryFiles((prev) => ({
-        ...prev,
-        [index]: file, // Store the file object
-      }));
-      form.setFieldValue(`childrens.update.${index}.image`, file); // Set the file directly
+      const file = files[0];
+      const key = `${type}-${index}`;
+      setSubCategoryFiles((prev) => ({ ...prev, [key]: file }));
+      form.setFieldValue(`childrens.${type}.${index}.image`, file);
     }
   };
+
   const handleFields = () => {
     return (
       <>
         {form.values.childrens?.update?.map((item, index) => (
           <Grid key={`update-${index}`}>
-            {/* Fields for updating existing subcategories */}
             <Grid.Col span={4}>
               <TextInput
                 placeholder="Sub Category"
                 required
                 label="Sub Category"
-                sx={{ flex: 1 }}
                 {...form.getInputProps(`childrens.update.${index}.name.en`)}
               />
             </Grid.Col>
             <Grid.Col span={4}>
               <TextInput
                 placeholder="Subcategory (Amharic)"
-                required
-                label={`Subcategory ${index + 1} (Amharic)`}
-                sx={{ flex: 1 }}
+                style={{ marginTop: "25px" }}
                 {...form.getInputProps(`childrens.update.${index}.name.am`)}
               />
             </Grid.Col>
@@ -107,7 +101,7 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
               <Button
                 onClick={() => {
                   document.getElementById(`file-input-update-${index}`).click();
-                }} // Trigger file input on button click
+                }}
                 variant="outline"
                 color="blue"
                 style={{ marginTop: "25px" }}
@@ -116,17 +110,18 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
                 Upload Image
               </Button>
               <input
-                id={`file-input-update-${index}`} // Unique ID for each input
+                id={`file-input-update-${index}`}
                 type="file"
                 accept={IMAGE_MIME_TYPE}
-                style={{ display: "none" }} // Hide the file input
+                style={{ display: "none" }}
                 onChange={(e) =>
-                  handleSubCategoryImageUpload(e.target.files, index)
-                } // Handle subcategory image selection
+                  handleSubCategoryImageUpload(e.target.files, "update", index)
+                }
               />
-              {subCategoryFiles[index] ? (
+              {/* Updated image display with type-specific key */}
+              {subCategoryFiles[`update-${index}`] ? (
                 <img
-                  src={URL.createObjectURL(subCategoryFiles[index])}
+                  src={URL.createObjectURL(subCategoryFiles[`update-${index}`])}
                   width="130"
                   alt="Sub Category"
                 />
@@ -142,30 +137,27 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
                 form.removeListItem("childrens.update", index);
                 form.insertListItem("childrens.delete", parseInt(item.id));
               }}
-              style={{ marginTop: "30px", padding: "2px" }}
+              style={{ marginTop: "30px" }}
             >
               <Trash size={24} />
             </ActionIcon>
           </Grid>
         ))}
+
         {form.values.childrens?.create?.map((item, index) => (
           <Grid key={`create-${index}`}>
-            {/* Fields for creating new subcategories */}
             <Grid.Col span={4}>
               <TextInput
                 placeholder="New Sub Category"
                 required
                 label="New Sub Category"
-                sx={{ flex: 1 }}
                 {...form.getInputProps(`childrens.create.${index}.name.en`)}
               />
             </Grid.Col>
             <Grid.Col span={4}>
               <TextInput
                 placeholder="New Subcategory (Amharic)"
-                required
-                label={`New Subcategory ${index + 1} (Amharic)`}
-                sx={{ flex: 1 }}
+                style={{ marginTop: "25px" }}
                 {...form.getInputProps(`childrens.create.${index}.name.am`)}
               />
             </Grid.Col>
@@ -173,7 +165,7 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
               <Button
                 onClick={() => {
                   document.getElementById(`file-input-create-${index}`).click();
-                }} // Trigger file input on button click
+                }}
                 variant="outline"
                 color="blue"
                 style={{ marginTop: "25px" }}
@@ -182,21 +174,18 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
                 Upload Image
               </Button>
               <input
-                id={`file-input-create-${index}`} // Unique ID for each input
+                id={`file-input-create-${index}`}
                 type="file"
                 accept={IMAGE_MIME_TYPE}
-                style={{ display: "none" }} // Hide the file input
+                style={{ display: "none" }}
                 onChange={(e) =>
-                  handleSubCategoryImageUpload(e.target.files, index)
-                } // Handle subcategory image selection
+                  handleSubCategoryImageUpload(e.target.files, "create", index)
+                }
               />
-              {subCategoryFiles[index + form.values.childrens.update.length] ? ( // Adjust index for new files
+              {/* Updated image display with type-specific key */}
+              {subCategoryFiles[`create-${index}`] ? (
                 <img
-                  src={URL.createObjectURL(
-                    subCategoryFiles[
-                      index + form.values.childrens.update.length
-                    ]
-                  )}
+                  src={URL.createObjectURL(subCategoryFiles[`create-${index}`])}
                   width="130"
                   alt="New Sub Category"
                 />
@@ -220,7 +209,7 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
               am: name.am,
               en: name.en,
             },
-            image: subCategoryFiles[index] || null, // Use the file object
+            image: subCategoryFiles[`update-${index}`] || null, // Use the file object
           };
         } else {
           return {
@@ -238,8 +227,7 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
         am: name.am,
         en: name.en,
       },
-      image:
-        subCategoryFiles[form.values.childrens.update.length + index] || null,
+      image: subCategoryFiles[`create-${index}`] || null,
     }));
 
     const variables = {

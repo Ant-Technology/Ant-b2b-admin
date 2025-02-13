@@ -45,41 +45,24 @@ const ProductAddModal = ({
   const theme = useMantineTheme();
   const [addProduct, { loading, error }] = useMutation(CREATE_PRODUCT, {
     update(cache, { data: { createProduct } }) {
-      try {
-        const { products } = cache.readQuery({
+      cache.updateQuery(
+        {
           query: GET_PRODUCTS,
           variables: {
             first: 10,
-            page: 1,
+            page: activePage,
+            search: "",
           },
-        }) || { products: { data: [], paginatorInfo: { total: 0 } } };
-
-        const updatedProduct = [createProduct, ...products.data];
-        cache.writeQuery({
-          query: GET_PRODUCTS,
-          variables: {
-            first: 10,
-            page: 1,
-          },
-          data: {
+        },
+        (data) => {
+          return {
             products: {
-              ...products,
-              data: updatedProduct,
-              paginatorInfo: {
-                ...products.paginatorInfo,
-                total: products.paginatorInfo.total + 1,
-              },
+              ...data.products,
+              data: [createProduct, ...data.products.data],
             },
-          },
-        });
-
-        // Update the total count and reset the active page
-        const newTotal = products.paginatorInfo.total + 1;
-        setTotal(newTotal);
-        setActivePage(1);
-      } catch (err) {
-        console.error("Error updating cache:", err);
-      }
+          };
+        }
+      );
     },
     onError(err) {
       console.error("Error creating product:", err);
@@ -132,10 +115,6 @@ const ProductAddModal = ({
           },
         ],
       },
-    },
-
-    validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
     },
   });
   const handleAttributeCards = () => {
@@ -238,6 +217,7 @@ const ProductAddModal = ({
   };
 
   const submit = () => {
+    console.log("Rrr");
     addProduct({
       variables: {
         name: form.getInputProps("name").value,
@@ -380,7 +360,7 @@ const ProductAddModal = ({
                 />
               </Grid.Col>
               <Grid.Col span={6}>
-              <Select
+                <Select
                   searchable
                   data={dropDownData.enArr}
                   value={form

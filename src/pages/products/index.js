@@ -95,6 +95,7 @@ const Products = () => {
           variables: {
             first: 10,
             page: activePage,
+            search:""
           },
         },
         (data) => {

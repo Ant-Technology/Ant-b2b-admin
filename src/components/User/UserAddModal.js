@@ -58,38 +58,27 @@ const UserAddModal = ({
     },
   });
 
-  // mutation
   const [addUser, { loading: userLoading }] = useMutation(CREATE_USER, {
     update(cache, { data: { createUser } }) {
-      const { users } = cache.readQuery({
-        query: GET_ALL_USERS,
-        variables: {
-          first: 10,
-          page: 1,
-        },
-      });
-      if (!users) {
-        return;
-      }
-      const updatedUsers = [createUser, ...users.data];
-
-      cache.writeQuery({
-        query: GET_ALL_USERS,
-        variables: {
-          first: 10,
-          page: 1,
-        },
-        data: {
-          users: {
-            ...users,
-            data: updatedUsers,
+      cache.updateQuery(
+        {
+          query: GET_ALL_USERS,
+          variables: {
+            first: 10,
+            page: activePage,
+            search: "",
           },
         },
-      });
-
-      const newTotal = users.paginatorInfo.total + 1;
-      setTotal(newTotal);
-      setActivePage(1);
+        (data) => {
+          // Add the new user to the start of the existing users array
+          return {
+            users: {
+              ...data.users,
+              data: [createUser, ...data.users.data],
+            },
+          };
+        }
+      );
     },
   });
 
@@ -99,9 +88,9 @@ const UserAddModal = ({
       name: "",
       email: "",
       password: "",
-      phone:"",
+      phone: "",
       password_confirmation: "",
-      role_id: ""
+      role_id: "",
     },
   });
   const submit = () => {
@@ -201,7 +190,7 @@ const UserAddModal = ({
                     type="email"
                     {...form.getInputProps("email")}
                   />
-                    <TextInput
+                  <TextInput
                     required
                     label="Phone"
                     placeholder="Phone"
@@ -231,31 +220,31 @@ const UserAddModal = ({
                   />
                 </Grid.Col>
               </Grid>
-              
+
               <div style={{ marginTop: "10px" }}>
-                    <Button
-                      onClick={() => fileInputRef.current.click()}
-                      color="blue"
-                      variant="outline"
-                      fullWidth
-                    >
-                      Upload Image
-                    </Button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      accept="image/*"
-                      style={{ display: "none" }}
-                      onChange={handleFileChange}
-                    />
-                    <SimpleGrid
-                      cols={4}
-                      breakpoints={[{ maxWidth: "sm", cols: 1 }]}
-                      mt={previews.length > 0 ? "xl" : 0}
-                    >
-                      {previews}
-                    </SimpleGrid>
-                  </div>
+                <Button
+                  onClick={() => fileInputRef.current.click()}
+                  color="blue"
+                  variant="outline"
+                  fullWidth
+                >
+                  Upload Image
+                </Button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+                <SimpleGrid
+                  cols={4}
+                  breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                  mt={previews.length > 0 ? "xl" : 0}
+                >
+                  {previews}
+                </SimpleGrid>
+              </div>
               <Grid>
                 <Grid.Col span={12}>
                   <Button
