@@ -37,10 +37,14 @@ export const DEL_CATEGORY = gql`
 export const UPDATE_CATEGORY = gql`
   mutation UPDATE_CATEGORY(
     $id: ID!
+    $image: Upload
     $name: TranslatableInput!
     $children: UpdateCategoryHasMany
   ) {
-    updateCategory(id: $id, input: { name: $name, children: $children }) {
+    updateCategory(
+      id: $id
+      input: { name: $name, image: $image, children: $children }
+    ) {
       id
       name
       children_count

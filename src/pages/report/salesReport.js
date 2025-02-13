@@ -108,9 +108,9 @@ const SalesReport = () => {
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [product, setSetProduct] = useState("");
-  const [retailer, setSetRetailer] = useState("");
-  const [warehouse, setSetWarhouse] = useState("");
+  const [product, setSetProduct] = useState(null);
+  const [retailer, setSetRetailer] = useState(null);
+  const [warehouse, setSetWarhouse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [timeRange, setTimeRange] = useState(null);
   const [drivers, setDrivers] = useState([]);
@@ -119,10 +119,10 @@ const SalesReport = () => {
 
   const [sortedData, setSortedData] = useState([]);
   useEffect(() => {
-    fetchData(activePage);
+    fetchData();
   }, [activePage]);
 
-  const fetchData = async (page) => {
+  const fetchData = async () => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -132,15 +132,15 @@ const SalesReport = () => {
         },
       };
       const response = await axios.get(
-        `${API}/reports/sales?period=custom&startDate=2024-01-01&endDate=2025-01-31&product=&warehouse=Skylight&retailer=`,
+        `${API}/reports/sales?page=${activePage}`,
         config
       );
       if (response.data) {
         setLoading(false);
-        setDrivers(response.data.salesTransactions);
-        setSortedData(response.data.salesTransactions);
-        setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setDrivers(response.data.salesTransactions.data);
+        setSortedData(response.data.salesTransactions.data);
+        setTotal(response.data.salesTransactions.pagination?.links);
+        setTotalPages(response.data.salesTransactions.pagination.last_page);
       }
     } catch (error) {
       setLoading(false);
@@ -166,16 +166,16 @@ const SalesReport = () => {
       const response = await axios.get(
         `${API}/reports/sales?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&product=${product}&warehouse=${warehouse}&retailer=${retailer}`,
+        }&startDate=${startDate}&endDate=${endDate}&product=${product}&warehouse=${warehouse}&retailer=${retailer}&page=${activePage}`,
         config
       );
 
       if (response.data) {
         setLoading(false);
-        setDrivers(response.data.salesTransactions);
-        setSortedData(response.data.salesTransactions);
-        setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setDrivers(response.data.salesTransactions.data);
+        setSortedData(response.data.salesTransactions.data);
+        setTotal(response.data.salesTransactions.pagination?.links);
+        setTotalPages(response.data.salesTransactions.pagination.last_page);
       }
     } catch (error) {
       setLoading(false);
@@ -186,11 +186,27 @@ const SalesReport = () => {
   const handleReset = () => {
     setSelectedStartDate(null);
     setSelectedEndDate(null);
-    setSetProduct("");
-    setTimeRange(null)
-    setSetRetailer("");
-    setSetWarhouse("");
+    setSetProduct(null);
+    setTimeRange(null);
+    setSetRetailer(null);
+    setSetWarhouse(null);
     fetchData();
+  };
+  const handleChange = (page) => {
+    if (
+      timeRange ||
+      selectedEndDate ||
+      selectedStartDate ||
+      warehouse ||
+      product ||
+      retailer
+    ) {
+      setActivePage(page);
+      handleFilter();
+    } else {
+      setActivePage(page);
+      fetchData();
+    }
   };
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
@@ -204,7 +220,6 @@ const SalesReport = () => {
         <td style={{ width: "100px" }}>{row.warehouseRegion}</td>
         <td style={{ width: "100px" }}>{row.date}</td>
         <td style={{ width: "100px" }}>{row.retailer}</td>
-        <td style={{ width: "100px" }}>{row.retailerRegion}</td>
       </tr>
     </Fragment>
   ));
@@ -232,7 +247,7 @@ const SalesReport = () => {
               label="Select Period"
               placeholder="Select Range"
               withinPortal
-              clearable // Allow clearing the selection
+              clearable
             />
           </div>
           <div>
@@ -270,6 +285,7 @@ const SalesReport = () => {
           selectedEndDate ||
           selectedStartDate ||
           warehouse ||
+          product ||
           retailer) && (
           <div
             style={{
@@ -322,10 +338,10 @@ const SalesReport = () => {
                   <span className={classes.thh}>Price</span>
                 </Th>
                 <Th>
-                  <span className={classes.thh}>Total Price </span>
+                  <span className={classes.thh}>Quantity</span>
                 </Th>
                 <Th>
-                  <span className={classes.thh}>Quantity</span>
+                  <span className={classes.thh}>SubTotal </span>
                 </Th>
                 <Th>
                   <span className={classes.thh}>Warehouse</span>
@@ -338,9 +354,6 @@ const SalesReport = () => {
                 </Th>
                 <Th>
                   <span className={classes.thh}>Retailer</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Retailer Region</span>
                 </Th>
               </tr>
             </thead>
@@ -358,6 +371,18 @@ const SalesReport = () => {
               )}
             </tbody>
           </Table>
+          <Center>
+            <div style={{ paddingTop: "12px" }}>
+              <Container>
+                <Pagination
+                  color="blue"
+                  page={activePage}
+                  onChange={handleChange}
+                  total={totalPages}
+                />
+              </Container>
+            </div>
+          </Center>
         </ScrollArea>
       </Card>
     </div>

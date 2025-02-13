@@ -180,7 +180,7 @@ const UserAddModal = ({
       />
       <div>
         <ScrollArea
-          style={{ height: height / 1.1 }}
+          style={{ height: height / 1.4 }}
           type="auto"
           offsetScrollbars
         >
@@ -232,7 +232,7 @@ const UserAddModal = ({
                 </Grid.Col>
               </Grid>
               
-              <div style={{ marginTop: "25px" }}>
+              <div style={{ marginTop: "10px" }}>
                     <Button
                       onClick={() => fileInputRef.current.click()}
                       color="blue"
@@ -260,7 +260,6 @@ const UserAddModal = ({
                 <Grid.Col span={12}>
                   <Button
                     style={{
-                      marginTop: "20px",
                       width: "30%",
 
                       backgroundColor: "#FF6A00",

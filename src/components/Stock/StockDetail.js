@@ -53,7 +53,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-function StockDetailModal({ Id }) {
+function StockDetailModal({ Id,updateData,setOpenedDetail }) {
   const form = useForm({
     initialValues: {
       minimum_stock_level: 0,
@@ -105,7 +105,8 @@ function StockDetailModal({ Id }) {
           title: "Success",
           message: "Stock Level Updated Successfully",
         });
-        fetchData();
+        updateData()
+        setOpenedDetail()
       },
       onError() {
         showNotification({

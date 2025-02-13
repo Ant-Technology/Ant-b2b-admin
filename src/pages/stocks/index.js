@@ -151,10 +151,10 @@ const Drivers = () => {
   const [openedDelete, setOpenedDelete] = useState(false);
 
   useEffect(() => {
-    fetchData(activePage);
-  }, [activePage]);
+    fetchData();
+  }, []);
 
-  const fetchData = async (page) => {
+  const fetchData = async () => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -163,7 +163,7 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/stocks?page=${page}`, config);
+      const response = await axios.get(`${API}/stocks?page=${activePage}`, config);
       if (response.data) {
         setLoading(false);
         setDrivers(response.data.data);
@@ -383,7 +383,7 @@ const Drivers = () => {
         position="bottom"
         size="80%"
       >
-        <StockDetailModal Id={editId} />
+        <StockDetailModal updateData={fetchData} Id={editId} setOpenedDetail={setOpenedDetail} />
       </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>

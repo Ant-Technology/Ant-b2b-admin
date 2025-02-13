@@ -145,7 +145,7 @@ const Orders = () => {
     {
       label: "Retailer",
       key: "retailer",
-      sortable: true,
+      sortable: false,
       searchable: true,
       render: (rowData) => {
         return <span>{rowData.retailer?.name}</span>;
@@ -172,7 +172,7 @@ const Orders = () => {
     {
       label: "Total Price",
       key: "total_price",
-      sortable: true,
+      sortable: false,
       searchable: true,
       render: (rowData) => {
         return <span>{rowData.total_price}</span>;

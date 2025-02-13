@@ -76,7 +76,7 @@ const DropOffs = () => {
     {
       label: "Status",
       key: "status",
-      sortable: true,
+      sortable: false,
       searchable: true,
       render: (rowData) => {
         return <span>{rowData.status}</span>;
@@ -85,7 +85,7 @@ const DropOffs = () => {
     {
       label: "Driver",
       key: "driver",
-      sortable: true,
+      sortable: false,
       searchable: true,
       render: (rowData) => {
         return (
@@ -98,7 +98,7 @@ const DropOffs = () => {
     {
       label: "Retailer",
       key: "retailer",
-      sortable: true,
+      sortable: false,
       searchable: true,
       render: (rowData) => {
         return <span>{rowData.dropoff_order[0].order.retailer.name}</span>;

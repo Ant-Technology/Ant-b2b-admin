@@ -320,48 +320,51 @@ const Drivers = () => {
     }
   };
   const theme = useMantineTheme();
-  const rows = sortedData?.map((row) => (
-    <Fragment key={row.id}>
-      <tr>
-        <td className={classes.idColumn}>{row.id}</td>
-        <td>{row.name}</td>
-        <td>{row.email}</td>
-        <td>{row.phone}</td>
-        <td className={classes.cityColumn}>{row.region?.name?.en}</td>
-        <td>{row.city}</td>
-        <td style={{ width: "10%" }}>{row.vehicle?.vehicle_type?.title.en}</td>
-        <td>{formatNumber(row.wallet?.balance)}</td>
-        <td>
-          <div style={{ display: "flex" }}>
-            <Controls.ActionButton
-              color="primary"
-              title="Update"
-              onClick={() => handleEditDriver(row)}
-            >
-              <EditIcon style={{ fontSize: "1rem" }} />
-            </Controls.ActionButton>
-            <span style={{ marginLeft: "1px" }}>
+  const rows = sortedData?.map((row) => {
+    const rowStyle = row.wallet?.balance < 1000 ? { backgroundColor: '#FFCCCB' } : {}; // Warning color for balance < 1000
+  
+    return (
+      <Fragment key={row.id}>
+        <tr style={rowStyle}> {/* Apply conditional styling to the entire row */}
+          <td className={classes.idColumn}>{row.id}</td>
+          <td>{row.name}</td>
+          <td>{row.email}</td>
+          <td>{row.phone}</td>
+          <td className={classes.cityColumn}>{row.region?.name?.en}</td>
+          <td>{row.city}</td>
+          <td style={{ width: "10%" }}>{row.vehicle?.vehicle_type?.title.en}</td>
+          <td>{formatNumber(row.wallet?.balance)}</td>
+          <td>
+            <div style={{ display: "flex" }}>
               <Controls.ActionButton
                 color="primary"
-                title="View Detail"
-                onClick={() => handleManageDriver(`${row.id}`)}
+                title="Update"
+                onClick={() => handleEditDriver(row)}
               >
-                <FiEye fontSize="medium" />
+                <EditIcon style={{ fontSize: "1rem" }} />
               </Controls.ActionButton>
-            </span>
-            <Controls.ActionButton
-              color="primary"
-              title="Delete"
-              onClick={() => handleDelete(`${row.id}`)}
-            >
-              <Trash size={17} />
-            </Controls.ActionButton>
-          </div>
-        </td>
-      </tr>
-    </Fragment>
-  ));
-
+              <span style={{ marginLeft: "1px" }}>
+                <Controls.ActionButton
+                  color="primary"
+                  title="View Detail"
+                  onClick={() => handleManageDriver(`${row.id}`)}
+                >
+                  <FiEye fontSize="medium" />
+                </Controls.ActionButton>
+              </span>
+              <Controls.ActionButton
+                color="primary"
+                title="Delete"
+                onClick={() => handleDelete(`${row.id}`)}
+              >
+                <Trash size={17} />
+              </Controls.ActionButton>
+            </div>
+          </td>
+        </tr>
+      </Fragment>
+    );
+  });
   return loading ? (
     <LoadingOverlay
       visible={loading}
