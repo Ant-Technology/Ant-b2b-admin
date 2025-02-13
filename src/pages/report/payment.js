@@ -36,13 +36,12 @@ import { showNotification } from "@mantine/notifications";
 import SalesDetailModal from "components/Sales/SalesDetailModal";
 import { SalesEditModal } from "components/Sales/SalesUpdateModal";
 import { SalesAddModal } from "components/Sales/SalesAddModal";
-import { API } from "utiles/url";
+import { API, formatNumber } from "utiles/url";
 import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
 import ProductFilter from "./product";
 import RetailerFilter from "./retailer";
 import WarehouseFilter from "./warehouse";
-import OrdersDetailModal from "./orders";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -103,22 +102,21 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
   );
 }
 
-const RetailerReport = () => {
+const PaymentReport = () => {
   const { classes } = useStyles();
+  const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
+  const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [product, setSetProduct] = useState("");
+  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [openedDetail, setOpenedDetail] = useState(false);
-
   const [timeRange, setTimeRange] = useState(null);
-  const [status, setStatus] = useState(null);
+  const [drivers, setDrivers] = useState([]);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
 
   const [sortedData, setSortedData] = useState([]);
-  const [data, setData] = useState([]);
-
   useEffect(() => {
     fetchData();
   }, [activePage]);
@@ -133,16 +131,19 @@ const RetailerReport = () => {
         },
       };
       const response = await axios.get(
-        `${API}/reports/retailers?page=${activePage}`,
+        `${API}/reports/payments-orders?page=${activePage}`,
         config
       );
       if (response.data) {
         setLoading(false);
-        setSortedData(response.data.retailerActivity.data);
-        setTotalPages(response.data.retailerActivity.last_page);
+        setDrivers(response.data.transactionsSummary.data);
+        setSortedData(response.data.transactionsSummary.data);
+        setTotal(response.data.transactionsSummary?.links);
+        setTotalPages(response.data.transactionsSummary.last_page);
       }
     } catch (error) {
       setLoading(false);
+      console.error("Error fetching data:", error);
     }
   };
   const handleFilter = async () => {
@@ -160,28 +161,33 @@ const RetailerReport = () => {
       const endDate = selectedEndDate
         ? selectedEndDate.toISOString().slice(0, 10)
         : "";
+
       const response = await axios.get(
-        `${API}/reports/retailers?period=${
+        `${API}/reports/payments-orders?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&product=${product}&status=${status}`,
+        }&startDate=${startDate}&endDate=${endDate}&paymentMethod=${selectedMethod}&trans_status=${selectedStatus}&page=${activePage}`,
         config
       );
+
       if (response.data) {
         setLoading(false);
-        setSortedData(response.data.retailerActivity.data);
-        setTotalPages(response.data.retailerActivity.last_page);
+        setDrivers(response.data.transactionsSummary.data);
+        setSortedData(response.data.transactionsSummary.data);
+        setTotal(response.data.transactionsSummary?.links);
+        setTotalPages(response.data.transactionsSummary.last_page);
       }
     } catch (error) {
       setLoading(false);
+      console.error("Error fetching data:", error);
     }
   };
 
   const handleReset = () => {
     setSelectedStartDate(null);
     setSelectedEndDate(null);
-    setSetProduct(null);
-    setStatus(null);
+    setSelectedMethod(null);
     setTimeRange(null);
+    setSelectedStatus(null);
     fetchData();
   };
   const handleChange = (page) => {
@@ -189,8 +195,8 @@ const RetailerReport = () => {
       timeRange ||
       selectedEndDate ||
       selectedStartDate ||
-      product ||
-      status
+      selectedStatus ||
+      selectedMethod
     ) {
       setActivePage(page);
       handleFilter();
@@ -199,30 +205,15 @@ const RetailerReport = () => {
       fetchData();
     }
   };
-  const theme = useMantineTheme();
-  const handleDetail = (item) => {
-    setOpenedDetail(true);
-    setData(item);
-  };
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
-        <td>{row.name}</td>
-        <td>{row.contact_email}</td>
-        <td>{row.contact_phone}</td>
-        <td>{row.address}</td>
-        <td>{row.region.name.en}</td>
-        <td>{row.orders.length}</td>
-        <td>
-          {" "}
-          <Controls.ActionButton
-            color="primary"
-            title="View Detail"
-            onClick={() => handleDetail(row.orders)}
-          >
-            <FiEye fontSize="medium" />
-          </Controls.ActionButton>
-        </td>
+        <td style={{ width: "80px" }}>{row.payment_method}</td>
+        <td style={{ width: "120px" }}>{row.payable_type.split('\\').pop()}</td>
+        <td style={{ width: "20px" }}>{row.type}</td>
+        <td style={{ width: "30px" }}>{formatNumber(row.amount)}</td>
+        <td style={{ width: "70px" }}>{row.status}</td>
+        <td style={{ width: "100px" }}>{row.payable.name}</td>
       </tr>
     </Fragment>
   ));
@@ -272,16 +263,31 @@ const RetailerReport = () => {
             />
           </div>
           <div>
-            <ProductFilter category={product} onCardClick={setSetProduct} />
+            <Select
+              data={[
+                { value: "TELEBIRR", label: "TELEBIRR" },
+                { value: "WALLET", label: "WALLET" },
+                { value: "INVOICE", label: "INVOICE" },
+                { value: "CASH", label: "CASH" },
+              ]}
+              value={selectedMethod}
+              onChange={setSelectedMethod}
+              label="Select Payment Method"
+              placeholder="Select Method"
+              withinPortal
+              clearable
+            />{" "}
           </div>
           <div>
             <Select
               data={[
-                { value: "active", label: "Active" },
-                { value: "inactive", label: "Inactive" },
+                { value: "CONFIRMED", label: "CONFIRMED" },
+                { value: "PENDING", label: "PENDING" },
+                { value: "FAILED", label: "FAILED" },
+                { value: "REJECTED", label: "REJECTED" },
               ]}
-              value={status}
-              onChange={setStatus}
+              value={selectedStatus}
+              onChange={setSelectedStatus}
               label="Select Status"
               placeholder="Select Status"
               withinPortal
@@ -292,8 +298,8 @@ const RetailerReport = () => {
         {(timeRange ||
           selectedEndDate ||
           selectedStartDate ||
-          product ||
-          status) && (
+          selectedStatus ||
+          selectedMethod) && (
           <div
             style={{
               display: "flex",
@@ -325,26 +331,6 @@ const RetailerReport = () => {
           </div>
         )}
       </div>
-
-      <Drawer
-        opened={openedDetail}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Retailer Orders Detail"
-        padding="xl"
-        onClose={() => setOpenedDetail(false)}
-        position="bottom"
-        size="80%"
-      >
-        <OrdersDetailModal
-        data={data}
-        />
-      </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
           <Table
@@ -356,25 +342,22 @@ const RetailerReport = () => {
             <thead>
               <tr style={{ backgroundColor: "#F1F1F1" }}>
                 <Th>
-                  <span className={classes.thh}>Name</span>
+                  <span className={classes.thh}> Method </span>
                 </Th>
                 <Th>
-                  <span className={classes.thh}>Email</span>
+                  <span className={classes.thh}>User Type</span>
                 </Th>
                 <Th>
-                  <span className={classes.thh}>Phone</span>
+                  <span className={classes.thh}>Type</span>
                 </Th>
                 <Th>
-                  <span className={classes.thh}>Address</span>
+                  <span className={classes.thh}>Amount </span>
                 </Th>
                 <Th>
-                  <span className={classes.thh}>Region</span>
+                  <span className={classes.thh}>Status </span>
                 </Th>
                 <Th>
-                  <span className={classes.thh}>Orders</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Action</span>
+                  <span className={classes.thh}>User</span>
                 </Th>
               </tr>
             </thead>
@@ -410,4 +393,4 @@ const RetailerReport = () => {
   );
 };
 
-export default RetailerReport;
+export default PaymentReport;

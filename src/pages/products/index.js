@@ -154,7 +154,7 @@ const Products = () => {
       render: (rowData) => {
         return (
           <Avatar.Group spacing="sm">
-            <Avatar src={rowData?.imageUrl} radius="xl" />
+            <Avatar src={rowData?.images[0].original_url} radius="xl" />
           </Avatar.Group>
         );
       },
@@ -162,7 +162,7 @@ const Products = () => {
     {
       label: "Name",
       key: "name",
-      sortable: true,
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.name}</span>;
@@ -171,7 +171,7 @@ const Products = () => {
     {
       label: "Category",
       key: "category",
-      sortable: true,
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.category?.name}</span>;
@@ -180,7 +180,7 @@ const Products = () => {
     {
       label: "Product Variant",
       key: "variantCount",
-      sortable: true,
+      sortable: false,
       searchable: false,
       render: (rowData) => {
         return <span>{rowData.productSkusCount}</span>;

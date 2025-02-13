@@ -87,9 +87,9 @@ console.log("drop off data ", dropOffData);
                       ? data.order.retailer?.name
                       : "unknown"}
                   </Text>
-                <Badge color={data.order.received ? "green" : "red"} variant="light">
+                <Badge color={data.received ? "green" : "red"} variant="light">
                     
-                    {dropOffData && data.order.received
+                    {dropOffData && data.received
                       ? "Recieved"
                       : "Not Recieved"}
                   </Badge>

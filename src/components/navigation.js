@@ -330,6 +330,12 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         ...(permissions.some((perm) => perm.name === "reports-retailers")
           ? [{ link: "/retailer-report", label: "Retailer Report" }]
           : []),
+          ...(permissions.some((perm) => perm.name === "reports-retailers")
+          ? [{ link: "/payment-report", label: "Payment Report" }]
+          : []),
+          ...(permissions.some((perm) => perm.name === "reports-sales")
+          ? [{ link: "/sales-person-report", label: "Sales Person Report" }]
+          : []),
       ],
     });
   }

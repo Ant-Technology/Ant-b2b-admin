@@ -26,23 +26,16 @@ import { FiEdit, FiEye } from "react-icons/fi";
 import EditIcon from "@mui/icons-material/Edit";
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import axios from "axios";
-import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { Plus, Search } from "tabler-icons-react";
-import { showNotification } from "@mantine/notifications";
-import SalesDetailModal from "components/Sales/SalesDetailModal";
-import { SalesEditModal } from "components/Sales/SalesUpdateModal";
-import { SalesAddModal } from "components/Sales/SalesAddModal";
+
 import { API } from "utiles/url";
 import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
 import ProductFilter from "./product";
-import RetailerFilter from "./retailer";
-import WarehouseFilter from "./warehouse";
 import OrdersDetailModal from "./orders";
+import SalesDetailModal from "components/Sales/SalesDetailModal";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -103,21 +96,19 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
   );
 }
 
-const RetailerReport = () => {
+const SalesPersonReport = () => {
   const { classes } = useStyles();
   const [activePage, setActivePage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [product, setSetProduct] = useState("");
   const [loading, setLoading] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
 
   const [timeRange, setTimeRange] = useState(null);
-  const [status, setStatus] = useState(null);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
 
   const [sortedData, setSortedData] = useState([]);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -133,13 +124,13 @@ const RetailerReport = () => {
         },
       };
       const response = await axios.get(
-        `${API}/reports/retailers?page=${activePage}`,
+        `${API}/reports/salesperson?page=${activePage}`,
         config
       );
       if (response.data) {
         setLoading(false);
-        setSortedData(response.data.retailerActivity.data);
-        setTotalPages(response.data.retailerActivity.last_page);
+        setSortedData(response.data.salespersonActivity.data);
+        setTotalPages(response.data.salespersonActivity.last_page);
       }
     } catch (error) {
       setLoading(false);
@@ -161,15 +152,15 @@ const RetailerReport = () => {
         ? selectedEndDate.toISOString().slice(0, 10)
         : "";
       const response = await axios.get(
-        `${API}/reports/retailers?period=${
+        `${API}/reports/salesperson?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&product=${product}&status=${status}`,
+        }&dateFrom=${startDate}&dateTo=${endDate}`,
         config
       );
       if (response.data) {
         setLoading(false);
-        setSortedData(response.data.retailerActivity.data);
-        setTotalPages(response.data.retailerActivity.last_page);
+        setSortedData(response.data.salespersonActivity.data);
+        setTotalPages(response.data.salespersonActivity.last_page);
       }
     } catch (error) {
       setLoading(false);
@@ -179,19 +170,11 @@ const RetailerReport = () => {
   const handleReset = () => {
     setSelectedStartDate(null);
     setSelectedEndDate(null);
-    setSetProduct(null);
-    setStatus(null);
     setTimeRange(null);
     fetchData();
   };
   const handleChange = (page) => {
-    if (
-      timeRange ||
-      selectedEndDate ||
-      selectedStartDate ||
-      product ||
-      status
-    ) {
+    if (timeRange || selectedEndDate || selectedStartDate) {
       setActivePage(page);
       handleFilter();
     } else {
@@ -208,17 +191,20 @@ const RetailerReport = () => {
     <Fragment key={row.id}>
       <tr>
         <td>{row.name}</td>
-        <td>{row.contact_email}</td>
-        <td>{row.contact_phone}</td>
+        <td>{row.email}</td>
+        <td>{row.phone}</td>
         <td>{row.address}</td>
-        <td>{row.region.name.en}</td>
-        <td>{row.orders.length}</td>
+        <td>{row.region}</td>
+        <td>{row.city}</td>
+        <td>{row.subcity}</td>
+        <td>{row.woreda}</td>
+        <td>{row.retailers.length}</td>
         <td>
           {" "}
           <Controls.ActionButton
             color="primary"
             title="View Detail"
-            onClick={() => handleDetail(row.orders)}
+            onClick={() => handleDetail(row.id)}
           >
             <FiEye fontSize="medium" />
           </Controls.ActionButton>
@@ -243,7 +229,7 @@ const RetailerReport = () => {
                 { value: "daily", label: "Daily" },
                 { value: "weekly", label: "Weekly" },
                 { value: "monthly", label: "Monthly" },
-                { value: "annual", label: "Annual" },
+                { value: "annually", label: "Annual" },
               ]}
               value={timeRange}
               onChange={setTimeRange}
@@ -271,29 +257,10 @@ const RetailerReport = () => {
               clearable
             />
           </div>
-          <div>
-            <ProductFilter category={product} onCardClick={setSetProduct} />
-          </div>
-          <div>
-            <Select
-              data={[
-                { value: "active", label: "Active" },
-                { value: "inactive", label: "Inactive" },
-              ]}
-              value={status}
-              onChange={setStatus}
-              label="Select Status"
-              placeholder="Select Status"
-              withinPortal
-              clearable
-            />
-          </div>
         </SimpleGrid>
         {(timeRange ||
           selectedEndDate ||
-          selectedStartDate ||
-          product ||
-          status) && (
+          selectedStartDate) && (
           <div
             style={{
               display: "flex",
@@ -335,15 +302,13 @@ const RetailerReport = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Retailer Orders Detail"
+        title="Sales Detail"
         padding="xl"
         onClose={() => setOpenedDetail(false)}
         position="bottom"
         size="80%"
       >
-        <OrdersDetailModal
-        data={data}
-        />
+        <SalesDetailModal Id={data} />
       </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
@@ -371,7 +336,16 @@ const RetailerReport = () => {
                   <span className={classes.thh}>Region</span>
                 </Th>
                 <Th>
-                  <span className={classes.thh}>Orders</span>
+                  <span className={classes.thh}>City</span>
+                </Th>
+                <Th>
+                  <span className={classes.thh}>SubCity</span>
+                </Th>
+                <Th>
+                  <span className={classes.thh}>Woreda</span>
+                </Th>
+                <Th>
+                  <span className={classes.thh}>Retailers</span>
                 </Th>
                 <Th>
                   <span className={classes.thh}>Action</span>
@@ -410,4 +384,4 @@ const RetailerReport = () => {
   );
 };
 
-export default RetailerReport;
+export default SalesPersonReport;

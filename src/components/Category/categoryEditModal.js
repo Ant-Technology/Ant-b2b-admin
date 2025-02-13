@@ -59,7 +59,7 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
   const [subCategoryFiles, setSubCategoryFiles] = useState({});
   const [mainCategoryFile, setMainCategoryFile] = useState(null);
   const { height } = useViewportSize();
-  const fileInputRef = useRef(null);
+  const mainFileInputRef = useRef(null);
 
   const handleMainFileChange = (event) => {
     const files = Array.from(event.target.files);
@@ -70,93 +70,195 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
   };
 
   const handleSubCategoryImageUpload = (files, index) => {
-    setSubCategoryFiles((prev) => ({
-      ...prev,
-      [index]: files[0],
-    }));
-    form.setFieldValue(`childrens.update.${index}.image`, files[0]);
+    if (files.length > 0) {
+      const file = files[0]; // Get the file object
+      setSubCategoryFiles((prev) => ({
+        ...prev,
+        [index]: file, // Store the file object
+      }));
+      form.setFieldValue(`childrens.update.${index}.image`, file); // Set the file directly
+    }
   };
-
   const handleFields = () => {
-    return form.values.childrens?.update?.map((item, index) => (
-      <Grid key={index}>
-        <Grid.Col span={4}>
-          <TextInput
-            placeholder="Sub Category"
-            required
-            label="Sub Category"
-            sx={{ flex: 1 }}
-            {...form.getInputProps(`childrens.update.${index}.name.en`)}
-          />
-        </Grid.Col>
-        <Grid.Col span={4}>
-          <TextInput
-            placeholder="Subcategory (Amharic)"
-            required
-            label={`Subcategory ${index + 1} (Amharic)`}
-            sx={{ flex: 1 }}
-            {...form.getInputProps(`childrens.update.${index}.name.am`)}
-          />
-        </Grid.Col>
-        <Grid.Col span={3}>
-          <Button
-            onClick={() => fileInputRef.current.click()} // Trigger file input on button click
-            variant="outline"
-            color="blue"
-            style={{ marginTop: "25px" }}
-            fullWidth
-          >
-            Upload Image
-          </Button>
-          <input
-            type="file"
-            accept={IMAGE_MIME_TYPE}
-            ref={fileInputRef}
-            style={{ display: "none" }} // Hide the file input
-            onChange={(e) =>
-              handleSubCategoryImageUpload(e.target.files, index)
-            } // Handle subcategory image selection
-          />
-          {subCategoryFiles[index] ? (
-            <img
-              src={URL.createObjectURL(subCategoryFiles[index])}
-              width="130"
-              alt="Sub Category"
-            />
-          ) : (
-            item.imageUrl && (
-              <img src={item.imageUrl} width="130" alt="Sub Category" />
-            )
-          )}
-        </Grid.Col>
-        <ActionIcon
-          color="#ed522f"
-          onClick={() => {
-            form.removeListItem("childrens.update", index);
-            form.insertListItem("childrens.delete", parseInt(item.id));
-          }}
-          style={{ marginTop: "30px", padding: "2px" }}
-        >
-          <Trash size={24} />
-        </ActionIcon>
-      </Grid>
-    ));
+    return (
+      <>
+        {form.values.childrens?.update?.map((item, index) => (
+          <Grid key={`update-${index}`}>
+            {/* Fields for updating existing subcategories */}
+            <Grid.Col span={4}>
+              <TextInput
+                placeholder="Sub Category"
+                required
+                label="Sub Category"
+                sx={{ flex: 1 }}
+                {...form.getInputProps(`childrens.update.${index}.name.en`)}
+              />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <TextInput
+                placeholder="Subcategory (Amharic)"
+                required
+                label={`Subcategory ${index + 1} (Amharic)`}
+                sx={{ flex: 1 }}
+                {...form.getInputProps(`childrens.update.${index}.name.am`)}
+              />
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <Button
+                onClick={() => {
+                  document.getElementById(`file-input-update-${index}`).click();
+                }} // Trigger file input on button click
+                variant="outline"
+                color="blue"
+                style={{ marginTop: "25px" }}
+                fullWidth
+              >
+                Upload Image
+              </Button>
+              <input
+                id={`file-input-update-${index}`} // Unique ID for each input
+                type="file"
+                accept={IMAGE_MIME_TYPE}
+                style={{ display: "none" }} // Hide the file input
+                onChange={(e) =>
+                  handleSubCategoryImageUpload(e.target.files, index)
+                } // Handle subcategory image selection
+              />
+              {subCategoryFiles[index] ? (
+                <img
+                  src={URL.createObjectURL(subCategoryFiles[index])}
+                  width="130"
+                  alt="Sub Category"
+                />
+              ) : (
+                item.imageUrl && (
+                  <img src={item.imageUrl} width="130" alt="Sub Category" />
+                )
+              )}
+            </Grid.Col>
+            <ActionIcon
+              color="#ed522f"
+              onClick={() => {
+                form.removeListItem("childrens.update", index);
+                form.insertListItem("childrens.delete", parseInt(item.id));
+              }}
+              style={{ marginTop: "30px", padding: "2px" }}
+            >
+              <Trash size={24} />
+            </ActionIcon>
+          </Grid>
+        ))}
+        {form.values.childrens?.create?.map((item, index) => (
+          <Grid key={`create-${index}`}>
+            {/* Fields for creating new subcategories */}
+            <Grid.Col span={4}>
+              <TextInput
+                placeholder="New Sub Category"
+                required
+                label="New Sub Category"
+                sx={{ flex: 1 }}
+                {...form.getInputProps(`childrens.create.${index}.name.en`)}
+              />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <TextInput
+                placeholder="New Subcategory (Amharic)"
+                required
+                label={`New Subcategory ${index + 1} (Amharic)`}
+                sx={{ flex: 1 }}
+                {...form.getInputProps(`childrens.create.${index}.name.am`)}
+              />
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <Button
+                onClick={() => {
+                  document.getElementById(`file-input-create-${index}`).click();
+                }} // Trigger file input on button click
+                variant="outline"
+                color="blue"
+                style={{ marginTop: "25px" }}
+                fullWidth
+              >
+                Upload Image
+              </Button>
+              <input
+                id={`file-input-create-${index}`} // Unique ID for each input
+                type="file"
+                accept={IMAGE_MIME_TYPE}
+                style={{ display: "none" }} // Hide the file input
+                onChange={(e) =>
+                  handleSubCategoryImageUpload(e.target.files, index)
+                } // Handle subcategory image selection
+              />
+              {subCategoryFiles[index + form.values.childrens.update.length] ? ( // Adjust index for new files
+                <img
+                  src={URL.createObjectURL(
+                    subCategoryFiles[
+                      index + form.values.childrens.update.length
+                    ]
+                  )}
+                  width="130"
+                  alt="New Sub Category"
+                />
+              ) : null}
+            </Grid.Col>
+          </Grid>
+        ))}
+      </>
+    );
   };
-
   const submit = () => {
-    updateCategory({
-      variables: {
-        id: form.getInputProps("id").value,
-        name: {
-          am: form.getInputProps("name_translations.am").value,
-          en: form.getInputProps("name_translations.en").value,
-        },
-        children: {
-          create: form.getInputProps("childrens.create").value,
-          update: form.getInputProps("childrens.update").value,
-          delete: form.getInputProps("childrens.delete").value,
-        },
+    const { id, name_translations, childrens } = form.values;
+
+    const cleanChildrenUpdate = childrens.update.map(
+      ({ __typename, ...child }, index) => {
+        const { name, image } = child; // Get the name and file
+        if (subCategoryFiles[index]) {
+          return {
+            id: child.id,
+            name: {
+              am: name.am,
+              en: name.en,
+            },
+            image: subCategoryFiles[index] || null, // Use the file object
+          };
+        } else {
+          return {
+            id: child.id,
+            name: {
+              am: name.am,
+              en: name.en,
+            },
+          };
+        }
+      }
+    );
+    const childrenCreate = childrens.create.map(({ name }, index) => ({
+      name: {
+        am: name.am,
+        en: name.en,
       },
+      image:
+        subCategoryFiles[form.values.childrens.update.length + index] || null,
+    }));
+
+    const variables = {
+      id,
+      name: {
+        am: name_translations.am,
+        en: name_translations.en,
+      },
+      children: {
+        create: childrenCreate,
+        update: cleanChildrenUpdate,
+        delete: childrens.delete,
+      },
+    };
+    if (mainCategoryFile) {
+      variables.image = form.values.image;
+    }
+    updateCategory({
+      variables,
       onCompleted() {
         showNotification({
           color: "green",
@@ -204,7 +306,7 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
           </Grid.Col>
           <Grid.Col span={3}>
             <Button
-              onClick={() => fileInputRef.current.click()} // Trigger file input on button click
+              onClick={() => mainFileInputRef.current.click()} // Use the main file input ref
               variant="outline"
               color="blue"
               style={{ marginTop: "25px" }}
@@ -215,10 +317,11 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
             <input
               type="file"
               accept={IMAGE_MIME_TYPE}
-              ref={fileInputRef}
-              style={{ display: "none" }} // Hide the file input
-              onChange={handleMainFileChange} // Handle main image selection
+              ref={mainFileInputRef}
+              style={{ display: "none" }}
+              onChange={handleMainFileChange} // Use main file handler
             />
+            {/* Display Main Category Image */}
             {mainCategoryFile ? (
               <img
                 src={URL.createObjectURL(mainCategoryFile)}
@@ -226,11 +329,7 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
                 alt="Main Category"
               />
             ) : (
-              <img
-                src={form.values.image} // Display initial image if it exists
-                width="130"
-                alt="Main Category"
-              />
+              <img src={form.values.image} width="130" alt="Main Category" />
             )}
           </Grid.Col>
           <Grid.Col span={12}>
@@ -240,19 +339,20 @@ const CategoryEditModal = ({ setOpenedEdit, editId }) => {
                 color="blue"
                 variant="outline"
                 fullWidth
-                style={{ width: "200px" }} // Set a specific width for the button
+                style={{ width: "200px" }}
                 onClick={() => {
-                  form.insertListItem("childrens.update", {
+                  form.insertListItem("childrens.create", {
+                    // Insert into "create" array
                     name: { en: "", am: "" },
-                    image: "",
+                    image: null, // Initialize with null or empty value
                   });
                   setSubCategoryFiles((prev) => ({
                     ...prev,
-                    [form.values.childrens.update.length]: null,
+                    [form.values.childrens.create.length]: null, // Ensure it's in the right index
                   }));
                 }}
               >
-                Add new sub category
+                Add new subcategory
               </Button>
             </Group>
           </Grid.Col>

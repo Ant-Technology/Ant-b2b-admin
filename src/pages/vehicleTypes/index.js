@@ -69,6 +69,7 @@ const VehicleTypes = () => {
           variables: {
             first: 10,
             page: activePage,
+            search: searchValue
           },
         },
         (data) => {
