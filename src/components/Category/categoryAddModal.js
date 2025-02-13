@@ -33,6 +33,7 @@ export default function CategoryAddModal({
   const [mainCategoryFile, setMainCategoryFile] = useState(null);
   const [subCategoryFiles, setSubCategoryFiles] = useState([]);
   const fileInputRef = useRef(null);
+  const subCategoryFileRefs = useRef([]);
 
   const form = useForm({
     initialValues: {
@@ -91,7 +92,7 @@ export default function CategoryAddModal({
         </Grid.Col>
         <Grid.Col span={3}>
           <Button
-            onClick={() => fileInputRef.current.click()} // Trigger file input on button click
+            onClick={() => subCategoryFileRefs.current[index].click()} // Trigger the specific file input
             variant="outline"
             color="blue"
             fullWidth
@@ -102,7 +103,7 @@ export default function CategoryAddModal({
           <input
             type="file"
             accept={IMAGE_MIME_TYPE}
-            ref={fileInputRef}
+            ref={(el) => (subCategoryFileRefs.current[index] = el)} // Assign ref for each input
             style={{ display: "none" }} // Hide the file input
             onChange={(e) => handleSubCategoryFileChange(e, index)} // Handle file selection
           />
@@ -127,34 +128,24 @@ export default function CategoryAddModal({
 
   const [addCategory, { loading }] = useMutation(CREATE_CATEGORY, {
     update(cache, { data: { createCategory } }) {
-      const { categories } = cache.readQuery({
-        query: GET_CATEGORIES,
-        variables: {
-          first: 10,
-          page: 1,
-        },
-      });
-      if (!categories) return;
-
-      const updatedDropoffs = [createCategory, ...categories.data];
-
-      cache.writeQuery({
-        query: GET_CATEGORIES,
-        variables: {
-          first: 10,
-          page: 1,
-        },
-        data: {
-          categories: {
-            ...categories,
-            data: updatedDropoffs,
+      cache.updateQuery(
+        {
+          query: GET_CATEGORIES,
+          variables: {
+            first: parseInt(10),
+            page: activePage,
+            search: "",
           },
         },
-      });
-
-      const newTotal = categories.paginatorInfo.total + 1;
-      setTotal(newTotal);
-      setActivePage(1);
+        (data) => {
+          return {
+            categories: {
+              ...data.categories,
+              data: [createCategory, ...data.categories.data],
+            },
+          };
+        }
+      );
     },
   });
 
@@ -246,7 +237,8 @@ export default function CategoryAddModal({
                     width: "200px", // Set a specific width for the button
                   }}
                   onClick={() => {
-                    form.insertListItem("children", { // Correct path
+                    form.insertListItem("children", {
+                      // Correct path
                       name: { en: "", am: "" },
                       image: "",
                     });

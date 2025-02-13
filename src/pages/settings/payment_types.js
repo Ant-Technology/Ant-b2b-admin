@@ -268,7 +268,6 @@ const PaymentTypes = () => {
             </div>
           </SimpleGrid>
           <Drawer
-            style={{ marginTop: "10px" }}
             opened={opened}
             onClose={() => setOpened(false)}
             padding="xl"
@@ -278,8 +277,8 @@ const PaymentTypes = () => {
                 color: "black",
                 marginTop: "50px",
               }}}
-            position="bottom"
-          >
+              position="right"
+              >
             <PaymentTypeAddModal fetchDta={refetch} setOpened={setOpened} />
           </Drawer>
           <Drawer

@@ -103,9 +103,8 @@ const PaymentTypeAddModal = ({ setOpened, fetchDta }) => {
         overlayBlur={2}
         loader={customLoader}
       />
-      <div>
         <ScrollArea
-          style={{ height: height / 1.1 }}
+          style={{ height: height / 1.4 }}
           type="auto"
           offsetScrollbars
         >
@@ -122,7 +121,7 @@ const PaymentTypeAddModal = ({ setOpened, fetchDta }) => {
                 </Grid.Col>
               </Grid>
 
-              <div style={{ marginTop: "25px" }}>
+              <div style={{ marginTop: "10px" }}>
                 <Button
                   onClick={() => fileInputRef.current.click()}
                   color="blue"
@@ -150,7 +149,6 @@ const PaymentTypeAddModal = ({ setOpened, fetchDta }) => {
                 <Grid.Col span={12}>
                   <Button
                     style={{
-                      marginTop: "20px",
                       width: "30%",
 
                       backgroundColor: "#FF6A00",
@@ -167,7 +165,6 @@ const PaymentTypeAddModal = ({ setOpened, fetchDta }) => {
             </Stack>
           </form>
         </ScrollArea>
-      </div>
     </>
   );
 };

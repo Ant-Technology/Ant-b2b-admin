@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { DEL_CATEGORY } from "apollo/mutuations";
 import { FiEdit, FiEye } from "react-icons/fi";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import { GET_CATEGORIES } from "apollo/queries";
 import CategoryAddModal from "components/Category/categoryAddModal";
 import CategoryEditModal from "components/Category/categoryEditModal";
@@ -20,7 +20,7 @@ import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
 import { useState, useEffect } from "react";
 import { showNotification } from "@mantine/notifications";
-import { Edit, ManualGearbox, Trash, } from "tabler-icons-react";
+import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import CategoryDetailModal from "components/Category/categoryDetail";
 import Controls from "components/controls/Controls";
 
@@ -44,12 +44,7 @@ const Categories = () => {
     variables: {
       first: parseInt(size), // Pass size dynamically
       page: activePage,
-      ordered_by: [
-        {
-          column: "NAME",
-          order: "DESC",
-        },
-      ],
+      search:"",
     },
   });
 
@@ -59,11 +54,13 @@ const Categories = () => {
         {
           query: GET_CATEGORIES,
           variables: {
-            first: 10,
+            first: parseInt(size), // Use the same size variable
             page: activePage,
+            search: "",
           },
         },
         (data) => {
+          console.log(data)
           if (data.categories.data.length === 1) {
             setTotal(total - 1);
             setActivePage(activePage - 1);
@@ -128,7 +125,7 @@ const Categories = () => {
     if (data) {
       setTotal(data.categories.paginatorInfo.lastPage);
     }
-  }, [data, size]); 
+  }, [data, size]);
 
   const handleChange = (currentPage) => {
     fetchMore({
@@ -201,12 +198,12 @@ const Categories = () => {
       render: (rowData) => {
         return (
           <>
-           <Controls.ActionButton
+            <Controls.ActionButton
               color="primary"
               title="Update"
               onClick={() => handleEditCategory(`${rowData.id}`)}
             >
-              <EditIcon style={{ fontSize: '1rem' }}/>
+              <EditIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>
             <span style={{ marginLeft: "1px" }}>
               <Controls.ActionButton
@@ -224,7 +221,6 @@ const Categories = () => {
             >
               <Trash size={17} />
             </Controls.ActionButton>
-          
           </>
         );
       },
@@ -281,9 +277,7 @@ const Categories = () => {
         position="bottom"
         size="80%"
       >
-        <CategoryDetailModal
-          Id={editId}
-        />
+        <CategoryDetailModal Id={editId} />
       </Drawer>
 
       <Modal
@@ -333,7 +327,7 @@ const Categories = () => {
             optionsData={optionsData}
             loading={loading}
             data={data ? data.categories.data : []}
-            handlePageSizeChange= {handlePageSizeChange}
+            handlePageSizeChange={handlePageSizeChange}
             size={size}
           />
         </ScrollArea>
