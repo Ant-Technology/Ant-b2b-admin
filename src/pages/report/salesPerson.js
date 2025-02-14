@@ -30,7 +30,7 @@ import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 
-import { API } from "utiles/url";
+import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
 import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
 import ProductFilter from "./product";
@@ -97,6 +97,12 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const SalesPersonReport = () => {
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   const { classes } = useStyles();
   const [activePage, setActivePage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -111,10 +117,9 @@ const SalesPersonReport = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetchData();
-  }, [activePage]);
-
-  const fetchData = async () => {
+    fetchData(size);
+  }, []);
+  const fetchData = async (size) => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -124,7 +129,7 @@ const SalesPersonReport = () => {
         },
       };
       const response = await axios.get(
-        `${API}/reports/salesperson?page=${activePage}`,
+        `${API}/reports/salesperson?page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
@@ -154,7 +159,7 @@ const SalesPersonReport = () => {
       const response = await axios.get(
         `${API}/reports/salesperson?period=${
           timeRange ? timeRange : "custom"
-        }&dateFrom=${startDate}&dateTo=${endDate}`,
+        }&dateFrom=${startDate}&dateTo=${endDate}&first=${size}`,
         config
       );
       if (response.data) {
@@ -171,7 +176,7 @@ const SalesPersonReport = () => {
     setSelectedStartDate(null);
     setSelectedEndDate(null);
     setTimeRange(null);
-    fetchData();
+    fetchData(size);
   };
   const handleChange = (page) => {
     if (timeRange || selectedEndDate || selectedStartDate) {
@@ -179,7 +184,7 @@ const SalesPersonReport = () => {
       handleFilter();
     } else {
       setActivePage(page);
-      fetchData();
+      fetchData(size);
     }
   };
   const theme = useMantineTheme();
@@ -258,9 +263,7 @@ const SalesPersonReport = () => {
             />
           </div>
         </SimpleGrid>
-        {(timeRange ||
-          selectedEndDate ||
-          selectedStartDate) && (
+        {(timeRange || selectedEndDate || selectedStartDate) && (
           <div
             style={{
               display: "flex",
@@ -366,17 +369,28 @@ const SalesPersonReport = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange} // Call parent handler for page size change
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
                 />
-              </Container>
-            </div>
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
           </Center>
         </ScrollArea>
       </Card>

@@ -125,8 +125,6 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   const navigate = useNavigate();
   const [signout] = useMutation(LOGOUT);
   const [permissions, setPermissions] = useState([]);
-  const [collapseOpened, setCollapseOpened] = useState(false);
-
   useEffect(() => {
     const pusher = new Pusher("83f49852817c6b52294f", { cluster: "mt1" });
     const channel = pusher.subscribe("nav-counter");

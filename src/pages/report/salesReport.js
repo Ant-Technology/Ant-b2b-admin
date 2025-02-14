@@ -36,7 +36,7 @@ import { showNotification } from "@mantine/notifications";
 import SalesDetailModal from "components/Sales/SalesDetailModal";
 import { SalesEditModal } from "components/Sales/SalesUpdateModal";
 import { SalesAddModal } from "components/Sales/SalesAddModal";
-import { API } from "utiles/url";
+import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
 import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
 import ProductFilter from "./product";
@@ -103,8 +103,13 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const SalesReport = () => {
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   const { classes } = useStyles();
-  const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -119,10 +124,10 @@ const SalesReport = () => {
 
   const [sortedData, setSortedData] = useState([]);
   useEffect(() => {
-    fetchData();
-  }, [activePage]);
+    fetchData(size);
+  }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (size) => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -132,7 +137,7 @@ const SalesReport = () => {
         },
       };
       const response = await axios.get(
-        `${API}/reports/sales?page=${activePage}`,
+        `${API}/reports/sales?page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
@@ -166,7 +171,7 @@ const SalesReport = () => {
       const response = await axios.get(
         `${API}/reports/sales?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&product=${product}&warehouse=${warehouse}&retailer=${retailer}&page=${activePage}`,
+        }&startDate=${startDate}&endDate=${endDate}&product=${product}&warehouse=${warehouse}&retailer=${retailer}&page=${activePage}&first=${size}`,
         config
       );
 
@@ -190,7 +195,7 @@ const SalesReport = () => {
     setTimeRange(null);
     setSetRetailer(null);
     setSetWarhouse(null);
-    fetchData();
+    fetchData(size);
   };
   const handleChange = (page) => {
     if (
@@ -205,7 +210,7 @@ const SalesReport = () => {
       handleFilter();
     } else {
       setActivePage(page);
-      fetchData();
+      fetchData(size);
     }
   };
   const rows = sortedData?.map((row) => (
@@ -371,17 +376,29 @@ const SalesReport = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
+
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
                 />
-              </Container>
-            </div>
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
           </Center>
         </ScrollArea>
       </Card>

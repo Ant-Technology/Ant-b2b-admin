@@ -53,9 +53,9 @@ const ProductSkuEditModal = ({
       variables: {
         id: editId,
         sku: form.values.sku,
-        price: parseFloat(form.values.price), // Ensure price is a float
+        price: parseFloat(form.values.price),
         is_active: form.values.is_active,
-        buy_price: parseFloat(form.values.buy_price), // Ensure buy_price is a float
+        buy_price: parseFloat(form.values.buy_price),
       },
       onCompleted(data) {
         showNotification({
