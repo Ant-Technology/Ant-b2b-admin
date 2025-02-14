@@ -373,7 +373,6 @@ export const CREATE_PRODUCT_SKUS = gql`
     }
   }
 `;
-
 export const UPDATE_PRODUCT_SKUS = gql`
   mutation UPDATE_PRODUCT_SKUS(
     $id: ID!
@@ -388,7 +387,7 @@ export const UPDATE_PRODUCT_SKUS = gql`
         sku: $sku
         price: $price
         is_active: $is_active
-        buy_price: buy_price
+        buy_price: $buy_price
       }
     ) {
       id
