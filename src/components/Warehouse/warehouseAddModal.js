@@ -142,36 +142,24 @@ export default function WarehouseAddModal({
 
   const [createWarehouse, { loading }] = useMutation(CREATE_WARE_HOUSE, {
     update(cache, { data: { createWarehouse } }) {
-      // Read the existing data from the cache
-      const { warehouses } = cache.readQuery({
-        query: GET_WARE_HOUSES,
-        variables: {
-          first: 10,
-          page: 1,
-        },
-      });
-      if (!warehouses) {
-        return;
-      }
-      const updatedWarehouses = [createWarehouse, ...warehouses.data];
-
-      cache.writeQuery({
-        query: GET_WARE_HOUSES,
-        variables: {
-          first: 10,
-          page: 1,
-        },
-        data: {
-          warehouses: {
-            ...warehouses,
-            data: updatedWarehouses,
+      cache.updateQuery(
+        {
+          query: GET_WARE_HOUSES,
+          variables: {
+            first: parseInt(10),
+            page: activePage,
+            search: "",
           },
         },
-      });
-
-      const newTotal = warehouses.paginatorInfo.total + 1;
-      setTotal(newTotal);
-      setActivePage(1);
+        (data) => {
+          return {
+            warehouses: {
+              ...data.warehouses,
+              data: [createWarehouse, ...data.warehouses.data],
+            },
+          };
+        }
+      );
     },
   });
 
@@ -234,7 +222,7 @@ export default function WarehouseAddModal({
                 placeholder="Name"
                 {...form.getInputProps("name")}
               />
-               {isLoaded && (
+              {isLoaded && (
                 <Autocomplete
                   onLoad={autocompleteLoadHandler}
                   onPlaceChanged={onPlaceChangedHandler}
@@ -248,9 +236,9 @@ export default function WarehouseAddModal({
                 </Autocomplete>
               )}
             </Grid.Col>
-            
+
             <Grid.Col span={6}>
-            <Select
+              <Select
                 required
                 searchable
                 data={regionsDropDownData}
@@ -294,9 +282,20 @@ export default function WarehouseAddModal({
               </ScrollArea>
             </Grid.Col>
           </Grid>
-          <Grid style={{ marginTop: "10px", marginBottom: "20px" }}>
-            <Grid.Col span={4}>
-              <Button type="submit" color="blue" variant="outline" fullWidth>
+
+          <Grid>
+            <Grid.Col span={12}>
+              <Button
+                type="submit"
+                style={{
+                  marginTop: "10px",
+                  width: "20%",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                fullWidth
+                color="blue"
+              >
                 Submit
               </Button>
             </Grid.Col>

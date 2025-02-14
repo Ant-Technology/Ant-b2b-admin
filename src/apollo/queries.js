@@ -266,7 +266,6 @@ export const GET_DISTRIBUTORS = gql`
       paginatorInfo {
         count
         currentPage
-        firstItem
         hasMorePages
         lastItem
         lastPage
@@ -286,6 +285,10 @@ export const GET_REGIONS = gql`
         id
         name
         specific_areas
+        name_translations {
+          en
+          am
+        }
         retailersCount
         driversCount
         warehousesCount
@@ -313,6 +316,7 @@ export const GET_REGION = gql`
         en
         am
       }
+      specific_areas
     }
   }
 `;
@@ -482,6 +486,7 @@ export const GET_PRODUCT_SKU = gql`
       sku
       price
       is_active
+      buy_price
     }
   }
 `;

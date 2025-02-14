@@ -1,6 +1,5 @@
 import { useQuery } from "@apollo/client";
 import { X } from "tabler-icons-react"; // Import a close icon
-
 import {
   Badge,
   Card,
@@ -21,24 +20,26 @@ import {
   Button,
   Tooltip,
   Modal,
+  Tabs,
 } from "@mantine/core";
+import { Api, Edit, Trash } from "tabler-icons-react";
 import { FiEdit, FiEye } from "react-icons/fi";
 import EditIcon from "@mui/icons-material/Edit";
-
-import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import axios from "axios";
-import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
-import SalesDetailModal from "components/Sales/SalesDetailModal";
-import { SalesEditModal } from "components/Sales/SalesUpdateModal";
-import { SalesAddModal } from "components/Sales/SalesAddModal";
-import { API } from "utiles/url";
+import DriverDetailModal from "components/Driver/DriverDetail";
+import { DriverEditModal } from "components/Driver/DriverEditModal";
+import { DriverAddModal } from "components/Driver/DriverAddModal";
 import Controls from "components/controls/Controls";
+import { API, formatNumber } from "utiles/url";
+import MapView from "./mapView";
+import { Box } from "@mui/material";
+import Demo from "./activeDrivers";
+import Pusher from "pusher-js";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -69,7 +70,12 @@ const useStyles = createStyles((theme) => ({
     textTransform: "uppercase",
     fontWeight: "bold",
   },
-  
+  idColumn: {
+    width: "3%",
+  },
+  cityColumn: {
+    width: "4%",
+  },
 
   searchContainer: {
     position: "relative",
@@ -127,7 +133,7 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
   );
 }
 
-const Drivers = () => {
+const MinmumBalance = () => {
   const { classes } = useStyles();
   const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
@@ -136,6 +142,7 @@ const Drivers = () => {
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState([]);
+  const [activeTab, setActiveTab] = useState("first");
 
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
@@ -143,6 +150,7 @@ const Drivers = () => {
   const [deleteID, setDeleteID] = useState(false);
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState([]);
+  const [activeDrivers, setActiveDrivers] = useState([]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
@@ -151,9 +159,23 @@ const Drivers = () => {
   useEffect(() => {
     fetchData(activePage);
   }, [activePage]);
+  useEffect(() => {
+    const pusher = new Pusher("83f49852817c6b52294f", {
+      cluster: "mt1",
+    });
+    const notificationChannel = pusher.subscribe("driver-location");
+    notificationChannel.bind("driver-location", function (data) {
+      console.log("Pusher event received:", data);
+      setActiveDrivers(data.data);
+    });
+    return () => {
+      // Unsubscribe from channels, disconnect, etc.
+      pusher.disconnect();
+    };
+  }, []);
 
   const fetchData = async (page) => {
-    setLoading(true)
+    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -161,22 +183,25 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/sales?page=${page}`, config);
+      const response = await axios.get(
+        `${API}/drivers/list/below_minimum_wallet_balance?page=${activePage}`,
+        config
+      );
       if (response.data) {
-        setLoading(false)
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
+        setLoading(false);
       }
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       console.error("Error fetching data:", error);
     }
   };
 
-  const handleSearchChange = async(event) => {
-    setLoading(true)
+  const handleSearchChange = async () => {
+    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -184,16 +209,19 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/sales?search=${search}&page=${activePage}`, config);
+      const response = await axios.get(
+        `${API}/drivers/list/below_minimum_wallet_balance?page=${activePage}`,
+        config
+      );
       if (response.data) {
-        setLoading(false)
         setDrivers(response.data.data);
-        setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
+        setSortedData(response.data.data);
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
+        setLoading(false);
       }
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       console.error("Error fetching data:", error);
     }
   };
@@ -225,15 +253,6 @@ const Drivers = () => {
     setSortBy(field);
     setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
   };
-  const handleEditSales = (row) => {
-    setOpenedEdit(true);
-    setEditRow(row);
-  };
-  const [isHovered, setIsHovered] = useState(false);
-  const handleManageSales = (id) => {
-    setEditId(id);
-    setOpenedDetail(true);
-  };
 
   const filterData = (data, search) => {
     const query = search.toLowerCase().trim();
@@ -246,81 +265,26 @@ const Drivers = () => {
       )
     );
   };
-  const handleDelete = (id) => {
-    setOpenedDelete(true);
-    setDeleteID(id);
-  };
-
-  const deleteSales = async () => {
-    try {
-      let token = localStorage.getItem("auth_token");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      const response = await axios.delete(`${API}/sales/${deleteID}`, config);
-      if (response.data) {
-        fetchData(activePage);
-        setOpenedDelete(false);
-        setDeleteID(null);
-        showNotification({
-          color: "green",
-          title: "Success",
-          message: "Sales Deleted Successfully",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setOpenedDelete(false);
-      setDeleteID(null);
-      showNotification({
-        color: "red",
-        title: "Error",
-        message: `Sales Not Deleted Successfully`,
-      });
-    }
-  };
 
   const theme = useMantineTheme();
-  const rows = sortedData?.map((row) => (
-    <Fragment key={row.id}>
-      <tr>
-        <td>{row.name}</td>
-        <td>{row.email}</td>
-        <td>{row.phone}</td>
-        <td>{row.retailers_count}</td>
-        <td>
-          <>
-            <Controls.ActionButton
-              color="primary"
-              title="Update"
-              onClick={() => handleEditSales(row)}
-            >
-              <EditIcon style={{ fontSize: "1rem" }} />
-            </Controls.ActionButton>
-            <span style={{ marginLeft: "1px" }}>
-              <Controls.ActionButton
-                color="primary"
-                title="View Detail"
-                onClick={() => handleManageSales(`${row.id}`)}
-              >
-                <FiEye fontSize="medium" />
-              </Controls.ActionButton>
-            </span>
-            <Controls.ActionButton
-              color="primary"
-              title="Delete"
-              onClick={() => handleDelete(`${row.id}`)}
-            >
-              <Trash size={17} />
-            </Controls.ActionButton>
-          </>
-        </td>
-      </tr>
-    </Fragment>
-  ));
-
+  const rows = sortedData?.map((row) => {
+    return (
+      <Fragment key={row.id}>
+        <tr>
+          <td className={classes.idColumn}>{row.id}</td>
+          <td>{row.name}</td>
+          <td>{row.email}</td>
+          <td>{row.phone}</td>
+          <td className={classes.cityColumn}>{row.region?.name?.en}</td>
+          <td>{row.city}</td>
+          <td style={{ width: "10%" }}>
+            {row.vehicle?.vehicle_type?.title.en}
+          </td>
+          <td>{formatNumber(row.wallet?.balance)}</td>
+        </tr>
+      </Fragment>
+    );
+  });
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -330,119 +294,20 @@ const Drivers = () => {
     />
   ) : (
     <div style={{ width: "98%", margin: "auto" }}>
-      <Drawer
-        opened={openedEdit}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Editing a Sales"
-        padding="xl"
-        onClose={() => setOpenedEdit(false)}
-        position="bottom"
-        size="80%"
-      >
-        <SalesEditModal
-          activePage={activePage}
-          fetchData={fetchData}
-          editRow={editRow}
-          setOpenedEdit={setOpenedEdit}
-          editId={editId}
-        />
-      </Drawer>
-      <Drawer
-        opened={opened}
-        onClose={() => setOpened(false)}
-        title="Adding a Sales"
-        padding="xl"
-        size="80%"
-        position="bottom"
-      >
-        <SalesAddModal
-          total={total}
-          setTotal={setTotal}
-          activePage={activePage}
-          setActivePage={setActivePage}
-          setOpened={setOpened}
-          fetchData={fetchData}
-        />
-      </Drawer>
-      <Drawer
-        opened={openedDetail}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Sales Detail"
-        padding="xl"
-        onClose={() => setOpenedDetail(false)}
-        position="bottom"
-        size="80%"
-      >
-        <SalesDetailModal Id={editId} />
-      </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
-          <SimpleGrid cols={3}>
-            <div>
-              <Button
-                onClick={() => setOpened(true)}
-                style={{
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-                leftIcon={<Plus size={14} />}
-              >
-                Add Sales
-              </Button>
-            </div>
-            <div></div>
-
-            <div className={classes.searchContainer}>
-              <TextInput
-                placeholder="Search"
-                mb="md"
-                icon={<Search size={14} />}
-                value={search}
-                onChange={(event) => setSearch(event.currentTarget.value)}
-                className={classes.searchInput}
-                rightSection={
-                  search && ( // Show clear icon only if there's text in the input
-                    <UnstyledButton
-                      onClick={() => {
-                        setSearch(""); // Clear the search input
-                        fetchData(activePage); // Fetch all drivers again
-                      }}
-                      style={{ padding: 5 }} // Adjust padding for better click area
-                    >
-                      <X size={16} color="red" /> {/* Clear icon */}
-                    </UnstyledButton>
-                  )
-                }
-              />
-              <button
-                className={classes.searchButton}
-                onClick={handleSearchChange}
-              >
-                <Search size={16} />
-              </button>
-            </div>
-          </SimpleGrid>
           <Table
             highlightOnHover
             horizontalSpacing="md"
             verticalSpacing="xs"
-            sx={{ tableLayout: "fixed", minWidth: 700 }}
+            sx={{ minWidth: 700 }}
           >
             <thead>
               <tr style={{ backgroundColor: "#F1F1F1" }}>
-                <Th sortable onSort={() => handleSort("name")}>
+                <Th sortable={false} onSort={() => handleSort("id")}>
+                  <span className={classes.thh}>ID</span>
+                </Th>
+                <Th sortable={false} onSort={() => handleSort("name")}>
                   <span className={classes.thh}> Name </span>
                 </Th>
                 <Th sortable onSort={() => handleSort("email")}>
@@ -451,12 +316,18 @@ const Drivers = () => {
                 <Th sortable onSort={() => handleSort("phone")}>
                   <span className={classes.thh}> Phone</span>
                 </Th>
-                <Th sortable onSort={() => handleSort("retailers_count")}>
-                  <span className={classes.thh}> Retailers Count</span>
-                </Th>
                 <Th sortable={false}>
                   {" "}
-                  <span className={classes.thh}>Actions</span>
+                  <span className={classes.thh}>Region</span>
+                </Th>
+                <Th sortable onSort={() => handleSort("email")}>
+                  <span className={classes.thh}> City</span>
+                </Th>
+                <Th sortable={false}>
+                  <span className={classes.thh}>Vehicle Type</span>
+                </Th>
+                <Th sortable={false}>
+                  <span className={classes.thh}>Balance</span>
                 </Th>
               </tr>
             </thead>
@@ -487,22 +358,9 @@ const Drivers = () => {
             </div>
           </Center>
         </ScrollArea>
-        <Modal
-          opened={openedDelete}
-          onClose={() => setOpenedDelete(false)}
-          title="Warning"
-          centered
-        >
-          <p>Are you sure do you want to delete this Sales?</p>
-          <Group position="right">
-            <Button onClick={() => deleteSales()} color="red">
-              Delete
-            </Button>
-          </Group>
-        </Modal>
       </Card>
     </div>
   );
 };
 
-export default Drivers;
+export default MinmumBalance;

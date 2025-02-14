@@ -8,6 +8,8 @@ import {
   Group,
   Card,
 } from "@mantine/core";
+import EditIcon from "@mui/icons-material/Edit";
+
 import { useMutation, useQuery } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
 import { DEL_REGION } from "apollo/mutuations";
@@ -19,9 +21,10 @@ import B2bTable from "components/reusable/b2bTable";
 import RegionEditModal from "components/Region/regionEditModal";
 import RegionsAddModal from "components/Region/regionsAddModal";
 import RegionDetailModal from "components/Region/regionDetail";
+import Controls from "components/controls/Controls";
 
 const Regions = () => {
-  const [size,setSize] = useState("10");
+  const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -30,8 +33,6 @@ const Regions = () => {
   const [openedDetail, setOpenedDetail] = useState(false);
   const [region, setRegion] = useState();
   const [searchValue, setSearchValue] = useState("");
-
-  //pagination states
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
@@ -39,7 +40,7 @@ const Regions = () => {
     variables: {
       first: parseInt(size),
       page: activePage,
-      search: searchValue
+      search: searchValue,
     },
   });
 
@@ -51,7 +52,7 @@ const Regions = () => {
     if (data) {
       setTotal(data.regions.paginatorInfo.lastPage);
     }
-  }, [data, size]); 
+  }, [data, size]);
 
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
@@ -63,8 +64,9 @@ const Regions = () => {
         {
           query: GET_REGIONS,
           variables: {
-            first: 10,
+            first: parseInt(size),
             page: activePage,
+            search: "",
           },
         },
         (data) => {
@@ -200,26 +202,20 @@ const Regions = () => {
       render: (rowData) => {
         return (
           <>
-            <Trash
-              style={{ cursor: "pointer" }}
-              color="#ed522f"
-              size={24}
+            <Controls.ActionButton
+              color="primary"
+              title="Update"
+              onClick={() => handleEditRegion(rowData)}
+            >
+              <EditIcon style={{ fontSize: "1rem" }} />
+            </Controls.ActionButton>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
               onClick={() => handleDelete(`${rowData.id}`)}
-            />
-            <Edit
-              style={{ marginLeft: "10px", cursor: "pointer" }}
-              size={24}
-              onClick={() => handleEditRegion(`${rowData.id}`)}
-            />
-            <ManualGearbox
-              color="#1971C2"
-              style={{
-                cursor: "pointer",
-                marginLeft: "10px",
-              }}
-              size={24}
-              onClick={() => handleManageRegion(rowData)}
-            />
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
           </>
         );
       },
@@ -239,7 +235,7 @@ const Regions = () => {
   };
   const clearInput = () => {
     setSearchValue("");
-    setConfirmedSearch("")
+    setConfirmedSearch("");
   };
   return loading ? (
     <LoadingOverlay

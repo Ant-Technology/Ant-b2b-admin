@@ -9,7 +9,7 @@ import {
   LoadingOverlay,
   Group,
 } from "@mantine/core";
-import React, { useState } from "react";
+import React from "react";
 import { useMutation } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
 import { useForm } from "@mantine/form";
@@ -19,7 +19,13 @@ import { customLoader } from "components/utilities/loader";
 import { CREATE_REGIONS } from "apollo/mutuations";
 import { GET_REGIONS } from "apollo/queries";
 
-const RegionsAddModal = ({ setOpened, total, setTotal, activePage, setActivePage }) => {
+const RegionsAddModal = ({
+  setOpened,
+  total,
+  setTotal,
+  activePage,
+  setActivePage,
+}) => {
   // mutation
   const [addRegion, { loading: regionLoading }] = useMutation(CREATE_REGIONS, {
     update(cache, { data: { createRegion } }) {
@@ -27,21 +33,18 @@ const RegionsAddModal = ({ setOpened, total, setTotal, activePage, setActivePage
         {
           query: GET_REGIONS,
           variables: {
-            first: 10,
+            first: parseInt(10),
             page: activePage,
+            search: "",
           },
         },
         (data) => {
-          if (data.regions.data.length === 10) {
-            setTotal(total + 1);
-            setActivePage(total + 1);
-          } else {
-            return {
-              regions: {
-                data: [createRegion, ...data.regions.data],
-              },
-            };
-          }
+          return {
+            regions: {
+              ...data.regions,
+              data: [createRegion, ...data.regions.data],
+            },
+          };
         }
       );
     },
@@ -51,40 +54,42 @@ const RegionsAddModal = ({ setOpened, total, setTotal, activePage, setActivePage
   const form = useForm({
     initialValues: {
       name: { en: "", am: "" },
-      children: [],
+      children: [], // This will store an array of strings for specific areas
     },
   });
 
   const { height } = useViewportSize();
-  
+
   const handleFields = () => {
     return form.values.children.map((item, index) => (
       <Grid key={index}>
-          <Grid.Col span={6}>
-        <TextInput
-          required
-          label={`Specific Area ${index + 1}`}
-          sx={{ flex: 1 }}
-          {...form.getInputProps(`children.${index}.name.en`)}
-        />
+        <Grid.Col span={6}>
+          <TextInput
+            required
+            label={`Specific Area ${index + 1}`}
+            sx={{ flex: 1 }}
+            {...form.getInputProps(`children.${index}`)} // Directly bind to the string
+          />
         </Grid.Col>
         <Grid.Col span={6}>
-        <ActionIcon
-          color="#ed522f"
-          onClick={() => form.removeListItem("children", index)}
-          style={{ marginTop: "30px", padding: "2px" }}
-        >
-          <Trash size={24} />
-        </ActionIcon>
+          <ActionIcon
+            color="#ed522f"
+            onClick={() => form.removeListItem("children", index)}
+            style={{ marginTop: "30px", padding: "2px" }}
+          >
+            <Trash size={24} />
+          </ActionIcon>
         </Grid.Col>
       </Grid>
     ));
   };
 
   const submit = () => {
+    console.log(form.values);
     addRegion({
       variables: {
         name: form.values.name,
+        specific_areas: form.values.children, // Send specific areas as an array of strings
       },
       onCompleted(data) {
         showNotification({
@@ -104,10 +109,14 @@ const RegionsAddModal = ({ setOpened, total, setTotal, activePage, setActivePage
       },
     });
   };
-
   return (
     <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
-      <LoadingOverlay visible={regionLoading} color="blue" overlayBlur={2} loader={customLoader} />
+      <LoadingOverlay
+        visible={regionLoading}
+        color="blue"
+        overlayBlur={2}
+        loader={customLoader}
+      />
       <form onSubmit={form.onSubmit(() => submit())} noValidate>
         <Stack>
           <Grid grow>
@@ -128,31 +137,29 @@ const RegionsAddModal = ({ setOpened, total, setTotal, activePage, setActivePage
               />
             </Grid.Col>
           </Grid>
-            {handleFields().length > 0 ? (
-              handleFields()
-            ) : (
-              <Text color="dimmed" align="center">
-                No specific areas added yet...
-              </Text>
-            )}
-            <Group position="start" mt="md">
-              <Button
-                color="blue"
-                variant="outline"
-                fullWidth
-                style={{
-                  width: "200px", // Set a specific width for the button
-                }}
-                onClick={() =>
-                  form.insertListItem("children", {
-                    name: { en: "", am: "" },
-                  })
-                }
-              >
-                Add New Specific Area
-              </Button>
-            </Group>
-            <Grid>
+          {handleFields().length > 0 ? (
+            handleFields()
+          ) : (
+            <Text color="dimmed" align="center">
+              No specific areas added yet...
+            </Text>
+          )}
+          <Group position="start" mt="md">
+            <Button
+              color="blue"
+              variant="outline"
+              fullWidth
+              style={{
+                width: "200px", // Set a specific width for the button
+              }}
+              onClick={
+                () => form.insertListItem("children", "") // Insert an empty string for new specific area
+              }
+            >
+              Add New Specific Area
+            </Button>
+          </Group>
+          <Grid>
             <Grid.Col span={4}>
               <Button
                 style={{

@@ -61,6 +61,7 @@ const Vehicles = () => {
           variables: {
             first: 10,
             page: activePage,
+            search:"",
             ordered_by: [
               {
                 column: "CREATED_AT",

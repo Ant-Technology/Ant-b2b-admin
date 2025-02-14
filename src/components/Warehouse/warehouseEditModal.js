@@ -37,9 +37,10 @@ const containerStyle = {
   width: "100%",
   height: "400px",
 };
-//AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk
-const GOOGLE_API_KEY = "AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk";
+
+const GOOGLE_API_KEY = "AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk"; // Your Google API Key
 const libraries = ["places"];
+
 const CategoryEditModal = ({
   setOpenedEdit,
   editId,
@@ -50,16 +51,12 @@ const CategoryEditModal = ({
   const [center, setCenter] = useState({ lat: 8.9999645, lng: 38.7700539 });
   const [autocomplete, setAutocomplete] = useState();
   const [mapRef, setMapRef] = useState(null);
+
   useEffect(() => {
-    if (
-      location &&
-      Object.keys(location) &&
-      Object.keys(location)?.length > 0
-    ) {
+    if (location && Object.keys(location).length > 0) {
       setCenter({ lat: location.lat, lng: location.lng });
     }
   }, [location]);
-  console.log("Center", center);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: GOOGLE_API_KEY,
@@ -72,7 +69,6 @@ const CategoryEditModal = ({
 
   const onPlaceChangedHandler = () => {
     if (autocomplete !== null) {
-      console.log(autocomplete.getPlace().name);
       form.setFieldValue("specific_area", autocomplete.getPlace().name);
       setCenter({
         lat: autocomplete.getPlace().geometry.location.lat(),
@@ -88,54 +84,29 @@ const CategoryEditModal = ({
   const autocompleteLoadHandler = (autocomplete) => {
     setAutocomplete(autocomplete);
   };
-  //form initialization and validation
+
   const form = useForm({
-    name: "",
-    region: { connect: "1" }, // Provide the default region ID here
-    specific_area: "",
+    initialValues: {
+      name: "",
+      region: { connect: "1" }, // Initialized correctly
+      specific_area: "",
+    },
   });
-
-  useEffect(() => {
-    if (editId) {
-      getWarehouse({
-        variables: { id: editId },
-
-        onCompleted(data) {
-          // console.log(data)
-          form.setValues({
-            name: data.warehouse?.name,
-            specific_area: data.warehouse?.specific_area,
-            region: { connect: data.warehouse?.region?.id },
-          });
-          setLocation({ ...data.warehouse?._geo });
-        },
-      });
-    }
-    // eslint-disable-next-line
-  }, []);
 
   const [regionsDropDownData, setRegionsDropDownData] = useState([]);
 
-  // graphql queries
+  // GraphQL queries
   const { loading: regionsLoading } = useQuery(GET_REGIONS, {
     variables: {
       first: 100000,
       page: 1,
     },
     onCompleted(data) {
-      let regions = data.regions;
-      let regionsArray = [];
-
-      // loop over regions data to structure the data for the use of drop down
-      regions.data.forEach((region, index) => {
-        regionsArray.push({
-          label: region?.name,
-          value: region?.id,
-        });
-      });
-
-      // put it on the state
-      setRegionsDropDownData([...regionsArray]);
+      const regions = data.regions.data.map((region) => ({
+        label: region?.name,
+        value: region?.id,
+      }));
+      setRegionsDropDownData(regions);
     },
     onError(err) {
       showNotification({
@@ -145,7 +116,24 @@ const CategoryEditModal = ({
       });
     },
   });
-  // mutation
+  useEffect(() => {
+    if (editId) {
+      getWarehouse({
+        variables: { id: editId },
+
+        onCompleted(data) {
+          console.log(data);
+          form.setValues({
+            name: data.warehouse?.name,
+            specific_area: data.warehouse?.specific_area,
+            region: { connect: data.warehouse?.region?.id },
+          });
+          setLocation({ ...data.warehouse?._geo });
+        },
+      });
+    }
+  }, []);
+  // Mutation
   const [editWarehouse] = useMutation(UPDATE_WARE_HOUSE);
 
   const { height } = useViewportSize();
@@ -154,22 +142,20 @@ const CategoryEditModal = ({
     editWarehouse({
       variables: {
         id: editId,
-        name: form.values.name, // Use form.values to access form fields
+        name: form.values.name,
         _geo: {
           lat: +location.lat,
           lng: +location.lng,
         },
-        region: { connect: form.values.region.connect }, // Access the region value correctly
+        region: { connect: form.values.region.connect }, // Accessing the region value correctly
         specific_area: form.values.specific_area,
       },
-
-      onCompleted(data) {
+      onCompleted() {
         showNotification({
           color: "green",
           title: "Success",
           message: "Warehouse Edited Successfully",
         });
-        // refetch();
         form.reset();
         setOpenedEdit(false);
       },
@@ -178,14 +164,16 @@ const CategoryEditModal = ({
         showNotification({
           color: "red",
           title: "Error",
-          message: "Something went wrong while editing vehicle",
+          message: "Something went wrong while editing warehouse",
         });
       },
     });
   };
+
   const setRegionDropDownValue = (val) => {
-    form.setFieldValue("region.connect", val);
+    form.setFieldValue("region.connect", val); // Correctly set the path
   };
+
   return (
     <>
       <LoadingOverlay
@@ -208,10 +196,9 @@ const CategoryEditModal = ({
           </Grid>
           <Grid>
             <Grid.Col span={6}>
-              {" "}
               <Select
                 data={regionsDropDownData}
-                value={form.getInputProps("region.connect").value}
+                value={form.values.region.connect} // Access the value directly from form values
                 onChange={setRegionDropDownValue}
                 label="Region"
                 placeholder="Pick a region this retailer belongs to"
@@ -258,9 +245,20 @@ const CategoryEditModal = ({
               </ScrollArea>
             </Grid.Col>
           </Grid>
-          <Grid style={{ marginTop: "10px", marginBottom: "20px" }}>
-            <Grid.Col span={4}>
-              <Button type="submit" color="blue" variant="outline" fullWidth>
+
+          <Grid>
+            <Grid.Col span={12}>
+              <Button
+                type="submit"
+                style={{
+                  marginTop: "10px",
+                  width: "20%",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+                fullWidth
+                color="blue"
+              >
                 Submit
               </Button>
             </Grid.Col>

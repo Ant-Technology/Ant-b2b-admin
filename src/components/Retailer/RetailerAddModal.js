@@ -64,36 +64,24 @@ const RetailerAddModal = ({
     CREATE_RETAILER,
     {
       update(cache, { data: { createRetailer } }) {
-        // Read the existing data from the cache
-        const { retailers } = cache.readQuery({
-          query: GET_RETAILERS,
-          variables: {
-            first: 10,
-            page: 1,
-          },
-        });
-        if (!retailers) {
-          return;
-        }
-        const updatedRetailers = [createRetailer, ...retailers.data];
-
-        cache.writeQuery({
-          query: GET_RETAILERS,
-          variables: {
-            first: 10,
-            page: 1,
-          },
-          data: {
-            retailers: {
-              ...retailers,
-              data: updatedRetailers,
+        cache.updateQuery(
+          {
+            query: GET_RETAILERS,
+            variables: {
+              first: 10,
+              page: activePage,
+              search: "",
             },
           },
-        });
-
-        const newTotal = retailers.paginatorInfo.count + 1;
-        setTotal(newTotal);
-        setActivePage(1);
+          (data) => {
+            return {
+              retailers: {
+                ...data.retailers,
+                data: [createRetailer, ...data.retailers.data],
+              },
+            };
+          }
+        );
       },
     }
   );
@@ -328,7 +316,16 @@ const RetailerAddModal = ({
 
             <Grid>
               <Grid.Col span={4}>
-                <Button type="submit" color="blue" variant="outline" fullWidth>
+                <Button
+                  style={{
+                    width: "25%",
+                    marginTop: "15px",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
+                  type="submit"
+                  fullWidth
+                >
                   Submit
                 </Button>
               </Grid.Col>

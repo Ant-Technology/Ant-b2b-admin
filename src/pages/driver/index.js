@@ -40,6 +40,7 @@ import MapView from "./mapView";
 import { Box } from "@mui/material";
 import Demo from "./activeDrivers";
 import Pusher from "pusher-js";
+import MinmumBalance from "./minumunBalance";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -321,18 +322,23 @@ const Drivers = () => {
   };
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => {
-    const rowStyle = row.wallet?.balance < 1000 ? { backgroundColor: '#FFCCCB' } : {}; // Warning color for balance < 1000
-  
+    const rowStyle =
+      row.wallet?.balance < 1000 ? { backgroundColor: "#FFCCCB" } : {}; // Warning color for balance < 1000
+
     return (
       <Fragment key={row.id}>
-        <tr style={rowStyle}> {/* Apply conditional styling to the entire row */}
+        <tr style={rowStyle}>
+          {" "}
+          {/* Apply conditional styling to the entire row */}
           <td className={classes.idColumn}>{row.id}</td>
           <td>{row.name}</td>
           <td>{row.email}</td>
           <td>{row.phone}</td>
           <td className={classes.cityColumn}>{row.region?.name?.en}</td>
           <td>{row.city}</td>
-          <td style={{ width: "10%" }}>{row.vehicle?.vehicle_type?.title.en}</td>
+          <td style={{ width: "10%" }}>
+            {row.vehicle?.vehicle_type?.title.en}
+          </td>
           <td>{formatNumber(row.wallet?.balance)}</td>
           <td>
             <div style={{ display: "flex" }}>
@@ -385,8 +391,15 @@ const Drivers = () => {
             All Active Drivers
           </span>
         </Tabs.Tab>
+        <Tabs.Tab value="third">
+          <span style={{ color: "rgb(20, 61, 89)", fontWeight: "bold" }}>
+            Minmum Balance
+          </span>
+        </Tabs.Tab>
       </Tabs.List>
-
+      <Tabs.Panel value="third">
+        <MinmumBalance />
+      </Tabs.Panel>
       <Tabs.Panel value="second">
         <Box
           sx={{

@@ -133,5 +133,4 @@ function RegionDetailModal({ region }) {
     </ScrollArea>
   );
 }
-
 export default RegionDetailModal;

@@ -106,42 +106,30 @@ const VehicleAddModal = ({
     refetchQueries: [{ query: GET_UNASSIGNED_DRIVERS }],
     awaitRefetchQueries: true,
     update(cache, { data: { createVehicle } }) {
-      try {
-        const { vehicles } = cache.readQuery({
+      cache.updateQuery(
+        {
           query: GET_VEHICLES,
           variables: {
-            first: 10,
+            first: parseInt(10),
             page: activePage,
-            ordered_by: [{ column: "CREATED_AT", order: "DESC" }],
-          },
-        }) || { vehicles: { data: [], paginatorInfo: { total: 0 } } };
-
-        const updatedVehicle = [createVehicle, ...vehicles.data];
-        cache.writeQuery({
-          query: GET_VEHICLES,
-          variables: {
-            first: 10,
-            page: activePage,
-            ordered_by: [{ column: "CREATED_AT", order: "DESC" }],
-          },
-          data: {
-            vehicles: {
-              ...vehicles,
-              data: updatedVehicle,
-              paginatorInfo: {
-                ...vehicles.paginatorInfo,
-                total: vehicles.paginatorInfo.total + 1,
+            search: "",
+            ordered_by: [
+              {
+                column: "CREATED_AT",
+                order: "DESC",
               },
-            },
+            ],
           },
-        });
-
-        const newTotal = vehicles.paginatorInfo.total + 1;
-        setTotal(newTotal);
-        setActivePage(1);
-      } catch (err) {
-        console.error("Error updating cache:", err);
-      }
+        },
+        (data) => {
+          return {
+            vehicles: {
+              ...data.vehicles,
+              data: [createVehicle, ...data.vehicles.data],
+            },
+          };
+        }
+      );
     },
     onCompleted(data) {
       if (data.createVehicle) {

@@ -148,7 +148,7 @@ const Orders = () => {
       sortable: false,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData.retailer?.name}</span>;
+        return <span>{rowData?.retailer?.name}</span>;
       },
     },
     {
@@ -184,7 +184,7 @@ const Orders = () => {
       sortable: true,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData?.warehouse.name}</span>;
+        return <span>{rowData?.warehouse?.name}</span>;
       },
     },
     {

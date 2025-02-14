@@ -154,9 +154,13 @@ const RetailerEditModal = ({
             <Grid>
               <Grid.Col span={4}>
                 <Button
+                  style={{
+                    width: "25%",
+                    marginTop: "15px",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
                   type="submit"
-                  color="blue"
-                  variant="outline"
                   fullWidth
                 >
                   Submit
