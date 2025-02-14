@@ -202,8 +202,11 @@ export const DEL_DISTRIBUTOR = gql`
 
 // region related mutation retailer
 export const CREATE_REGIONS = gql`
-  mutation create_regions($name: TranslatableInput!, $_geo: GeoInput) {
-    createRegion(input: { name: $name, _geo: $_geo }) {
+  mutation create_regions(
+    $name: TranslatableInput!
+    $specific_areas: [String]
+  ) {
+    createRegion(input: { name: $name, specific_areas: $specific_areas }) {
       id
       name
       name_translations {
@@ -215,12 +218,21 @@ export const CREATE_REGIONS = gql`
 `;
 
 export const UPDATE_REGION = gql`
-  mutation update_region($id: ID!, $name: TranslatableInput!, $_geo: GeoInput) {
-    updateRegion(id: $id, input: { name: $name, _geo: $_geo }) {
+  mutation update_region(
+    $id: ID!
+    $name: TranslatableInput!
+    $specific_areas: [String]
+  ) {
+    updateRegion(
+      id: $id
+      input: { name: $name, specific_areas: $specific_areas }
+    ) {
       id
       name
-      _geo {
-        lat
+      specific_areas
+      name_translations {
+        en
+        am
       }
     }
   }
@@ -367,14 +379,21 @@ export const UPDATE_PRODUCT_SKUS = gql`
     $id: ID!
     $sku: String!
     $price: Float!
+    $buy_price: Float!
     $is_active: Boolean
   ) {
     updateProductSku(
       id: $id
-      input: { sku: $sku, price: $price, is_active: $is_active }
+      input: {
+        sku: $sku
+        price: $price
+        is_active: $is_active
+        buy_price: buy_price
+      }
     ) {
       id
       sku
+      buy_price
       price
       is_active
       product {

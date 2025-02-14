@@ -70,8 +70,9 @@ const Warehouses = () => {
         {
           query: GET_WARE_HOUSES,
           variables: {
-            first: 10,
+            first: parseInt(size),
             page: activePage,
+            search:""
           },
         },
         (data) => {

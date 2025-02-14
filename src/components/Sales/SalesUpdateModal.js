@@ -1,7 +1,6 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import {
   Button,
-  Checkbox,
   FileInput,
   Grid,
   LoadingOverlay,
@@ -14,43 +13,61 @@ import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import { UPDATE_DRIVER } from "apollo/mutuations";
-import { GET_DRIVER } from "apollo/queries";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { API } from "utiles/url";
 
 export const SalesEditModal = ({
   activePage,
   fetchData,
   editRow,
-  editId,
   setOpenedEdit,
 }) => {
-  const form = useForm({});
+  // Define form with initial values
+  const form = useForm({
+    initialValues: {
+      name: "",
+      phone: "",
+      email: "",
+      city: "",
+      subcity: "",
+      address: "",
+      house_number: "",
+      woreda: "",
+      region: "",
+      password: "",
+    },
+  });
+
   const [loading, setLoading] = useState(false);
-
+  const [file, setFile] = useState(null);
   const [updateDriver, { loading: driverLoading }] = useMutation(UPDATE_DRIVER);
-  useEffect(() => {
-    form.setValues({
-      name: editRow.name,
-      phone: editRow.phone,
-      email: editRow.email,
-      city: editRow.city,
-      subcity: editRow.subcity,
-      address: editRow.address,
-      house_number: editRow.house_number,
-      woreda: editRow.woreda,
-      region: editRow.region,
-    });
-  }, [editRow]);
-
   const { height } = useViewportSize();
 
-  const submit = async () => {
-    fetchData(activePage);
+  // Populate form when editRow changes
+  useEffect(() => {
+    if (editRow) {
+      form.setValues({
+        name: editRow.name || "",
+        phone: editRow.phone || "",
+        email: editRow.email || "",
+        city: editRow.city || "",
+        subcity: editRow.subcity || "",
+        address: editRow.address || "",
+        house_number: editRow.house_number || "",
+        woreda: editRow.woreda || "",
+        region: editRow.region || "",
+      });
+    }
+  }, [editRow]); 
 
+  // Debugging - Log form values on change
+  useEffect(() => {
+    console.log("Form values updated:", form.values);
+  }, [form.values]);
+
+  const submit = async () => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -61,37 +78,33 @@ export const SalesEditModal = ({
         },
       };
       const formData = new FormData();
-      formData.append("profile_image", file);
-      formData.append("name", form.values.name);
-      formData.append("phone", form.values.phone);
-      formData.append("email", form.values.email);
-      formData.append("password", form.valuespassword);
-      formData.append("address", form.values.address);
-      formData.append("city", form.values.city);
-      formData.append("subcity", form.values.subcity);
-      formData.append("gender", form.values.gender);
-      formData.append("woreda", form.values.woreda);
-      formData.append("house_number", form.values.house_number);
-      formData.append("region", form.values.region);
+
+      if (file) {
+        formData.append("profile_image", file);
+      }
+      Object.entries(form.values).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
       formData.append("status", 1);
       formData.append("_method", "PATCH");
+
       const { data } = await axios.post(
-        `${API}/sales/${editId}`,
+        `${API}/sales/${editRow.id}`,
         formData,
         config
       );
+
       if (data) {
         showNotification({
           color: "green",
           title: "Success",
           message: "Sales Updated Successfully",
         });
-        setLoading(false);
-        fetchData(1);
+        fetchData(activePage);
         setOpenedEdit(false);
       }
     } catch (error) {
-      setLoading(false);
       showNotification({
         color: "red",
         title: "Error",
@@ -99,24 +112,13 @@ export const SalesEditModal = ({
           ? error.response.data.errors
           : "Sales Not Updated!",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const [file, setFile] = useState(null);
-
   const handleFileChange = (newFile) => {
     setFile(newFile);
-  };
-  const imagePreview = () => {
-    const imageUrl = URL.createObjectURL(file);
-    return (
-      <img
-        src={imageUrl}
-        width="130"
-        alt=""
-        imageprops={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
-      />
-    );
   };
 
   return (
@@ -128,7 +130,7 @@ export const SalesEditModal = ({
         loader={customLoader}
       />
       <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
-        <form onSubmit={form.onSubmit(() => submit())}>
+        <form onSubmit={form.onSubmit(submit)}>
           <Stack>
             <Grid>
               <Grid.Col span={6}>
@@ -189,7 +191,6 @@ export const SalesEditModal = ({
                   placeholder="Woreda"
                   {...form.getInputProps("woreda")}
                 />
-
                 <FileInput
                   label="Upload Photo"
                   placeholder="Upload Photo"
@@ -210,16 +211,20 @@ export const SalesEditModal = ({
             <Grid>
               <Grid.Col span={6}>
                 {file ? (
-                  <>{imagePreview()}</>
-                ) : (
                   <img
-                    src={editRow.profile_image}
+                    src={URL.createObjectURL(file)}
                     width="130"
                     alt=""
-                    imageprops={{
-                      onLoad: () => URL.revokeObjectURL(editRow.profile_image),
-                    }}
+                    onLoad={(e) => URL.revokeObjectURL(e.target.src)}
                   />
+                ) : (
+                  editRow?.profile_image && (
+                    <img
+                      src={editRow.profile_image}
+                      width="130"
+                      alt=""
+                    />
+                  )
                 )}
               </Grid.Col>
             </Grid>
@@ -241,7 +246,7 @@ export const SalesEditModal = ({
             </Grid>
           </Stack>
         </form>
-      </ScrollArea>{" "}
+      </ScrollArea>
     </>
   );
 };

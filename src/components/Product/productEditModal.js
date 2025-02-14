@@ -26,7 +26,8 @@ import { GET_PRODUCT, NON_PAGINATED_CATEGORIES } from "apollo/queries";
 
 const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
   const theme = useMantineTheme();
-  const [updateProduct, { loading: updateProductLoading }] = useMutation(UPDATE_PRODUCT);
+  const [updateProduct, { loading: updateProductLoading }] =
+    useMutation(UPDATE_PRODUCT);
   const { height } = useViewportSize();
   const [dropDownData, setDropDownData] = useState({ enArr: [], amArr: [] });
 
@@ -54,10 +55,24 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
   const { loading } = useQuery(GET_PRODUCT, {
     variables: { id: editId },
     onCompleted(data) {
-      const forUpdate = data.product.attributes.map(item => ({
+      console.log(data);
+      const forUpdate = data.product.attributes.map((item) => ({
         id: item.id,
-        name: item.name_translations,
-        values: { create: [], update: item.values, delete: [] },
+        name: {
+          en: item.name_translations.en,
+          am: item.name_translations.am,
+        },
+        values: {
+          update: item.values.map((value) => ({
+            id: value.id,
+            value: {
+              en: value.value_translations.en,
+              am: value.value_translations.am,
+            },
+          })),
+          create: [],
+          delete: [],
+        },
       }));
 
       form.setValues({
@@ -84,103 +99,163 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
       });
     },
   });
-
   const { loading: categoryLoading } = useQuery(NON_PAGINATED_CATEGORIES, {
     onCompleted(data) {
-      const enArr = data.categoryNonPaginated.map(item => ({
+      const enArr = data.categoryNonPaginated.map((item) => ({
         label: item.name_translations.en,
         value: item.id,
       }));
-      const amArr = data.categoryNonPaginated.map(item => ({
+      const amArr = data.categoryNonPaginated.map((item) => ({
         label: item.name_translations.am,
         value: item.id,
       }));
       setDropDownData({ enArr, amArr });
     },
   });
-
   const handleAttributeCards = () => {
-    return form.values.attributes?.update.map((item, index) => (
-      <Card key={index} shadow="sm" p="lg" radius="md" withBorder mt="xl">
-        <Stack>
-          <Group position="right">
-            <ActionIcon
-              color="red"
-              onClick={() => {
-                form.removeListItem("attributes.update", index);
-                form.insertListItem("attributes.delete", parseInt(item.id));
-              }}
-            >
-              <Ban size={26} strokeWidth={2} color="red" />
-            </ActionIcon>
-          </Group>
-
-          <Grid>
-            <Grid.Col span={6}>
-              <TextInput
-                required
-                label="Name (English)"
-                placeholder="Attribute Name (English)"
-                {...form.getInputProps(`attributes.update.${index}.name.en`)}
-              />
-            </Grid.Col>
-            <Grid.Col span={6}>
-              <TextInput
-                required
-                label="Name (Amharic)"
-                placeholder="Attribute Name (Amharic)"
-                {...form.getInputProps(`attributes.update.${index}.name.am`)}
-              />
-            </Grid.Col>
-            <Grid.Col span={12}>
-              <Group position="apart" mt="xl">
-                <Button
-                  onClick={() =>
-                    form.insertListItem(
-                      `attributes.update.${index}.values.create`,
-                      { value: { en: "", am: "" } }
-                    )
+    return [...form.values.attributes?.update, ...form.values.attributes?.create].map((item, mainIndex) => {
+      const isUpdateAttribute = !!item.id;
+      const attributeType = isUpdateAttribute ? "update" : "create";
+      const attributeIndex = isUpdateAttribute 
+        ? mainIndex 
+        : mainIndex - form.values.attributes.update.length;
+  
+      return (
+        <Card key={item.id || mainIndex} shadow="sm" p="lg" radius="md" withBorder mt="xl">
+          <Stack>
+            <Group position="right">
+              <ActionIcon
+                color="red"
+                onClick={() => {
+                  if (item.id) {
+                    form.removeListItem("attributes.update", mainIndex);
+                    form.insertListItem("attributes.delete", parseInt(item.id));
+                  } else {
+                    form.removeListItem("attributes.create", attributeIndex);
                   }
-                  variant="outline"
-                  leftIcon={<Plus />}
-                  color="blue"
-                >
-                  Add Value
-                </Button>
-              </Group>
-              {item.values.update.map((attr, idx) => (
-                <Group key={idx} mt="xs">
-                  <TextInput
-                    placeholder="Attribute Value (English)"
-                    required
-                    sx={{ flex: 1 }}
-                    {...form.getInputProps(`attributes.update.${index}.values.update.${idx}.value.en`)}
-                  />
-                  <TextInput
-                    placeholder="Attribute Value (Amharic)"
-                    required
-                    sx={{ flex: 1 }}
-                    {...form.getInputProps(`attributes.update.${index}.values.update.${idx}.value.am`)}
-                  />
-                  <ActionIcon
-                    color="#ed522f"
-                    onClick={() => {
-                      form.removeListItem(`attributes.update.${index}.values.update`, idx);
-                      form.insertListItem(`attributes.update.${index}.values.delete`, attr.id);
-                    }}
+                }}
+              >
+                <Ban size={26} strokeWidth={2} color="red" />
+              </ActionIcon>
+            </Group>
+  
+            <Grid>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Name (English)"
+                  placeholder="Attribute Name (English)"
+                  {...form.getInputProps(
+                    `attributes.${attributeType}.${attributeIndex}.name.en`
+                  )}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  label="Name (Amharic)"
+                  placeholder="Attribute Name (Amharic)"
+                  {...form.getInputProps(
+                    `attributes.${attributeType}.${attributeIndex}.name.am`
+                  )}
+                />
+              </Grid.Col>
+  
+              <Grid.Col span={12}>
+                <Group position="apart" mt="xl">
+                  <Button
+                    onClick={() =>
+                      form.insertListItem(
+                        `attributes.${attributeType}.${attributeIndex}.values.create`,
+                        { value: { en: "", am: "" } }
+                      )
+                    }
+                    variant="outline"
+                    leftIcon={<Plus />}
+                    color="blue"
                   >
-                    <Trash size={24} />
-                  </ActionIcon>
+                    Add Value
+                  </Button>
                 </Group>
-              ))}
-            </Grid.Col>
-          </Grid>
-        </Stack>
-      </Card>
-    ));
+  
+                {/* Existing values */}
+                {item.values?.update?.map((attr, updateIndex) => (
+                  <Group key={attr.id} mt="xs">
+                    <TextInput
+                      placeholder="Attribute Value (English)"
+                      required
+                      sx={{ flex: 1 }}
+                      {...form.getInputProps(
+                        `attributes.${attributeType}.${attributeIndex}.values.update.${updateIndex}.value.en`
+                      )}
+                    />
+                    <TextInput
+                      placeholder="Attribute Value (Amharic)"
+                      required
+                      sx={{ flex: 1 }}
+                      {...form.getInputProps(
+                        `attributes.${attributeType}.${attributeIndex}.values.update.${updateIndex}.value.am`
+                      )}
+                    />
+                    <ActionIcon
+                      color="#ed522f"
+                      onClick={() => {
+                        form.removeListItem(
+                          `attributes.${attributeType}.${attributeIndex}.values.update`,
+                          updateIndex
+                        );
+                        form.insertListItem(
+                          `attributes.${attributeType}.${attributeIndex}.values.delete`,
+                          attr.id
+                        );
+                      }}
+                    >
+                      <Trash size={24} />
+                    </ActionIcon>
+                  </Group>
+                ))}
+  
+                {/* New values */}
+                {item.values?.create?.map((value, createIndex) => (
+                  <Group key={createIndex} mt="xs">
+                    <TextInput
+                      placeholder="Attribute Value (English)"
+                      required
+                      sx={{ flex: 1 }}
+                      {...form.getInputProps(
+                        `attributes.${attributeType}.${attributeIndex}.values.create.${createIndex}.value.en`
+                      )}
+                    />
+                    <TextInput
+                      placeholder="Attribute Value (Amharic)"
+                      required
+                      sx={{ flex: 1 }}
+                      {...form.getInputProps(
+                        `attributes.${attributeType}.${attributeIndex}.values.create.${createIndex}.value.am`
+                      )}
+                    />
+                    <ActionIcon
+                      color="#ed522f"
+                      onClick={() => {
+                        form.removeListItem(
+                          `attributes.${attributeType}.${attributeIndex}.values.create`,
+                          createIndex
+                        );
+                      }}
+                    >
+                      <Trash size={24} />
+                    </ActionIcon>
+                  </Group>
+                ))}
+              </Grid.Col>
+            </Grid>
+          </Stack>
+        </Card>
+      );
+    });
   };
-
   const submit = () => {
+    console.log(form.values);   
     updateProduct({
       variables: {
         id: editId,
@@ -245,7 +320,11 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
     }),
     ...(form.values.images?.existing || []).map((image, index) => (
       <div style={{ position: "relative", margin: "10px" }} key={index}>
-        <img src={image.original_url} alt={`Existing Image ${index}`} width="130" />
+        <img
+          src={image.original_url}
+          alt={`Existing Image ${index}`}
+          width="130"
+        />
         <ActionIcon
           color="red"
           style={{
@@ -266,7 +345,12 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
 
   return (
     <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
-      <LoadingOverlay visible={loading || updateProductLoading || categoryLoading} color="blue" overlayBlur={2} loader={customLoader} />
+      <LoadingOverlay
+        visible={loading || updateProductLoading || categoryLoading}
+        color="blue"
+        overlayBlur={2}
+        loader={customLoader}
+      />
       <form onSubmit={form.onSubmit(() => submit())}>
         <Stack>
           <Grid>
@@ -344,7 +428,11 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
                 style={{ display: "none" }} // Hide the file input
                 onChange={handleFileChange} // Handle file selection
               />
-              <SimpleGrid cols={4} breakpoints={[{ maxWidth: "sm", cols: 1 }]} mt={previews.length > 0 ? "xl" : 0}>
+              <SimpleGrid
+                cols={4}
+                breakpoints={[{ maxWidth: "sm", cols: 1 }]}
+                mt={previews.length > 0 ? "xl" : 0}
+              >
                 {previews}
               </SimpleGrid>
             </Grid.Col>

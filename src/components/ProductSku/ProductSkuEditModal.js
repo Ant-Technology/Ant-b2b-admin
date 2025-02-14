@@ -32,6 +32,7 @@ const ProductSkuEditModal = ({
         sku: data.productSku.sku,
         price: data.productSku.price,
         is_active: data.productSku.is_active,
+        buy_price: data.productSku.buy_price,
       });
     },
     onError(data) {},
@@ -48,6 +49,7 @@ const ProductSkuEditModal = ({
         sku: form.values.sku,
         price: parseInt(form.values.price),
         is_active: form.values.is_active,
+        buy_price: parseFloat(form.values.buy_price),
       },
       onCompleted(data) {
         showNotification({
@@ -80,21 +82,13 @@ const ProductSkuEditModal = ({
         <form onSubmit={form.onSubmit(() => submit())}>
           <Stack>
             <Grid>
-              <Grid.Col span={4}></Grid.Col>
-              <Grid.Col span={4}>
+              <Grid.Col span={6}>
                 <TextInput
                   required
                   type="text"
                   label="Sku"
                   placeholder="Sku"
                   {...form.getInputProps("sku")}
-                />
-                <TextInput
-                  required
-                  type="text"
-                  label="Price"
-                  placeholder="Price"
-                  {...form.getInputProps("price")}
                 />
                 <div style={{ margin: "10px" }}>
                   <Checkbox
@@ -110,11 +104,40 @@ const ProductSkuEditModal = ({
                     }}
                   />
                 </div>
-                <Button type="submit" color="blue" variant="outline" fullWidth>
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  type="text"
+                  label="Price"
+                  placeholder="Price"
+                  {...form.getInputProps("price")}
+                />
+                <TextInput
+                  {...form.getInputProps("buy_price")}
+                  type="number"
+                  placeholder="Buy price"
+                  label="Buy price"
+                  error={form.errors.buy_price}
+                />
+              </Grid.Col>
+            </Grid>
+
+            <Grid>
+              <Grid.Col span={4}>
+                <Button
+                  style={{
+                    width: "25%",
+                    marginTop: "15px",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
+                  type="submit"
+                  fullWidth
+                >
                   Submit
                 </Button>
               </Grid.Col>
-              <Grid.Col span={4}></Grid.Col>
             </Grid>
           </Stack>
         </form>
