@@ -36,7 +36,7 @@ import { showNotification } from "@mantine/notifications";
 import SalesDetailModal from "components/Sales/SalesDetailModal";
 import { SalesEditModal } from "components/Sales/SalesUpdateModal";
 import { SalesAddModal } from "components/Sales/SalesAddModal";
-import { API, formatNumber } from "utiles/url";
+import { API, formatNumber, PAGE_SIZE_OPTIONS } from "utiles/url";
 import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
 import ProductFilter from "./product";
@@ -103,8 +103,13 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const PaymentReport = () => {
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   const { classes } = useStyles();
-  const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -118,10 +123,10 @@ const PaymentReport = () => {
 
   const [sortedData, setSortedData] = useState([]);
   useEffect(() => {
-    fetchData();
-  }, [activePage]);
+    fetchData(size);
+  }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (size) => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -131,7 +136,7 @@ const PaymentReport = () => {
         },
       };
       const response = await axios.get(
-        `${API}/reports/payments-orders?page=${activePage}`,
+        `${API}/reports/payments-orders?page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
@@ -165,7 +170,7 @@ const PaymentReport = () => {
       const response = await axios.get(
         `${API}/reports/payments-orders?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&paymentMethod=${selectedMethod}&trans_status=${selectedStatus}&page=${activePage}`,
+        }&startDate=${startDate}&endDate=${endDate}&paymentMethod=${selectedMethod}&trans_status=${selectedStatus}&page=${activePage}&first=${size}`,
         config
       );
 
@@ -188,7 +193,7 @@ const PaymentReport = () => {
     setSelectedMethod(null);
     setTimeRange(null);
     setSelectedStatus(null);
-    fetchData();
+    fetchData(size);
   };
   const handleChange = (page) => {
     if (
@@ -202,14 +207,14 @@ const PaymentReport = () => {
       handleFilter();
     } else {
       setActivePage(page);
-      fetchData();
+      fetchData(size);
     }
   };
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
         <td style={{ width: "80px" }}>{row.payment_method}</td>
-        <td style={{ width: "120px" }}>{row.payable_type.split('\\').pop()}</td>
+        <td style={{ width: "120px" }}>{row.payable_type.split("\\").pop()}</td>
         <td style={{ width: "20px" }}>{row.type}</td>
         <td style={{ width: "30px" }}>{formatNumber(row.amount)}</td>
         <td style={{ width: "70px" }}>{row.status}</td>
@@ -375,17 +380,29 @@ const PaymentReport = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
+
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
                 />
-              </Container>
-            </div>
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
           </Center>
         </ScrollArea>
       </Card>
