@@ -156,7 +156,7 @@ const MinmumStock = () => {
         },
       };
       const response = await axios.get(
-        `${API}/stocks?page=${activePage}`,
+        `${API}/stocks/list/below_minimum_stock_level?page=${activePage}`,
         config
       );
       if (response.data) {
