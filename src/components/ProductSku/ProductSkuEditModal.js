@@ -35,36 +35,42 @@ const ProductSkuEditModal = ({
         buy_price: data.productSku.buy_price,
       });
     },
-    onError(data) {},
+    onError(err) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: "Failed to fetch SKU data.",
+      });
+    },
   });
 
-  const [updateProductSku, { loading: skuEditLoading }] =
-    useMutation(UPDATE_PRODUCT_SKUS);
+  const [updateProductSku, { loading: skuEditLoading }] = useMutation(UPDATE_PRODUCT_SKUS);
 
   const { height } = useViewportSize();
+  
   const submit = () => {
     updateProductSku({
       variables: {
         id: editId,
         sku: form.values.sku,
-        price: parseInt(form.values.price),
+        price: parseFloat(form.values.price), // Ensure price is a float
         is_active: form.values.is_active,
-        buy_price: parseFloat(form.values.buy_price),
+        buy_price: parseFloat(form.values.buy_price), // Ensure buy_price is a float
       },
       onCompleted(data) {
         showNotification({
           color: "green",
           title: "Success",
-          message: "ProductSKU updated Successfully",
+          message: "Product SKU updated successfully.",
         });
         fetchData(activePage);
         setOpenedEdit(false);
       },
-      onError(data) {
+      onError(error) {
         showNotification({
           color: "red",
           title: "Error",
-          message: "ProductSKU not updated Successfully",
+          message: "Product SKU not updated successfully.",
         });
       },
     });
@@ -86,8 +92,8 @@ const ProductSkuEditModal = ({
                 <TextInput
                   required
                   type="text"
-                  label="Sku"
-                  placeholder="Sku"
+                  label="SKU"
+                  placeholder="SKU"
                   {...form.getInputProps("sku")}
                 />
                 <div style={{ margin: "10px" }}>
@@ -97,10 +103,7 @@ const ProductSkuEditModal = ({
                     checked={form.values.is_active}
                     label="Is active"
                     onChange={(event) => {
-                      form.setFieldValue(
-                        "is_active",
-                        event.currentTarget.checked
-                      );
+                      form.setFieldValue("is_active", event.currentTarget.checked);
                     }}
                   />
                 </div>
@@ -108,17 +111,17 @@ const ProductSkuEditModal = ({
               <Grid.Col span={6}>
                 <TextInput
                   required
-                  type="text"
+                  type="number" // Changed to number for appropriate input type
                   label="Price"
                   placeholder="Price"
                   {...form.getInputProps("price")}
                 />
                 <TextInput
-                  {...form.getInputProps("buy_price")}
-                  type="number"
+                  required
+                  type="number" // Changed to number for appropriate input type
                   placeholder="Buy price"
                   label="Buy price"
-                  error={form.errors.buy_price}
+                  {...form.getInputProps("buy_price")}
                 />
               </Grid.Col>
             </Grid>
