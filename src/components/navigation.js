@@ -23,6 +23,9 @@ import {
   IconSettings,
   IconChevronUp,
   IconReport,
+  IconBox ,
+  IconSteeringWheel,
+  IconUserPlus
 } from "@tabler/icons";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -204,7 +207,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       data.push({
         link: "/products",
         label: "Products",
-        icon: IconShoppingCart,
+        icon: IconBox,
       });
     }
 
@@ -219,7 +222,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
     if (permissions.some((perm) => perm.name === "warehouses-view")) {
       data.push({
         link: "/warehouses",
-        label: "Ware House",
+        label: "Warehouse",
         icon: IconBuildingWarehouse,
       });
     }
@@ -241,7 +244,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
     }
 
     if (permissions.some((perm) => perm.name === "drivers-view")) {
-      data.push({ link: "/drivers", label: "Drivers", icon: IconUser });
+      data.push({ link: "/drivers", label: "Drivers", icon: IconSteeringWheel });
     }
 
     if (permissions.some((perm) => perm.name === "vehicle_types-view")) {
@@ -273,7 +276,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
     }
 
     if (permissions.some((perm) => perm.name === "sales-show")) {
-      data.push({ link: "/sales", label: "Sales", icon: IconUser });
+      data.push({ link: "/sales", label: "Sales Person", icon: IconUserPlus });
     }
 
     if (

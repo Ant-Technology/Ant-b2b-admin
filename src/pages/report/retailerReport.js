@@ -105,15 +105,14 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 
 const RetailerReport = () => {
   const [size, setSize] = useState("10");
-    const handlePageSizeChange = (newSize) => {
-      setSize(newSize);
-      setActivePage(1);
-      fetchData(newSize);
-    };
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   const { classes } = useStyles();
   const [activePage, setActivePage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [product, setSetProduct] = useState("");
   const [loading, setLoading] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
 
@@ -169,7 +168,7 @@ const RetailerReport = () => {
       const response = await axios.get(
         `${API}/reports/retailers?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&product=${product}&status=${status}&first=${size}`,
+        }&startDate=${startDate}&endDate=${endDate}&status=${status}&first=${size}`,
         config
       );
       if (response.data) {
@@ -185,7 +184,6 @@ const RetailerReport = () => {
   const handleReset = () => {
     setSelectedStartDate(null);
     setSelectedEndDate(null);
-    setSetProduct(null);
     setStatus(null);
     setTimeRange(null);
     fetchData(size);
@@ -195,7 +193,6 @@ const RetailerReport = () => {
       timeRange ||
       selectedEndDate ||
       selectedStartDate ||
-      product ||
       status
     ) {
       setActivePage(page);
@@ -242,7 +239,7 @@ const RetailerReport = () => {
       />
 
       <div>
-        <SimpleGrid cols={5}>
+        <SimpleGrid cols={4}>
           <div>
             <Select
               data={[
@@ -277,9 +274,7 @@ const RetailerReport = () => {
               clearable
             />
           </div>
-          <div>
-            <ProductFilter category={product} onCardClick={setSetProduct} />
-          </div>
+
           <div>
             <Select
               data={[
@@ -298,7 +293,6 @@ const RetailerReport = () => {
         {(timeRange ||
           selectedEndDate ||
           selectedStartDate ||
-          product ||
           status) && (
           <div
             style={{
@@ -347,9 +341,7 @@ const RetailerReport = () => {
         position="bottom"
         size="80%"
       >
-        <OrdersDetailModal
-        data={data}
-        />
+        <OrdersDetailModal data={data} />
       </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
@@ -398,30 +390,30 @@ const RetailerReport = () => {
               )}
             </tbody>
           </Table>
-         
-                   <Center mt="md">
-                     <Group spacing="xs" position="center">
-                       <Group spacing="sm">
-                         <Text size="sm" mt="sm">
-                           <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
-                             Show per page:
-                           </span>
-                         </Text>
-                         <Select
-                           value={size}
-                           onChange={handlePageSizeChange}
-                           data={PAGE_SIZE_OPTIONS}
-                           style={{ width: 80, height: 40 }}
-                         />
-                       </Group>
-                       <Pagination
-                         color="blue"
-                         page={activePage}
-                         onChange={handleChange}
-                         total={totalPages}
-                       />
-                     </Group>
-                   </Center>
+
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
+                />
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
+          </Center>
         </ScrollArea>
       </Card>
     </div>

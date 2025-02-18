@@ -41,6 +41,7 @@ import { Box } from "@mui/material";
 import Demo from "./activeDrivers";
 import Pusher from "pusher-js";
 import MinmumBalance from "./minumunBalance";
+import NewDriver from "./newDriver";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -382,23 +383,37 @@ const Drivers = () => {
     <Tabs color="#FF6A00" value={activeTab} onTabChange={handleTabChange}>
       <Tabs.List>
         <Tabs.Tab value="first">
-          <span style={{ color: "rgb(20, 61, 89)", fontWeight: "bold" }}>
+          <span style={{ color: "#666666", fontWeight: "bold" }}>
             All Drivers
           </span>
         </Tabs.Tab>
         <Tabs.Tab value="second">
-          <span style={{ color: "rgb(20, 61, 89)", fontWeight: "bold" }}>
+          <span
+            style={{
+              color: "#666666",
+            //  backgroundColor: "#F1F1F1",
+              fontWeight: "bold",
+            }}
+          >
             All Active Drivers
           </span>
         </Tabs.Tab>
         <Tabs.Tab value="third">
-          <span style={{ color: "rgb(20, 61, 89)", fontWeight: "bold" }}>
+          <span style={{ color: "#666666", fontWeight: "bold" }}>
             Minmum Balance
+          </span>
+        </Tabs.Tab>
+        <Tabs.Tab value="four">
+          <span style={{ color: "#666666", fontWeight: "bold" }}>
+            New Driver
           </span>
         </Tabs.Tab>
       </Tabs.List>
       <Tabs.Panel value="third">
         <MinmumBalance />
+      </Tabs.Panel>
+      <Tabs.Panel value="four">
+        <NewDriver />
       </Tabs.Panel>
       <Tabs.Panel value="second">
         <Box

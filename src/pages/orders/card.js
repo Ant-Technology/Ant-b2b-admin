@@ -1,21 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {
-  Badge,
-  Group,
-  Popover,
-  Button,
-  Loader,
-  LoadingOverlay,
-} from "@mantine/core";
+import { Badge, Group, Button } from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
-import { IconChevronDown } from "@tabler/icons-react";
-import { customLoader } from "components/utilities/loader";
 
-export default function StatsGrid({ onCardClick, handelSearch, clearFilter }) {
+export default function StatsGrid({
+  onCardClick,
+  handelSearch,
+  clearFilter,
+  selectedStatus,
+}) {
   const [data, setData] = useState();
-  const [status, setStatus] = useState(null);
-  const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -41,148 +35,112 @@ export default function StatsGrid({ onCardClick, handelSearch, clearFilter }) {
       console.error("Error fetching data:", error);
     }
   };
+
   const handelOnClick = (status) => {
     onCardClick(status);
     handelSearch(null);
   };
+
+  const getButtonStyles = (status) => ({
+    root: {
+      fontWeight: 600,
+      backgroundColor: selectedStatus === status ? '#666666' : 'transparent',
+      color: selectedStatus === status ? 'white' : '#666666',
+      border: `1px solid ${selectedStatus === status ? '#666666' : '#ddd'}`,
+      width: "120px",
+      padding: "8px 12px",
+      transition: 'all 0.2s ease',
+      '&:hover': {
+        backgroundColor: selectedStatus === status ? '#666666' : '#f5f5f5',
+      },
+    },
+  });
+
+  const getBadgeStyles = (status, color) => ({
+    backgroundColor: selectedStatus === status ? 'white' : color,
+    color: selectedStatus === status ? '#666666' : 'white',
+    marginLeft: 8,
+  });
+
   return (
     <Group spacing="xs" position="left" style={{ paddingBottom: 16 }}>
       {/* Cancelled Button */}
       <Button
         onClick={() => handelOnClick("CANCELED")}
-        color="green"
         radius="md"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "120px",
-            padding: "2px 5px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
+        styles={getButtonStyles("CANCELED")}
       >
         Cancelled
         <Badge
-          color="green"
-          variant="filled"
           size="xs"
-          style={{ marginLeft: 4, fontSize: "12px" }}
+          style={getBadgeStyles("CANCELED",  "#FF6A00")}
         >
           {data?.CANCELED > 0 ? data?.CANCELED : 0}
         </Badge>
       </Button>
+
+      {/* Delivered Button */}
       <Button
         onClick={() => handelOnClick("DELIVERED")}
-        color="blue"
         radius="md"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "120px",
-            padding: "2px 5px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
+        styles={getButtonStyles("DELIVERED")}
       >
         Delivered
         <Badge
-          color="blue"
-          variant="filled"
           size="xs"
-          style={{ marginLeft: 4, fontSize: "12px" }}
+          style={getBadgeStyles("DELIVERED",  "#FF6A00")}
         >
           {data?.DELIVERED > 0 ? data?.DELIVERED : 0}
         </Badge>
       </Button>
+
+      {/* Ordered Button */}
       <Button
         onClick={() => handelOnClick("ORDERED")}
-        color="blue"
         radius="md"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "120px",
-            padding: "2px 5px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
+        styles={getButtonStyles("ORDERED")}
       >
         Ordered
         <Badge
-          color="blue"
-          variant="filled"
           size="xs"
-          style={{ marginLeft: 4, fontSize: "12px" }}
+          style={getBadgeStyles("ORDERED",  "#FF6A00")}
         >
           {data?.ORDERED > 0 ? data?.ORDERED : 0}
         </Badge>
       </Button>
+
+      {/* Back Ordered Button */}
       <Button
         onClick={() => handelOnClick("BACKORDERED")}
-        color="purple"
         radius="md"
-        styles={{
-          root: {
-            backgroundColor: "#225F4F",
-            fontWeight: "bold",
-            width: "130px",
-            padding: "2px 5px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
+        styles={getButtonStyles("BACKORDERED")}
       >
         Back Ordered
         <Badge
-          color="purple"
-          variant="filled"
           size="xs"
-          style={{
-            backgroundColor: "#225F4F",
-            marginLeft: 4,
-            fontSize: "12px",
-          }}
+          style={getBadgeStyles("BACKORDERED",  "#FF6A00")}
         >
           {data?.BACKORDERED > 0 ? data?.BACKORDERED : 0}
         </Badge>
       </Button>
+
+      {/* Shipped Button */}
       <Button
         onClick={() => handelOnClick("SHIPPED")}
         radius="md"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            backgroundColor: "#00688B",
-            width: "120px",
-            padding: "2px 5px",
-          },
-          label: {
-            fontSize: "14px",
-          },
-        }}
+        styles={getButtonStyles("SHIPPED")}
       >
         Shipped
         <Badge
-          variant="filled"
           size="xs"
-          style={{
-            backgroundColor: "#00688B",
-            marginLeft: 4,
-            fontSize: "12px",
-          }}
+          style={getBadgeStyles("SHIPPED",  "#FF6A00")}
         >
           {data?.SHIPPED > 0 ? data?.SHIPPED : 0}
         </Badge>
       </Button>
+
+      {/* All Button */}
       <Button
-        color="gray"
         onClick={clearFilter}
         radius="md"
         styles={{

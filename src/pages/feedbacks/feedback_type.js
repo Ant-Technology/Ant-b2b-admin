@@ -1,8 +1,10 @@
 import {
+  Button,
   Card,
   Drawer,
   LoadingOverlay,
   ScrollArea,
+  SimpleGrid,
   Table,
   useMantineTheme,
 } from "@mantine/core";
@@ -11,13 +13,17 @@ import OnlinePredictionIcon from "@mui/icons-material/OnlinePrediction";
 import { Box } from "@mui/material";
 import axios from "axios";
 import { API } from "utiles/url";
+import EditIcon from "@mui/icons-material/Edit";
+import {Trash } from "tabler-icons-react";
 import { customLoader } from "components/utilities/loader";
 import Controls from "components/controls/Controls";
 import { FiEdit, FiEye } from "react-icons/fi";
 import FeedbackTypeDetailModal from "./feedbacktypeDetail";
+import { Plus } from "tabler-icons-react";
+import {Add} from "./add";
 export default function FeedbackTypes({}) {
   const [data, setData] = useState([]);
-
+  const [opened, setOpened] = useState(false);
   useEffect(() => {
     fetchData();
   }, []);
@@ -62,6 +68,13 @@ export default function FeedbackTypes({}) {
         })}
       </td>
       <td>
+      <Controls.ActionButton
+              color="primary"
+              title="Update"
+             // onClick={() => handleEditSales(row)}
+            >
+              <EditIcon style={{ fontSize: "1rem" }} />
+            </Controls.ActionButton>
         <span style={{ marginLeft: "1px" }}>
           <Controls.ActionButton
             color="primary"
@@ -71,6 +84,13 @@ export default function FeedbackTypes({}) {
             <FiEye fontSize="medium" />
           </Controls.ActionButton>
         </span>
+        <Controls.ActionButton
+              color="primary"
+              title="Delete"
+             // onClick={() => handleDelete(`${row.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
       </td>
     </tr>
   ));
@@ -103,9 +123,42 @@ export default function FeedbackTypes({}) {
           row={feedback}
         />
       </Drawer>
+      <Drawer
+        opened={opened}
+        onClose={() => setOpened(false)}
+        padding="xl"
+        size="40%"
+        styles={{
+          closeButton: {
+            color: "black",
+            marginTop: "50px",
+          },
+        }}
+        position="right"
+      >
+        <Add fetchData={fetchData} setOpened={setOpened} />
+      </Drawer>
 
       <Card shadow="sm" p="lg">
         <ScrollArea>
+          <SimpleGrid cols={3}>
+            <div>
+              <Button
+                onClick={() => setOpened(true)}
+                style={{
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                  marginBottom:"10px"
+                }}
+                leftIcon={<Plus size={14} />}
+              >
+                Add
+              </Button>
+            </div>
+            <div></div>
+
+            <div></div>
+          </SimpleGrid>
           <Table style={{ width: "100%", minWidth: "600px" }}>
             <thead>
               <tr style={{ backgroundColor: "#F1F1F1" }}>

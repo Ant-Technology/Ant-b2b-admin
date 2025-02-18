@@ -36,12 +36,13 @@ import { showNotification } from "@mantine/notifications";
 import SalesDetailModal from "components/Sales/SalesDetailModal";
 import { SalesEditModal } from "components/Sales/SalesUpdateModal";
 import { SalesAddModal } from "components/Sales/SalesAddModal";
-import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
+import { API, formatNumber, PAGE_SIZE_OPTIONS } from "utiles/url";
 import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
 import ProductFilter from "./product";
 import RetailerFilter from "./retailer";
 import WarehouseFilter from "./warehouse";
+import { Box } from "@mui/material";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -376,7 +377,6 @@ const SalesReport = () => {
               )}
             </tbody>
           </Table>
-
           <Center mt="md">
             <Group spacing="xs" position="center">
               <Group spacing="sm">
@@ -400,6 +400,34 @@ const SalesReport = () => {
               />
             </Group>
           </Center>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-end",
+              flexDirection: "column",
+              p: 1,
+              gap: 1,
+              m: 1,
+              bgcolor: "background.paper",
+              borderRadius: 1,
+            }}
+          >
+            <div
+              style={{
+                marginRight: "35px",
+                fontWeight: "bold",
+                fontSize: "15px",
+              }}
+            >
+              Total Price:{" "}
+              {formatNumber(
+                sortedData.reduce((sum, item) => {
+                  return sum + item.subtotal;
+                }, 0)
+              )}
+            </div>
+          </Box>
         </ScrollArea>
       </Card>
     </div>

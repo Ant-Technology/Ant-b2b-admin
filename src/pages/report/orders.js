@@ -86,7 +86,7 @@ console.log(sales)
                   <th>Warehouse</th>
                   <th>Vehicle Type</th>
                   <th>Product</th>
-                  <th>State</th>
+                  <th>Status</th>
                   <th>Date</th>
                 </tr>
               </thead>

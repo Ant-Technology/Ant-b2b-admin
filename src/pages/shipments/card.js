@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Button, Group, Badge, Popover, Loader, Text } from "@mantine/core";
+import { Button, Group, Badge } from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
 
-const StatusDropdown = ({ onCardClick, handelSearch, clearFilter }) => {
+const StatusDropdown = ({
+  onCardClick,
+  handelSearch,
+  clearFilter,
+  selectedStatus,
+}) => {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
 
@@ -24,6 +29,7 @@ const StatusDropdown = ({ onCardClick, handelSearch, clearFilter }) => {
       setData(response.data);
       console.log(response.data);
     } catch (error) {
+      console.error("Error fetching shipment data:", error);
     } finally {
       setLoading(false);
     }
@@ -34,99 +40,98 @@ const StatusDropdown = ({ onCardClick, handelSearch, clearFilter }) => {
     handelSearch(null);
   };
 
+  const getButtonStyles = (status) => ({
+    root: {
+      fontWeight: 600,
+      backgroundColor: selectedStatus === status ? "#666666" : "transparent",
+      color: selectedStatus === status ? "white" : "#666666",
+      border: `1px solid ${selectedStatus === status ? "#666666" : "#ddd"}`,
+      width: "120px",
+      padding: "8px 12px",
+      transition: "all 0.2s ease",
+      "&:hover": {
+        backgroundColor: selectedStatus === status ? "#666666" : "#f5f5f5",
+      },
+    },
+  });
+
+  const getBadgeStyles = (status, color) => ({
+    backgroundColor: selectedStatus === status ? "white" : color,
+    color: selectedStatus === status ? "#666666" : "white",
+    marginLeft: 6,
+  });
+
   return (
     <Group spacing="sm" position="left" style={{ paddingBottom: 20 }}>
+      {/* Pending Button */}
       <Button
-        color="orange"
-        radius="md"
         onClick={() => handelOnClick("PENDING")}
-        styles={{
-          root: {
-            fontWeight: "bold",
-            backgroundColor: "#FF6A00",
-            width: "120px",
-            padding: "2px 5px",
-          },
-        }}
+        radius="md"
+        styles={getButtonStyles("PENDING")}
       >
         Pending
         <Badge
           color="orange"
           variant="filled"
           size="sm"
-          style={{ backgroundColor: "#FF6A00", marginLeft: 6 }}
+          style={getBadgeStyles("PENDING", "#FF6A00")}
         >
           {data?.PENDING > 0 ? data?.PENDING : 0}
         </Badge>
       </Button>
+
+      {/* Cancelled Button */}
       <Button
         onClick={() => handelOnClick("CANCELED")}
-        color="green"
         radius="md"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "120px",
-            padding: "2px 5px",
-          },
-        }}
+        styles={getButtonStyles("CANCELED")}
       >
         Cancelled
         <Badge
           color="green"
           variant="filled"
           size="sm"
-          style={{ marginLeft: 6 }}
+          style={getBadgeStyles("CANCELED", "#FF6A00")}
         >
           {data?.CANCELED > 0 ? data?.CANCELED : 0}
         </Badge>
       </Button>
+
+      {/* Delivered Button */}
       <Button
-        color="blue"
-        radius="md"
         onClick={() => handelOnClick("DELIVERED")}
-        styles={{
-          root: {
-            fontWeight: "bold",
-            width: "120px",
-            padding: "2px 5px",
-          },
-        }}
+        radius="md"
+        styles={getButtonStyles("DELIVERED")}
       >
         Delivered
         <Badge
           color="blue"
           variant="filled"
           size="sm"
-          style={{ marginLeft: 6 }}
+          style={getBadgeStyles("DELIVERED", "#FF6A00")}
         >
           {data?.DELIVERED > 0 ? data?.DELIVERED : 0}
         </Badge>
       </Button>
+
+      {/* Shipped Button */}
       <Button
-        color="#00688B"
         onClick={() => handelOnClick("SHIPPED")}
         radius="md"
-        styles={{
-          root: {
-            fontWeight: "bold",
-            backgroundColor: "#00688B",
-            width: "120px",
-            padding: "2px 5px",
-          },
-        }}
+        styles={getButtonStyles("SHIPPED")}
       >
         Shipped
         <Badge
           variant="filled"
           size="sm"
-          style={{ backgroundColor: "#00688B", marginLeft: 6 }}
+          style={getBadgeStyles("SHIPPED", "#FF6A00")}
         >
           {data?.SHIPPED > 0 ? data?.SHIPPED : 0}
         </Badge>
       </Button>
+
+      {/* All Button */}
       <Button
-        color="gray"
         onClick={clearFilter}
         radius="md"
         styles={{

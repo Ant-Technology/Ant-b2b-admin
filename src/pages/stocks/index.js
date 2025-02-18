@@ -341,12 +341,10 @@ const Drivers = () => {
       <Tabs.List>
         <Tabs.List>
           <Tabs.Tab value="first">
-            <span style={{ color: "rgb(20, 61, 89)", fontWeight: "bold" }}>
-              All
-            </span>
+            <span style={{ color: "#666666", fontWeight: "bold" }}>All</span>
           </Tabs.Tab>
           <Tabs.Tab value="second">
-            <span style={{ color: "rgb(20, 61, 89)", fontWeight: "bold" }}>
+            <span style={{ color: "#666666", fontWeight: "bold" }}>
               Minimum Stock
             </span>
           </Tabs.Tab>

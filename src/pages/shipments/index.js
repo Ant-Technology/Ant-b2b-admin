@@ -290,7 +290,7 @@ const Shipments = () => {
   const clearFilter = () => {
     setDropoffStatus(null);
     setSearchValue("");
-    setConfirmedSearch("")
+    setConfirmedSearch("");
   };
 
   const handleManualSearch = (searchTerm) => {
@@ -299,7 +299,7 @@ const Shipments = () => {
   const clearInput = () => {
     setSearchValue("");
     setDropoffStatus(null);
-    setConfirmedSearch("")
+    setConfirmedSearch("");
   };
 
   return loading ? (
@@ -394,6 +394,7 @@ const Shipments = () => {
           onCardClick={setDropoffStatus}
           handelSearch={setSearchValue}
           clearFilter={clearFilter}
+          selectedStatus={dropoffStatus}
         />
         <ScrollArea style={{ overflowX: "hidden" }}>
           <B2bTable

@@ -1,9 +1,6 @@
-import { useQuery } from "@apollo/client";
-import { X } from "tabler-icons-react"; // Import a close icon
+
 import {
-  Badge,
   Card,
-  Drawer,
   LoadingOverlay,
   ScrollArea,
   useMantineTheme,
@@ -13,33 +10,14 @@ import {
   Group,
   Text,
   Center,
-  TextInput,
-  SimpleGrid,
   Container,
-  Pagination,
-  Button,
-  Tooltip,
-  Modal,
-  Tabs,
+  Pagination
 } from "@mantine/core";
-import { Api, Edit, Trash } from "tabler-icons-react";
-import { FiEdit, FiEye } from "react-icons/fi";
-import EditIcon from "@mui/icons-material/Edit";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { Plus, Search } from "tabler-icons-react";
-import { showNotification } from "@mantine/notifications";
-import DriverDetailModal from "components/Driver/DriverDetail";
-import { DriverEditModal } from "components/Driver/DriverEditModal";
-import { DriverAddModal } from "components/Driver/DriverAddModal";
-import Controls from "components/controls/Controls";
 import { API, formatNumber } from "utiles/url";
-import MapView from "./mapView";
-import { Box } from "@mui/material";
-import Demo from "./activeDrivers";
-import Pusher from "pusher-js";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -135,44 +113,19 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 
 const MinmumBalance = () => {
   const { classes } = useStyles();
-  const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState([]);
-  const [activeTab, setActiveTab] = useState("first");
 
-  const [openedEdit, setOpenedEdit] = useState(false);
-  const [editId, setEditId] = useState();
-  const [editRow, setEditRow] = useState();
-  const [deleteID, setDeleteID] = useState(false);
-  const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState([]);
-  const [activeDrivers, setActiveDrivers] = useState([]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-  const [openedDetail, setOpenedDetail] = useState(false);
-  const [openedDelete, setOpenedDelete] = useState(false);
 
   useEffect(() => {
     fetchData(activePage);
   }, [activePage]);
-  useEffect(() => {
-    const pusher = new Pusher("83f49852817c6b52294f", {
-      cluster: "mt1",
-    });
-    const notificationChannel = pusher.subscribe("driver-location");
-    notificationChannel.bind("driver-location", function (data) {
-      console.log("Pusher event received:", data);
-      setActiveDrivers(data.data);
-    });
-    return () => {
-      // Unsubscribe from channels, disconnect, etc.
-      pusher.disconnect();
-    };
-  }, []);
 
   const fetchData = async (page) => {
     setLoading(true);
@@ -190,32 +143,6 @@ const MinmumBalance = () => {
       if (response.data) {
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
-        setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
-        setLoading(false);
-      }
-    } catch (error) {
-      setLoading(false);
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  const handleSearchChange = async () => {
-    setLoading(true);
-    try {
-      let token = localStorage.getItem("auth_token");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      const response = await axios.get(
-        `${API}/drivers/list/below_minimum_wallet_balance?page=${activePage}`,
-        config
-      );
-      if (response.data) {
-        setDrivers(response.data.data);
-        setSortedData(response.data.data);
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
         setLoading(false);
@@ -251,7 +178,7 @@ const MinmumBalance = () => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
+    setSortedData(sortData(drivers, { sortBy: field, reversed }));
   };
 
   const filterData = (data, search) => {

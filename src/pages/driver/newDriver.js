@@ -1,8 +1,5 @@
-import { useQuery } from "@apollo/client";
 import {
-  Badge,
   Card,
-  Drawer,
   LoadingOverlay,
   ScrollArea,
   useMantineTheme,
@@ -12,28 +9,20 @@ import {
   Group,
   Text,
   Center,
-  TextInput,
-  SimpleGrid,
   Container,
   Pagination,
-  Button,
-  Tooltip,
-  Modal,
+ 
 } from "@mantine/core";
-import { Edit, Trash } from "tabler-icons-react";
 import axios from "axios";
-import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { Plus, Search } from "tabler-icons-react";
-import { showNotification } from "@mantine/notifications";
-import { FiEdit, FiEye } from "react-icons/fi";
 
-import { API } from "utiles/url";
 import Controls from "components/controls/Controls";
-
+import { API, formatNumber } from "utiles/url";
+import Pusher from "pusher-js";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import PersonOffIcon from "@mui/icons-material/PersonOff";
 const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
@@ -62,6 +51,38 @@ const useStyles = createStyles((theme) => ({
     fontSize: "10px",
     textTransform: "uppercase",
     fontWeight: "bold",
+  },
+  idColumn: {
+    width: "3%",
+  },
+  cityColumn: {
+    width: "4%",
+  },
+
+  searchContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+  },
+  searchInput: {
+    flexGrow: 1,
+    paddingRight: "50px", // Add padding to avoid text overlap with button
+  },
+  searchButton: {
+    position: "absolute",
+    right: 0,
+    borderRadius: "0 4px 4px 0",
+    height: "70%",
+    width: "40px", // Fixed width for the button
+    backgroundColor: "#FF6A00",
+    color: "#FFFFFF",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+    cursor: "pointer",
   },
 }));
 
@@ -94,27 +115,24 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
   );
 }
 
-const Feedbacks = () => {
+const NewDriver = () => {
   const { classes } = useStyles();
-  const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState([]);
-  const [deleteID, setDeleteID] = useState(false);
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState([]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-  const [openedDelete, setOpenedDelete] = useState(false);
 
   useEffect(() => {
     fetchData(activePage);
   }, [activePage]);
 
   const fetchData = async (page) => {
+    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -122,28 +140,21 @@ const Feedbacks = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/feedbacks?page=${page}`, config);
+      const response = await axios.get(
+        `${API}/drivers/list/below_minimum_wallet_balance?page=${activePage}`,
+        config
+      );
       if (response.data) {
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
         setTotalPages(response.data.last_page);
+        setLoading(false);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error fetching data:", error);
     }
-  };
-
-  const handleSearchChange = (event) => {
-    const { value } = event.currentTarget;
-    setSearch(value);
-    setSortedData(
-      sortData(drivers, {
-        sortBy,
-        reversed: reverseSortDirection,
-        search: value,
-      })
-    );
   };
 
   const sortData = (data, payload) => {
@@ -174,7 +185,6 @@ const Feedbacks = () => {
     setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
   };
 
-  const [isHovered, setIsHovered] = useState(false);
   const filterData = (data, search) => {
     const query = search.toLowerCase().trim();
     return data.filter((item) =>
@@ -186,75 +196,40 @@ const Feedbacks = () => {
       )
     );
   };
-  const handleDelete = (id) => {
-    setOpenedDelete(true);
-    setDeleteID(id);
-  };
-
-  const deleteDriver = async () => {
-    try {
-      let token = localStorage.getItem("auth_token");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      const response = await axios.delete(
-        `${API}/drivers/${deleteID}`,
-        config
-      );
-      if (response.data) {
-        fetchData(activePage);
-        setOpenedDelete(false);
-        setDeleteID(null);
-        showNotification({
-          color: "green",
-          title: "Success",
-          message: "Driver Deleted Successfully",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setOpenedDelete(false);
-      setDeleteID(null);
-      showNotification({
-        color: "red",
-        title: "Error",
-        message: `Driver Not Deleted Successfully`,
-      });
-    }
-  };
 
   const theme = useMantineTheme();
-  const rows = sortedData?.map((row) => (
-    <Fragment key={row.id}>
-      <tr>
-        <td>{row.description}</td>
-        <td>{row.user?.name}</td>
-        <td>{row.user?.email}</td>
-        <td>{row.user?.role}</td>
-        <td>{row.feedback_type?.name}</td>
-        <td>{new Date(row.created_at).toLocaleDateString()}</td>
-        <td>
-        <Controls.ActionButton
-            color="primary"
-            title="View Detail"
-          //  onClick={() => handleDetail(element.feedbacks)}
-          >
-            <FiEye fontSize="medium" />
-          </Controls.ActionButton>
-        <Controls.ActionButton
+  const rows = sortedData?.map((row) => {
+    return (
+      <Fragment key={row.id}>
+        <tr>
+          <td className={classes.idColumn}>{row.id}</td>
+          <td>{row.name}</td>
+          <td>{row.email}</td>
+          <td>{row.phone}</td>
+          <td className={classes.cityColumn}>{row.region?.name?.en}</td>
+          <td>{row.city}</td>
+          <td style={{ width: "10%" }}>
+            {row.vehicle?.vehicle_type?.title.en}
+          </td>
+          <td>{formatNumber(row.wallet?.balance)}</td>
+          <td>
+            {" "}
+            <Controls.ActionButton
               color="primary"
-              title="Delete"
-             // onClick={() => handleDelete(`${row.id}`)}
+              title={row.status ? "Approve" : "Activate"}
+            //  onClick={() => handleEditDriver(row)}
             >
-              <Trash size={17} />
+                {row.status ? (
+                <PersonOffIcon size={17} />
+              ) : (
+                <HowToRegIcon size={17} />
+              )}
             </Controls.ActionButton>
-        </td>
-      </tr>
-    </Fragment>
-  ));
-
+          </td>
+        </tr>
+      </Fragment>
+    );
+  });
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -266,47 +241,41 @@ const Feedbacks = () => {
     <div style={{ width: "98%", margin: "auto" }}>
       <Card shadow="sm" p="lg">
         <ScrollArea>
-          <SimpleGrid cols={3}>
-            <div></div>
-            <div></div>
-            <div>
-              <TextInput
-                placeholder="Search by any field"
-                mb="md"
-                icon={<Search size={14} />}
-                value={search}
-                onChange={handleSearchChange}
-              />
-            </div>
-          </SimpleGrid>
           <Table
             highlightOnHover
             horizontalSpacing="md"
             verticalSpacing="xs"
-            sx={{ tableLayout: "fixed", minWidth: 700 }}
+            sx={{ minWidth: 700 }}
           >
             <thead>
               <tr style={{ backgroundColor: "#F1F1F1" }}>
-                <Th sortable={false} onSort={() => handleSort("description")}>
-                  <span className={classes.thh}> Description </span>
+                <Th sortable={false} onSort={() => handleSort("id")}>
+                  <span className={classes.thh}>ID</span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("type")}>
-                  <span className={classes.thh}> Type</span>
+                <Th sortable={false} onSort={() => handleSort("name")}>
+                  <span className={classes.thh}> Name </span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("type")}>
-                  <span className={classes.thh}> Name</span>
-                </Th>
-                <Th sortable={false} onSort={() => handleSort("type")}>
+                <Th sortable onSort={() => handleSort("email")}>
                   <span className={classes.thh}> Email</span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("type")}>
-                  <span className={classes.thh}> Role</span>
+                <Th sortable onSort={() => handleSort("phone")}>
+                  <span className={classes.thh}> Phone</span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("created_at")}>
-                  <span className={classes.thh}> Date</span>
+                <Th sortable={false}>
+                  {" "}
+                  <span className={classes.thh}>Region</span>
                 </Th>
-                <Th sortable={false} onSort={() => handleSort("created_at")}>
-                  <span className={classes.thh}> Actions</span>
+                <Th sortable onSort={() => handleSort("email")}>
+                  <span className={classes.thh}> City</span>
+                </Th>
+                <Th sortable={false}>
+                  <span className={classes.thh}>Vehicle Type</span>
+                </Th>
+                <Th sortable={false}>
+                  <span className={classes.thh}>Balance</span>
+                </Th>
+                <Th sortable={false}>
+                  <span className={classes.thh}>Actions</span>
                 </Th>
               </tr>
             </thead>
@@ -342,4 +311,4 @@ const Feedbacks = () => {
   );
 };
 
-export default Feedbacks;
+export default NewDriver;

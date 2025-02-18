@@ -33,16 +33,16 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
 
   const form = useForm({
     initialValues: {
-      // Initialize images with the proper structure
       images: {
         delete: [],
-        existing: [], // Initialize as an empty array
+        existing: [],
         create: [],
       },
       name: { am: "", en: "" },
       short_description: { am: "", en: "" },
       description: { am: "", en: "" },
-      category: { connect: "" },
+      category: { connect: 10 },
+      subcategory: { connect: "" },
       is_active: true,
       attributes: {
         update: [],
@@ -51,12 +51,34 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
       },
     },
   });
-
+  const { loading: categoryLoading, data: categoriesData } = useQuery(NON_PAGINATED_CATEGORIES, {
+    onCompleted(data) {
+      const enArr = data.categoryNonPaginated.map((item) => ({
+        label: item.name,
+        value: item.id,
+        children: item.children,
+      }));
+      const amArr = data.categoryNonPaginated.map((item) => ({
+        label: item.name,
+        value: item.id,
+        children: item.children,
+      }));
+      setDropDownData({ enArr, amArr });
+    },
+  });
+  
   const { loading } = useQuery(GET_PRODUCT, {
     variables: { id: editId },
+    skip: !categoriesData,
     onCompleted(data) {
-      console.log(data);
-      const forUpdate = data.product.attributes.map((item) => ({
+      const product = data.product;
+      const productCategoryId = product.category.id;
+      const parentCategory = categoriesData.categoryNonPaginated.find(cat =>
+        cat.children.some(child => child.id === productCategoryId)
+      );
+  
+      // Prepare attributes data
+      const forUpdate = product.attributes.map((item) => ({
         id: item.id,
         name: {
           en: item.name_translations.en,
@@ -74,54 +96,58 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
           delete: [],
         },
       }));
-
-      form.setValues({
+        form.setValues({
         name: {
-          am: data.product.name_translations.am,
-          en: data.product.name_translations.en,
+          am: product.name_translations.am,
+          en: product.name_translations.en,
         },
         short_description: {
-          am: data.product.short_description_translations.am,
-          en: data.product.short_description_translations.en,
+          am: product.short_description_translations.am,
+          en: product.short_description_translations.en,
         },
         description: {
-          am: data.product.description_translations.am,
-          en: data.product.description_translations.en,
+          am: product.description_translations.am,
+          en: product.description_translations.en,
         },
-        category: { connect: data.product.category.id },
-        images: { delete: [], existing: data.product.images, create: [] },
-        is_active: data.product.is_active,
+        category: { connect: parentCategory?.id || "" },
+        subcategory: { connect: productCategoryId }, 
+        images: {
+          delete: [],
+          existing: product.images,
+          create: [],
+        },
+        is_active: product.is_active,
         attributes: {
           update: forUpdate,
           create: [],
           delete: [],
         },
       });
-    },
-  });
-  const { loading: categoryLoading } = useQuery(NON_PAGINATED_CATEGORIES, {
-    onCompleted(data) {
-      const enArr = data.categoryNonPaginated.map((item) => ({
-        label: item.name_translations.en,
-        value: item.id,
-      }));
-      const amArr = data.categoryNonPaginated.map((item) => ({
-        label: item.name_translations.am,
-        value: item.id,
-      }));
-      setDropDownData({ enArr, amArr });
+        if (parentCategory) {
+        setSubcategories(parentCategory.children);
+      }
     },
   });
   const handleAttributeCards = () => {
-    return [...form.values.attributes?.update, ...form.values.attributes?.create].map((item, mainIndex) => {
+    return [
+      ...form.values.attributes?.update,
+      ...form.values.attributes?.create,
+    ].map((item, mainIndex) => {
       const isUpdateAttribute = !!item.id;
       const attributeType = isUpdateAttribute ? "update" : "create";
-      const attributeIndex = isUpdateAttribute 
-        ? mainIndex 
+      const attributeIndex = isUpdateAttribute
+        ? mainIndex
         : mainIndex - form.values.attributes.update.length;
-  
+
       return (
-        <Card key={item.id || mainIndex} shadow="sm" p="lg" radius="md" withBorder mt="xl">
+        <Card
+          key={item.id || mainIndex}
+          shadow="sm"
+          p="lg"
+          radius="md"
+          withBorder
+          mt="xl"
+        >
           <Stack>
             <Group position="right">
               <ActionIcon
@@ -138,7 +164,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
                 <Ban size={26} strokeWidth={2} color="red" />
               </ActionIcon>
             </Group>
-  
+
             <Grid>
               <Grid.Col span={6}>
                 <TextInput
@@ -160,7 +186,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
                   )}
                 />
               </Grid.Col>
-  
+
               <Grid.Col span={12}>
                 <Group position="apart" mt="xl">
                   <Button
@@ -177,7 +203,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
                     Add Value
                   </Button>
                 </Group>
-  
+
                 {/* Existing values */}
                 {item.values?.update?.map((attr, updateIndex) => (
                   <Group key={attr.id} mt="xs">
@@ -214,7 +240,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
                     </ActionIcon>
                   </Group>
                 ))}
-  
+
                 {/* New values */}
                 {item.values?.create?.map((value, createIndex) => (
                   <Group key={createIndex} mt="xs">
@@ -255,7 +281,6 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
     });
   };
   const submit = () => {
-    console.log(form.values);   
     updateProduct({
       variables: {
         id: editId,
@@ -268,7 +293,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
           create: [...files],
           delete: [...form.getInputProps("images.delete").value],
         },
-        category: form.getInputProps("category").value,
+        category: form.getInputProps("subcategory").value,
       },
       onCompleted() {
         showNotification({
@@ -286,7 +311,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
         });
       },
     });
-  };
+   };
 
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -342,7 +367,14 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
       </div>
     )),
   ];
+  const [subcategories, setSubcategories] = useState([]);
 
+  const handleCategoryChange = (val) => {
+    form.setFieldValue("category.connect", val);
+    const selectedCategory = dropDownData.enArr.find((cat) => cat.value === val);
+    setSubcategories(selectedCategory ? selectedCategory.children : []);
+    form.setFieldValue("subcategory.connect", ""); // Reset subcategory on parent change
+  };
   return (
     <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
       <LoadingOverlay
@@ -404,11 +436,30 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
             </Grid.Col>
             <Grid.Col span={6}>
               <Select
+                searchable
                 data={dropDownData.enArr}
                 value={form.getInputProps("category.connect").value?.toString()}
-                onChange={(val) => form.setFieldValue("category.connect", val)}
+                onChange={handleCategoryChange}
                 label="Category"
                 placeholder="Pick a category this product belongs to"
+              />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <Select
+                searchable
+                data={subcategories.map((sub) => ({
+                  label: sub.name,
+                  value: sub.id,
+                }))}
+                value={form
+                  .getInputProps("subcategory.connect")
+                  .value?.toString()}
+                onChange={(val) =>
+                  form.setFieldValue("subcategory.connect", val)
+                }
+                label="Subcategory"
+                placeholder="Pick a subcategory this product belongs to"
+                disabled={subcategories.length === 0}
               />
             </Grid.Col>
             <Grid.Col span={6}>
