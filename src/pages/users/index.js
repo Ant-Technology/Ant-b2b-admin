@@ -24,8 +24,9 @@ import UserEditModal from "components/User/UserEditModal";
 import { customLoader } from "components/utilities/loader";
 import React, { useEffect } from "react";
 import { useState } from "react";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import PersonOffIcon from "@mui/icons-material/PersonOff";
+import RoleFilter from "./roleFilter";
 
 const Users = () => {
   const [size, setSize] = useState("10");
@@ -35,10 +36,9 @@ const Users = () => {
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-
-  //pagination states
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [roleId, setRoleId] = useState(null);
 
   const { data, loading } = useQuery(GET_ALL_USERS, {
     variables: {
@@ -188,9 +188,9 @@ const Users = () => {
               onClick={() => handleUserStatusChange(rowData.id, rowData.status)}
             >
               {rowData.status ? (
-                <CancelIcon size={17} />
+                <PersonOffIcon size={17} />
               ) : (
-                <CheckCircleIcon size={17} />
+                <HowToRegIcon size={17} />
               )}
             </Controls.ActionButton>
           </div>
@@ -384,6 +384,9 @@ const Users = () => {
             loading={loading}
             data={data ? data.users.data : []}
             size={size}
+            filterData={({ onCardClick }) => (
+              <RoleFilter category={roleId} onCardClick={setRoleId} />
+            )}
             handlePageSizeChange={handlePageSizeChange}
           />
         </ScrollArea>

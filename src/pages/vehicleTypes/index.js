@@ -28,8 +28,8 @@ import React, { useEffect, useState } from "react";
 import { Edit, Trash } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
 import EditIcon from "@mui/icons-material/Edit";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import PersonOffIcon from "@mui/icons-material/PersonOff";
 
 const VehicleTypes = () => {
   const [size, setSize] = useState("10");
@@ -47,7 +47,7 @@ const VehicleTypes = () => {
     variables: {
       first: parseInt(size),
       page: activePage,
-      search: searchValue
+      search: searchValue,
     },
   });
 
@@ -69,7 +69,7 @@ const VehicleTypes = () => {
           variables: {
             first: 10,
             page: activePage,
-            search: searchValue
+            search: searchValue,
           },
         },
         (data) => {
@@ -302,9 +302,9 @@ const VehicleTypes = () => {
               }
             >
               {rowData.status === "ACTIVE" ? (
-                <CancelIcon size={17} />
+                <PersonOffIcon size={17} />
               ) : (
-                <CheckCircleIcon size={17} />
+                <HowToRegIcon size={17} />
               )}
             </Controls.ActionButton>
           </div>

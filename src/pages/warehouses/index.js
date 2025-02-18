@@ -9,8 +9,8 @@ import WarehouseAddModal from "components/Warehouse/warehouseAddModal";
 import WarehouseEditModal from "components/Warehouse/warehouseEditModal";
 import { showNotification } from "@mantine/notifications";
 import EditIcon from "@mui/icons-material/Edit";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import PersonOffIcon from "@mui/icons-material/PersonOff";
 import { customLoader } from "components/utilities/loader";
 import { GET_WARE_HOUSE, GET_WARE_HOUSES } from "apollo/queries";
 import { CHANGE_WAREHOUSE_STATUS, DEL_WAREHOUSE } from "apollo/mutuations";
@@ -277,10 +277,11 @@ const Warehouses = () => {
                 handleWarehouseStatusChange(rowData.id, rowData.status)
               }
             >
-              {rowData.status === "ACTIVE" ? (
-                <CancelIcon size={15} />
+            
+               {rowData.status === "ACTIVE" ? (
+                <PersonOffIcon size={17} />
               ) : (
-                <CheckCircleIcon size={15} />
+                <HowToRegIcon size={17} />
               )}
             </Controls.ActionButton>
           </div>

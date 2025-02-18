@@ -264,6 +264,7 @@ const Orders = () => {
           onCardClick={setDropoffStatus}
           handelSearch={setSearchValue}
           clearFilter={clearFilter}
+          selectedStatus ={dropoffStatus}
         />
         <ScrollArea>
           <B2bTable
