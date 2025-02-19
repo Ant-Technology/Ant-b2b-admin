@@ -1242,6 +1242,15 @@ export const GET_DROPOFF = gql`
             address
             city
           }
+          order_transaction {
+            transaction {
+              id
+              payment_method
+              amount
+              txn_ref
+              type
+            }
+          }
           items {
             id
             quantity

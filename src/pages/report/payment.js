@@ -1,48 +1,29 @@
-import { useQuery } from "@apollo/client";
-import { X } from "tabler-icons-react"; // Import a close icon
+import "jspdf-autotable";
+import jsPDF from "jspdf";
+import * as XLSX from "xlsx";
 import {
-  Badge,
   Card,
-  Drawer,
   LoadingOverlay,
   ScrollArea,
-  useMantineTheme,
   createStyles,
   Table,
   UnstyledButton,
   Group,
   Text,
   Center,
-  TextInput,
   SimpleGrid,
-  Container,
   Pagination,
   Button,
-  Tooltip,
-  Modal,
   Select,
   Menu,
 } from "@mantine/core";
-import { FiEdit, FiEye } from "react-icons/fi";
-import EditIcon from "@mui/icons-material/Edit";
-import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import axios from "axios";
-import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { Plus, Search } from "tabler-icons-react";
-import { showNotification } from "@mantine/notifications";
-import SalesDetailModal from "components/Sales/SalesDetailModal";
-import { SalesEditModal } from "components/Sales/SalesUpdateModal";
-import { SalesAddModal } from "components/Sales/SalesAddModal";
 import { API, formatNumber, PAGE_SIZE_OPTIONS } from "utiles/url";
-import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
-import ProductFilter from "./product";
-import RetailerFilter from "./retailer";
-import WarehouseFilter from "./warehouse";
+import { Box } from "@mui/material";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -71,7 +52,7 @@ const useStyles = createStyles((theme) => ({
     fontWeight: "bold",
   },
 }));
-
+const headers = ["Method", "User Type", "Type", "Amount", "Status", "User"];
 function Th({ children, sortable, sorted, reversed, onSort }) {
   const { classes } = useStyles();
   const Icon = sorted
@@ -212,12 +193,88 @@ const PaymentReport = () => {
     }
   };
   const exportToPDF = () => {
-    console.log("Exporting to PDF...");
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Payment Report", pageWidth / 2, 20, { align: "center" });
+
+    let subtitle = "Date: ";
+    if (selectedStartDate && selectedEndDate) {
+      const startDate = selectedStartDate.toISOString().slice(0, 10);
+      const endDate = selectedEndDate.toISOString().slice(0, 10);
+      subtitle += `${startDate} - ${endDate}`;
+    } else {
+      subtitle += "All Date";
+    }
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(subtitle, pageWidth / 2, 28, { align: "center" });
+
+    const bodyData = sortedData.map((row) => [
+      row.payment_method || "N/A",
+      row.payable_type.split("\\").pop() || "N/A",
+      row.type || "N/A",
+      formatNumber(row.amount) || 0,
+      row.status || "N/A",
+      row.payable.name || "N/A",
+    ]);
+    doc.autoTable({
+      startY: 35,
+      head: [headers],
+      body: bodyData,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] }, // Updated header color
+    });
+
+    const finalY = doc.lastAutoTable.finalY || 10;
+    const totalAmount = sortedData.reduce((sum, item) => sum +  Number(item.amount), 0);
+    doc.text(
+      `Total Amount: ${formatNumber(totalAmount)}`,
+      pageWidth - 20,
+      finalY + 10,
+      { align: "right" }
+    );
+
+    const exportedDate = `Exported Date: ${new Date().toLocaleString()}`;
+    doc.setFontSize(10);
+    doc.text(
+      exportedDate,
+      pageWidth - 14,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: "right" }
+    );
+
+    doc.save("payment_report.pdf");
   };
 
   const exportToExcel = () => {
-    console.log("Exporting to Excel...");
+    const bodyData = sortedData.map((row) => ({
+      Method: row.payment_method,
+      UserType: row.payable_type.split("\\").pop(),
+      Type: row.type,
+      Amount: formatNumber(row.amount),
+      Status: row.status,
+      User: row.payable.name,
+    }));
+
+    const totalAmount = sortedData.reduce((sum, item) => sum +  Number(item.amount), 0);
+    bodyData.push({
+      Method: "Total Amount",
+      UserType: totalAmount.toFixed(2),
+      Type: "",
+      Amount: "",
+      Status: "",
+      User: "",
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(bodyData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
+    XLSX.writeFile(workbook, "payment_report.xlsx");
   };
+
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
@@ -380,24 +437,11 @@ const PaymentReport = () => {
           >
             <thead>
               <tr style={{ backgroundColor: "#F1F1F1" }}>
-                <Th>
-                  <span className={classes.thh}> Method </span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>User Type</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Type</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Amount </span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Status </span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>User</span>
-                </Th>
+                {headers.map((header) => (
+                  <Th key={header}>
+                    <span className={classes.thh}>{header}</span>
+                  </Th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -405,7 +449,7 @@ const PaymentReport = () => {
                 rows
               ) : (
                 <tr>
-                  <td colSpan={10}>
+                  <td colSpan={6}>
                     <Text weight={500} align="center">
                       Nothing found
                     </Text>
@@ -414,7 +458,6 @@ const PaymentReport = () => {
               )}
             </tbody>
           </Table>
-
           <Center mt="md">
             <Group spacing="xs" position="center">
               <Group spacing="sm">
@@ -438,6 +481,30 @@ const PaymentReport = () => {
               />
             </Group>
           </Center>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-end",
+              flexDirection: "column",
+              p: 1,
+              gap: 1,
+              m: 1,
+              bgcolor: "background.paper",
+              borderRadius: 1,
+            }}
+          >
+            <div
+              style={{
+                marginRight: "35px",
+                fontWeight: "bold",
+                fontSize: "15px",
+              }}
+            >
+              Total Amount:{" "}
+              {formatNumber(sortedData.reduce((sum, item) => sum + Number(item.amount), 0))}
+            </div>
+          </Box>
         </ScrollArea>
       </Card>
     </div>

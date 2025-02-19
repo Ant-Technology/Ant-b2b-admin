@@ -1,30 +1,23 @@
-import { useQuery } from "@apollo/client";
-import { X } from "tabler-icons-react"; // Import a close icon
+import "jspdf-autotable";
+import jsPDF from "jspdf";
+import * as XLSX from "xlsx";
 import {
-  Badge,
   Card,
-  Drawer,
   LoadingOverlay,
   ScrollArea,
-  useMantineTheme,
   createStyles,
   Table,
   UnstyledButton,
   Group,
   Text,
   Center,
-  TextInput,
   SimpleGrid,
-  Container,
   Pagination,
   Button,
-  Tooltip,
-  Modal,
   Menu,
-  MenuItem,
   Select,
 } from "@mantine/core";
-import { IconDownload } from "@tabler/icons-react";
+
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
@@ -35,7 +28,17 @@ import ProductFilter from "./product";
 import RetailerFilter from "./retailer";
 import WarehouseFilter from "./warehouse";
 import { Box } from "@mui/material";
-
+const headers = [
+  "SKU",
+  "Product Name",
+  "Quantity",
+  "Unit Price",
+  "Subtotal",
+  "Warehouse",
+  "Warehouse Region",
+  "Date",
+  "Retailer",
+];
 const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
@@ -209,14 +212,97 @@ const SalesReport = () => {
   const [opened, setOpened] = useState(false);
 
   const exportToPDF = () => {
-    console.log("Exporting to PDF...");
-    setOpened(false);
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Sales Report", pageWidth / 2, 20, { align: "center" });
+
+    let subtitle = "Date: ";
+    if (selectedStartDate && selectedEndDate) {
+      const startDate = selectedStartDate.toISOString().slice(0, 10);
+      const endDate = selectedEndDate.toISOString().slice(0, 10);
+      subtitle += `${startDate} - ${endDate}`;
+    } else {
+      subtitle += "All Date";
+    }
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(subtitle, pageWidth / 2, 28, { align: "center" });
+
+    const bodyData = sortedData.map((row) => [
+      row.productSku || "N/A",
+      row.productName || "N/A",
+      row.quantity || 0,
+      row.unitPrice || 0,
+      row.subtotal || 0,
+      row.warehouse || "N/A",
+      row.warehouseRegion || "N/A",
+      row.date || "N/A",
+      row.retailer || "N/A",
+    ]);
+
+    doc.autoTable({
+      startY: 35,
+      head: [headers],
+      body: bodyData,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] }, // Updated header color
+    });
+    const finalY = doc.lastAutoTable.finalY || 10;
+    doc.text(
+      `Total Price: ${formatNumber(
+        sortedData.reduce((sum, item) => {
+          return sum + item.subtotal;
+        }, 0)
+      )}`,
+      doc.internal.pageSize.getWidth() - 20,
+      finalY + 10,
+      { align: "right" }
+    );
+
+    const exportedDate = `Exported Date: ${new Date().toLocaleString()}`;
+    doc.setFontSize(10);
+    doc.text(exportedDate, pageWidth - 14, pageHeight - 10, { align: "right" });
+
+    doc.save("sales_report.pdf");
   };
 
   const exportToExcel = () => {
-    console.log("Exporting to Excel...");
-    setOpened(false);
+    const bodyData = sortedData.map((row) => ({
+      SKU: row.productSku,
+      ProductName: row.productName,
+      Quantity: row.quantity,
+      UnitPrice: row.unitPrice,
+      Subtotal: row.subtotal,
+      Warehouse: row.warehouse,
+      WarehouseRegion: row.warehouseRegion,
+      Date: row.date,
+      Retailer: row.retailer,
+    }));
+    bodyData.push({
+      SKU: "Total Price",
+      ProductName: formatNumber(
+        sortedData.reduce((sum, item) => {
+          return sum + item.subtotal;
+        }, 0)
+      ),
+      Quantity: "",
+      UnitPrice: "",
+      Subtotal: "",
+      Warehouse: "",
+      WarehouseRegion: "",
+      Date: "",
+      Retailer: "",
+    });
+    const worksheet = XLSX.utils.json_to_sheet(bodyData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales");
+    XLSX.writeFile(workbook, "sales_report.xlsx");
   };
+
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
@@ -363,33 +449,11 @@ const SalesReport = () => {
           >
             <thead>
               <tr style={{ backgroundColor: "#F1F1F1" }}>
-                <Th>
-                  <span className={classes.thh}> Sku </span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}> Product Name</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Price</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Quantity</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>SubTotal </span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Warehouse</span>
-                </Th>
-                <Th sortable={false}>
-                  <span className={classes.thh}>Warehouse Region</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Date</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Retailer</span>
-                </Th>
+                {headers.map((header) => (
+                  <Th key={header}>
+                    <span className={classes.thh}>{header}</span>
+                  </Th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -397,7 +461,7 @@ const SalesReport = () => {
                 rows
               ) : (
                 <tr>
-                  <td colSpan={10}>
+                  <td colSpan={9}>
                     <Text weight={500} align="center">
                       Nothing found
                     </Text>
@@ -406,6 +470,7 @@ const SalesReport = () => {
               )}
             </tbody>
           </Table>
+
           <Center mt="md">
             <Group spacing="xs" position="center">
               <Group spacing="sm">

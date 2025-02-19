@@ -28,7 +28,6 @@ import PaymentTypes from "pages/settings/payment_types";
 import SalesReport from "pages/report/salesReport";
 import RetailerReport from "pages/report/retailerReport";
 import PaymentReport from "pages/report/payment";
-import SalesPersonReport from "pages/report/salesPerson";
 const RoutesComp = () => {
   return (
     <Routes>
@@ -61,7 +60,6 @@ const RoutesComp = () => {
       <Route path="/sales-report" element={<SalesReport />} />
       <Route path="/retailer-report" element={<RetailerReport />} />
       <Route path="/payment-report" element={<PaymentReport />} />
-      <Route path="/sales-person-report" element={<SalesPersonReport/>} />
     </Routes>
   );
 };

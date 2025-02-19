@@ -19,6 +19,7 @@ import {
   Button,
   Tooltip,
   Modal,
+  Select,
 } from "@mantine/core";
 import { Edit, Trash } from "tabler-icons-react";
 import axios from "axios";
@@ -31,7 +32,7 @@ import { Plus, Search } from "tabler-icons-react";
 import { showNotification } from "@mantine/notifications";
 import { FiEdit, FiEye } from "react-icons/fi";
 
-import { API } from "utiles/url";
+import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
 import Controls from "components/controls/Controls";
 
 const useStyles = createStyles((theme) => ({
@@ -96,7 +97,6 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 
 const Feedbacks = () => {
   const { classes } = useStyles();
-  const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -109,12 +109,17 @@ const Feedbacks = () => {
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
-
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   useEffect(() => {
-    fetchData(activePage);
-  }, [activePage]);
+    fetchData(size);
+  }, []);
 
-  const fetchData = async (page) => {
+  const fetchData = async (size) => {
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -122,12 +127,15 @@ const Feedbacks = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/feedbacks?page=${page}`, config);
+      const response = await axios.get(
+        `${API}/feedbacks?page=${activePage}&first=${size}`,
+        config
+      );
       if (response.data) {
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -165,6 +173,7 @@ const Feedbacks = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
+    fetchData(size);
   };
 
   const handleSort = (field) => {
@@ -191,7 +200,7 @@ const Feedbacks = () => {
   };
 
   const deleteFeedback = async () => {
-    console.log("aaaa")
+    console.log("aaaa");
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -203,9 +212,9 @@ const Feedbacks = () => {
         `${API}/feedbacks/${deleteID}`,
         config
       );
-      console.log(response)
+      console.log(response);
       if (response) {
-        fetchData(activePage);
+        fetchData(size);
         setOpenedDelete(false);
         setDeleteID(null);
         showNotification({
@@ -237,20 +246,20 @@ const Feedbacks = () => {
         <td>{row.feedback_type?.name}</td>
         <td>{new Date(row.created_at).toLocaleDateString()}</td>
         <td>
-        <Controls.ActionButton
+          <Controls.ActionButton
             color="primary"
             title="View Detail"
-          //  onClick={() => handleDetail(element.feedbacks)}
+            //  onClick={() => handleDetail(element.feedbacks)}
           >
             <FiEye fontSize="medium" />
           </Controls.ActionButton>
-        <Controls.ActionButton
-              color="primary"
-              title="Delete"
-              onClick={() => handleDelete(`${row.id}`)}
-            >
-              <Trash size={17} />
-            </Controls.ActionButton>
+          <Controls.ActionButton
+            color="primary"
+            title="Delete"
+            onClick={() => handleDelete(`${row.id}`)}
+          >
+            <Trash size={17} />
+          </Controls.ActionButton>
         </td>
       </tr>
     </Fragment>
@@ -325,17 +334,29 @@ const Feedbacks = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
+
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
                 />
-              </Container>
-            </div>
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
           </Center>
         </ScrollArea>
         <Modal

@@ -97,7 +97,7 @@ export default function FeedbackTypes({}) {
       );
       console.log(response.data);
       if (response.data) {
-        fetchData();
+        fetchData(size);
         setOpenedDelete(false);
         setEditData(null);
         showNotification({
@@ -206,7 +206,7 @@ export default function FeedbackTypes({}) {
         }}
         position="right"
       >
-        <Add fetchData={fetchData} setOpened={setOpened} />
+        <Add fetchData={fetchData} size={size} setOpened={setOpened} />
       </Drawer>
       <Drawer
         opened={openedEdit}
