@@ -11,18 +11,17 @@ import {
   Center,
   Container,
   Pagination,
- 
+  Select,
 } from "@mantine/core";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-
+import { API, formatNumber, PAGE_SIZE_OPTIONS } from "utiles/url";
 import Controls from "components/controls/Controls";
-import { API, formatNumber } from "utiles/url";
-import Pusher from "pusher-js";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
-import PersonOffIcon from "@mui/icons-material/PersonOff";
+import { showNotification } from "@mantine/notifications";
+
 const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
@@ -122,16 +121,21 @@ const NewDriver = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState([]);
-  const [search, setSearch] = useState("");
+
   const [sortedData, setSortedData] = useState([]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   useEffect(() => {
-    fetchData(activePage);
-  }, [activePage]);
+    fetchData(size);
+  }, []);
 
-  const fetchData = async (page) => {
+  const fetchData = async (size) => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -141,19 +145,51 @@ const NewDriver = () => {
         },
       };
       const response = await axios.get(
-        `${API}/drivers/list/below_minimum_wallet_balance?page=${activePage}`,
+        `${API}/drivers/list/not_approved?page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
         setDrivers(response.data.data);
-        setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
+        setSortedData(response.data.data);
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
         setLoading(false);
       }
     } catch (error) {
       setLoading(false);
       console.error("Error fetching data:", error);
+    }
+  };
+  const handleApprove = async (driverId) => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("auth_token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.put(
+        `${API}/drivers/${driverId}/approve`,
+        {},
+        config
+      );
+      if (response.data) {
+        showNotification({
+          color: "green",
+          title: "Success",
+          message: `Driver Approved successfully`,
+        });
+        fetchData(size);
+      }
+    } catch (error) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `${error[0] ? error[0].message : "Driver Not Approved"}`,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -176,13 +212,14 @@ const NewDriver = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
+    fetchData(size);
   };
 
   const handleSort = (field) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
+    setSortedData(sortData(drivers, { sortBy: field, reversed }));
   };
 
   const filterData = (data, search) => {
@@ -206,24 +243,16 @@ const NewDriver = () => {
           <td>{row.name}</td>
           <td>{row.email}</td>
           <td>{row.phone}</td>
-          <td className={classes.cityColumn}>{row.region?.name?.en}</td>
           <td>{row.city}</td>
-          <td style={{ width: "10%" }}>
-            {row.vehicle?.vehicle_type?.title.en}
-          </td>
           <td>{formatNumber(row.wallet?.balance)}</td>
           <td>
             {" "}
             <Controls.ActionButton
               color="primary"
-              title={row.status ? "Approve" : "Activate"}
-            //  onClick={() => handleEditDriver(row)}
+              onClick={() => handleApprove(row.id)}
+              title="Approve"
             >
-                {row.status ? (
-                <PersonOffIcon size={17} />
-              ) : (
-                <HowToRegIcon size={17} />
-              )}
+              <HowToRegIcon size={17} />
             </Controls.ActionButton>
           </td>
         </tr>
@@ -261,21 +290,14 @@ const NewDriver = () => {
                 <Th sortable onSort={() => handleSort("phone")}>
                   <span className={classes.thh}> Phone</span>
                 </Th>
-                <Th sortable={false}>
-                  {" "}
-                  <span className={classes.thh}>Region</span>
-                </Th>
                 <Th sortable onSort={() => handleSort("email")}>
                   <span className={classes.thh}> City</span>
-                </Th>
-                <Th sortable={false}>
-                  <span className={classes.thh}>Vehicle Type</span>
                 </Th>
                 <Th sortable={false}>
                   <span className={classes.thh}>Balance</span>
                 </Th>
                 <Th sortable={false}>
-                  <span className={classes.thh}>Actions</span>
+                  <span className={classes.thh}>Action</span>
                 </Th>
               </tr>
             </thead>
@@ -293,17 +315,29 @@ const NewDriver = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
+
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
                 />
-              </Container>
-            </div>
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
           </Center>
         </ScrollArea>
       </Card>

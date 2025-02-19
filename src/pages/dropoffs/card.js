@@ -3,10 +3,15 @@ import { Badge, Group, Button } from "@mantine/core";
 import axios from "axios";
 import { API } from "utiles/url";
 
-export default function StatsGrid({ onCardClick, handelSearch, clearFilter,selectedStatus }) {
+export default function StatsGrid({
+  onCardClick,
+  handelSearch,
+  clearFilter,
+  selectedStatus,
+}) {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
-//  const [selectedStatus, setSelectedStatus] = useState(null);
+  //  const [selectedStatus, setSelectedStatus] = useState(null);
 
   useEffect(() => {
     fetchDeposit();
@@ -44,21 +49,22 @@ export default function StatsGrid({ onCardClick, handelSearch, clearFilter,selec
   const getButtonStyles = (status) => ({
     root: {
       fontWeight: 600,
-      backgroundColor: selectedStatus === status ? '#666666' : 'transparent',
-      color: selectedStatus === status ? 'white' : '#666666',
-      border: `1px solid ${selectedStatus === status ? '#666666' : '#ddd'}`,
+      backgroundColor: selectedStatus === status ? "#FF6A00" : "transparent",
+      color: selectedStatus === status ? "white" : "rgb(20, 61, 89)",
+      border: `1px solid ${selectedStatus === status ? "#FF6A00" : "#ddd"}`,
       width: "120px",
       padding: "8px 12px",
-      transition: 'all 0.2s ease',
-      '&:hover': {
-        backgroundColor: selectedStatus === status ? '#666666' : '#f5f5f5',
+      transition: "all 0.2s ease",
+      "&:hover": {
+        color: "#FFFFFF",
+        backgroundColor: "#FF6A00",
       },
     },
   });
 
   const getBadgeStyles = (status, color) => ({
     backgroundColor: selectedStatus === status ? 'white' : color,
-    color: selectedStatus === status ? '#666666' : 'white',
+    color: selectedStatus === status ? '#FF6A00' : 'white',
     marginLeft: 8,
   });
 
@@ -71,10 +77,7 @@ export default function StatsGrid({ onCardClick, handelSearch, clearFilter,selec
         styles={getButtonStyles("PENDING")}
       >
         Pending
-        <Badge
-          size="sm"
-          style={getBadgeStyles("PENDING", "#FF6A00")}
-        >
+        <Badge size="sm" style={getBadgeStyles("PENDING", "#FF6A00")}>
           {data?.PENDING > 0 ? data?.PENDING : 0}
         </Badge>
       </Button>
@@ -86,10 +89,7 @@ export default function StatsGrid({ onCardClick, handelSearch, clearFilter,selec
         styles={getButtonStyles("STARTED")}
       >
         Started
-        <Badge
-          size="sm"
-          style={getBadgeStyles("STARTED", "#FF6A00")}
-        >
+        <Badge size="sm" style={getBadgeStyles("STARTED", "#FF6A00")}>
           {data?.STARTED > 0 ? data?.STARTED : 0}
         </Badge>
       </Button>
@@ -101,10 +101,7 @@ export default function StatsGrid({ onCardClick, handelSearch, clearFilter,selec
         styles={getButtonStyles("FINISHED")}
       >
         Finished
-        <Badge
-          size="sm"
-          style={getBadgeStyles("FINISHED", "#FF6A00")}
-        >
+        <Badge size="sm" style={getBadgeStyles("FINISHED", "#FF6A00")}>
           {data?.FINISHED > 0 ? data?.FINISHED : 0}
         </Badge>
       </Button>
@@ -116,10 +113,7 @@ export default function StatsGrid({ onCardClick, handelSearch, clearFilter,selec
         styles={getButtonStyles("DRIVER_ACCEPTED")}
       >
         Accepted
-        <Badge
-          size="sm"
-          style={getBadgeStyles("DRIVER_ACCEPTED", "#FF6A00")}
-        >
+        <Badge size="sm" style={getBadgeStyles("DRIVER_ACCEPTED", "#FF6A00")}>
           {data?.DRIVER_ACCEPTED > 0 ? data?.DRIVER_ACCEPTED : 0}
         </Badge>
       </Button>
@@ -131,13 +125,13 @@ export default function StatsGrid({ onCardClick, handelSearch, clearFilter,selec
         styles={{
           root: {
             fontWeight: 600,
-            backgroundColor: selectedStatus === null ? '#666666' : '#808080',
-            color: 'white',
+            backgroundColor: selectedStatus === null ? "#666666" : "#808080",
+            color: "white",
             width: "80px",
             padding: "8px 12px",
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              backgroundColor: selectedStatus === null ? '#666666' : '#909090',
+            transition: "all 0.2s ease",
+            "&:hover": {
+              backgroundColor: selectedStatus === null ? "#666666" : "#909090",
             },
           },
         }}

@@ -39,27 +39,28 @@ const StatusDropdown = ({
     onCardClick(status);
     handelSearch(null);
   };
-
   const getButtonStyles = (status) => ({
     root: {
       fontWeight: 600,
-      backgroundColor: selectedStatus === status ? "#666666" : "transparent",
-      color: selectedStatus === status ? "white" : "#666666",
-      border: `1px solid ${selectedStatus === status ? "#666666" : "#ddd"}`,
+      backgroundColor: selectedStatus === status ? "#FF6A00" : "transparent",
+      color: selectedStatus === status ? "white" : "rgb(20, 61, 89)",
+      border: `1px solid ${selectedStatus === status ? "#FF6A00" : "#ddd"}`,
       width: "120px",
       padding: "8px 12px",
       transition: "all 0.2s ease",
       "&:hover": {
-        backgroundColor: selectedStatus === status ? "#666666" : "#f5f5f5",
+        color: "#FFFFFF",
+        backgroundColor: "#FF6A00",
       },
     },
   });
 
   const getBadgeStyles = (status, color) => ({
-    backgroundColor: selectedStatus === status ? "white" : color,
-    color: selectedStatus === status ? "#666666" : "white",
-    marginLeft: 6,
+    backgroundColor: selectedStatus === status ? 'white' : color,
+    color: selectedStatus === status ? '#FF6A00' : 'white',
+    marginLeft: 8,
   });
+
 
   return (
     <Group spacing="sm" position="left" style={{ paddingBottom: 20 }}>

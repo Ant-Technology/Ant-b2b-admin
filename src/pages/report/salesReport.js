@@ -20,24 +20,16 @@ import {
   Button,
   Tooltip,
   Modal,
+  Menu,
+  MenuItem,
   Select,
 } from "@mantine/core";
-import { FiEdit, FiEye } from "react-icons/fi";
-import EditIcon from "@mui/icons-material/Edit";
-import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
+import { IconDownload } from "@tabler/icons-react";
 import axios from "axios";
-import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { Plus, Search } from "tabler-icons-react";
-import { showNotification } from "@mantine/notifications";
-import SalesDetailModal from "components/Sales/SalesDetailModal";
-import { SalesEditModal } from "components/Sales/SalesUpdateModal";
-import { SalesAddModal } from "components/Sales/SalesAddModal";
 import { API, formatNumber, PAGE_SIZE_OPTIONS } from "utiles/url";
-import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
 import ProductFilter from "./product";
 import RetailerFilter from "./retailer";
@@ -214,6 +206,17 @@ const SalesReport = () => {
       fetchData(size);
     }
   };
+  const [opened, setOpened] = useState(false);
+
+  const exportToPDF = () => {
+    console.log("Exporting to PDF...");
+    setOpened(false);
+  };
+
+  const exportToExcel = () => {
+    console.log("Exporting to Excel...");
+    setOpened(false);
+  };
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
@@ -287,42 +290,68 @@ const SalesReport = () => {
             />
           </div>
         </SimpleGrid>
-        {(timeRange ||
-          selectedEndDate ||
-          selectedStartDate ||
-          warehouse ||
-          product ||
-          retailer) && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: "10px",
-            }}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "10px",
+            gap: "10px", // Add space between buttons
+          }}
+        >
+          {(timeRange ||
+            selectedEndDate ||
+            selectedStartDate ||
+            warehouse ||
+            product ||
+            retailer) && (
+            <>
+              <Button
+                onClick={handleReset}
+                style={{
+                  width: "80px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleFilter}
+                style={{
+                  width: "80px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Filter
+              </Button>
+            </>
+          )}
+
+          <Menu
+            shadow="md"
+            trigger="hover" // Change to "hover" to open on hover
+            openDelay={100}
+            closeDelay={400}
           >
-            <Button
-              onClick={handleReset}
-              style={{
-                width: "80px",
-                marginRight: "10px",
-                backgroundColor: "#FF6A00",
-                color: "#FFFFFF",
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleFilter}
-              style={{
-                width: "80px",
-                backgroundColor: "#FF6A00",
-                color: "#FFFFFF",
-              }}
-            >
-              Filter
-            </Button>
-          </div>
-        )}
+            <Menu.Target>
+              <Button
+                style={{
+                  width: "80px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Export
+              </Button>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item onClick={exportToPDF}>PDF</Menu.Item>
+              <Menu.Item onClick={exportToExcel}>Excel</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </div>
       </div>
       <Card shadow="sm" p="lg">
         <ScrollArea>

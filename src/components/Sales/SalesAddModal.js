@@ -83,7 +83,7 @@ export const SalesAddModal = ({
           message: "Sales Created Successfully",
         });
         setLoading(false);
-        fetchData(1);
+        fetchData(activePage);
         setOpened(false);
       }
     } catch (error) {

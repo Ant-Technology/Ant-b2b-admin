@@ -21,6 +21,7 @@ import {
   Button,
   Tooltip,
   Modal,
+  Select,
 } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
 import EditIcon from "@mui/icons-material/Edit";
@@ -37,7 +38,7 @@ import { showNotification } from "@mantine/notifications";
 import SalesDetailModal from "components/Sales/SalesDetailModal";
 import { SalesEditModal } from "components/Sales/SalesUpdateModal";
 import { SalesAddModal } from "components/Sales/SalesAddModal";
-import { API } from "utiles/url";
+import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
 import Controls from "components/controls/Controls";
 
 const useStyles = createStyles((theme) => ({
@@ -129,7 +130,6 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 
 const Drivers = () => {
   const { classes } = useStyles();
-  const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -147,12 +147,17 @@ const Drivers = () => {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
-
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   useEffect(() => {
-    fetchData(activePage);
-  }, [activePage]);
+    fetchData(size);
+  }, []);
 
-  const fetchData = async (page) => {
+  const fetchData = async (size) => {
     setLoading(true)
     try {
       let token = localStorage.getItem("auth_token");
@@ -161,13 +166,13 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/sales?page=${page}`, config);
+      const response = await axios.get(`${API}/sales?page=${activePage}&first=${size}`, config);
       if (response.data) {
         setLoading(false)
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
       }
     } catch (error) {
       setLoading(false)
@@ -184,13 +189,13 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/sales?search=${search}&page=${activePage}`, config);
+      const response = await axios.get(`${API}/sales?search=${search}&page=${activePage}&first=${size}`, config);
       if (response.data) {
         setLoading(false)
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
       }
     } catch (error) {
       setLoading(false)
@@ -217,6 +222,7 @@ const Drivers = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
+    fetchData(size)
   };
 
   const handleSort = (field) => {
@@ -261,7 +267,7 @@ const Drivers = () => {
       };
       const response = await axios.delete(`${API}/sales/${deleteID}`, config);
       if (response.data) {
-        fetchData(activePage);
+        fetchData(size);
         setOpenedDelete(false);
         setDeleteID(null);
         showNotification({
@@ -346,7 +352,7 @@ const Drivers = () => {
         size="80%"
       >
         <SalesEditModal
-          activePage={activePage}
+          activePage={size}
           fetchData={fetchData}
           editRow={editRow}
           setOpenedEdit={setOpenedEdit}
@@ -364,7 +370,7 @@ const Drivers = () => {
         <SalesAddModal
           total={total}
           setTotal={setTotal}
-          activePage={activePage}
+          activePage={size}
           setActivePage={setActivePage}
           setOpened={setOpened}
           fetchData={fetchData}
@@ -417,7 +423,7 @@ const Drivers = () => {
                     <UnstyledButton
                       onClick={() => {
                         setSearch(""); // Clear the search input
-                        fetchData(activePage); // Fetch all drivers again
+                        fetchData(size); // Fetch all drivers again
                       }}
                       style={{ padding: 5 }} // Adjust padding for better click area
                     >
@@ -474,18 +480,30 @@ const Drivers = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
-                />
-              </Container>
-            </div>
-          </Center>
+         
+                   <Center mt="md">
+                     <Group spacing="xs" position="center">
+                       <Group spacing="sm">
+                         <Text size="sm" mt="sm">
+                           <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                             Show per page:
+                           </span>
+                         </Text>
+                         <Select
+                           value={size}
+                           onChange={handlePageSizeChange}
+                           data={PAGE_SIZE_OPTIONS}
+                           style={{ width: 80, height: 40 }}
+                         />
+                       </Group>
+                       <Pagination
+                         color="blue"
+                         page={activePage}
+                         onChange={handleChange}
+                         total={totalPages}
+                       />
+                     </Group>
+                   </Center>
         </ScrollArea>
         <Modal
           opened={openedDelete}

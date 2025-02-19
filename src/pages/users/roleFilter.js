@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Select, LoadingOverlay } from "@mantine/core";
-import { useQuery } from "@apollo/client";
-import { NON_PAGINATED_CATEGORIES } from "apollo/queries";
-import { useForm } from "@mantine/form";
 import axios from "axios";
 import { API } from "utiles/url";
+import { useForm } from "@mantine/form";
 
 export default function RoleFilter({ onCardClick, role }) {
   const [dropDownData, setDropDownData] = useState([]);
@@ -13,6 +11,7 @@ export default function RoleFilter({ onCardClick, role }) {
       role: null,
     },
   });
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -29,7 +28,7 @@ export default function RoleFilter({ onCardClick, role }) {
       if (response.data) {
         const roleArr = response.data.roles.map((item) => ({
           label: item.name,
-          value: String(item.id),
+          value: item.name,
         }));
         setDropDownData(roleArr);
       }
@@ -40,7 +39,6 @@ export default function RoleFilter({ onCardClick, role }) {
 
   const handleRoleSelect = (value) => {
     form.setFieldValue("role", value);
-    form.setValues({ role: value });
     if (onCardClick) {
       onCardClick(value);
     }
@@ -50,10 +48,11 @@ export default function RoleFilter({ onCardClick, role }) {
     <Select
       placeholder="Filter By Role"
       data={dropDownData}
-      value={role}
+      value={form.values.role || role}
       onChange={(value) => {
         handleRoleSelect(value);
       }}
+      onClear={() => handleRoleSelect(null)} // Handle clear action
       clearable
       searchable
       withinPortal

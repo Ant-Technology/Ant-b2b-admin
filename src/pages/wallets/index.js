@@ -18,6 +18,7 @@ import {
   Pagination,
   Button,
   Tooltip,
+  Select,
 } from "@mantine/core";
 import { Edit, Trash } from "tabler-icons-react";
 import { FiEdit, FiEye } from "react-icons/fi";
@@ -30,7 +31,7 @@ import { ManualGearbox } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { Plus, Search } from "tabler-icons-react";
 import Controls from "components/controls/Controls";
-import { API } from "utiles/url";
+import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
 import { X } from "tabler-icons-react"; // Import a close icon
 
 const useStyles = createStyles((theme) => ({
@@ -122,11 +123,15 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 
 const Wallets = () => {
   const { classes } = useStyles();
-  const [size] = useState(10);
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [Wallets, setWallets] = useState([]);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -138,10 +143,10 @@ const Wallets = () => {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
   useEffect(() => {
-    fetchData(activePage);
-  }, [activePage]);
+    fetchData(size);
+  }, []);
 
-  const fetchData = async (page) => {
+  const fetchData = async (size) => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -151,14 +156,14 @@ const Wallets = () => {
         },
       };
       const response = await axios.get(
-        `${API}/deposit-slips?page=${page}`,
+        `${API}/deposit-slips?page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
         setWallets(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
         setLoading(false);
       }
     } catch (error) {
@@ -177,14 +182,14 @@ const Wallets = () => {
         },
       };
       const response = await axios.get(
-        `${API}/deposit-slips?search=${search}& page=${activePage}`,
+        `${API}/deposit-slips?search=${search}& page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
         setWallets(response.data.data);
         setSortedData(response.data.data);
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
         setLoading(false);
       }
     } catch (error) {
@@ -218,6 +223,7 @@ const Wallets = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
+    fetchData(size);
   };
 
   const handleSort = (field) => {
@@ -316,7 +322,7 @@ const Wallets = () => {
           total={total}
           fetchData={fetchData}
           setTotal={setTotal}
-          activePage={activePage}
+          activePage={size}
           setActivePage={setActivePage}
           setOpenedEdit={setOpenedEdit}
           editId={editId}
@@ -340,7 +346,7 @@ const Wallets = () => {
                     <UnstyledButton
                       onClick={() => {
                         setSearch(""); // Clear the search input
-                        fetchData(activePage); // Fetch all drivers again
+                        fetchData(size); // Fetch all drivers again
                       }}
                       style={{ padding: 5 }} // Adjust padding for better click area
                     >
@@ -405,17 +411,29 @@ const Wallets = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
+
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
                 />
-              </Container>
-            </div>
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
           </Center>
         </ScrollArea>
       </Card>

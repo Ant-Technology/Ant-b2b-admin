@@ -21,6 +21,7 @@ import {
   Tooltip,
   Modal,
   Select,
+  Menu,
 } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
 import EditIcon from "@mui/icons-material/Edit";
@@ -189,12 +190,7 @@ const RetailerReport = () => {
     fetchData(size);
   };
   const handleChange = (page) => {
-    if (
-      timeRange ||
-      selectedEndDate ||
-      selectedStartDate ||
-      status
-    ) {
+    if (timeRange || selectedEndDate || selectedStartDate || status) {
       setActivePage(page);
       handleFilter();
     } else {
@@ -206,6 +202,13 @@ const RetailerReport = () => {
   const handleDetail = (item) => {
     setOpenedDetail(true);
     setData(item);
+  };
+  const exportToPDF = () => {
+    console.log("Exporting to PDF...");
+  };
+
+  const exportToExcel = () => {
+    console.log("Exporting to Excel...");
   };
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
@@ -290,40 +293,64 @@ const RetailerReport = () => {
             />
           </div>
         </SimpleGrid>
-        {(timeRange ||
-          selectedEndDate ||
-          selectedStartDate ||
-          status) && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginTop: "10px",
-            }}
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "10px",
+            gap: "10px", // Add space between buttons
+          }}
+        >
+          {(timeRange || selectedEndDate || selectedStartDate || status) && (
+            <>
+              <Button
+                onClick={handleReset}
+                style={{
+                  width: "80px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleFilter}
+                style={{
+                  width: "80px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Filter
+              </Button>
+            </>
+          )}
+
+          <Menu
+            shadow="md"
+            trigger="hover" // Change to "hover" to open on hover
+            openDelay={100}
+            closeDelay={400}
           >
-            <Button
-              onClick={handleReset}
-              style={{
-                width: "80px",
-                marginRight: "10px",
-                backgroundColor: "#FF6A00",
-                color: "#FFFFFF",
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleFilter}
-              style={{
-                width: "80px",
-                backgroundColor: "#FF6A00",
-                color: "#FFFFFF",
-              }}
-            >
-              Filter
-            </Button>
-          </div>
-        )}
+            <Menu.Target>
+              <Button
+                style={{
+                  width: "80px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Export
+              </Button>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item onClick={exportToPDF}>PDF</Menu.Item>
+              <Menu.Item onClick={exportToExcel}>Excel</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </div>
       </div>
 
       <Drawer

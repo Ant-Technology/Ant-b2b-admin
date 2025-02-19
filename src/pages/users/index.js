@@ -45,6 +45,7 @@ const Users = () => {
       first: parseInt(size),
       page: activePage,
       search: searchValue,
+      role:roleId
     },
   });
 
@@ -385,7 +386,7 @@ const Users = () => {
             data={data ? data.users.data : []}
             size={size}
             filterData={({ onCardClick }) => (
-              <RoleFilter category={roleId} onCardClick={setRoleId} />
+              <RoleFilter role={roleId} onCardClick={setRoleId} />
             )}
             handlePageSizeChange={handlePageSizeChange}
           />
