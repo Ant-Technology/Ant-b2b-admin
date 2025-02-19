@@ -20,6 +20,7 @@ import {
   Tooltip,
   Modal,
   Tabs,
+  Select,
 } from "@mantine/core";
 import { Edit, Trash } from "tabler-icons-react";
 import axios from "axios";
@@ -37,7 +38,7 @@ import { DEL_STOCK } from "apollo/mutuations";
 import StockAddModal from "components/Stock/StockAddModal";
 import ManageStock from "components/Stock/ManageStock";
 import Controls from "components/controls/Controls";
-import { API } from "utiles/url";
+import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
 import StockDetailModal from "components/Stock/StockDetail";
 import { FiEdit, FiEye } from "react-icons/fi";
 import { X } from "tabler-icons-react"; // Import a close icon
@@ -133,7 +134,6 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 
 const Drivers = () => {
   const { classes } = useStyles();
-  const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -151,12 +151,17 @@ const Drivers = () => {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
-
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   useEffect(() => {
-    fetchData();
+    fetchData(size);
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (size) => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -166,7 +171,7 @@ const Drivers = () => {
         },
       };
       const response = await axios.get(
-        `${API}/stocks?page=${activePage}`,
+        `${API}/stocks?page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
@@ -174,7 +179,7 @@ const Drivers = () => {
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
       }
     } catch (error) {
       setLoading(false);
@@ -192,7 +197,7 @@ const Drivers = () => {
         },
       };
       const response = await axios.get(
-        `${API}/stocks?search=${search}&page=${activePage}`,
+        `${API}/stocks?search=${search}&page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
@@ -200,7 +205,7 @@ const Drivers = () => {
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
       }
     } catch (error) {
       setLoading(false);
@@ -227,6 +232,7 @@ const Drivers = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
+    fetchData(size);
   };
 
   const handleSort = (field) => {
@@ -267,7 +273,7 @@ const Drivers = () => {
       variables: { id: deleteID },
 
       onCompleted(data) {
-        fetchData(activePage);
+        fetchData(size);
         setOpenedDelete(false);
         setDeleteID(null);
         showNotification({
@@ -337,7 +343,24 @@ const Drivers = () => {
       loader={customLoader}
     />
   ) : (
-    <Tabs color="#FF6A00" value={activeTab} onTabChange={handleTabChange}>
+    <Tabs
+      color="#FF6A00"
+      value={activeTab}
+      styles={{
+        tabList: {
+          borderBottom: `2px solid #FF6A00`,
+        },
+        tab: {
+          "&[data-active]": {
+            borderColor: "#FF6A00",
+          },
+          "&:hover": {
+            borderColor: "#FF6A00",
+          },
+        },
+      }}
+      onTabChange={handleTabChange}
+    >
       <Tabs.List>
         <Tabs.List>
           <Tabs.Tab value="first">
@@ -414,6 +437,7 @@ const Drivers = () => {
             >
               <StockDetailModal
                 updateData={fetchData}
+                size={size}
                 Id={editId}
                 setOpenedDetail={setOpenedDetail}
               />
@@ -445,7 +469,7 @@ const Drivers = () => {
                           <UnstyledButton
                             onClick={() => {
                               setSearch(""); // Clear the search input
-                              fetchData(activePage); // Fetch all drivers again
+                              fetchData(size); // Fetch all drivers again
                             }}
                             style={{ padding: 5 }} // Adjust padding for better click area
                           >
@@ -509,17 +533,31 @@ const Drivers = () => {
                     )}
                   </tbody>
                 </Table>
-                <Center>
-                  <div style={{ paddingTop: "12px" }}>
-                    <Container>
-                      <Pagination
-                        color="blue"
-                        page={activePage}
-                        onChange={handleChange}
-                        total={totalPages}
+
+                <Center mt="md">
+                  <Group spacing="xs" position="center">
+                    <Group spacing="sm">
+                      <Text size="sm" mt="sm">
+                        <span
+                          style={{ color: "#FF6A00", marginBottom: "10px" }}
+                        >
+                          Show per page:
+                        </span>
+                      </Text>
+                      <Select
+                        value={size}
+                        onChange={handlePageSizeChange}
+                        data={PAGE_SIZE_OPTIONS}
+                        style={{ width: 80, height: 40 }}
                       />
-                    </Container>
-                  </div>
+                    </Group>
+                    <Pagination
+                      color="blue"
+                      page={activePage}
+                      onChange={handleChange}
+                      total={totalPages}
+                    />
+                  </Group>
                 </Center>
               </ScrollArea>
               <Modal

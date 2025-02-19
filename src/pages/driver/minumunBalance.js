@@ -1,4 +1,3 @@
-
 import {
   Card,
   LoadingOverlay,
@@ -11,13 +10,14 @@ import {
   Text,
   Center,
   Container,
-  Pagination
+  Pagination,
+  Select,
 } from "@mantine/core";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { API, formatNumber } from "utiles/url";
+import { API, formatNumber, PAGE_SIZE_OPTIONS } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -122,12 +122,17 @@ const MinmumBalance = () => {
   const [sortedData, setSortedData] = useState([]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   useEffect(() => {
-    fetchData(activePage);
-  }, [activePage]);
+    fetchData(size);
+  }, []);
 
-  const fetchData = async (page) => {
+  const fetchData = async (size) => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -137,14 +142,14 @@ const MinmumBalance = () => {
         },
       };
       const response = await axios.get(
-        `${API}/drivers/list/below_minimum_wallet_balance?page=${activePage}`,
+        `${API}/drivers/list/below_minimum_wallet_balance?page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
         setDrivers(response.data.data);
-        setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
+        setSortedData(response.data.data);
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
         setLoading(false);
       }
     } catch (error) {
@@ -172,6 +177,7 @@ const MinmumBalance = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
+    fetchData(size);
   };
 
   const handleSort = (field) => {
@@ -272,17 +278,29 @@ const MinmumBalance = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
+
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
                 />
-              </Container>
-            </div>
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
           </Center>
         </ScrollArea>
       </Card>

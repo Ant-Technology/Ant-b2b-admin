@@ -10,8 +10,17 @@ import {
   Stack,
   Select,
   Group,
+  Text,
 } from "@mantine/core";
-import { ManualGearbox, DotsCircleHorizontal,CircleX } from "tabler-icons-react";
+import {
+  ManualGearbox,
+  DotsCircleHorizontal,
+  CircleX,
+  Category,
+  Receipt,
+  CurrencyDollar,
+  CreditCard,
+} from "tabler-icons-react";
 import { useForm } from "@mantine/form";
 import { useQuery, useMutation } from "@apollo/client";
 import { showNotification } from "@mantine/notifications";
@@ -19,7 +28,8 @@ import { customLoader } from "components/utilities/loader";
 import { GET_ORDER, GET_SHIPMENTS } from "apollo/queries";
 import { SHIP_ITEM } from "apollo/mutuations";
 import axios from "axios";
-import { API } from "utiles/url";
+import { API, formatNumber } from "utiles/url";
+import { Box } from "@mui/material";
 
 function ManageOrderModal({ editId }) {
   // state variables
@@ -66,6 +76,7 @@ function ManageOrderModal({ editId }) {
   const { loading: orderLoading, refetch } = useQuery(GET_ORDER, {
     variables: { id: editId },
     onCompleted(data) {
+      console.log(data);
       let order = data.order;
       setOrder(order);
     },
@@ -265,6 +276,72 @@ function ManageOrderModal({ editId }) {
               )}
             </tbody>
           </Table>
+          <Stack spacing="sm">
+            <Group>
+              <Group spacing="xs">
+                <CurrencyDollar size={20} color="#4dabf7" />
+                <Text size="sm" color="dimmed">
+                  Total Amount:
+                </Text>
+              </Group>
+              <Text weight={500} size="md" style={{ marginLeft: "5px" }}>
+                {" "}
+                {/* Adjusted margin */}
+                {formatNumber(order?.order_transaction?.transaction?.amount) ||
+                  "N/A"}
+              </Text>
+            </Group>
+
+            <Group>
+              <Group spacing="xs">
+                <CreditCard size={20} color="#4dabf7" />
+                <Text size="sm" color="dimmed">
+                  Payment Method:
+                </Text>
+              </Group>
+              <Text weight={500} size="md" style={{ marginLeft: "5px" }}>
+                {" "}
+                {/* Adjusted margin */}
+                {order?.order_transaction?.transaction?.payment_method || "N/A"}
+              </Text>
+            </Group>
+
+            <Group>
+              <Group spacing="xs">
+                <Receipt size={20} color="#4dabf7" />
+                <Text size="sm" color="dimmed">
+                  Transaction Reference:
+                </Text>
+              </Group>
+              <Text
+                weight={500}
+                size="md"
+                sx={{
+                  maxWidth: 200,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  marginLeft: "5px", // Adjusted margin
+                }}
+              >
+                {order?.order_transaction?.transaction?.txn_ref || "N/A"}
+              </Text>
+            </Group>
+
+            <Group>
+              <Group spacing="sm">
+                <Category size={20} color="#4dabf7" />
+                <Text size="sm" color="dimmed">
+                  Transaction Type:
+                </Text>
+              </Group>
+              <Text weight={500} size="md">
+                {" "}
+                {/* Adjusted margin */}
+                {order?.order_transaction?.transaction?.type || "N/A"}
+              </Text>
+            </Group>
+          </Stack>
           <Modal
             opened={openedCancel}
             onClose={() => setOpenedCancel(false)}
@@ -273,7 +350,11 @@ function ManageOrderModal({ editId }) {
           >
             <p>Are you sure do you want to Cancel this Item?</p>
             <Group position="right">
-              <Button onClick={() => cancelItem()} color="blue" variant="outline">
+              <Button
+                onClick={() => cancelItem()}
+                color="blue"
+                variant="outline"
+              >
                 Yes
               </Button>
             </Group>

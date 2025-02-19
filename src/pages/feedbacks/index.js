@@ -174,7 +174,6 @@ const Feedbacks = () => {
     setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
   };
 
-  const [isHovered, setIsHovered] = useState(false);
   const filterData = (data, search) => {
     const query = search.toLowerCase().trim();
     return data.filter((item) =>
@@ -191,7 +190,8 @@ const Feedbacks = () => {
     setDeleteID(id);
   };
 
-  const deleteDriver = async () => {
+  const deleteFeedback = async () => {
+    console.log("aaaa")
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -200,10 +200,11 @@ const Feedbacks = () => {
         },
       };
       const response = await axios.delete(
-        `${API}/drivers/${deleteID}`,
+        `${API}/feedbacks/${deleteID}`,
         config
       );
-      if (response.data) {
+      console.log(response)
+      if (response) {
         fetchData(activePage);
         setOpenedDelete(false);
         setDeleteID(null);
@@ -246,7 +247,7 @@ const Feedbacks = () => {
         <Controls.ActionButton
               color="primary"
               title="Delete"
-             // onClick={() => handleDelete(`${row.id}`)}
+              onClick={() => handleDelete(`${row.id}`)}
             >
               <Trash size={17} />
             </Controls.ActionButton>
@@ -337,6 +338,19 @@ const Feedbacks = () => {
             </div>
           </Center>
         </ScrollArea>
+        <Modal
+          opened={openedDelete}
+          onClose={() => setOpenedDelete(false)}
+          title="Warning"
+          centered
+        >
+          <p>Are you sure do you want to delete this data?</p>
+          <Group position="right">
+            <Button onClick={() => deleteFeedback()} color="red">
+              Delete
+            </Button>
+          </Group>
+        </Modal>
       </Card>
     </div>
   );

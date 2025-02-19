@@ -21,6 +21,7 @@ import {
   Tooltip,
   Modal,
   Tabs,
+  Select,
 } from "@mantine/core";
 import { Api, Edit, Trash } from "tabler-icons-react";
 import { FiEdit, FiEye } from "react-icons/fi";
@@ -35,7 +36,7 @@ import DriverDetailModal from "components/Driver/DriverDetail";
 import { DriverEditModal } from "components/Driver/DriverEditModal";
 import { DriverAddModal } from "components/Driver/DriverAddModal";
 import Controls from "components/controls/Controls";
-import { API, formatNumber } from "utiles/url";
+import { API, formatNumber, PAGE_SIZE_OPTIONS } from "utiles/url";
 import MapView from "./mapView";
 import { Box } from "@mui/material";
 import Demo from "./activeDrivers";
@@ -137,7 +138,12 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 
 const Drivers = () => {
   const { classes } = useStyles();
-  const [size] = useState(10);
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -159,8 +165,8 @@ const Drivers = () => {
   const [openedDelete, setOpenedDelete] = useState(false);
 
   useEffect(() => {
-    fetchData(activePage);
-  }, [activePage]);
+    fetchData(size);
+  }, []);
   useEffect(() => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
@@ -176,7 +182,7 @@ const Drivers = () => {
     };
   }, []);
 
-  const fetchData = async (page) => {
+  const fetchData = async (size) => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -185,12 +191,15 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/drivers?page=${page}`, config);
+      const response = await axios.get(
+        `${API}/drivers?page=${activePage}&first=${size}`,
+        config
+      );
       if (response.data) {
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
         setLoading(false);
       }
     } catch (error) {
@@ -209,14 +218,14 @@ const Drivers = () => {
         },
       };
       const response = await axios.get(
-        `${API}/drivers?search=${search}&page=${activePage}`,
+        `${API}/drivers?search=${search}&page=${activePage}&first=${size}}`,
         config
       );
       if (response.data) {
         setDrivers(response.data.data);
         setSortedData(response.data.data);
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
         setLoading(false);
       }
     } catch (error) {
@@ -244,6 +253,7 @@ const Drivers = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
+    fetchData(size);
   };
 
   const handleSort = (field) => {
@@ -288,7 +298,7 @@ const Drivers = () => {
       };
       const response = await axios.delete(`${API}/drivers/${deleteID}`, config);
       if (response.data) {
-        fetchData(activePage);
+        fetchData(size);
         setOpenedDelete(false);
         setDeleteID(null);
         showNotification({
@@ -380,7 +390,24 @@ const Drivers = () => {
       loader={customLoader}
     />
   ) : (
-    <Tabs color="#FF6A00" value={activeTab} onTabChange={handleTabChange}>
+    <Tabs
+      color="#FF6A00"
+      value={activeTab}
+      styles={{
+        tabList: {
+          borderBottom: `2px solid #FF6A00`,
+        },
+        tab: {
+          '&[data-active]': {
+            borderColor: '#FF6A00',
+          },
+          '&:hover': {
+            borderColor: '#FF6A00',
+          },
+        },
+      }}
+      onTabChange={handleTabChange}
+    >
       <Tabs.List>
         <Tabs.Tab value="first">
           <span style={{ color: "#666666", fontWeight: "bold" }}>
@@ -391,7 +418,6 @@ const Drivers = () => {
           <span
             style={{
               color: "#666666",
-            //  backgroundColor: "#F1F1F1",
               fontWeight: "bold",
             }}
           >
@@ -458,7 +484,7 @@ const Drivers = () => {
             size="80%"
           >
             <DriverEditModal
-              activePage={activePage}
+              activePage={size}
               fetchData={fetchData}
               editRow={editRow}
               setOpenedEdit={setOpenedEdit}
@@ -476,7 +502,7 @@ const Drivers = () => {
             <DriverAddModal
               total={total}
               setTotal={setTotal}
-              activePage={activePage}
+              activePage={size}
               setActivePage={setActivePage}
               setOpened={setOpened}
               fetchData={fetchData}
@@ -529,11 +555,11 @@ const Drivers = () => {
                     onChange={(event) => setSearch(event.currentTarget.value)}
                     className={classes.searchInput}
                     rightSection={
-                      search && ( // Show clear icon only if there's text in the input
+                      search && (
                         <UnstyledButton
                           onClick={() => {
-                            setSearch(""); // Clear the search input
-                            fetchData(activePage); // Fetch all drivers again
+                            setSearch("");
+                            fetchData(size); // Fetch all drivers again
                           }}
                           style={{ padding: 5 }} // Adjust padding for better click area
                         >
@@ -603,17 +629,29 @@ const Drivers = () => {
                   )}
                 </tbody>
               </Table>
-              <Center>
-                <div style={{ paddingTop: "12px" }}>
-                  <Container>
-                    <Pagination
-                      color="blue"
-                      page={activePage}
-                      onChange={handleChange}
-                      total={totalPages}
+
+              <Center mt="md">
+                <Group spacing="xs" position="center">
+                  <Group spacing="sm">
+                    <Text size="sm" mt="sm">
+                      <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                        Show per page:
+                      </span>
+                    </Text>
+                    <Select
+                      value={size}
+                      onChange={handlePageSizeChange}
+                      data={PAGE_SIZE_OPTIONS}
+                      style={{ width: 80, height: 40 }}
                     />
-                  </Container>
-                </div>
+                  </Group>
+                  <Pagination
+                    color="blue"
+                    page={activePage}
+                    onChange={handleChange}
+                    total={totalPages}
+                  />
+                </Group>
               </Center>
             </ScrollArea>
             <Modal

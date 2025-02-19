@@ -680,6 +680,15 @@ export const GET_ORDER = gql`
         id
         name
       }
+      order_transaction {
+        transaction {
+          id
+          payment_method
+          amount
+          txn_ref
+          type
+        }
+      }
     }
   }
 `;
@@ -1257,8 +1266,8 @@ export const GET_DROPOFF = gql`
 //general users query
 
 export const GET_ALL_USERS = gql`
-  query ($first: Int!, $search: String, $page: Int) {
-    users(first: $first, search: $search, page: $page) {
+  query ($first: Int!, $search: String, $role: String, $page: Int) {
+    users(first: $first, search: $search, role: $role, page: $page) {
       data {
         id
         name

@@ -111,7 +111,7 @@ export const DriverAddModal = ({
           title: "Success",
           message: "Driver Created Successfully",
         });
-        fetchData(1);
+        fetchData(activePage);
         setOpened(false);
       },
       onError(error) {

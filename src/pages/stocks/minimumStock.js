@@ -12,34 +12,16 @@ import {
   Group,
   Text,
   Center,
-  TextInput,
-  SimpleGrid,
-  Container,
   Pagination,
-  Button,
-  Tooltip,
-  Modal,
+
+  Select,
 } from "@mantine/core";
-import { Edit, Trash } from "tabler-icons-react";
+
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
-import EditIcon from "@mui/icons-material/Edit";
 import React, { Fragment, useEffect, useState } from "react";
-import { ManualGearbox } from "tabler-icons-react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { Plus, Search } from "tabler-icons-react";
-import { showNotification } from "@mantine/notifications";
-import DriverDetailModal from "components/Driver/DriverDetail";
-import { DriverEditModal } from "components/Driver/DriverEditModal";
-import { DriverAddModal } from "components/Driver/DriverAddModal";
-import { DEL_STOCK } from "apollo/mutuations";
-import StockAddModal from "components/Stock/StockAddModal";
-import ManageStock from "components/Stock/ManageStock";
-import Controls from "components/controls/Controls";
-import { API } from "utiles/url";
-import StockDetailModal from "components/Stock/StockDetail";
-import { FiEdit, FiEye } from "react-icons/fi";
-import { X } from "tabler-icons-react"; // Import a close icon
+import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -131,7 +113,6 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 
 const MinmumStock = () => {
   const { classes } = useStyles();
-  const [size] = useState(10);
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -141,12 +122,17 @@ const MinmumStock = () => {
   const [sortedData, setSortedData] = useState([]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-
+  const [size, setSize] = useState("10");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
   useEffect(() => {
-    fetchData();
+    fetchData(size);
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (size) => {
     setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -156,7 +142,7 @@ const MinmumStock = () => {
         },
       };
       const response = await axios.get(
-        `${API}/stocks/list/below_minimum_stock_level?page=${activePage}`,
+        `${API}/stocks/list/below_minimum_stock_level?page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
@@ -164,7 +150,7 @@ const MinmumStock = () => {
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
         setTotal(response.data?.links);
-        setTotalPages(response.data.last_page);
+        setTotalPages(response.data.paginatorInfo.lastPage);
       }
     } catch (error) {
       setLoading(false);
@@ -191,6 +177,7 @@ const MinmumStock = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
+    fetchData(size)
   };
 
   const handleSort = (field) => {
@@ -276,17 +263,29 @@ const MinmumStock = () => {
               )}
             </tbody>
           </Table>
-          <Center>
-            <div style={{ paddingTop: "12px" }}>
-              <Container>
-                <Pagination
-                  color="blue"
-                  page={activePage}
-                  onChange={handleChange}
-                  total={totalPages}
+
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
                 />
-              </Container>
-            </div>
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
           </Center>
         </ScrollArea>
       </Card>
