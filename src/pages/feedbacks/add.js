@@ -25,6 +25,7 @@ export const Add = ({
   activePage,
   setActivePage,
   fetchData,
+  size
 }) => {
   const [loading, setLoading] = useState(false);
   const form = useForm({
@@ -63,7 +64,7 @@ export const Add = ({
           message: "Feedback-types Created Successfully",
         });
         setLoading(false);
-        fetchData();
+        fetchData(size);
         setOpened(false);
       }
     } catch (error) {

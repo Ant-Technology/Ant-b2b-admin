@@ -1,5 +1,6 @@
-import { useQuery } from "@apollo/client";
-import { X } from "tabler-icons-react"; // Import a close icon
+import "jspdf-autotable";
+import jsPDF from "jspdf";
+import * as XLSX from "xlsx"; // Import the xlsx library
 import {
   Badge,
   Card,
@@ -18,33 +19,26 @@ import {
   Container,
   Pagination,
   Button,
-  Tooltip,
-  Modal,
   Select,
   Menu,
 } from "@mantine/core";
 import { FiEdit, FiEye } from "react-icons/fi";
-import EditIcon from "@mui/icons-material/Edit";
-import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import axios from "axios";
-import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
-import ManageDepositSlip from "components/Wallet/ManageDepositSlip";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { Plus, Search } from "tabler-icons-react";
-import { showNotification } from "@mantine/notifications";
-import SalesDetailModal from "components/Sales/SalesDetailModal";
-import { SalesEditModal } from "components/Sales/SalesUpdateModal";
-import { SalesAddModal } from "components/Sales/SalesAddModal";
 import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
 import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
-import ProductFilter from "./product";
-import RetailerFilter from "./retailer";
-import WarehouseFilter from "./warehouse";
 import OrdersDetailModal from "./orders";
-
+const columns = [
+  { header: "Name", dataKey: "name" },
+  { header: "Email", dataKey: "contact_email" },
+  { header: "Phone", dataKey: "contact_phone" },
+  { header: "Address", dataKey: "address" },
+  { header: "Region", dataKey: "region.name.en" },
+  { header: "Orders", dataKey: "orders.length" },
+];
 const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
@@ -204,12 +198,74 @@ const RetailerReport = () => {
     setData(item);
   };
   const exportToPDF = () => {
-    console.log("Exporting to PDF...");
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth(); // Get PDF width
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Retailer Report", pageWidth / 2, 20, { align: "center" });
+
+    let subtitle = "Date: ";
+    if (selectedStartDate && selectedEndDate) {
+      const startDate =
+        selectedStartDate instanceof Date
+          ? selectedStartDate.toISOString().slice(0, 10)
+          : "N/A";
+      const endDate =
+        selectedEndDate instanceof Date
+          ? selectedEndDate.toISOString().slice(0, 10)
+          : "N/A";
+      subtitle += `${startDate} - ${endDate}`;
+    } else {
+      subtitle += "All Date";
+    }
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(subtitle, pageWidth / 2, 28, { align: "center" });
+    const headers = columns.map((col) => col.header);
+    const bodyData = sortedData.map((row) => [
+      row.name || "N/A",
+      row.contact_email || "N/A",
+      row.contact_phone || "N/A",
+      row.address || "N/A",
+      row.region?.name?.en || "N/A",
+      Array.isArray(row.orders) ? row.orders.length : 0,
+    ]);
+
+    doc.autoTable({
+      startY: 35,
+      head: [headers],
+      body: bodyData,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] }, // Updated header color
+    });
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    const exportedDate = `Exported Date: ${new Date().toLocaleString()}`;
+
+    doc.setFontSize(10);
+    doc.text(exportedDate, pageWidth - 14, pageHeight - 10, { align: "right" });
+
+    doc.save("retailer_report.pdf");
   };
 
   const exportToExcel = () => {
-    console.log("Exporting to Excel...");
+    const bodyData = sortedData.map((row) => ({
+      Name: row.name,
+      Email: row.contact_email,
+      Phone: row.contact_phone,
+      Address: row.address,
+      Region: row.region.name.en,
+      Orders: row.orders.length,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(bodyData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Retailers");
+    XLSX.writeFile(workbook, "retailer_report.xlsx");
   };
+
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
@@ -380,24 +436,11 @@ const RetailerReport = () => {
           >
             <thead>
               <tr style={{ backgroundColor: "#F1F1F1" }}>
-                <Th>
-                  <span className={classes.thh}>Name</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Email</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Phone</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Address</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Region</span>
-                </Th>
-                <Th>
-                  <span className={classes.thh}>Orders</span>
-                </Th>
+                {columns.map((col) => (
+                  <Th key={col.dataKey}>
+                    <span className={classes.thh}>{col.header}</span>
+                  </Th>
+                ))}
                 <Th>
                   <span className={classes.thh}>Action</span>
                 </Th>
@@ -408,7 +451,7 @@ const RetailerReport = () => {
                 rows
               ) : (
                 <tr>
-                  <td colSpan={10}>
+                  <td colSpan={columns.length + 1}>
                     <Text weight={500} align="center">
                       Nothing found
                     </Text>
