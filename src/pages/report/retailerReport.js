@@ -27,7 +27,7 @@ import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { API, PAGE_SIZE_OPTIONS } from "utiles/url";
+import { API, PAGE_SIZE_OPTIONS, PAGE_SIZE_OPTIONS_REPORT } from "utiles/url";
 import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
 import OrdersDetailModal from "./orders";

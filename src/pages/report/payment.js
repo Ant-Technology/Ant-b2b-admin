@@ -21,7 +21,7 @@ import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { API, formatNumber, PAGE_SIZE_OPTIONS } from "utiles/url";
+import { API, formatNumber, PAGE_SIZE_OPTIONS, PAGE_SIZE_OPTIONS_REPORT } from "utiles/url";
 import { DatePicker } from "@mantine/dates";
 import { Box } from "@mui/material";
 
