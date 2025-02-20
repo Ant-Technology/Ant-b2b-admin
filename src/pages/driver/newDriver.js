@@ -233,8 +233,6 @@ const NewDriver = () => {
       )
     );
   };
-
-  const theme = useMantineTheme();
   const rows = sortedData?.map((row) => {
     return (
       <Fragment key={row.id}>
@@ -244,7 +242,6 @@ const NewDriver = () => {
           <td>{row.email}</td>
           <td>{row.phone}</td>
           <td>{row.city}</td>
-          <td>{formatNumber(row.wallet?.balance)}</td>
           <td>
             {" "}
             <Controls.ActionButton
@@ -292,9 +289,6 @@ const NewDriver = () => {
                 </Th>
                 <Th sortable onSort={() => handleSort("email")}>
                   <span className={classes.thh}> City</span>
-                </Th>
-                <Th sortable={false}>
-                  <span className={classes.thh}>Balance</span>
                 </Th>
                 <Th sortable={false}>
                   <span className={classes.thh}>Action</span>

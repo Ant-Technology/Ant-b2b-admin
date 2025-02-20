@@ -350,7 +350,7 @@ const Drivers = () => {
           <td style={{ width: "10%" }}>
             {row.vehicle?.vehicle_type?.title.en}
           </td>
-          <td>{formatNumber(row.wallet?.balance)}</td>
+          <td>{row.wallet?.balance?formatNumber(row.wallet?.balance):"No Balance"}</td>
           <td>
             <div style={{ display: "flex" }}>
               <Controls.ActionButton

@@ -1,24 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Table,
-  ScrollArea,
-  Card,
-  Button,
-  Modal,
-  LoadingOverlay,
-  Grid,
-  Stack,
-  Select,
-  createStyles,
-  Group,
-  Paper,
-  SimpleGrid,
-  Text,
-  Image,
-} from "@mantine/core";
-import { useQuery } from "@apollo/client";
-import { customLoader } from "components/utilities/loader";
-import { GET_PRODUCT, GET_SHIPMENTS } from "apollo/queries";
+import { Table, ScrollArea, Card, createStyles, Text } from "@mantine/core";
 import { UserPlus, Discount2, Receipt2, Coin } from "tabler-icons-react";
 import { useViewportSize } from "@mantine/hooks";
 
@@ -67,6 +48,7 @@ function FeedbackTypeDetailModal({ row }) {
   useEffect(() => {
     setData(row);
   }, []);
+  console.log(row);
   const { height } = useViewportSize();
   return (
     <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
@@ -77,10 +59,9 @@ function FeedbackTypeDetailModal({ row }) {
               <span>Feedbacks</span>
             </Text>
             <Table
-             style={{ width: "100%", minWidth: "600px" }}
+              style={{ width: "100%", minWidth: "600px" }}
               horizontalSpacing="md"
               verticalSpacing="xs"
-            
             >
               <thead>
                 <tr>
@@ -88,7 +69,6 @@ function FeedbackTypeDetailModal({ row }) {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Role</th>
-                
                 </tr>
               </thead>
               <tbody>
@@ -97,7 +77,11 @@ function FeedbackTypeDetailModal({ row }) {
                     <td>{item.description}</td>
                     <td>{item.user?.name}</td>
                     <td>{item.user?.email}</td>
-                    <td>{item.user?.role}</td>
+                    <td>
+                      {item.user?.roles
+                        ?.map((role) => role.name || "Unknown Role")
+                        .join(", ")}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -73,28 +73,28 @@ const ManageDropOffModal = ({ editId, setOpenedEdit }) => {
                   <CurrencyDollar size={20} color="#4dabf7" />
                   <Text size="sm" color="dimmed">Total Amount:</Text>
                 </Group>
-                <Text weight={500} size="md">{formatNumber(data.order.order_transaction.transaction.amount) || "N/A"}</Text>
+                <Text weight={400} size="md">{formatNumber(data.order.order_transaction.transaction.amount) || "N/A"}</Text>
               </Group>
               <Group>
                 <Group spacing="xs">
                   <CreditCard size={20} color="#4dabf7" />
                   <Text size="sm" color="dimmed">Payment Method:</Text>
                 </Group>
-                <Text weight={500} size="md">{data.order.order_transaction.transaction.payment_method || "N/A"}</Text>
+                <Text weight={400} size="md">{data.order.order_transaction.transaction.payment_method || "N/A"}</Text>
               </Group>
               <Group>
                 <Group spacing="xs">
                   <Receipt size={20} color="#4dabf7" />
                   <Text size="sm" color="dimmed">Transaction Reference:</Text>
                 </Group>
-                <Text weight={500} size="md">{data.order.order_transaction.transaction.txn_ref || "N/A"}</Text>
+                <Text weight={400} size="md">{data.order.order_transaction.transaction.txn_ref || "N/A"}</Text>
               </Group>
               <Group>
                 <Group spacing="xs">
                   <Category size={20} color="#4dabf7" />
                   <Text size="sm" color="dimmed">Transaction Type:</Text>
                 </Group>
-                <Text weight={500} size="md">{data.order.order_transaction.transaction.type || "N/A"}</Text>
+                <Text weight={400} size="md">{data.order.order_transaction.transaction.type || "N/A"}</Text>
               </Group>
             </Stack>
             <Group position="apart" mt="md" mb="xs">

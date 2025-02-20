@@ -22,7 +22,12 @@ import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { API, formatNumber, PAGE_SIZE_OPTIONS,PAGE_SIZE_OPTIONS_REPORT } from "utiles/url";
+import {
+  API,
+  formatNumber,
+  PAGE_SIZE_OPTIONS,
+  PAGE_SIZE_OPTIONS_REPORT,
+} from "utiles/url";
 import { DatePicker } from "@mantine/dates";
 import ProductFilter from "./product";
 import RetailerFilter from "./retailer";
@@ -158,10 +163,15 @@ const SalesReport = () => {
         },
       };
       const startDate = selectedStartDate
-        ? selectedStartDate.toISOString().slice(0, 10)
+        ? new Date(selectedStartDate.setHours(0, 0, 0, 0))
+            .toISOString()
+            .slice(0, 10)
         : "";
+
       const endDate = selectedEndDate
-        ? selectedEndDate.toISOString().slice(0, 10)
+        ? new Date(selectedEndDate.setHours(23, 59, 59, 999))
+            .toISOString()
+            .slice(0, 10)
         : "";
 
       const response = await axios.get(
