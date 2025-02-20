@@ -231,6 +231,7 @@ function ManageOrderModal({ editId }) {
                 <th>Total Price</th>
                 <th>Product Name</th>
                 <th>Status</th>
+                <th>Date</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -249,6 +250,8 @@ function ManageOrderModal({ editId }) {
                       <td>{row.product_sku?.price}</td>
                       <td>{row.product_sku?.product?.name}</td>
                       <td>{row.state}</td>
+                      <td>{row.created_at}</td>
+
                       <td>
                         <ManualGearbox
                           color="#1971C2"
@@ -284,7 +287,7 @@ function ManageOrderModal({ editId }) {
                   Total Amount:
                 </Text>
               </Group>
-              <Text weight={500} size="md" style={{ marginLeft: "5px" }}>
+              <Text weight={400} size="md" style={{ marginLeft: "5px" }}>
                 {" "}
                 {/* Adjusted margin */}
                 {formatNumber(order?.order_transaction?.transaction?.amount) ||
@@ -299,7 +302,7 @@ function ManageOrderModal({ editId }) {
                   Payment Method:
                 </Text>
               </Group>
-              <Text weight={500} size="md" style={{ marginLeft: "5px" }}>
+              <Text weight={400} size="md" style={{ marginLeft: "5px" }}>
                 {" "}
                 {/* Adjusted margin */}
                 {order?.order_transaction?.transaction?.payment_method || "N/A"}
@@ -314,7 +317,7 @@ function ManageOrderModal({ editId }) {
                 </Text>
               </Group>
               <Text
-                weight={500}
+                weight={400}
                 size="md"
                 sx={{
                   maxWidth: 200,
@@ -335,7 +338,7 @@ function ManageOrderModal({ editId }) {
                   Transaction Type:
                 </Text>
               </Group>
-              <Text weight={500} size="md">
+              <Text weight={400} size="md">
                 {" "}
                 {/* Adjusted margin */}
                 {order?.order_transaction?.transaction?.type || "N/A"}

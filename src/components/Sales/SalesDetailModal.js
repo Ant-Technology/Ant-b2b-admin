@@ -124,16 +124,15 @@ function SalesDetailModal({ Id }) {
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            flexDirection: "column",
-            p: 1,
-            m: 1,
-            bgcolor: "background.paper",
-            borderRadius: 1,
+            alignItems: "flex-start",
+            gap: "20px",
+            padding: "10px",
+            margin: "10px",
+            flexWrap: "wrap",
           }}
         >
-          <Card style={{ width: "40%" }} shadow="sm" radius="md" withBorder>
-            <div style={{ paddingLeft: "20px" }}>
+          <Card style={{ width: "25%" }} shadow="sm" radius="md" withBorder>
+            <div>
               <Group align="flex-end" spacing="xs" mt={25}>
                 <Text size="sm" weight={500} className={classes.diff}>
                   <span>
@@ -176,21 +175,18 @@ function SalesDetailModal({ Id }) {
               </Group>
             </div>
           </Card>
+          <Select
+            data={regionsDropDownData}
+            searchable
+            clearable
+            onChange={setRegionDropDownValue}
+            label="Region"
+            placeholder="Pick a region to filter"
+            style={{ width: "240px" }}
+          />
         </Box>
-        <Card style={{ marginTop: "30px" }} shadow="sm" p="lg">
+        <Card style={{ marginTop: "5px" }} shadow="sm" p="lg">
           <ScrollArea>
-            <Text size="md" weight={500} className={classes.diff}>
-              <span>Retailers</span>
-            </Text>
-              <Select
-                data={regionsDropDownData}
-                searchable
-                clearable
-                onChange={setRegionDropDownValue}
-                label="Region"
-                placeholder="Pick a region to filter"
-                style={{ width: "240px" }}
-              />
             <Table
               horizontalSpacing="md"
               verticalSpacing="xs"

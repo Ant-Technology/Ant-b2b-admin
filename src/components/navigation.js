@@ -4,7 +4,7 @@ import Pusher from "pusher-js";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import { useMediaQuery, useViewportSize } from "@mantine/hooks";
 import {
-  IconDashboard,
+  IconLayoutDashboard,
   IconApps,
   IconShoppingCart,
   IconGeometry,
@@ -177,7 +177,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
   }
   let data = [];
   if (permissions.length > 0) {
-    data.push({ link: "/", label: "Dashboard", icon: IconDashboard });
+    data.push({ link: "/", label: "Dashboard", icon: IconLayoutDashboard });
 
     if (permissions.some((perm) => perm.name === "dropoffs-view")) {
       data.push({

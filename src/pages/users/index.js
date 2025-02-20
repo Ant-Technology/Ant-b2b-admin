@@ -130,7 +130,7 @@ const Users = () => {
       },
     },
     {
-      label: "Account",
+      label: "Status",
       key: "account",
       sortable: false,
       searchable: false,

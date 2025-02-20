@@ -155,11 +155,16 @@ const RetailerReport = () => {
         },
       };
       const startDate = selectedStartDate
-        ? selectedStartDate.toISOString().slice(0, 10)
-        : "";
-      const endDate = selectedEndDate
-        ? selectedEndDate.toISOString().slice(0, 10)
-        : "";
+      ? new Date(selectedStartDate.setHours(0, 0, 0, 0))
+          .toISOString()
+          .slice(0, 10)
+      : "";
+
+    const endDate = selectedEndDate
+      ? new Date(selectedEndDate.setHours(23, 59, 59, 999))
+          .toISOString()
+          .slice(0, 10)
+      : "";
       const response = await axios.get(
         `${API}/reports/retailers?period=${
           timeRange ? timeRange : "custom"
