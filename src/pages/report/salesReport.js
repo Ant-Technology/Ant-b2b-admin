@@ -22,7 +22,7 @@ import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { API, formatNumber, PAGE_SIZE_OPTIONS } from "utiles/url";
+import { API, formatNumber, PAGE_SIZE_OPTIONS,PAGE_SIZE_OPTIONS_REPORT } from "utiles/url";
 import { DatePicker } from "@mantine/dates";
 import ProductFilter from "./product";
 import RetailerFilter from "./retailer";
@@ -99,7 +99,7 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const SalesReport = () => {
-  const [size, setSize] = useState("10");
+  const [size, setSize] = useState("50");
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
@@ -482,7 +482,7 @@ const SalesReport = () => {
                 <Select
                   value={size}
                   onChange={handlePageSizeChange}
-                  data={PAGE_SIZE_OPTIONS}
+                  data={PAGE_SIZE_OPTIONS_REPORT}
                   style={{ width: 80, height: 40 }}
                 />
               </Group>
