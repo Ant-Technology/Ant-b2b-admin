@@ -320,10 +320,10 @@ const SalesReport = () => {
         <td style={{ width: "120px" }}>{row.productName}</td>
         <td style={{ width: "20px" }}>{row.quantity}</td>
         <td style={{ width: "30px" }}>{row.unitPrice}</td>
-        <td style={{ width: "70px" }}>{row.subtotal}</td>
+        <td style={{ width: "10px" }}>{row.subtotal}</td>
         <td style={{ width: "100px" }}>{row.warehouse}</td>
         <td style={{ width: "100px" }}>{row.warehouseRegion}</td>
-        <td style={{ width: "100px" }}>{row.date}</td>
+        <td style={{ width: "100px" }}>{new Date(row.date).toLocaleString()}</td>      
         <td style={{ width: "100px" }}>{row.retailer}</td>
       </tr>
     </Fragment>

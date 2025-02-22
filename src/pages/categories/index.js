@@ -38,13 +38,22 @@ const Categories = () => {
   const [openedDetail, setOpenedDetail] = useState(false);
 
   const theme = useMantineTheme();
+  const [confirmedSearch, setConfirmedSearch] = useState("");
+  const [searchValue, setSearchValue] = useState("");
 
+  const handleManualSearch = (searchTerm) => {
+    setSearchValue(searchTerm);
+  };
+  const clearInput = () => {
+    setSearchValue("");
+    setConfirmedSearch("");
+  };
   const { data, loading, fetchMore } = useQuery(GET_CATEGORIES, {
     // fetchPolicy: "no-cache",
     variables: {
       first: parseInt(size), // Pass size dynamically
       page: activePage,
-      search:"",
+      search:searchValue,
     },
   });
 
@@ -322,6 +331,10 @@ const Categories = () => {
           <B2bTable
             total={total}
             activePage={activePage}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             handleChange={handleChange}
             header={headerData}
             optionsData={optionsData}

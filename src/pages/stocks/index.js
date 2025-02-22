@@ -395,7 +395,7 @@ const Drivers = () => {
               <ManageStock
                 total={total}
                 setTotal={setTotal}
-                activePage={activePage}
+                activePage={size}
                 setActivePage={setActivePage}
                 setOpenedEdit={setOpenedEdit}
                 editId={editId}
@@ -413,6 +413,7 @@ const Drivers = () => {
               <StockAddModal
                 total={total}
                 setTotal={setTotal}
+                size={size}
                 activePage={activePage}
                 setActivePage={setActivePage}
                 setOpened={setOpened}
