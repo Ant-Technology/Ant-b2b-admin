@@ -555,8 +555,8 @@ export const GET_RETAILER = gql`
 `;
 
 export const GET_RETAILERS = gql`
-  query ($first: Int!, $page: Int) {
-    retailers(first: $first, page: $page) {
+  query ($first: Int!, $search: String, $page: Int) {
+    retailers(first: $first, search: $search, page: $page) {
       data {
         id
         name

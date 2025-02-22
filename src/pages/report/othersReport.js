@@ -16,7 +16,6 @@ import {
   Button,
   Select,
   Menu,
-  Tabs,
 } from "@mantine/core";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
@@ -30,7 +29,6 @@ import {
 } from "utiles/url";
 import { DatePicker } from "@mantine/dates";
 import { Box } from "@mui/material";
-import OthersPaymentReport from "./othersReport";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -91,7 +89,7 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
   );
 }
 
-const PaymentReport = () => {
+const OthersPaymentReport = () => {
   const [size, setSize] = useState("50");
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
@@ -109,11 +107,7 @@ const PaymentReport = () => {
   const [drivers, setDrivers] = useState([]);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
-  const [activeTab, setActiveTab] = useState("first");
 
-  const handleTabChange = async (tab) => {
-    setActiveTab(tab);
-  };
   const [sortedData, setSortedData] = useState([]);
   useEffect(() => {
     fetchData(size);
@@ -129,7 +123,7 @@ const PaymentReport = () => {
         },
       };
       const response = await axios.get(
-        `${API}/reports/payments-orders?page=${activePage}&first=${size}&type=ANT`,
+        `${API}/reports/payments-orders?page=${activePage}&first=${size}&type=Others`,
         config
       );
       if (response.data) {
@@ -168,7 +162,7 @@ const PaymentReport = () => {
       const response = await axios.get(
         `${API}/reports/payments-orders?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&paymentMethod=${selectedMethod}&trans_status=${selectedStatus}&page=${activePage}&first=${size}&type=ANT`,
+        }&startDate=${startDate}&endDate=${endDate}&paymentMethod=${selectedMethod}&trans_status=${selectedStatus}&page=${activePage}&first=${size}&type=Others`,
         config
       );
 
@@ -318,248 +312,221 @@ const PaymentReport = () => {
         loader={customLoader}
       />
 
-      <Tabs
-        color="#FF6A00"
-        value={activeTab}
-        styles={{
-          tabList: {
-            borderBottom: `2px solid #FF6A00`,
-          },
-          tab: {
-            "&[data-active]": {
-              borderColor: "#FF6A00",
-            },
-            "&:hover": {
-              borderColor: "#FF6A00",
-            },
-          },
-        }}
-        onTabChange={handleTabChange}
-      >
-        <Tabs.List>
-          <Tabs.Tab value="first">
-            <span style={{ color: "#666666", fontWeight: "bold" }}>ANT</span>
-          </Tabs.Tab>
-          <Tabs.Tab value="second">
-            <span style={{ color: "#666666", fontWeight: "bold" }}>Others</span>
-          </Tabs.Tab>
-        </Tabs.List>
-        <Tabs.Panel value="second">
-          <OthersPaymentReport />
-        </Tabs.Panel>
-        <Tabs.Panel value="first">
-          <div style={{ width: "98%", margin: "auto" }}>
-            <SimpleGrid cols={5}>
-              <Select
-                data={[
-                  { value: "daily", label: "Daily" },
-                  { value: "weekly", label: "Weekly" },
-                  { value: "monthly", label: "Monthly" },
-                  { value: "annual", label: "Annual" },
-                ]}
-                value={timeRange}
-                onChange={setTimeRange}
-                label="Select Period"
-                placeholder="Select Range"
-                withinPortal
-                clearable
-              />
-              <DatePicker
-                value={selectedStartDate}
-                onChange={setSelectedStartDate}
-                placeholder="Pick a date"
-                label="Select Start Date"
-                clearable
-              />
-              <DatePicker
-                value={selectedEndDate}
-                onChange={setSelectedEndDate}
-                placeholder="Pick a date"
-                label="Select End Date"
-                clearable
-              />
-              <Select
-                data={[
-                  { value: "TELEBIRR", label: "TELEBIRR" },
-                  { value: "WALLET", label: "WALLET" },
-                  { value: "INVOICE", label: "INVOICE" },
-                  { value: "CASH", label: "CASH" },
-                ]}
-                value={selectedMethod}
-                onChange={setSelectedMethod}
-                label="Select Payment Method"
-                placeholder="Select Method"
-                withinPortal
-                clearable
-              />
-              <Select
-                data={[
-                  { value: "CONFIRMED", label: "CONFIRMED" },
-                  { value: "PENDING", label: "PENDING" },
-                  { value: "FAILED", label: "FAILED" },
-                  { value: "REJECTED", label: "REJECTED" },
-                ]}
-                value={selectedStatus}
-                onChange={setSelectedStatus}
-                label="Select Status"
-                placeholder="Select Status"
-                withinPortal
-                clearable
-              />
-            </SimpleGrid>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                marginTop: "10px",
-                gap: "10px", // Add space between buttons
-              }}
-            >
-              {(timeRange ||
-                selectedEndDate ||
-                selectedStartDate ||
-                selectedStatus ||
-                selectedMethod) && (
-                <>
-                  <Button
-                    onClick={handleReset}
-                    style={{
-                      width: "80px",
-                      backgroundColor: "#FF6A00",
-                      color: "#FFFFFF",
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleFilter}
-                    style={{
-                      width: "80px",
-                      backgroundColor: "#FF6A00",
-                      color: "#FFFFFF",
-                    }}
-                  >
-                    Filter
-                  </Button>
-                </>
-              )}
-
-              <Menu
-                shadow="md"
-                trigger="hover" // Change to "hover" to open on hover
-                openDelay={100}
-                closeDelay={400}
-              >
-                <Menu.Target>
-                  <Button
-                    style={{
-                      width: "80px",
-                      backgroundColor: "#FF6A00",
-                      color: "#FFFFFF",
-                    }}
-                  >
-                    Export
-                  </Button>
-                </Menu.Target>
-
-                <Menu.Dropdown>
-                  <Menu.Item onClick={exportToPDF}>PDF</Menu.Item>
-                  <Menu.Item onClick={exportToExcel}>Excel</Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-            </div>
+      <div style={{ width: "98%", margin: "auto" }}>
+        <SimpleGrid cols={5}>
+          <div>
+            <Select
+              data={[
+                { value: "daily", label: "Daily" },
+                { value: "weekly", label: "Weekly" },
+                { value: "monthly", label: "Monthly" },
+                { value: "annual", label: "Annual" },
+              ]}
+              value={timeRange}
+              onChange={setTimeRange}
+              label="Select Period"
+              placeholder="Select Range"
+              withinPortal
+              clearable
+            />
           </div>
-
-          <Card shadow="sm" p="lg">
-            <ScrollArea>
-              <Table
-                highlightOnHover
-                horizontalSpacing="md"
-                verticalSpacing="xs"
-                sx={{ minWidth: 700, marginTop: "10px" }}
-              >
-                <thead>
-                  <tr style={{ backgroundColor: "#F1F1F1" }}>
-                    {headers.map((header) => (
-                      <Th key={header}>
-                        <span className={classes.thh}>{header}</span>
-                      </Th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows?.length > 0 ? (
-                    rows
-                  ) : (
-                    <tr>
-                      <td colSpan={6}>
-                        <Text weight={500} align="center">
-                          Nothing found
-                        </Text>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </Table>
-              <Center mt="md">
-                <Group spacing="xs" position="center">
-                  <Group spacing="sm">
-                    <Text size="sm" mt="sm">
-                      <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
-                        Show per page:
-                      </span>
-                    </Text>
-                    <Select
-                      value={size}
-                      onChange={handlePageSizeChange}
-                      data={PAGE_SIZE_OPTIONS_REPORT}
-                      style={{ width: 80, height: 40 }}
-                    />
-                  </Group>
-                  <Pagination
-                    color="blue"
-                    page={activePage}
-                    onChange={handleChange}
-                    total={totalPages}
-                  />
-                </Group>
-              </Center>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "flex-end",
-                  flexDirection: "column",
-                  p: 1,
-                  gap: 1,
-                  m: 1,
-                  bgcolor: "background.paper",
-                  borderRadius: 1,
+          <div>
+            <DatePicker
+              value={selectedStartDate}
+              onChange={setSelectedStartDate}
+              placeholder="Pick a date"
+              label="Select Start Date"
+              clearable
+            />
+          </div>
+          <div>
+            <DatePicker
+              value={selectedEndDate}
+              onChange={setSelectedEndDate}
+              placeholder="Pick a date"
+              label="Select End Date"
+              clearable
+            />
+          </div>
+          <div>
+            <Select
+              data={[
+                { value: "TELEBIRR", label: "TELEBIRR" },
+                { value: "WALLET", label: "WALLET" },
+                { value: "INVOICE", label: "INVOICE" },
+                { value: "CASH", label: "CASH" },
+              ]}
+              value={selectedMethod}
+              onChange={setSelectedMethod}
+              label="Select Payment Method"
+              placeholder="Select Method"
+              withinPortal
+              clearable
+            />{" "}
+          </div>
+          <div>
+            <Select
+              data={[
+                { value: "CONFIRMED", label: "CONFIRMED" },
+                { value: "PENDING", label: "PENDING" },
+                { value: "FAILED", label: "FAILED" },
+                { value: "REJECTED", label: "REJECTED" },
+              ]}
+              value={selectedStatus}
+              onChange={setSelectedStatus}
+              label="Select Status"
+              placeholder="Select Status"
+              withinPortal
+              clearable
+            />
+          </div>
+        </SimpleGrid>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "10px",
+            gap: "10px", // Add space between buttons
+          }}
+        >
+          {(timeRange ||
+            selectedEndDate ||
+            selectedStartDate ||
+            selectedStatus ||
+            selectedMethod) && (
+            <>
+              <Button
+                onClick={handleReset}
+                style={{
+                  width: "80px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
                 }}
               >
-                <div
-                  style={{
-                    marginRight: "35px",
-                    fontWeight: "bold",
-                    fontSize: "15px",
-                  }}
-                >
-                  Total Amount:{" "}
-                  {formatNumber(
-                    sortedData.reduce(
-                      (sum, item) => sum + Number(item.amount),
-                      0
-                    )
-                  )}
-                </div>
-              </Box>
-            </ScrollArea>
-          </Card>
-        </Tabs.Panel>
-      </Tabs>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleFilter}
+                style={{
+                  width: "80px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Filter
+              </Button>
+            </>
+          )}
+
+          <Menu
+            shadow="md"
+            trigger="hover" // Change to "hover" to open on hover
+            openDelay={100}
+            closeDelay={400}
+          >
+            <Menu.Target>
+              <Button
+                style={{
+                  width: "80px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
+                }}
+              >
+                Export
+              </Button>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item onClick={exportToPDF}>PDF</Menu.Item>
+              <Menu.Item onClick={exportToExcel}>Excel</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </div>
+      </div>
+      <Card shadow="sm" p="lg">
+        <ScrollArea>
+          <Table
+            highlightOnHover
+            horizontalSpacing="md"
+            verticalSpacing="xs"
+            sx={{ minWidth: 700, marginTop: "10px" }}
+          >
+            <thead>
+              <tr style={{ backgroundColor: "#F1F1F1" }}>
+                {headers.map((header) => (
+                  <Th key={header}>
+                    <span className={classes.thh}>{header}</span>
+                  </Th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows?.length > 0 ? (
+                rows
+              ) : (
+                <tr>
+                  <td colSpan={6}>
+                    <Text weight={500} align="center">
+                      Nothing found
+                    </Text>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS_REPORT}
+                  style={{ width: 80, height: 40 }}
+                />
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
+          </Center>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-end",
+              flexDirection: "column",
+              p: 1,
+              gap: 1,
+              m: 1,
+              bgcolor: "background.paper",
+              borderRadius: 1,
+            }}
+          >
+            <div
+              style={{
+                marginRight: "35px",
+                fontWeight: "bold",
+                fontSize: "15px",
+              }}
+            >
+              Total Amount:{" "}
+              {formatNumber(
+                sortedData.reduce((sum, item) => sum + Number(item.amount), 0)
+              )}
+            </div>
+          </Box>
+        </ScrollArea>
+      </Card>
     </div>
   );
 };
 
-export default PaymentReport;
+export default OthersPaymentReport;

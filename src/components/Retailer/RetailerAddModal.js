@@ -24,6 +24,7 @@ const RetailerAddModal = ({
   setOpened,
   total,
   setTotal,
+  size,
   activePage,
   setActivePage,
 }) => {
@@ -68,12 +69,13 @@ const RetailerAddModal = ({
           {
             query: GET_RETAILERS,
             variables: {
-              first: 10,
+              first: parseInt(size),
               page: activePage,
               search: "",
             },
           },
           (data) => {
+            console.log(data)
             return {
               retailers: {
                 ...data.retailers,
@@ -177,11 +179,19 @@ const RetailerAddModal = ({
         setOpened(false);
       },
       onError(error) {
+        let errorMessage = "Retailer Not Created Successfully!";
+        if (error?.graphQLErrors?.length) {
+          const validationErrors =
+            error.graphQLErrors[0]?.extensions?.validation;
+          if (validationErrors) {
+            errorMessage = Object.values(validationErrors).flat().join(", ");
+          }
+        }
         setOpened(true);
         showNotification({
           color: "red",
           title: "Error",
-          message: "Retailer Not Created Successfully",
+          message: errorMessage,
         });
       },
     });

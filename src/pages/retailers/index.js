@@ -35,6 +35,7 @@ const Retailers = () => {
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   //pagination states
   const [activePage, setActivePage] = useState(1);
@@ -44,6 +45,7 @@ const Retailers = () => {
     variables: {
       first: parseInt(size),
       page: activePage,
+      search: searchValue
     },
   });
 
@@ -63,8 +65,9 @@ const Retailers = () => {
         {
           query: GET_RETAILERS,
           variables: {
-            first: 10,
+            first: parseInt(size),
             page: activePage,
+            search:""
           },
         },
         (data) => {
@@ -243,6 +246,15 @@ const Retailers = () => {
     actionLabel: "Add Retailer",
     setAddModal: setOpened,
   };
+   const [confirmedSearch, setConfirmedSearch] = useState("");
+  
+    const handleManualSearch = (searchTerm) => {
+      setSearchValue(searchTerm);
+    };
+    const clearInput = () => {
+      setSearchValue("");
+      setConfirmedSearch("");
+    };
 
   return loading ? (
     <LoadingOverlay
@@ -323,6 +335,7 @@ const Retailers = () => {
           activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}
+          size={size}
         />
       </Drawer>
 
@@ -332,6 +345,10 @@ const Retailers = () => {
             total={total}
             activePage={activePage}
             handleChange={handleChange}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
             header={headerData}
             optionsData={optionsData}
             loading={loading}

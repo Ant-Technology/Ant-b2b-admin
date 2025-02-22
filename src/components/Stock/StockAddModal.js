@@ -23,6 +23,7 @@ const StockAddModal = ({
   activePage,
   setActivePage,
   fetchData,
+  size,
   totalPages,
 }) => {
   // state variables
@@ -116,7 +117,7 @@ const StockAddModal = ({
         quantity: parseInt(form.values.quantity),
         product_sku: parseInt(form.values.product_sku.connect),
         warehouse: parseInt(form.values.warehouse.connect),
-        minimum_stock_level:parseInt(form.values.minimum_stock_level)
+        minimum_stock_level: parseInt(form.values.minimum_stock_level),
       },
       onCompleted(data) {
         showNotification({
@@ -124,15 +125,23 @@ const StockAddModal = ({
           title: "Success",
           message: "Stock Created Successfully",
         });
-        fetchData(totalPages);
+        fetchData(size);
         setOpened(false);
       },
       onError(error) {
-        setOpened(true);
+        let errorMessage = "Stock Not Created!";
+        if (error?.graphQLErrors && error.graphQLErrors.length) {
+          const validationErrors = error.graphQLErrors[0]?.extensions?.errors;
+
+          if (validationErrors) {
+            errorMessage =
+              Object.values(validationErrors).flat().join(", ") || errorMessage;
+          }
+        }
         showNotification({
           color: "red",
           title: "Error",
-          message: "Stock Not Created Successfully",
+          message: errorMessage,
         });
       },
     });
