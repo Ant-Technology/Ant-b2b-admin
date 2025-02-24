@@ -237,7 +237,7 @@ const Drivers = () => {
   };
   const [isHovered, setIsHovered] = useState(false);
   const handleManageSales = (id) => {
-    setEditId(id);
+    setEditRow(id);
     setOpenedDetail(true);
   };
 
@@ -309,7 +309,7 @@ const Drivers = () => {
               <Controls.ActionButton
                 color="primary"
                 title="View Detail"
-                onClick={() => handleManageSales(`${row.id}`)}
+                onClick={() => handleManageSales(row)}
               >
                 <FiEye fontSize="medium" />
               </Controls.ActionButton>
@@ -391,7 +391,7 @@ const Drivers = () => {
         position="bottom"
         size="80%"
       >
-        <SalesDetailModal Id={editId} />
+        <SalesDetailModal sales={editRow} />
       </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>

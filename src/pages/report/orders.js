@@ -68,7 +68,6 @@ function OrdersDetailModal({ data }) {
   useEffect(() => {
     setSales(data);
   }, [data]);
-console.log(sales)
   const { height } = useViewportSize();
   return (
     <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>

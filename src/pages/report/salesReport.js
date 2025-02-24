@@ -323,7 +323,9 @@ const SalesReport = () => {
         <td style={{ width: "10px" }}>{row.subtotal}</td>
         <td style={{ width: "100px" }}>{row.warehouse}</td>
         <td style={{ width: "100px" }}>{row.warehouseRegion}</td>
-        <td style={{ width: "100px" }}>{new Date(row.date).toLocaleString()}</td>      
+        <td style={{ width: "100px" }}>
+          {new Date(row.date).toLocaleString()}
+        </td>
         <td style={{ width: "100px" }}>{row.retailer}</td>
       </tr>
     </Fragment>
@@ -348,7 +350,12 @@ const SalesReport = () => {
                 { value: "annual", label: "Annual" },
               ]}
               value={timeRange}
-              onChange={setTimeRange}
+              onChange={(value) => {
+                setTimeRange(value);
+                if (value === null) {
+                  fetchData(size);
+                }
+              }}
               label="Select Period"
               placeholder="Select Range"
               withinPortal

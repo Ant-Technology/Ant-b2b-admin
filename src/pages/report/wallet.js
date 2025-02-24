@@ -1,43 +1,35 @@
 import "jspdf-autotable";
 import jsPDF from "jspdf";
-import * as XLSX from "xlsx"; // Import the xlsx library
+import * as XLSX from "xlsx";
 import {
-  Badge,
   Card,
-  Drawer,
   LoadingOverlay,
   ScrollArea,
-  useMantineTheme,
   createStyles,
   Table,
   UnstyledButton,
   Group,
   Text,
   Center,
-  TextInput,
   SimpleGrid,
-  Container,
   Pagination,
   Button,
   Select,
   Menu,
 } from "@mantine/core";
-import { FiEdit, FiEye } from "react-icons/fi";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons";
-import { API, PAGE_SIZE_OPTIONS, PAGE_SIZE_OPTIONS_REPORT } from "utiles/url";
-import Controls from "components/controls/Controls";
+import {
+  API,
+  formatNumber,
+  PAGE_SIZE_OPTIONS,
+  PAGE_SIZE_OPTIONS_REPORT,
+} from "utiles/url";
 import { DatePicker } from "@mantine/dates";
-import OrdersDetailModal from "./orders";
-const columns = [
-  { header: "Name", dataKey: "name" },
-  { header: "Email", dataKey: "contact_email" },
-  { header: "Phone", dataKey: "contact_phone" },
-  { header: "Address", dataKey: "address" },
-  { header: "Region", dataKey: "region.name.en" },
-];
+import { Box } from "@mui/material";
+
 const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
@@ -65,7 +57,15 @@ const useStyles = createStyles((theme) => ({
     fontWeight: "bold",
   },
 }));
-
+const headers = [
+  "Method",
+  "User Type",
+  "Type",
+  "Amount",
+  "Status",
+  "User",
+  "Date",
+];
 function Th({ children, sortable, sorted, reversed, onSort }) {
   const { classes } = useStyles();
   const Icon = sorted
@@ -97,7 +97,7 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
   );
 }
 
-const RetailerReport = () => {
+const WalletPaymentReport = () => {
   const [size, setSize] = useState("50");
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
@@ -106,18 +106,15 @@ const RetailerReport = () => {
   };
   const { classes } = useStyles();
   const [activePage, setActivePage] = useState(1);
+  const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [openedDetail, setOpenedDetail] = useState(false);
-
   const [timeRange, setTimeRange] = useState(null);
-  const [status, setStatus] = useState(null);
+  const [drivers, setDrivers] = useState([]);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
 
   const [sortedData, setSortedData] = useState([]);
-  const [data, setData] = useState([]);
-
   useEffect(() => {
     fetchData(size);
   }, []);
@@ -132,16 +129,19 @@ const RetailerReport = () => {
         },
       };
       const response = await axios.get(
-        `${API}/reports/retailers?page=${activePage}&first=${size}`,
+        `${API}/reports/payments-orders?page=${activePage}&first=${size}&type=Wallet`,
         config
       );
       if (response.data) {
         setLoading(false);
-        setSortedData(response.data.retailerActivity.data);
-        setTotalPages(response.data.retailerActivity.last_page);
+        setDrivers(response.data.transactionsSummary.data);
+        setSortedData(response.data.transactionsSummary.data);
+        setTotal(response.data.transactionsSummary?.links);
+        setTotalPages(response.data.transactionsSummary.last_page);
       }
     } catch (error) {
       setLoading(false);
+      console.error("Error fetching data:", error);
     }
   };
   const handleFilter = async () => {
@@ -154,41 +154,45 @@ const RetailerReport = () => {
         },
       };
       const startDate = selectedStartDate
-      ? new Date(selectedStartDate.setHours(0, 0, 0, 0))
-          .toISOString()
-          .slice(0, 10)
-      : "";
+        ? new Date(selectedStartDate.setHours(0, 0, 0, 0))
+            .toISOString()
+            .slice(0, 10)
+        : "";
 
-    const endDate = selectedEndDate
-      ? new Date(selectedEndDate.setHours(23, 59, 59, 999))
-          .toISOString()
-          .slice(0, 10)
-      : "";
+      const endDate = selectedEndDate
+        ? new Date(selectedEndDate.setHours(23, 59, 59, 999))
+            .toISOString()
+            .slice(0, 10)
+        : "";
+
       const response = await axios.get(
-        `${API}/reports/retailers?period=${
+        `${API}/reports/payments-orders?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&status=${status}&first=${size}`,
+        }&startDate=${startDate}&endDate=${endDate}&page=${activePage}&first=${size}&type=Wallet`,
         config
       );
+
       if (response.data) {
         setLoading(false);
-        setSortedData(response.data.retailerActivity.data);
-        setTotalPages(response.data.retailerActivity.last_page);
+        setDrivers(response.data.transactionsSummary.data);
+        setSortedData(response.data.transactionsSummary.data);
+        setTotal(response.data.transactionsSummary?.links);
+        setTotalPages(response.data.transactionsSummary.last_page);
       }
     } catch (error) {
       setLoading(false);
+      console.error("Error fetching data:", error);
     }
   };
 
   const handleReset = () => {
     setSelectedStartDate(null);
     setSelectedEndDate(null);
-    setStatus(null);
     setTimeRange(null);
     fetchData(size);
   };
   const handleChange = (page) => {
-    if (timeRange || selectedEndDate || selectedStartDate || status) {
+    if (timeRange || selectedEndDate || selectedStartDate) {
       setActivePage(page);
       handleFilter();
     } else {
@@ -196,29 +200,17 @@ const RetailerReport = () => {
       fetchData(size);
     }
   };
-  const theme = useMantineTheme();
-  const handleDetail = (item) => {
-    setOpenedDetail(true);
-    setData(item);
-  };
   const exportToPDF = () => {
     const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth(); // Get PDF width
-
+    const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
-    doc.text("Retailer Report", pageWidth / 2, 20, { align: "center" });
+    doc.text("Payment Report", pageWidth / 2, 20, { align: "center" });
 
     let subtitle = "Date: ";
     if (selectedStartDate && selectedEndDate) {
-      const startDate =
-        selectedStartDate instanceof Date
-          ? selectedStartDate.toISOString().slice(0, 10)
-          : "N/A";
-      const endDate =
-        selectedEndDate instanceof Date
-          ? selectedEndDate.toISOString().slice(0, 10)
-          : "N/A";
+      const startDate = selectedStartDate.toISOString().slice(0, 10);
+      const endDate = selectedEndDate.toISOString().slice(0, 10);
       subtitle += `${startDate} - ${endDate}`;
     } else {
       subtitle += "All Date";
@@ -227,16 +219,16 @@ const RetailerReport = () => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
     doc.text(subtitle, pageWidth / 2, 28, { align: "center" });
-    const headers = columns.map((col) => col.header);
-    const bodyData = sortedData.map((row) => [
-      row.name || "N/A",
-      row.contact_email || "N/A",
-      row.contact_phone || "N/A",
-      row.address || "N/A",
-      row.region?.name?.en || "N/A",
-      Array.isArray(row.orders) ? row.orders.length : 0,
-    ]);
 
+    const bodyData = sortedData.map((row) => [
+      row.payment_method || "N/A",
+      row.payable_type.split("\\").pop() || "N/A",
+      row.type || "N/A",
+      formatNumber(row.amount) || 0,
+      row.status || "N/A",
+      row.payable.name || "N/A",
+      new Date(row.created_at).toLocaleString() || "N/A",
+    ]);
     doc.autoTable({
       startY: 35,
       head: [headers],
@@ -244,50 +236,73 @@ const RetailerReport = () => {
       styles: { fontSize: 10 },
       headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] }, // Updated header color
     });
-    const pageHeight = doc.internal.pageSize.getHeight();
+
+    const finalY = doc.lastAutoTable.finalY || 10;
+    const totalAmount = sortedData.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    );
+    doc.text(
+      `Total Amount: ${formatNumber(totalAmount)}`,
+      pageWidth - 20,
+      finalY + 10,
+      { align: "right" }
+    );
 
     const exportedDate = `Exported Date: ${new Date().toLocaleString()}`;
-
     doc.setFontSize(10);
-    doc.text(exportedDate, pageWidth - 14, pageHeight - 10, { align: "right" });
+    doc.text(
+      exportedDate,
+      pageWidth - 14,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: "right" }
+    );
 
-    doc.save("retailer_report.pdf");
+    doc.save("payment_report.pdf");
   };
 
   const exportToExcel = () => {
     const bodyData = sortedData.map((row) => ({
-      Name: row.name,
-      Email: row.contact_email,
-      Phone: row.contact_phone,
-      Address: row.address,
-      Region: row.region.name.en,
-      Orders: row.orders.length,
+      Method: row.payment_method,
+      UserType: row.payable_type.split("\\").pop(),
+      Type: row.type,
+      Amount: formatNumber(row.amount),
+      Status: row.status,
+      User: row.payable.name,
+      Date: new Date(row.created_at).toLocaleString(),
     }));
+
+    const totalAmount = sortedData.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    );
+    bodyData.push({
+      Method: "Total Amount",
+      UserType: totalAmount.toFixed(2),
+      Type: "",
+      Amount: "",
+      Status: "",
+      User: "",
+      Date: "",
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(bodyData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Retailers");
-    XLSX.writeFile(workbook, "retailer_report.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
+    XLSX.writeFile(workbook, "payment_report.xlsx");
   };
 
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
       <tr>
-        <td>{row.name}</td>
-        <td>{row.contact_email}</td>
-        <td>{row.contact_phone}</td>
-        <td>{row.address}</td>
-        <td>{row.region.name.en}</td>
-        <td>{row.orders.length}</td>
-        <td>
-          {" "}
-          <Controls.ActionButton
-            color="primary"
-            title="View Detail"
-            onClick={() => handleDetail(row.orders)}
-          >
-            <FiEye fontSize="medium" />
-          </Controls.ActionButton>
+        <td style={{ width: "80px" }}>{row.payment_method}</td>
+        <td style={{ width: "120px" }}>{row.payable_type.split("\\").pop()}</td>
+        <td style={{ width: "20px" }}>{row.type}</td>
+        <td style={{ width: "30px" }}>{formatNumber(row.amount)}</td>
+        <td style={{ width: "70px" }}>{row.status}</td>
+        <td style={{ width: "100px" }}>{row.payable.name}</td>
+        <td style={{ width: "100px" }}>
+          {new Date(row.created_at).toLocaleString()}
         </td>
       </tr>
     </Fragment>
@@ -301,8 +316,8 @@ const RetailerReport = () => {
         loader={customLoader}
       />
 
-      <div>
-        <SimpleGrid cols={4}>
+      <div style={{ width: "98%", margin: "auto" }}>
+        <SimpleGrid cols={3}>
           <div>
             <Select
               data={[
@@ -317,7 +332,8 @@ const RetailerReport = () => {
                 if (value === null) {
                   fetchData(size);
                 }
-              }}              label="Select Period"
+              }}
+              label="Select Period"
               placeholder="Select Range"
               withinPortal
               clearable
@@ -330,6 +346,7 @@ const RetailerReport = () => {
               placeholder="Pick a date"
               label="Select Start Date"
               clearable
+              
             />
           </div>
           <div>
@@ -341,28 +358,7 @@ const RetailerReport = () => {
               clearable
             />
           </div>
-
-          <div>
-            <Select
-              data={[
-                { value: "active", label: "Active" },
-                { value: "inactive", label: "Inactive" },
-              ]}
-              value={status}
-              onChange={(value) => {
-                setStatus(value);
-                if (value === null) {
-                  fetchData(size);
-                }
-              }}
-              label="Select Status"
-              placeholder="Select Status"
-              withinPortal
-              clearable
-            />
-          </div>
         </SimpleGrid>
-
         <div
           style={{
             display: "flex",
@@ -371,7 +367,7 @@ const RetailerReport = () => {
             gap: "10px", // Add space between buttons
           }}
         >
-          {(timeRange || selectedEndDate || selectedStartDate || status) && (
+          {(timeRange || selectedEndDate || selectedStartDate) && (
             <>
               <Button
                 onClick={handleReset}
@@ -421,24 +417,6 @@ const RetailerReport = () => {
           </Menu>
         </div>
       </div>
-
-      <Drawer
-        opened={openedDetail}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Retailer Orders Detail"
-        padding="xl"
-        onClose={() => setOpenedDetail(false)}
-        position="bottom"
-        size="80%"
-      >
-        <OrdersDetailModal data={data} />
-      </Drawer>
       <Card shadow="sm" p="lg">
         <ScrollArea>
           <Table
@@ -449,14 +427,11 @@ const RetailerReport = () => {
           >
             <thead>
               <tr style={{ backgroundColor: "#F1F1F1" }}>
-                {columns.map((col) => (
-                  <Th key={col.dataKey}>
-                    <span className={classes.thh}>{col.header}</span>
+                {headers.map((header) => (
+                  <Th key={header}>
+                    <span className={classes.thh}>{header}</span>
                   </Th>
                 ))}
-                <Th>
-                  <span className={classes.thh}>Action</span>
-                </Th>
               </tr>
             </thead>
             <tbody>
@@ -464,7 +439,7 @@ const RetailerReport = () => {
                 rows
               ) : (
                 <tr>
-                  <td colSpan={columns.length + 1}>
+                  <td colSpan={6}>
                     <Text weight={500} align="center">
                       Nothing found
                     </Text>
@@ -473,7 +448,6 @@ const RetailerReport = () => {
               )}
             </tbody>
           </Table>
-
           <Center mt="md">
             <Group spacing="xs" position="center">
               <Group spacing="sm">
@@ -497,10 +471,36 @@ const RetailerReport = () => {
               />
             </Group>
           </Center>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-end",
+              flexDirection: "column",
+              p: 1,
+              gap: 1,
+              m: 1,
+              bgcolor: "background.paper",
+              borderRadius: 1,
+            }}
+          >
+            <div
+              style={{
+                marginRight: "35px",
+                fontWeight: "bold",
+                fontSize: "15px",
+              }}
+            >
+              Total Amount:{" "}
+              {formatNumber(
+                sortedData.reduce((sum, item) => sum + Number(item.amount), 0)
+              )}
+            </div>
+          </Box>
         </ScrollArea>
       </Card>
     </div>
   );
 };
 
-export default RetailerReport;
+export default WalletPaymentReport;
