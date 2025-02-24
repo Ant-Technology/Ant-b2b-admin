@@ -8,16 +8,29 @@ import {
   Text,
   Select,
   Box,
+  Menu,
+  Button,
+  Pagination,
+  Center,
 } from "@mantine/core";
+import "jspdf-autotable";
+import jsPDF from "jspdf";
+import * as XLSX from "xlsx";
 import { useQuery } from "@apollo/client";
 import { customLoader } from "components/utilities/loader";
 import { GET_REGIONS } from "apollo/queries";
 import { useViewportSize } from "@mantine/hooks";
 import axios from "axios";
-import { API } from "utiles/url";
+import { API, PAGE_SIZE_OPTIONS_REPORT } from "utiles/url";
 import { showNotification } from "@mantine/notifications";
 import { createStyles } from "@mantine/core";
-
+const columns = [
+  { header: "Name", dataKey: "name" },
+  { header: "Email", dataKey: "contact_email" },
+  { header: "Phone", dataKey: "contact_phone" },
+  { header: "City", dataKey: "city" },
+  { header: "Region", dataKey: "region.name.en" },
+];
 const useStyles = createStyles((theme) => ({
   root: {
     padding: theme.spacing.xl * 1.5,
@@ -34,19 +47,26 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-function SalesDetailModal({ Id }) {
+function SalesDetailModal({ sales }) {
   const { classes } = useStyles();
-  const [sales, setSales] = useState();
+  const [retailers, setSetRetailers] = useState();
   const [productLoading, setProductLoading] = useState(false);
   const [regionsDropDownData, setRegionsDropDownData] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState(null);
-  const [selectedRegionName, setSelectedRegionName] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
 
+  const [size, setSize] = useState("50");
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize);
+  };
+  const [activePage, setActivePage] = useState(1);
   useEffect(() => {
-    fetchData();
-  }, [Id]);
+    fetchData(size, selectedRegion);
+  }, [size, selectedRegion]);
 
-  const fetchData = async () => {
+  const fetchData = async (size, regionId = null) => {
     setProductLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
@@ -55,10 +75,15 @@ function SalesDetailModal({ Id }) {
           Authorization: `Bearer ${token}`,
         },
       };
-      const { data } = await axios.get(`${API}/sales/${Id}`, config);
+      const url =
+        `${API}/salesperson/${sales.id}/retailers?page=${activePage}&first=${size}` +
+        (regionId ? `&region_id=${regionId}` : "");
+      const { data } = await axios.get(url, config);
+
       if (data) {
         setProductLoading(false);
-        setSales(data.data);
+        setSetRetailers(data.data);
+        setTotalPages(data.paginatorInfo.lastPage);
       }
     } catch (error) {
       setProductLoading(false);
@@ -95,28 +120,67 @@ function SalesDetailModal({ Id }) {
 
   const setRegionDropDownValue = (val) => {
     setSelectedRegion(val);
-    console.log("Selected region ID:", val); // Log selected region
-    const selectedRegionObj = regionsDropDownData.find(
-      (region) => region.value === val
-    );
-    // Ensure selectedRegionName is set correctly
-    setSelectedRegionName(selectedRegionObj ? selectedRegionObj.label : "");
+    fetchData(size, val);
   };
 
-  // Log the filtered retailers
-  const filteredRetailers = selectedRegion
-    ? sales?.retailers?.filter((item) => {
-        console.log("Item region ID:", item.region_id); // Log each item's region_id
-        console.log("Comparing with selected region:", selectedRegion); // Log selected region
-        return item.region_id === Number(selectedRegion); // Ensure the comparison is consistent
-      })
-    : sales?.retailers;
+  const handleChange = (page) => {
+    setActivePage(page);
+    fetchData(size, selectedRegion);
+  };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth(); // Get PDF width
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(" Sales Person Report", pageWidth / 2, 20, { align: "center" });
+
+    const headers = columns.map((col) => col.header);
+    const bodyData = retailers.map((row) => [
+      row.name || "N/A",
+      row.contact_email || "N/A",
+      row.contact_phone || "N/A",
+      row.city || "N/A",
+      row.region?.name?.en || "N/A",
+    ]);
+
+    doc.autoTable({
+      startY: 35,
+      head: [headers],
+      body: bodyData,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] }, // Updated header color
+    });
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    const exportedDate = `Exported Date: ${new Date().toLocaleString()}`;
+
+    doc.setFontSize(10);
+    doc.text(exportedDate, pageWidth - 14, pageHeight - 10, { align: "right" });
+
+    doc.save("sales_person_report.pdf");
+  };
+
+  const exportToExcel = () => {
+    const bodyData = retailers.map((row) => ({
+      Name: row.name,
+      Email: row.contact_email,
+      Phone: row.contact_phone,
+      City: row.city,
+      Region: row.region.name.en,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(bodyData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales_retailers");
+    XLSX.writeFile(workbook, "Sales_retailers.xlsx");
+  };
   return (
     <ScrollArea style={{ height: height / 1.8 }} type="auto" offsetScrollbars>
       <div style={{ width: "98%", margin: "auto" }}>
         <LoadingOverlay
-          visible={productLoading}
+          visible={productLoading || regionsLoading}
           color="blue"
           overlayBlur={2}
           loader={customLoader}
@@ -128,6 +192,7 @@ function SalesDetailModal({ Id }) {
             gap: "20px",
             padding: "10px",
             margin: "10px",
+            justifyContent: "space-between", // Space between card and dropdown
             flexWrap: "wrap",
           }}
         >
@@ -175,15 +240,42 @@ function SalesDetailModal({ Id }) {
               </Group>
             </div>
           </Card>
-          <Select
-            data={regionsDropDownData}
-            searchable
-            clearable
-            onChange={setRegionDropDownValue}
-            label="Region"
-            placeholder="Pick a region to filter"
-            style={{ width: "240px" }}
-          />
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <Select
+              data={regionsDropDownData}
+              searchable
+              clearable
+              onChange={setRegionDropDownValue}
+              label="Region"
+              placeholder="Pick a region to filter"
+              style={{ width: "240px" }}
+            />
+            <Menu shadow="md" trigger="hover" openDelay={100} closeDelay={400}>
+              <Menu.Target>
+                <Button
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                    marginTop: "25px",
+                  }}
+                >
+                  Export
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item onClick={exportToPDF}>PDF</Menu.Item>
+                <Menu.Item onClick={exportToExcel}>Excel</Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Box>
         </Box>
         <Card style={{ marginTop: "5px" }} shadow="sm" p="lg">
           <ScrollArea>
@@ -203,7 +295,7 @@ function SalesDetailModal({ Id }) {
                 </tr>
               </thead>
               <tbody>
-                {filteredRetailers?.map((item) => (
+                {retailers?.map((item) => (
                   <tr key={item.id}>
                     <td>{item.name}</td>
                     <td>{item.address}</td>
@@ -215,6 +307,30 @@ function SalesDetailModal({ Id }) {
                 ))}
               </tbody>
             </Table>
+
+            <Center mt="md">
+              <Group spacing="xs" position="center">
+                <Group spacing="sm">
+                  <Text size="sm" mt="sm">
+                    <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                      Show per page:
+                    </span>
+                  </Text>
+                  <Select
+                    value={size}
+                    onChange={handlePageSizeChange}
+                    data={PAGE_SIZE_OPTIONS_REPORT}
+                    style={{ width: 80, height: 40 }}
+                  />
+                </Group>
+                <Pagination
+                  color="blue"
+                  page={activePage}
+                  onChange={handleChange}
+                  total={totalPages}
+                />
+              </Group>
+            </Center>
           </ScrollArea>
         </Card>
       </div>

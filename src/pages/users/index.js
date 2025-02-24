@@ -45,7 +45,7 @@ const Users = () => {
       first: parseInt(size),
       page: activePage,
       search: searchValue,
-      role:roleId
+      role: roleId,
     },
   });
 
@@ -137,7 +137,7 @@ const Users = () => {
       render: (rowData) => {
         return (
           <span>
-            {rowData.status === true ? (
+            {rowData.status === "ACTIVE" ? (
               <Badge variant="light" color="green">
                 Active
               </Badge>
@@ -185,10 +185,15 @@ const Users = () => {
             </Controls.ActionButton>
             <Controls.ActionButton
               color="primary"
-              title={rowData.status ? "Deactivate" : "Activate"}
-              onClick={() => handleUserStatusChange(rowData.id, rowData.status)}
+              title={rowData.status === "ACTIVE" ? "Deactivate" : "Activate"}
+              onClick={() =>
+                handleUserStatusChange(
+                  rowData.id,
+                  rowData.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE"
+                )
+              }
             >
-              {rowData.status ? (
+              {rowData.status === "ACTIVE" ? (
                 <PersonOffIcon size={17} />
               ) : (
                 <HowToRegIcon size={17} />
@@ -210,7 +215,8 @@ const Users = () => {
       },
     ],
     onCompleted(data) {
-      const action = data.changeUserStatus.status ? "Activated" : "Deactivated";
+      const action =
+        data.changeUserStatus.status === "ACTIVE" ? "Activated" : "Deactivated";
       showNotification({
         color: "green",
         title: "Success",
@@ -230,7 +236,7 @@ const Users = () => {
     changeUserStatus({
       variables: {
         id: id, // Ensure id is an integer
-        status: !currentStatus, // Toggle the status
+        status: currentStatus, // Toggle the status
       },
     });
   };

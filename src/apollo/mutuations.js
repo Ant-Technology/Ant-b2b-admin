@@ -894,7 +894,7 @@ export const DEL_PAYMENT_TYPE = gql`
   }
 `;
 export const CHANGE_USER_STATUS = gql`
-  mutation ChangeUserStatus($id: ID!, $status: Boolean!) {
+  mutation ChangeUserStatus($id: ID!, $status: String!) {
     changeUserStatus(id: $id, status: $status) {
       id
       name

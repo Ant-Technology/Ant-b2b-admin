@@ -57,7 +57,16 @@ const useStyles = createStyles((theme) => ({
     fontWeight: "bold",
   },
 }));
-const headers = ["Method", "User Type", "Type", "Amount", "Status", "User"];
+const headers = [
+  "Method",
+  "User Type",
+  "Type",
+  "Amount",
+  "Status",
+  "From",
+  "To",
+  "Date",
+];
 function Th({ children, sortable, sorted, reversed, onSort }) {
   const { classes } = useStyles();
   const Icon = sorted
@@ -229,6 +238,8 @@ const OthersPaymentReport = () => {
       formatNumber(row.amount) || 0,
       row.status || "N/A",
       row.payable.name || "N/A",
+      row.transaction_transfer?.to?.name || "N/A",
+      new Date(row.created_at).toLocaleString() || "N/A",
     ]);
     doc.autoTable({
       startY: 35,
@@ -269,7 +280,9 @@ const OthersPaymentReport = () => {
       Type: row.type,
       Amount: formatNumber(row.amount),
       Status: row.status,
-      User: row.payable.name,
+      From: row.payable.name,
+      To: row.transaction_transfer?.to?.name,
+      Date: new Date(row.created_at).toLocaleString(),
     }));
 
     const totalAmount = sortedData.reduce(
@@ -282,7 +295,9 @@ const OthersPaymentReport = () => {
       Type: "",
       Amount: "",
       Status: "",
-      User: "",
+      From: "",
+      To: "",
+      Date: "",
     });
 
     const worksheet = XLSX.utils.json_to_sheet(bodyData);
@@ -300,6 +315,10 @@ const OthersPaymentReport = () => {
         <td style={{ width: "30px" }}>{formatNumber(row.amount)}</td>
         <td style={{ width: "70px" }}>{row.status}</td>
         <td style={{ width: "100px" }}>{row.payable.name}</td>
+        <td style={{ width: "100px" }}>{row.transaction_transfer?.to?.name}</td>
+        <td style={{ width: "100px" }}>
+          {new Date(row.created_at).toLocaleString()}
+        </td>
       </tr>
     </Fragment>
   ));
@@ -323,7 +342,12 @@ const OthersPaymentReport = () => {
                 { value: "annual", label: "Annual" },
               ]}
               value={timeRange}
-              onChange={setTimeRange}
+              onChange={(value) => {
+                setTimeRange(value);
+                if (value === null) {
+                  fetchData(size);
+                }
+              }}
               label="Select Period"
               placeholder="Select Range"
               withinPortal

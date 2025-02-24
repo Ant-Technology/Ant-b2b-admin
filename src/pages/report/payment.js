@@ -31,6 +31,7 @@ import {
 import { DatePicker } from "@mantine/dates";
 import { Box } from "@mui/material";
 import OthersPaymentReport from "./othersReport";
+import WalletPaymentReport from "./wallet";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -59,7 +60,15 @@ const useStyles = createStyles((theme) => ({
     fontWeight: "bold",
   },
 }));
-const headers = ["Method", "User Type", "Type", "Amount", "Status", "User"];
+const headers = [
+  "Method",
+  "User Type",
+  "Type",
+  "Amount",
+  "Status",
+  "User",
+  "Date",
+];
 function Th({ children, sortable, sorted, reversed, onSort }) {
   const { classes } = useStyles();
   const Icon = sorted
@@ -235,6 +244,7 @@ const PaymentReport = () => {
       formatNumber(row.amount) || 0,
       row.status || "N/A",
       row.payable.name || "N/A",
+      new Date(row.created_at).toLocaleString() || "N/A",
     ]);
     doc.autoTable({
       startY: 35,
@@ -276,6 +286,7 @@ const PaymentReport = () => {
       Amount: formatNumber(row.amount),
       Status: row.status,
       User: row.payable.name,
+      Date: new Date(row.created_at).toLocaleString(),
     }));
 
     const totalAmount = sortedData.reduce(
@@ -289,6 +300,7 @@ const PaymentReport = () => {
       Amount: "",
       Status: "",
       User: "",
+      Date: "",
     });
 
     const worksheet = XLSX.utils.json_to_sheet(bodyData);
@@ -306,6 +318,9 @@ const PaymentReport = () => {
         <td style={{ width: "30px" }}>{formatNumber(row.amount)}</td>
         <td style={{ width: "70px" }}>{row.status}</td>
         <td style={{ width: "100px" }}>{row.payable.name}</td>
+        <td style={{ width: "100px" }}>
+          {new Date(row.created_at).toLocaleString()}
+        </td>
       </tr>
     </Fragment>
   ));
@@ -340,6 +355,9 @@ const PaymentReport = () => {
           <Tabs.Tab value="first">
             <span style={{ color: "#666666", fontWeight: "bold" }}>ANT</span>
           </Tabs.Tab>
+          <Tabs.Tab value="three">
+            <span style={{ color: "#666666", fontWeight: "bold" }}>Wallet</span>
+          </Tabs.Tab>
           <Tabs.Tab value="second">
             <span style={{ color: "#666666", fontWeight: "bold" }}>Others</span>
           </Tabs.Tab>
@@ -347,6 +365,10 @@ const PaymentReport = () => {
         <Tabs.Panel value="second">
           <OthersPaymentReport />
         </Tabs.Panel>
+        <Tabs.Panel value="three">
+          <WalletPaymentReport />
+        </Tabs.Panel>
+
         <Tabs.Panel value="first">
           <div style={{ width: "98%", margin: "auto" }}>
             <SimpleGrid cols={5}>
@@ -358,7 +380,12 @@ const PaymentReport = () => {
                   { value: "annual", label: "Annual" },
                 ]}
                 value={timeRange}
-                onChange={setTimeRange}
+                onChange={(value) => {
+                  setTimeRange(value);
+                  if (value === null) {
+                    fetchData(size);
+                  }
+                }}
                 label="Select Period"
                 placeholder="Select Range"
                 withinPortal
