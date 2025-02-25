@@ -12,6 +12,7 @@ import {
   Button,
   Pagination,
   Center,
+  Drawer,
 } from "@mantine/core";
 import "jspdf-autotable";
 import jsPDF from "jspdf";
@@ -24,6 +25,7 @@ import axios from "axios";
 import { API, PAGE_SIZE_OPTIONS_REPORT } from "utiles/url";
 import { showNotification } from "@mantine/notifications";
 import { createStyles } from "@mantine/core";
+import ShowWarehouseLocation from "components/Warehouse/showWarehouseLocation";
 const columns = [
   { header: "Name", dataKey: "name" },
   { header: "Email", dataKey: "contact_email" },
@@ -54,7 +56,15 @@ function SalesDetailModal({ sales }) {
   const [regionsDropDownData, setRegionsDropDownData] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [openedLocation, setOpenedLocation] = useState(false);
+  const [location, setLocation] = useState({});
+  const handleGeoLocationClick = (lat, lng) => {
+    setLocation({
+      lat: lat,
+      lng: lng,
+    });
+    setOpenedLocation(true);
+  };
   const [size, setSize] = useState("50");
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
@@ -277,6 +287,16 @@ function SalesDetailModal({ sales }) {
             </Menu>
           </Box>
         </Box>
+        <Drawer
+          opened={openedLocation}
+          onClose={() => setOpenedLocation(false)}
+          title="Warehouse Location"
+          padding="xl"
+          size="80%"
+          position="bottom"
+        >
+          <ShowWarehouseLocation location={location} />
+        </Drawer>
         <Card style={{ marginTop: "5px" }} shadow="sm" p="lg">
           <ScrollArea>
             <Table
@@ -286,12 +306,17 @@ function SalesDetailModal({ sales }) {
             >
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th style={{ width: "130px" }}>Name</th>{" "}
+                  {/* Decreased width */}
                   <th>Address</th>
-                  <th>City</th>
-                  <th>Contact Phone</th>
-                  <th>Contact Email</th>
-                  <th>Region</th>
+                  <th style={{ width: "100px" }}>City</th>{" "}
+                  {/* Decreased width */}
+                  <th style={{ width: "130px" }}>Contact Phone</th>
+                  <th style={{ width: "230px" }}>Contact Email</th>{" "}
+                  {/* Increased width */}
+                  <th style={{ width: "130px" }}>Region</th>{" "}
+                  {/* Increased width */}
+                  <th>Location</th>
                 </tr>
               </thead>
               <tbody>
@@ -303,6 +328,22 @@ function SalesDetailModal({ sales }) {
                     <td>{item.contact_phone}</td>
                     <td>{item.contact_email}</td>
                     <td>{item.region.name.en}</td>
+                    <td>
+                      <span style={{ cursor: "pointer" }}>
+                        [{item._geo.lat}, {item._geo.lng}]
+                        <div
+                          onClick={() =>
+                            handleGeoLocationClick(item._geo.lat, item._geo.lng)
+                          }
+                          style={{
+                            cursor: "pointer",
+                            color: "rgb(20, 61, 93)",
+                          }}
+                        >
+                          View Map
+                        </div>
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
