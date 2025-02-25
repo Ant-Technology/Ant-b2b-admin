@@ -250,8 +250,7 @@ function ManageOrderModal({ editId }) {
                       <td>{row.product_sku?.price}</td>
                       <td>{row.product_sku?.product?.name}</td>
                       <td>{row.state}</td>
-                      <td>{row.created_at}</td>
-
+                      <td>{new Date(row.created_at).toLocaleString()}</td>
                       <td>
                         <ManualGearbox
                           color="#1971C2"

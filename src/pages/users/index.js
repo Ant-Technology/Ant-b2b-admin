@@ -32,11 +32,13 @@ const Users = () => {
   const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
+  const [openedStatusChange, setStatusChange] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activePage, setActivePage] = useState(1);
+  const [status, setStatus] = useState(null);
   const [total, setTotal] = useState(0);
   const [roleId, setRoleId] = useState(null);
 
@@ -187,7 +189,7 @@ const Users = () => {
               color="primary"
               title={rowData.status === "ACTIVE" ? "Deactivate" : "Activate"}
               onClick={() =>
-                handleUserStatusChange(
+                handleStatus(
                   rowData.id,
                   rowData.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE"
                 )
@@ -222,6 +224,7 @@ const Users = () => {
         title: "Success",
         message: `User ${action} successfully`,
       });
+      setStatusChange(false)
     },
     onError(error) {
       showNotification({
@@ -232,11 +235,11 @@ const Users = () => {
     },
   });
 
-  const handleUserStatusChange = (id, currentStatus) => {
+  const handleUserStatusChange = () => {
     changeUserStatus({
       variables: {
-        id: id, // Ensure id is an integer
-        status: currentStatus, // Toggle the status
+        id: deleteID, // Ensure id is an integer
+        status: status, // Toggle the status
       },
     });
   };
@@ -248,6 +251,11 @@ const Users = () => {
   const handleDelete = (id) => {
     setOpenedDelete(true);
     setDeleteID(id);
+  };
+  const handleStatus = (id,status) => {
+    setStatusChange(true);
+    setDeleteID(id);
+    setStatus(status)
   };
 
   const handleEditUser = (id) => {
@@ -373,6 +381,19 @@ const Users = () => {
         <Group position="right">
           <Button onClick={() => deleteUser()} color="red">
             Delete
+          </Button>
+        </Group>
+      </Modal>
+      <Modal
+        opened={openedStatusChange}
+        onClose={() => setStatusChange(false)}
+        title="Warning"
+        centered
+      >
+        <p>{`Are you sure do you want ${status==="ACTIVE" ? "Activat" : "Deactivat"} this  user?`}</p>
+        <Group position="right">
+          <Button onClick={() => handleUserStatusChange()} color="red">
+            {status==="ACTIVE" ? "Activat" : "Deactivat"}
           </Button>
         </Group>
       </Modal>
