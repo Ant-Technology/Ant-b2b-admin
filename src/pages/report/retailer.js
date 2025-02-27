@@ -4,7 +4,12 @@ import { useQuery } from "@apollo/client";
 import { GET_PRODUCTS, GET_RETAILERS } from "apollo/queries"; // Ensure this is the correct query
 import { useForm } from "@mantine/form";
 
-export default function RetailerFilter({ onCardClick, retailer }) {
+export default function RetailerFilter({
+  onCardClick,
+  retailer,
+  fetchData,
+  size,
+}) {
   const [dropDownData, setDropDownData] = useState([]);
   const form = useForm({
     initialValues: {
@@ -40,6 +45,9 @@ export default function RetailerFilter({ onCardClick, retailer }) {
         label="Select Retailer"
         onChange={(value) => {
           handleProductSelect(value);
+          if (value === null) {
+            fetchData(size);
+          }
         }}
         clearable
         searchable

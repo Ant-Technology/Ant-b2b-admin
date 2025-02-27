@@ -307,15 +307,11 @@ function SalesDetailModal({ sales }) {
               <thead>
                 <tr>
                   <th style={{ width: "130px" }}>Name</th>{" "}
-                  {/* Decreased width */}
                   <th>Address</th>
                   <th style={{ width: "100px" }}>City</th>{" "}
-                  {/* Decreased width */}
                   <th style={{ width: "130px" }}>Contact Phone</th>
                   <th style={{ width: "230px" }}>Contact Email</th>{" "}
-                  {/* Increased width */}
                   <th style={{ width: "130px" }}>Region</th>{" "}
-                  {/* Increased width */}
                   <th>Location</th>
                 </tr>
               </thead>
