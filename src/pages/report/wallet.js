@@ -29,6 +29,8 @@ import {
 } from "utiles/url";
 import { DatePicker } from "@mantine/dates";
 import { Box } from "@mui/material";
+import RetailerFilter from "./retailer";
+import DriverFilter from "./driver";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -106,11 +108,14 @@ const WalletPaymentReport = () => {
   };
   const { classes } = useStyles();
   const [activePage, setActivePage] = useState(1);
+  const [retailer, setSetRetailer] = useState(null);
+  const [driver, setSetDriver] = useState(null);
+  const [selectedMethod, setSelectedMethod] = useState(null);
   const [total, setTotal] = useState([]);
+  const [walletSummary, setwalletSummary] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [timeRange, setTimeRange] = useState(null);
-  const [drivers, setDrivers] = useState([]);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
 
@@ -134,8 +139,8 @@ const WalletPaymentReport = () => {
       );
       if (response.data) {
         setLoading(false);
-        setDrivers(response.data.transactionsSummary.data);
         setSortedData(response.data.transactionsSummary.data);
+        setwalletSummary(response.data.walletSummary.total_net);
         setTotal(response.data.transactionsSummary?.links);
         setTotalPages(response.data.transactionsSummary.last_page);
       }
@@ -153,28 +158,32 @@ const WalletPaymentReport = () => {
           Authorization: `Bearer ${token}`,
         },
       };
+      const formatLocalDate = (date, hours, minutes, seconds, ms) => {
+        const d = new Date(date);
+        d.setHours(hours, minutes, seconds, ms);
+        const year = d.getFullYear();
+        const month = `${d.getMonth() + 1}`.padStart(2, "0");
+        const day = `${d.getDate()}`.padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+
       const startDate = selectedStartDate
-        ? new Date(selectedStartDate.setHours(0, 0, 0, 0))
-            .toISOString()
-            .slice(0, 10)
+        ? formatLocalDate(selectedStartDate, 0, 0, 0, 0)
         : "";
 
       const endDate = selectedEndDate
-        ? new Date(selectedEndDate.setHours(23, 59, 59, 999))
-            .toISOString()
-            .slice(0, 10)
+        ? formatLocalDate(selectedEndDate, 23, 59, 59, 999)
         : "";
 
       const response = await axios.get(
         `${API}/reports/payments-orders?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&page=${activePage}&first=${size}&type=Wallet`,
+        }&dateFrom=${startDate}&dateTo=${endDate}&page=${activePage}&first=${size}&type=Wallet&retailer=${retailer}&paymentMethod=${selectedMethod}&driver=${driver}`,
         config
       );
 
       if (response.data) {
         setLoading(false);
-        setDrivers(response.data.transactionsSummary.data);
         setSortedData(response.data.transactionsSummary.data);
         setTotal(response.data.transactionsSummary?.links);
         setTotalPages(response.data.transactionsSummary.last_page);
@@ -189,10 +198,20 @@ const WalletPaymentReport = () => {
     setSelectedStartDate(null);
     setSelectedEndDate(null);
     setTimeRange(null);
+    setSelectedMethod(null);
+    setSetRetailer(null);
+    setSetDriver(null);
     fetchData(size);
   };
   const handleChange = (page) => {
-    if (timeRange || selectedEndDate || selectedStartDate) {
+    if (
+      timeRange ||
+      selectedEndDate ||
+      selectedStartDate ||
+      retailer ||
+      selectedMethod ||
+      driver
+    ) {
       setActivePage(page);
       handleFilter();
     } else {
@@ -238,12 +257,8 @@ const WalletPaymentReport = () => {
     });
 
     const finalY = doc.lastAutoTable.finalY || 10;
-    const totalAmount = sortedData.reduce(
-      (sum, item) => sum + Number(item.amount),
-      0
-    );
     doc.text(
-      `Total Amount: ${formatNumber(totalAmount)}`,
+      `Total Net Amount: ${formatNumber(walletSummary?walletSummary:0)}`,
       pageWidth - 20,
       finalY + 10,
       { align: "right" }
@@ -272,13 +287,9 @@ const WalletPaymentReport = () => {
       Date: new Date(row.created_at).toLocaleString(),
     }));
 
-    const totalAmount = sortedData.reduce(
-      (sum, item) => sum + Number(item.amount),
-      0
-    );
     bodyData.push({
-      Method: "Total Amount",
-      UserType: totalAmount.toFixed(2),
+      Method: "Total Net Amount",
+      UserType: formatNumber(walletSummary?walletSummary:0),
       Type: "",
       Amount: "",
       Status: "",
@@ -317,7 +328,7 @@ const WalletPaymentReport = () => {
       />
 
       <div style={{ width: "98%", margin: "auto" }}>
-        <SimpleGrid cols={3}>
+        <SimpleGrid cols={6}>
           <div>
             <Select
               data={[
@@ -346,7 +357,6 @@ const WalletPaymentReport = () => {
               placeholder="Pick a date"
               label="Select Start Date"
               clearable
-              
             />
           </div>
           <div>
@@ -355,6 +365,37 @@ const WalletPaymentReport = () => {
               onChange={setSelectedEndDate}
               placeholder="Pick a date"
               label="Select End Date"
+              clearable
+            />
+          </div>
+          <div>
+            <RetailerFilter
+              fetchData={fetchData}
+              size={size}
+              retailer={retailer}
+              onCardClick={setSetRetailer}
+            />
+          </div>
+          <div>
+            <DriverFilter
+              fetchData={fetchData}
+              size={size}
+              driver={driver}
+              onCardClick={setSetDriver}
+            />
+          </div>
+          <div>
+            <Select
+              data={[
+                { value: "TELEBIRR", label: "TELEBIRR" },
+                { value: "WALLET", label: "WALLET" },
+                { value: "INVOICE", label: "INVOICE" },
+                { value: "CASH", label: "CASH" },
+              ]}
+              value={selectedMethod}
+              onChange={setSelectedMethod}
+              label="Select Payment Method"
+              placeholder="Select Method"
               clearable
             />
           </div>
@@ -367,7 +408,12 @@ const WalletPaymentReport = () => {
             gap: "10px", // Add space between buttons
           }}
         >
-          {(timeRange || selectedEndDate || selectedStartDate) && (
+          {(timeRange ||
+            selectedEndDate ||
+            retailer ||
+            selectedStartDate ||
+            selectedMethod ||
+            driver) && (
             <>
               <Button
                 onClick={handleReset}
@@ -491,10 +537,7 @@ const WalletPaymentReport = () => {
                 fontSize: "15px",
               }}
             >
-              Total Amount:{" "}
-              {formatNumber(
-                sortedData.reduce((sum, item) => sum + Number(item.amount), 0)
-              )}
+              Total Net Amount: {formatNumber(walletSummary ? walletSummary : 0)}
             </div>
           </Box>
         </ScrollArea>

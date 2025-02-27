@@ -16,6 +16,7 @@ import {
   Button,
   Select,
   Menu,
+  Modal,
 } from "@mantine/core";
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
@@ -29,6 +30,8 @@ import {
 } from "utiles/url";
 import { DatePicker } from "@mantine/dates";
 import { Box } from "@mui/material";
+import RetailerFilter from "./retailer";
+import DriverFilter from "./driver";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -112,8 +115,10 @@ const OthersPaymentReport = () => {
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [retailer, setSetRetailer] = useState(null);
+
   const [timeRange, setTimeRange] = useState(null);
-  const [drivers, setDrivers] = useState([]);
+  const [driver, setSetDriver] = useState(null);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
 
@@ -137,7 +142,6 @@ const OthersPaymentReport = () => {
       );
       if (response.data) {
         setLoading(false);
-        setDrivers(response.data.transactionsSummary.data);
         setSortedData(response.data.transactionsSummary.data);
         setTotal(response.data.transactionsSummary?.links);
         setTotalPages(response.data.transactionsSummary.last_page);
@@ -149,6 +153,7 @@ const OthersPaymentReport = () => {
   };
   const handleFilter = async () => {
     setLoading(true);
+    setModalOpened(false);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -156,28 +161,32 @@ const OthersPaymentReport = () => {
           Authorization: `Bearer ${token}`,
         },
       };
+      const formatLocalDate = (date, hours, minutes, seconds, ms) => {
+        const d = new Date(date);
+        d.setHours(hours, minutes, seconds, ms);
+        const year = d.getFullYear();
+        const month = `${d.getMonth() + 1}`.padStart(2, "0");
+        const day = `${d.getDate()}`.padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+
       const startDate = selectedStartDate
-        ? new Date(selectedStartDate.setHours(0, 0, 0, 0))
-            .toISOString()
-            .slice(0, 10)
+        ? formatLocalDate(selectedStartDate, 0, 0, 0, 0)
         : "";
 
       const endDate = selectedEndDate
-        ? new Date(selectedEndDate.setHours(23, 59, 59, 999))
-            .toISOString()
-            .slice(0, 10)
+        ? formatLocalDate(selectedEndDate, 23, 59, 59, 999)
         : "";
 
       const response = await axios.get(
         `${API}/reports/payments-orders?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&paymentMethod=${selectedMethod}&trans_status=${selectedStatus}&page=${activePage}&first=${size}&type=Others`,
+        }&dateFrom=${startDate}&dateTo=${endDate}&paymentMethod=${selectedMethod}&trans_status=${selectedStatus}&page=${activePage}&first=${size}&type=Others&retailer=${retailer}&driver=${driver}`,
         config
       );
 
       if (response.data) {
         setLoading(false);
-        setDrivers(response.data.transactionsSummary.data);
         setSortedData(response.data.transactionsSummary.data);
         setTotal(response.data.transactionsSummary?.links);
         setTotalPages(response.data.transactionsSummary.last_page);
@@ -194,6 +203,8 @@ const OthersPaymentReport = () => {
     setSelectedMethod(null);
     setTimeRange(null);
     setSelectedStatus(null);
+    setSetRetailer(null);
+    setSetDriver(null);
     fetchData(size);
   };
   const handleChange = (page) => {
@@ -202,7 +213,9 @@ const OthersPaymentReport = () => {
       selectedEndDate ||
       selectedStartDate ||
       selectedStatus ||
-      selectedMethod
+      retailer ||
+      selectedMethod ||
+      driver
     ) {
       setActivePage(page);
       handleFilter();
@@ -305,6 +318,7 @@ const OthersPaymentReport = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
     XLSX.writeFile(workbook, "payment_report.xlsx");
   };
+  const [modalOpened, setModalOpened] = useState(false);
 
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
@@ -332,7 +346,19 @@ const OthersPaymentReport = () => {
       />
 
       <div style={{ width: "98%", margin: "auto" }}>
-        <SimpleGrid cols={5}>
+        <Modal
+          opened={modalOpened}
+          onClose={() => setModalOpened(false)}
+          title="Filter Options"
+          size="lg"
+          styles={{
+            modal: {
+              marginTop: "50px",
+              marginLeft: "auto", // Align to the right
+              marginRight: "0", // Remove right margin
+            },
+          }}
+        >
           <div>
             <Select
               data={[
@@ -342,15 +368,9 @@ const OthersPaymentReport = () => {
                 { value: "annual", label: "Annual" },
               ]}
               value={timeRange}
-              onChange={(value) => {
-                setTimeRange(value);
-                if (value === null) {
-                  fetchData(size);
-                }
-              }}
+              onChange={setTimeRange}
               label="Select Period"
               placeholder="Select Range"
-              withinPortal
               clearable
             />
           </div>
@@ -384,9 +404,8 @@ const OthersPaymentReport = () => {
               onChange={setSelectedMethod}
               label="Select Payment Method"
               placeholder="Select Method"
-              withinPortal
               clearable
-            />{" "}
+            />
           </div>
           <div>
             <Select
@@ -400,11 +419,55 @@ const OthersPaymentReport = () => {
               onChange={setSelectedStatus}
               label="Select Status"
               placeholder="Select Status"
-              withinPortal
               clearable
             />
           </div>
-        </SimpleGrid>
+          <div>
+            <RetailerFilter fetchData={fetchData} size={size} retailer={retailer} onCardClick={setSetRetailer} />
+          </div>
+          <div>
+            <DriverFilter fetchData={fetchData} size={size} driver={driver} onCardClick={setSetDriver} />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-start",
+              marginTop: "10px",
+              gap: "10px", // Add space between buttons
+            }}
+          >
+            {(timeRange ||
+              selectedEndDate ||
+              selectedStartDate ||
+              selectedStatus ||
+              retailer ||
+              selectedMethod ||
+              driver) && (
+              <>
+                <Button
+                  onClick={handleFilter}
+                  style={{
+                    width: "20%",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  Apply Filters
+                </Button>
+                <Button
+                  onClick={handleReset}
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  Cancel
+                </Button>
+              </>
+            )}
+          </div>
+        </Modal>
         <div
           style={{
             display: "flex",
@@ -417,30 +480,30 @@ const OthersPaymentReport = () => {
             selectedEndDate ||
             selectedStartDate ||
             selectedStatus ||
-            selectedMethod) && (
-            <>
-              <Button
-                onClick={handleReset}
-                style={{
-                  width: "80px",
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleFilter}
-                style={{
-                  width: "80px",
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-              >
-                Filter
-              </Button>
-            </>
+            retailer ||
+            selectedMethod ||
+            driver) && (
+            <Button
+              onClick={handleReset}
+              style={{
+                width: "80px",
+                backgroundColor: "#FF6A00",
+                color: "#FFFFFF",
+              }}
+            >
+              Cancel
+            </Button>
           )}
+          <Button
+            style={{
+              backgroundColor: "#FF6A00",
+              color: "#FFFFFF",
+              marginBottom: "10px",
+            }}
+            onClick={() => setModalOpened(true)}
+          >
+            Open Filters
+          </Button>
 
           <Menu
             shadow="md"

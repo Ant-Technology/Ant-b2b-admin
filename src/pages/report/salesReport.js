@@ -162,18 +162,23 @@ const SalesReport = () => {
           Authorization: `Bearer ${token}`,
         },
       };
+      const formatLocalDate = (date, hours, minutes, seconds, ms) => {
+        const d = new Date(date);
+        d.setHours(hours, minutes, seconds, ms);
+        const year = d.getFullYear();
+        const month = `${d.getMonth() + 1}`.padStart(2, '0');
+        const day = `${d.getDate()}`.padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+  
       const startDate = selectedStartDate
-        ? new Date(selectedStartDate.setHours(0, 0, 0, 0))
-            .toISOString()
-            .slice(0, 10)
+        ? formatLocalDate(selectedStartDate, 0, 0, 0, 0)
         : "";
-
+  
       const endDate = selectedEndDate
-        ? new Date(selectedEndDate.setHours(23, 59, 59, 999))
-            .toISOString()
-            .slice(0, 10)
+        ? formatLocalDate(selectedEndDate, 23, 59, 59, 999)
         : "";
-
+  
       const response = await axios.get(
         `${API}/reports/sales?period=${
           timeRange ? timeRange : "custom"
@@ -381,10 +386,10 @@ const SalesReport = () => {
             />
           </div>
           <div>
-            <ProductFilter category={product} onCardClick={setSetProduct} />
+            <ProductFilter retailer={product} onCardClick={setSetProduct} />
           </div>
           <div>
-            <RetailerFilter category={retailer} onCardClick={setSetRetailer} />
+            <RetailerFilter retailer={retailer} onCardClick={setSetRetailer} />
           </div>
           <div>
             <WarehouseFilter

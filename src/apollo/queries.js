@@ -407,7 +407,14 @@ export const NON_PAGINATED_CATEGORIES = gql`
     }
   }
 `;
-
+export const NON_PAGINATED_DRIVERS = gql`
+  query {
+    driversNonPaginated {
+      id
+      name
+    }
+  }
+`;
 export const GET_PRODUCT = gql`
   query ($id: ID!) {
     product(id: $id) {
