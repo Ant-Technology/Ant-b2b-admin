@@ -17,7 +17,6 @@ import {
   Menu,
   Select,
 } from "@mantine/core";
-
 import axios from "axios";
 import { customLoader } from "components/utilities/loader";
 import React, { Fragment, useEffect, useState } from "react";
@@ -33,6 +32,7 @@ import ProductFilter from "./product";
 import RetailerFilter from "./retailer";
 import WarehouseFilter from "./warehouse";
 import { Box } from "@mui/material";
+
 const headers = [
   "SKU",
   "Product Name",
@@ -44,6 +44,7 @@ const headers = [
   "Date",
   "Retailer",
 ];
+
 const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
@@ -87,8 +88,6 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
         className={classes.control}
       >
         <Group position="apart" spacing={5}>
-          {" "}
-          {/* Adjusted spacing here */}
           <Text weight={500} size="sm">
             {children}
           </Text>
@@ -104,41 +103,36 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const SalesReport = () => {
-  const [size, setSize] = useState("50");
-  const handlePageSizeChange = (newSize) => {
-    setSize(newSize);
-    setActivePage(1);
-    fetchData(newSize);
-  };
   const { classes } = useStyles();
+  const [size, setSize] = useState("50");
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [product, setSetProduct] = useState(null);
   const [retailer, setSetRetailer] = useState(null);
-  const [warehouse, setSetWarhouse] = useState(null);
+  const [warehouse, setSetWarehouse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [timeRange, setTimeRange] = useState(null);
   const [drivers, setDrivers] = useState([]);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
-
   const [sortedData, setSortedData] = useState([]);
-  useEffect(() => {
-    fetchData(size);
-  }, []);
 
-  const fetchData = async (size) => {
+  useEffect(() => {
+    fetchData(size, activePage);
+  }, [size, activePage]);
+
+  const fetchData = async (size, page) => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
       const response = await axios.get(
-        `${API}/reports/sales?page=${activePage}&first=${size}`,
+        `${API}/reports/sales?page=${page}&first=${size}`,
         config
       );
       if (response.data) {
@@ -153,10 +147,17 @@ const SalesReport = () => {
       console.error("Error fetching data:", error);
     }
   };
+
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1); // Reset to the first page when page size changes
+    fetchData(newSize, 1); // Fetch data for the first page with the new size
+  };
+
   const handleFilter = async () => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -178,11 +179,9 @@ const SalesReport = () => {
       const endDate = selectedEndDate
         ? formatLocalDate(selectedEndDate, 23, 59, 59, 999)
         : "";
-  
+
       const response = await axios.get(
-        `${API}/reports/sales?period=${
-          timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&product=${product}&warehouse=${warehouse}&retailer=${retailer}&page=${activePage}&first=${size}`,
+        `${API}/reports/sales?period=${timeRange || "custom"}&startDate=${startDate}&endDate=${endDate}&product=${product}&warehouse=${warehouse}&retailer=${retailer}&page=${activePage}&first=${size}`,
         config
       );
 
@@ -205,10 +204,12 @@ const SalesReport = () => {
     setSetProduct(null);
     setTimeRange(null);
     setSetRetailer(null);
-    setSetWarhouse(null);
-    fetchData(size);
+    setSetWarehouse(null);
+    fetchData(size, activePage);
   };
+
   const handleChange = (page) => {
+    setActivePage(page);
     if (
       timeRange ||
       selectedEndDate ||
@@ -217,19 +218,15 @@ const SalesReport = () => {
       product ||
       retailer
     ) {
-      setActivePage(page);
       handleFilter();
     } else {
-      setActivePage(page);
-      fetchData(size);
+      fetchData(size, page);
     }
   };
-  const [opened, setOpened] = useState(false);
 
   const exportToPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text("Sales Report", pageWidth / 2, 20, { align: "center" });
@@ -264,23 +261,22 @@ const SalesReport = () => {
       head: [headers],
       body: bodyData,
       styles: { fontSize: 10 },
-      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] }, // Updated header color
+      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] },
     });
+
     const finalY = doc.lastAutoTable.finalY || 10;
     doc.text(
       `Total Price: ${formatNumber(
-        sortedData.reduce((sum, item) => {
-          return sum + item.subtotal;
-        }, 0)
+        sortedData.reduce((sum, item) => sum + item.subtotal, 0)
       )}`,
-      doc.internal.pageSize.getWidth() - 20,
+      pageWidth - 20,
       finalY + 10,
       { align: "right" }
     );
 
     const exportedDate = `Exported Date: ${new Date().toLocaleString()}`;
     doc.setFontSize(10);
-    doc.text(exportedDate, pageWidth - 14, pageHeight - 10, { align: "right" });
+    doc.text(exportedDate, pageWidth - 14, doc.internal.pageSize.getHeight() - 10, { align: "right" });
 
     doc.save("sales_report.pdf");
   };
@@ -297,12 +293,11 @@ const SalesReport = () => {
       Date: row.date,
       Retailer: row.retailer,
     }));
+
     bodyData.push({
       SKU: "Total Price",
       ProductName: formatNumber(
-        sortedData.reduce((sum, item) => {
-          return sum + item.subtotal;
-        }, 0)
+        sortedData.reduce((sum, item) => sum + item.subtotal, 0)
       ),
       Quantity: "",
       UnitPrice: "",
@@ -312,6 +307,7 @@ const SalesReport = () => {
       Date: "",
       Retailer: "",
     });
+
     const worksheet = XLSX.utils.json_to_sheet(bodyData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sales");
@@ -335,6 +331,7 @@ const SalesReport = () => {
       </tr>
     </Fragment>
   ));
+
   return (
     <div style={{ width: "98%", margin: "auto" }}>
       <LoadingOverlay
@@ -358,7 +355,7 @@ const SalesReport = () => {
               onChange={(value) => {
                 setTimeRange(value);
                 if (value === null) {
-                  fetchData(size);
+                  fetchData(size, activePage);
                 }
               }}
               label="Select Period"
@@ -394,7 +391,7 @@ const SalesReport = () => {
           <div>
             <WarehouseFilter
               category={warehouse}
-              onCardClick={setSetWarhouse}
+              onCardClick={setSetWarehouse}
             />
           </div>
         </SimpleGrid>
@@ -406,12 +403,7 @@ const SalesReport = () => {
             gap: "10px", // Add space between buttons
           }}
         >
-          {(timeRange ||
-            selectedEndDate ||
-            selectedStartDate ||
-            warehouse ||
-            product ||
-            retailer) && (
+          {(timeRange || selectedEndDate || selectedStartDate || warehouse || product || retailer) && (
             <>
               <Button
                 onClick={handleReset}
@@ -438,7 +430,7 @@ const SalesReport = () => {
 
           <Menu
             shadow="md"
-            trigger="hover" // Change to "hover" to open on hover
+            trigger="hover"
             openDelay={100}
             closeDelay={400}
           >
@@ -538,9 +530,7 @@ const SalesReport = () => {
             >
               Total Price:{" "}
               {formatNumber(
-                sortedData.reduce((sum, item) => {
-                  return sum + item.subtotal;
-                }, 0)
+                sortedData.reduce((sum, item) => sum + item.subtotal, 0)
               )}
             </div>
           </Box>

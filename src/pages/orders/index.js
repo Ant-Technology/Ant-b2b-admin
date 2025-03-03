@@ -211,7 +211,7 @@ const Orders = () => {
   const handleChange = (currentPage) => {
     fetchMore({
       variables: {
-        first: size,
+        first: parseInt(size),
         page: currentPage,
       },
     });

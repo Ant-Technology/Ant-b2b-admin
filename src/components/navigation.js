@@ -23,9 +23,9 @@ import {
   IconSettings,
   IconChevronUp,
   IconReport,
-  IconBox ,
+  IconBox,
   IconSteeringWheel,
-  IconUserPlus
+  IconUserPlus,
 } from "@tabler/icons";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -37,6 +37,7 @@ import {
   showNotification,
 } from "@mantine/notifications";
 import NotificationExample from "./showNotification";
+import { useRef } from "react";
 
 const useStyles = createStyles((theme, _params, getRef) => {
   const icon = getRef("icon");
@@ -163,6 +164,30 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       pusher.disconnect();
     };
   }, []); // notification
+  const containerRef = useRef(null);
+  const reportSectionRef = useRef(null); // Ref for the Report section's Collapse component
+
+  // Effect to handle scrolling when Report section is opened
+  useEffect(() => {
+    if (openSection === "Report") {
+      // Use setTimeout to wait for the Collapse animation to complete
+      setTimeout(() => {
+        if (reportSectionRef.current && containerRef.current) {
+          const container = containerRef.current;
+          const reportElement = reportSectionRef.current;
+
+          // Calculate the scroll position
+          const elementRect = reportElement.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          const scrollTop =
+            elementRect.top - containerRect.top + container.scrollTop;
+
+          // Scroll the container to the Report section with an offset
+          container.scrollTop = scrollTop - 20; // Adjust offset as needed
+        }
+      }, 300); // Matches the Collapse component's transition duration
+    }
+  }, [openSection]);
 
   const handleSectionToggle = (sectionLabel) => {
     setOpenSection(openSection === sectionLabel ? "" : sectionLabel);
@@ -244,7 +269,11 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
     }
 
     if (permissions.some((perm) => perm.name === "drivers-view")) {
-      data.push({ link: "/drivers", label: "Drivers", icon: IconSteeringWheel });
+      data.push({
+        link: "/drivers",
+        label: "Drivers",
+        icon: IconSteeringWheel,
+      });
     }
 
     if (permissions.some((perm) => perm.name === "vehicle_types-view")) {
@@ -331,9 +360,9 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         ...(permissions.some((perm) => perm.name === "reports-retailers")
           ? [{ link: "/retailer-report", label: "Retailer Report" }]
           : []),
-          ...(permissions.some((perm) => perm.name === "reports-retailers")
+        ...(permissions.some((perm) => perm.name === "reports-retailers")
           ? [{ link: "/payment-report", label: "Payment Report" }]
-          : [])
+          : []),
       ],
     });
   }
@@ -360,7 +389,9 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
                 <span
                   style={{
                     fontWeight:
-                      item.label === "Settings" || item.label === "Feedback" || "Report"
+                      item.label === "Settings" ||
+                      item.label === "Feedback" ||
+                      "Report"
                         ? "bold"
                         : "normal",
                   }}
@@ -381,7 +412,10 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
               ) : null}
             </div>
           </div>
-          <Collapse in={openSection === item.label}>
+          <Collapse
+            ref={item.label === "Report" ? reportSectionRef : null} // Attach ref here
+            in={openSection === item.label}
+          >
             {item.links.map((subItem, subIndex) => (
               <Link
                 key={subIndex}

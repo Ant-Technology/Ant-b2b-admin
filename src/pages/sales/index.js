@@ -26,7 +26,7 @@ import {
 import { FiEdit, FiEye } from "react-icons/fi";
 import EditIcon from "@mui/icons-material/Edit";
 
-import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
+import { Edit, Trash } from "tabler-icons-react";
 import axios from "axios";
 import B2bTable from "components/reusable/b2bTable";
 import { customLoader } from "components/utilities/loader";
@@ -45,11 +45,9 @@ const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
   },
-
   control: {
     width: "100%",
     padding: `${theme.spacing.xs}px ${theme.spacing.md}px`,
-
     "&:hover": {
       backgroundColor:
         theme.colorScheme === "dark"
@@ -57,7 +55,6 @@ const useStyles = createStyles((theme) => ({
           : theme.colors.gray[0],
     },
   },
-
   icon: {
     width: 21,
     height: 21,
@@ -70,8 +67,6 @@ const useStyles = createStyles((theme) => ({
     textTransform: "uppercase",
     fontWeight: "bold",
   },
-  
-
   searchContainer: {
     position: "relative",
     display: "flex",
@@ -80,14 +75,14 @@ const useStyles = createStyles((theme) => ({
   },
   searchInput: {
     flexGrow: 1,
-    paddingRight: "50px", // Add padding to avoid text overlap with button
+    paddingRight: "50px",
   },
   searchButton: {
     position: "absolute",
     right: 0,
     borderRadius: "0 4px 4px 0",
     height: "70%",
-    width: "40px", // Fixed width for the button
+    width: "40px",
     backgroundColor: "#FF6A00",
     color: "#FFFFFF",
     border: "none",
@@ -136,9 +131,7 @@ const Drivers = () => {
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [drivers, setDrivers] = useState([]);
-
   const [openedEdit, setOpenedEdit] = useState(false);
-  const [editId, setEditId] = useState();
   const [editRow, setEditRow] = useState();
   const [deleteID, setDeleteID] = useState(false);
   const [search, setSearch] = useState("");
@@ -148,17 +141,19 @@ const Drivers = () => {
   const [openedDetail, setOpenedDetail] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const [size, setSize] = useState("10");
+
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
-    fetchData(newSize);
+    fetchData(newSize, 1);
   };
-  useEffect(() => {
-    fetchData(size);
-  }, []);
 
-  const fetchData = async (size) => {
-    setLoading(true)
+  useEffect(() => {
+    fetchData(size, activePage);
+  }, [size, activePage]);
+
+  const fetchData = async (size, page = activePage) => {
+    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -166,22 +161,29 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/sales?page=${activePage}&first=${size}`, config);
+      const response = await axios.get(
+        `${API}/sales?page=${page}&first=${size}`,
+        config
+      );
       if (response.data) {
-        setLoading(false)
+        setLoading(false);
         setDrivers(response.data.data);
-        setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
+        setSortedData(response.data.data);
         setTotal(response.data?.links);
         setTotalPages(response.data.paginatorInfo.lastPage);
       }
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       console.error("Error fetching data:", error);
     }
   };
 
-  const handleSearchChange = async(event) => {
-    setLoading(true)
+  const handleSearchChange = async (event) => {
+    setSearch(event.currentTarget.value);
+  };
+
+  const handleSearchSubmit = async () => {
+    setLoading(true);
     try {
       let token = localStorage.getItem("auth_token");
       const config = {
@@ -189,16 +191,19 @@ const Drivers = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const response = await axios.get(`${API}/sales?search=${search}&page=${activePage}&first=${size}`, config);
+      const response = await axios.get(
+        `${API}/sales?search=${search}&page=${activePage}&first=${size}`,
+        config
+      );
       if (response.data) {
-        setLoading(false)
+        setLoading(false);
         setDrivers(response.data.data);
-        setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
+        setSortedData(response.data.data);
         setTotal(response.data?.links);
         setTotalPages(response.data.paginatorInfo.lastPage);
       }
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       console.error("Error fetching data:", error);
     }
   };
@@ -213,7 +218,6 @@ const Drivers = () => {
         if (payload.reversed) {
           return b[payload.sortBy].localeCompare(a[payload.sortBy]);
         }
-
         return a[payload.sortBy].localeCompare(b[payload.sortBy]);
       }),
       payload.search
@@ -222,7 +226,7 @@ const Drivers = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
-    fetchData(size)
+    fetchData(size, page);
   };
 
   const handleSort = (field) => {
@@ -231,11 +235,12 @@ const Drivers = () => {
     setSortBy(field);
     setSortedData(sortData(drivers, { sortBy: field, reversed, search }));
   };
+
   const handleEditSales = (row) => {
     setOpenedEdit(true);
     setEditRow(row);
   };
-  const [isHovered, setIsHovered] = useState(false);
+
   const handleManageSales = (id) => {
     setEditRow(id);
     setOpenedDetail(true);
@@ -252,6 +257,7 @@ const Drivers = () => {
       )
     );
   };
+
   const handleDelete = (id) => {
     setOpenedDelete(true);
     setDeleteID(id);
@@ -267,7 +273,7 @@ const Drivers = () => {
       };
       const response = await axios.delete(`${API}/sales/${deleteID}`, config);
       if (response.data) {
-        fetchData(size);
+        fetchData(size, activePage);
         setOpenedDelete(false);
         setDeleteID(null);
         showNotification({
@@ -287,7 +293,6 @@ const Drivers = () => {
       });
     }
   };
-
   const theme = useMantineTheme();
   const rows = sortedData?.map((row) => (
     <Fragment key={row.id}>
@@ -297,31 +302,29 @@ const Drivers = () => {
         <td>{row.phone}</td>
         <td>{row.retailers_count}</td>
         <td>
-          <>
+          <Controls.ActionButton
+            color="primary"
+            title="Update"
+            onClick={() => handleEditSales(row)}
+          >
+            <EditIcon style={{ fontSize: "1rem" }} />
+          </Controls.ActionButton>
+          <span style={{ marginLeft: "1px" }}>
             <Controls.ActionButton
               color="primary"
-              title="Update"
-              onClick={() => handleEditSales(row)}
+              title="View Detail"
+              onClick={() => handleManageSales(row)}
             >
-              <EditIcon style={{ fontSize: "1rem" }} />
+              <FiEye fontSize="medium" />
             </Controls.ActionButton>
-            <span style={{ marginLeft: "1px" }}>
-              <Controls.ActionButton
-                color="primary"
-                title="View Detail"
-                onClick={() => handleManageSales(row)}
-              >
-                <FiEye fontSize="medium" />
-              </Controls.ActionButton>
-            </span>
-            <Controls.ActionButton
-              color="primary"
-              title="Delete"
-              onClick={() => handleDelete(`${row.id}`)}
-            >
-              <Trash size={17} />
-            </Controls.ActionButton>
-          </>
+          </span>
+          <Controls.ActionButton
+            color="primary"
+            title="Delete"
+            onClick={() => handleDelete(`${row.id}`)}
+          >
+            <Trash size={17} />
+          </Controls.ActionButton>
         </td>
       </tr>
     </Fragment>
@@ -352,11 +355,10 @@ const Drivers = () => {
         size="80%"
       >
         <SalesEditModal
-          activePage={size}
+          activePage={activePage}
           fetchData={fetchData}
           editRow={editRow}
           setOpenedEdit={setOpenedEdit}
-          editId={editId}
         />
       </Drawer>
       <Drawer
@@ -370,7 +372,7 @@ const Drivers = () => {
         <SalesAddModal
           total={total}
           setTotal={setTotal}
-          activePage={size}
+          activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}
           fetchData={fetchData}
@@ -409,32 +411,31 @@ const Drivers = () => {
               </Button>
             </div>
             <div></div>
-
             <div className={classes.searchContainer}>
               <TextInput
                 placeholder="Search"
                 mb="md"
                 icon={<Search size={14} />}
                 value={search}
-                onChange={(event) => setSearch(event.currentTarget.value)}
+                onChange={handleSearchChange}
                 className={classes.searchInput}
                 rightSection={
-                  search && ( // Show clear icon only if there's text in the input
+                  search && (
                     <UnstyledButton
                       onClick={() => {
                         setSearch(""); // Clear the search input
-                        fetchData(size); // Fetch all drivers again
+                        fetchData(size, activePage); // Fetch all drivers again
                       }}
-                      style={{ padding: 5 }} // Adjust padding for better click area
+                      style={{ padding: 5 }}
                     >
-                      <X size={16} color="red" /> {/* Clear icon */}
+                      <X size={16} color="red" />
                     </UnstyledButton>
                   )
                 }
               />
               <button
                 className={classes.searchButton}
-                onClick={handleSearchChange}
+                onClick={handleSearchSubmit}
               >
                 <Search size={16} />
               </button>
@@ -461,7 +462,6 @@ const Drivers = () => {
                   <span className={classes.thh}> Retailers Count</span>
                 </Th>
                 <Th sortable={false}>
-                  {" "}
                   <span className={classes.thh}>Actions</span>
                 </Th>
               </tr>
@@ -471,7 +471,7 @@ const Drivers = () => {
                 rows
               ) : (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={5}>
                     <Text weight={500} align="center">
                       Nothing found
                     </Text>
@@ -480,30 +480,29 @@ const Drivers = () => {
               )}
             </tbody>
           </Table>
-         
-                   <Center mt="md">
-                     <Group spacing="xs" position="center">
-                       <Group spacing="sm">
-                         <Text size="sm" mt="sm">
-                           <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
-                             Show per page:
-                           </span>
-                         </Text>
-                         <Select
-                           value={size}
-                           onChange={handlePageSizeChange}
-                           data={PAGE_SIZE_OPTIONS}
-                           style={{ width: 80, height: 40 }}
-                         />
-                       </Group>
-                       <Pagination
-                         color="blue"
-                         page={activePage}
-                         onChange={handleChange}
-                         total={totalPages}
-                       />
-                     </Group>
-                   </Center>
+          <Center mt="md">
+            <Group spacing="xs" position="center">
+              <Group spacing="sm">
+                <Text size="sm" mt="sm">
+                  <span style={{ color: "#FF6A00", marginBottom: "10px" }}>
+                    Show per page:
+                  </span>
+                </Text>
+                <Select
+                  value={size}
+                  onChange={handlePageSizeChange}
+                  data={PAGE_SIZE_OPTIONS}
+                  style={{ width: 80, height: 40 }}
+                />
+              </Group>
+              <Pagination
+                color="blue"
+                page={activePage}
+                onChange={handleChange}
+                total={totalPages}
+              />
+            </Group>
+          </Center>
         </ScrollArea>
         <Modal
           opened={openedDelete}
@@ -511,9 +510,9 @@ const Drivers = () => {
           title="Warning"
           centered
         >
-          <p>Are you sure do you want to delete this Sales?</p>
+          <p>Are you sure you want to delete this Sales?</p>
           <Group position="right">
-            <Button onClick={() => deleteSales()} color="red">
+            <Button onClick={deleteSales} color="red">
               Delete
             </Button>
           </Group>

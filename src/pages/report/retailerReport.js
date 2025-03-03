@@ -31,6 +31,7 @@ import { API, PAGE_SIZE_OPTIONS, PAGE_SIZE_OPTIONS_REPORT } from "utiles/url";
 import Controls from "components/controls/Controls";
 import { DatePicker } from "@mantine/dates";
 import OrdersDetailModal from "./orders";
+
 const columns = [
   { header: "Name", dataKey: "name" },
   { header: "Email", dataKey: "contact_email" },
@@ -38,6 +39,7 @@ const columns = [
   { header: "Address", dataKey: "address" },
   { header: "Region", dataKey: "region.name.en" },
 ];
+
 const useStyles = createStyles((theme) => ({
   th: {
     padding: "0 !important",
@@ -81,8 +83,6 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
         className={classes.control}
       >
         <Group position="apart" spacing={5}>
-          {" "}
-          {/* Adjusted spacing here */}
           <Text weight={500} size="sm">
             {children}
           </Text>
@@ -98,41 +98,34 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const RetailerReport = () => {
-  const [size, setSize] = useState("50");
-  const handlePageSizeChange = (newSize) => {
-    setSize(newSize);
-    setActivePage(1);
-    fetchData(newSize);
-  };
   const { classes } = useStyles();
+  const [size, setSize] = useState("50");
   const [activePage, setActivePage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [openedDetail, setOpenedDetail] = useState(false);
-
   const [timeRange, setTimeRange] = useState(null);
   const [status, setStatus] = useState(null);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
-
   const [sortedData, setSortedData] = useState([]);
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetchData(size);
-  }, []);
+    fetchData(size, activePage);
+  }, [size, activePage]);
 
-  const fetchData = async (size) => {
+  const fetchData = async (size, page) => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
       const response = await axios.get(
-        `${API}/reports/retailers?page=${activePage}&first=${size}`,
+        `${API}/reports/retailers?page=${page}&first=${size}`,
         config
       );
       if (response.data) {
@@ -142,17 +135,26 @@ const RetailerReport = () => {
       }
     } catch (error) {
       setLoading(false);
+      console.error("Error fetching data:", error);
     }
   };
+
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1); // Reset to first page on size change
+    fetchData(newSize, 1);
+  };
+
   const handleFilter = async () => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
+
       const formatLocalDate = (date, hours, minutes, seconds, ms) => {
         const d = new Date(date);
         d.setHours(hours, minutes, seconds, ms);
@@ -173,7 +175,7 @@ const RetailerReport = () => {
       const response = await axios.get(
         `${API}/reports/retailers?period=${
           timeRange ? timeRange : "custom"
-        }&startDate=${startDate}&endDate=${endDate}&status=${status}&first=${size}`,
+        }&startDate=${startDate}&endDate=${endDate}&status=${status}page=${activePage}&first=${size}`,
         config
       );
       if (response.data) {
@@ -183,6 +185,7 @@ const RetailerReport = () => {
       }
     } catch (error) {
       setLoading(false);
+      console.error("Error fetching data:", error);
     }
   };
 
@@ -191,25 +194,27 @@ const RetailerReport = () => {
     setSelectedEndDate(null);
     setStatus(null);
     setTimeRange(null);
-    fetchData(size);
+    fetchData(size, activePage);
   };
+
   const handleChange = (page) => {
+    setActivePage(page);
     if (timeRange || selectedEndDate || selectedStartDate || status) {
-      setActivePage(page);
       handleFilter();
     } else {
-      setActivePage(page);
-      fetchData(size);
+      fetchData(size, page);
     }
   };
+
   const theme = useMantineTheme();
   const handleDetail = (item) => {
     setOpenedDetail(true);
     setData(item);
   };
+
   const exportToPDF = () => {
     const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth(); // Get PDF width
+    const pageWidth = doc.internal.pageSize.getWidth();
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
@@ -217,14 +222,8 @@ const RetailerReport = () => {
 
     let subtitle = "Date: ";
     if (selectedStartDate && selectedEndDate) {
-      const startDate =
-        selectedStartDate instanceof Date
-          ? selectedStartDate.toISOString().slice(0, 10)
-          : "N/A";
-      const endDate =
-        selectedEndDate instanceof Date
-          ? selectedEndDate.toISOString().slice(0, 10)
-          : "N/A";
+      const startDate = selectedStartDate.toISOString().slice(0, 10);
+      const endDate = selectedEndDate.toISOString().slice(0, 10);
       subtitle += `${startDate} - ${endDate}`;
     } else {
       subtitle += "All Date";
@@ -233,6 +232,7 @@ const RetailerReport = () => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
     doc.text(subtitle, pageWidth / 2, 28, { align: "center" });
+
     const headers = columns.map((col) => col.header);
     const bodyData = sortedData.map((row) => [
       row.name || "N/A",
@@ -248,14 +248,12 @@ const RetailerReport = () => {
       head: [headers],
       body: bodyData,
       styles: { fontSize: 10 },
-      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] }, // Updated header color
+      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] },
     });
-    const pageHeight = doc.internal.pageSize.getHeight();
 
     const exportedDate = `Exported Date: ${new Date().toLocaleString()}`;
-
     doc.setFontSize(10);
-    doc.text(exportedDate, pageWidth - 14, pageHeight - 10, { align: "right" });
+    doc.text(exportedDate, pageWidth - 14, doc.internal.pageSize.getHeight() - 10, { align: "right" });
 
     doc.save("retailer_report.pdf");
   };
@@ -286,7 +284,6 @@ const RetailerReport = () => {
         <td>{row.region.name.en}</td>
         <td>{row.orders.length}</td>
         <td>
-          {" "}
           <Controls.ActionButton
             color="primary"
             title="View Detail"
@@ -298,6 +295,7 @@ const RetailerReport = () => {
       </tr>
     </Fragment>
   ));
+
   return (
     <div style={{ width: "98%", margin: "auto" }}>
       <LoadingOverlay
@@ -321,7 +319,7 @@ const RetailerReport = () => {
               onChange={(value) => {
                 setTimeRange(value);
                 if (value === null) {
-                  fetchData(size);
+                  fetchData(size, activePage);
                 }
               }}              label="Select Period"
               placeholder="Select Range"
@@ -358,7 +356,7 @@ const RetailerReport = () => {
               onChange={(value) => {
                 setStatus(value);
                 if (value === null) {
-                  fetchData(size);
+                  fetchData(size, activePage);
                 }
               }}
               label="Select Status"
@@ -404,7 +402,7 @@ const RetailerReport = () => {
 
           <Menu
             shadow="md"
-            trigger="hover" // Change to "hover" to open on hover
+            trigger="hover"
             openDelay={100}
             closeDelay={400}
           >
