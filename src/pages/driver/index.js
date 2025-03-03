@@ -142,7 +142,7 @@ const Drivers = () => {
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
-    fetchData(newSize);
+    fetchData(newSize, 1);
   };
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState([]);
@@ -165,9 +165,6 @@ const Drivers = () => {
   const [openedDelete, setOpenedDelete] = useState(false);
 
   useEffect(() => {
-    fetchData(size);
-  }, []);
-  useEffect(() => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
     });
@@ -182,32 +179,34 @@ const Drivers = () => {
     };
   }, []);
 
-  const fetchData = async (size) => {
+  useEffect(() => {
+    fetchData(size, activePage);
+  }, [size, activePage]);
+
+  const fetchData = async (size, page) => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
       const response = await axios.get(
-        `${API}/drivers?page=${activePage}&first=${size}`,
+        `${API}/drivers?page=${page}&first=${size}`,
         config
       );
       if (response.data) {
+        setLoading(false);
         setDrivers(response.data.data);
         setSortedData(response.data.data); // Ensure sorting is applied when data is fetched
-        setTotal(response.data?.links);
         setTotalPages(response.data.paginatorInfo.lastPage);
-        setLoading(false);
       }
     } catch (error) {
       setLoading(false);
       console.error("Error fetching data:", error);
     }
   };
-
   const handleSearchChange = async () => {
     setLoading(true);
     try {
@@ -253,7 +252,7 @@ const Drivers = () => {
 
   const handleChange = (page) => {
     setActivePage(page);
-    fetchData(size);
+    fetchData(size, page);
   };
 
   const handleSort = (field) => {
@@ -350,7 +349,11 @@ const Drivers = () => {
           <td style={{ width: "10%" }}>
             {row.vehicle?.vehicle_type?.title.en}
           </td>
-          <td>{row.wallet?.balance?formatNumber(row.wallet?.balance):"No Balance"}</td>
+          <td>
+            {row.wallet?.balance
+              ? formatNumber(row.wallet?.balance)
+              : "No Balance"}
+          </td>
           <td>
             <div style={{ display: "flex" }}>
               <Controls.ActionButton
@@ -398,11 +401,11 @@ const Drivers = () => {
           borderBottom: `2px solid #FF6A00`,
         },
         tab: {
-          '&[data-active]': {
-            borderColor: '#FF6A00',
+          "&[data-active]": {
+            borderColor: "#FF6A00",
           },
-          '&:hover': {
-            borderColor: '#FF6A00',
+          "&:hover": {
+            borderColor: "#FF6A00",
           },
         },
       }}
@@ -484,7 +487,7 @@ const Drivers = () => {
             size="80%"
           >
             <DriverEditModal
-              activePage={size}
+              activePage={activePage}
               fetchData={fetchData}
               editRow={editRow}
               setOpenedEdit={setOpenedEdit}
@@ -502,7 +505,7 @@ const Drivers = () => {
             <DriverAddModal
               total={total}
               setTotal={setTotal}
-              activePage={size}
+              activePage={activePage}
               setActivePage={setActivePage}
               setOpened={setOpened}
               fetchData={fetchData}

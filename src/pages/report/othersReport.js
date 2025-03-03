@@ -62,12 +62,10 @@ const useStyles = createStyles((theme) => ({
 }));
 const headers = [
   "Method",
-  "User Type",
-  "Type",
   "Amount",
   "Status",
-  "From",
-  "To",
+  "From Retailer",
+  "To Driver",
   "Date",
 ];
 function Th({ children, sortable, sorted, reversed, onSort }) {
@@ -246,8 +244,6 @@ const OthersPaymentReport = () => {
 
     const bodyData = sortedData.map((row) => [
       row.payment_method || "N/A",
-      row.payable_type.split("\\").pop() || "N/A",
-      row.type || "N/A",
       formatNumber(row.amount) || 0,
       row.status || "N/A",
       row.payable.name || "N/A",
@@ -289,12 +285,10 @@ const OthersPaymentReport = () => {
   const exportToExcel = () => {
     const bodyData = sortedData.map((row) => ({
       Method: row.payment_method,
-      UserType: row.payable_type.split("\\").pop(),
-      Type: row.type,
       Amount: formatNumber(row.amount),
       Status: row.status,
-      From: row.payable.name,
-      To: row.transaction_transfer?.to?.name,
+      From_Retailer: row.payable.name,
+      From_Driver: row.transaction_transfer?.to?.name,
       Date: new Date(row.created_at).toLocaleString(),
     }));
 
@@ -304,12 +298,10 @@ const OthersPaymentReport = () => {
     );
     bodyData.push({
       Method: "Total Amount",
-      UserType: totalAmount.toFixed(2),
-      Type: "",
-      Amount: "",
+      Amount: totalAmount.toFixed(2),
       Status: "",
-      From: "",
-      To: "",
+      From_Retailer: "",
+      From_Driver: "",
       Date: "",
     });
 
@@ -324,8 +316,6 @@ const OthersPaymentReport = () => {
     <Fragment key={row.id}>
       <tr>
         <td style={{ width: "80px" }}>{row.payment_method}</td>
-        <td style={{ width: "120px" }}>{row.payable_type.split("\\").pop()}</td>
-        <td style={{ width: "20px" }}>{row.type}</td>
         <td style={{ width: "30px" }}>{formatNumber(row.amount)}</td>
         <td style={{ width: "70px" }}>{row.status}</td>
         <td style={{ width: "100px" }}>{row.payable.name}</td>

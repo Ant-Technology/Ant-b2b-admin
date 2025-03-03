@@ -60,6 +60,7 @@ const useStyles = createStyles((theme) => ({
     fontWeight: "bold",
   },
 }));
+
 const headers = [
   "Method",
   "User Type",
@@ -69,6 +70,7 @@ const headers = [
   "User",
   "Date",
 ];
+
 function Th({ children, sortable, sorted, reversed, onSort }) {
   const { classes } = useStyles();
   const Icon = sorted
@@ -84,8 +86,6 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
         className={classes.control}
       >
         <Group position="apart" spacing={5}>
-          {" "}
-          {/* Adjusted spacing here */}
           <Text weight={500} size="sm">
             {children}
           </Text>
@@ -101,51 +101,41 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
 }
 
 const PaymentReport = () => {
-  const [size, setSize] = useState("50");
-  const handlePageSizeChange = (newSize) => {
-    setSize(newSize);
-    setActivePage(1);
-    fetchData(newSize);
-  };
   const { classes } = useStyles();
+  const [size, setSize] = useState("50");
   const [activePage, setActivePage] = useState(1);
-  const [total, setTotal] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [sortedData, setSortedData] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [timeRange, setTimeRange] = useState(null);
-  const [drivers, setDrivers] = useState([]);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
   const [activeTab, setActiveTab] = useState("first");
-
   const handleTabChange = async (tab) => {
     setActiveTab(tab);
-  };
-  const [sortedData, setSortedData] = useState([]);
+    };
   useEffect(() => {
-    fetchData(size);
-  }, []);
+    fetchData(size, activePage);
+  }, [size, activePage]);
 
-  const fetchData = async (size) => {
+  const fetchData = async (size, page) => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       };
       const response = await axios.get(
-        `${API}/reports/payments-orders?page=${activePage}&first=${size}&type=ANT`,
+        `${API}/reports/payments-orders?page=${page}&first=${size}&type=ANT`,
         config
       );
       if (response.data) {
         setLoading(false);
-        setDrivers(response.data.transactionsSummary.data);
         setSortedData(response.data.transactionsSummary.data);
-        setTotal(response.data.transactionsSummary?.links);
         setTotalPages(response.data.transactionsSummary.last_page);
       }
     } catch (error) {
@@ -153,10 +143,17 @@ const PaymentReport = () => {
       console.error("Error fetching data:", error);
     }
   };
+
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setActivePage(1);
+    fetchData(newSize, 1);
+  };
+
   const handleFilter = async () => {
     setLoading(true);
     try {
-      let token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -181,17 +178,13 @@ const PaymentReport = () => {
   
 
       const response = await axios.get(
-        `${API}/reports/payments-orders?period=${
-          timeRange ? timeRange : "custom"
-        }&dateFrom=${startDate}&dateTo=${endDate}&paymentMethod=${selectedMethod}&trans_status=${selectedStatus}&page=${activePage}&first=${size}&type=ANT`,
+        `${API}/reports/payments-orders?period=${timeRange || "custom"}&dateFrom=${startDate}&dateTo=${endDate}&paymentMethod=${selectedMethod}&trans_status=${selectedStatus}&page=${activePage}&first=${size}&type=ANT`,
         config
       );
 
       if (response.data) {
         setLoading(false);
-        setDrivers(response.data.transactionsSummary.data);
         setSortedData(response.data.transactionsSummary.data);
-        setTotal(response.data.transactionsSummary?.links);
         setTotalPages(response.data.transactionsSummary.last_page);
       }
     } catch (error) {
@@ -206,23 +199,18 @@ const PaymentReport = () => {
     setSelectedMethod(null);
     setTimeRange(null);
     setSelectedStatus(null);
-    fetchData(size);
+    fetchData(size, activePage);
   };
+
   const handleChange = (page) => {
-    if (
-      timeRange ||
-      selectedEndDate ||
-      selectedStartDate ||
-      selectedStatus ||
-      selectedMethod
-    ) {
-      setActivePage(page);
+    setActivePage(page);
+    if (timeRange || selectedEndDate || selectedStartDate || selectedStatus || selectedMethod) {
       handleFilter();
     } else {
-      setActivePage(page);
-      fetchData(size);
+      fetchData(size, page);
     }
   };
+
   const exportToPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -252,12 +240,13 @@ const PaymentReport = () => {
       row.payable.name || "N/A",
       new Date(row.created_at).toLocaleString() || "N/A",
     ]);
+
     doc.autoTable({
       startY: 35,
       head: [headers],
       body: bodyData,
       styles: { fontSize: 10 },
-      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] }, // Updated header color
+      headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] },
     });
 
     const finalY = doc.lastAutoTable.finalY || 10;
@@ -330,6 +319,7 @@ const PaymentReport = () => {
       </tr>
     </Fragment>
   ));
+
   return (
     <div style={{ width: "98%", margin: "auto" }}>
       <LoadingOverlay
@@ -389,7 +379,7 @@ const PaymentReport = () => {
                 onChange={(value) => {
                   setTimeRange(value);
                   if (value === null) {
-                    fetchData(size);
+                    fetchData(size, activePage);
                   }
                 }}
                 label="Select Period"
@@ -449,11 +439,7 @@ const PaymentReport = () => {
                 gap: "10px", // Add space between buttons
               }}
             >
-              {(timeRange ||
-                selectedEndDate ||
-                selectedStartDate ||
-                selectedStatus ||
-                selectedMethod) && (
+              {(timeRange || selectedEndDate || selectedStartDate || selectedStatus || selectedMethod) && (
                 <>
                   <Button
                     onClick={handleReset}
