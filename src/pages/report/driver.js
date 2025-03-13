@@ -8,7 +8,7 @@ import {
 } from "apollo/queries"; // Ensure this is the correct query
 import { useForm } from "@mantine/form";
 
-export default function DriverFilter({ onCardClick, driver, fetchData, size }) {
+export default function DriverFilter({ onCardClick, driver, page,fetchData, size }) {
   const [dropDownData, setDropDownData] = useState([]);
   const form = useForm({
     initialValues: {
@@ -20,7 +20,7 @@ export default function DriverFilter({ onCardClick, driver, fetchData, size }) {
     onCompleted(data) {
       const driverArr = data.driversNonPaginated.map((item) => ({
         label: item.name,
-        value: item.name,
+        value: item.id,
       }));
       setDropDownData(driverArr);
     },
@@ -41,7 +41,7 @@ export default function DriverFilter({ onCardClick, driver, fetchData, size }) {
         onChange={(value) => {
           handleDriverSelect(value);
           if (value === null) {
-            fetchData(size);
+            fetchData(size,page);
           }
         }}
         clearable

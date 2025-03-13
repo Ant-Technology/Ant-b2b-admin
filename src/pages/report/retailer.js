@@ -8,6 +8,7 @@ export default function RetailerFilter({
   onCardClick,
   retailer,
   fetchData,
+  page,
   size,
 }) {
   const [dropDownData, setDropDownData] = useState([]);
@@ -25,7 +26,7 @@ export default function RetailerFilter({
     onCompleted: (data) => {
       const productArr = data.retailers.data.map((item) => ({
         label: item.name,
-        value: item.name,
+        value: item.id,
       }));
       setDropDownData(productArr);
     },
@@ -46,7 +47,7 @@ export default function RetailerFilter({
         onChange={(value) => {
           handleProductSelect(value);
           if (value === null) {
-            fetchData(size);
+            fetchData(size,page);
           }
         }}
         clearable

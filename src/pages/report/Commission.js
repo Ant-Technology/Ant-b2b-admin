@@ -99,25 +99,25 @@ function Th({ children, sortable, sorted, reversed, onSort }) {
   );
 }
 
-const WalletPaymentReport = () => {
+const CommissionPaymentReport = () => {
   const { classes } = useStyles();
   const [size, setSize] = useState("50");
   const [activePage, setActivePage] = useState(1);
-  const [retailer, setRetailer] = useState(null);
   const [driver, setDriver] = useState(null);
-  const [selectedMethod, setSelectedMethod] = useState(null);
   const [total, setTotal] = useState([]);
   const [walletSummary, setWalletSummary] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [timeRange, setTimeRange] = useState(null);
-  const [selectedStartDate, setSelectedStartDate] = useState(null);
-  const [selectedEndDate, setSelectedEndDate] = useState(null);
+
   const [sortedData, setSortedData] = useState([]);
 
   useEffect(() => {
-    fetchData(size, activePage);
-  }, [size, activePage]);
+    if (driver) {
+      handleFilter();
+    } else {
+      fetchData(size, activePage);
+    }
+  }, [size, activePage, driver]);
 
   const fetchData = async (size, page) => {
     setLoading(true);
@@ -129,11 +129,12 @@ const WalletPaymentReport = () => {
         },
       };
       const response = await axios.get(
-        `${API}/reports/payments-orders?page=${page}&first=${size}&type=Wallet`,
+        `${API}/reports/payments-orders?page=${page}&first=${size}&type=Commission`,
         config
       );
       if (response.data) {
         setLoading(false);
+        setWalletSummary(response.data.totalAmount);
         setSortedData(response.data.transactionsSummary.data);
         setWalletSummary(response.data.walletSummary.total_net);
         setTotal(response.data.transactionsSummary?.links);
@@ -154,30 +155,15 @@ const WalletPaymentReport = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      const formatLocalDate = (date, hours, minutes, seconds, ms) => {
-        const d = new Date(date);
-        d.setHours(hours, minutes, seconds, ms);
-        const year = d.getFullYear();
-        const month = `${d.getMonth() + 1}`.padStart(2, "0");
-        const day = `${d.getDate()}`.padStart(2, "0");
-        return `${year}-${month}-${day}`;
-      };
-      const startDate = selectedStartDate
-        ? formatLocalDate(selectedStartDate, 0, 0, 0, 0)
-        : "";
-      const endDate = selectedEndDate
-        ? formatLocalDate(selectedEndDate, 23, 59, 59, 999)
-        : "";
 
       const response = await axios.get(
-        `${API}/reports/payments-orders?period=${
-          timeRange || "custom"
-        }&dateFrom=${startDate}&dateTo=${endDate}&page=${activePage}&first=${size}&type=Wallet&retailer=${retailer}&paymentMethod=${selectedMethod}&driver=${driver}`,
+        `${API}/reports/payments-orders?page=${activePage}&first=${size}&type=Commission&driver=${driver}`,
         config
       );
 
       if (response.data) {
         setLoading(false);
+        setWalletSummary(response.data.totalAmount);
         setSortedData(response.data.transactionsSummary.data);
         setTotal(response.data.transactionsSummary?.links);
         setTotalPages(response.data.transactionsSummary.last_page);
@@ -188,27 +174,9 @@ const WalletPaymentReport = () => {
     }
   };
 
-  const handleReset = () => {
-    setSelectedStartDate(null);
-    setSelectedEndDate(null);
-    setTimeRange(null);
-    setSelectedMethod(null);
-    setRetailer(null);
-    setDriver(null);
-    fetchData(size, activePage);
-  };
-
   const handleChange = (page) => {
-    console.log(page);
     setActivePage(page);
-    if (
-      timeRange ||
-      selectedEndDate ||
-      selectedStartDate ||
-      retailer ||
-      selectedMethod ||
-      driver
-    ) {
+    if (driver) {
       handleFilter();
     } else {
       fetchData(size, page);
@@ -220,20 +188,7 @@ const WalletPaymentReport = () => {
     const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
-    doc.text("Wallet report", pageWidth / 2, 20, { align: "center" });
-
-    let subtitle = "Date: ";
-    if (selectedStartDate && selectedEndDate) {
-      const startDate = selectedStartDate.toISOString().slice(0, 10);
-      const endDate = selectedEndDate.toISOString().slice(0, 10);
-      subtitle += `${startDate} - ${endDate}`;
-    } else {
-      subtitle += "All Date";
-    }
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
-    doc.text(subtitle, pageWidth / 2, 28, { align: "center" });
+    doc.text("Commission Revenue", pageWidth / 2, 20, { align: "center" });
 
     const bodyData = sortedData.map((row) => [
       row.payment_method || "N/A",
@@ -251,10 +206,9 @@ const WalletPaymentReport = () => {
       styles: { fontSize: 10 },
       headStyles: { fillColor: [255, 106, 0], textColor: [255, 255, 255] },
     });
-
     const finalY = doc.lastAutoTable.finalY || 10;
     doc.text(
-      `Total Net Amount: ${formatNumber(walletSummary ? walletSummary : 0)}`,
+      `Total Amount: ${formatNumber(walletSummary ? walletSummary : 0)}`,
       pageWidth - 20,
       finalY + 10,
       { align: "right" }
@@ -269,7 +223,7 @@ const WalletPaymentReport = () => {
       { align: "right" }
     );
 
-    doc.save("Wallet_report.pdf");
+    doc.save("Commission_Revenue.pdf");
   };
 
   const exportToExcel = () => {
@@ -282,9 +236,8 @@ const WalletPaymentReport = () => {
       User: row.payable.name,
       Date: new Date(row.created_at).toLocaleString(),
     }));
-
     bodyData.push({
-      Method: "Total Net Amount",
+      Method: "Total Amount",
       UserType: formatNumber(walletSummary ? walletSummary : 0),
       Type: "",
       Amount: "",
@@ -292,11 +245,10 @@ const WalletPaymentReport = () => {
       User: "",
       Date: "",
     });
-
     const worksheet = XLSX.utils.json_to_sheet(bodyData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
-    XLSX.writeFile(workbook, "Wallet_report.xlsx");
+    XLSX.writeFile(workbook, "Commission_Revenue.xlsx");
   };
 
   const rows = sortedData?.map((row) => (
@@ -325,137 +277,37 @@ const WalletPaymentReport = () => {
       />
 
       <div style={{ width: "98%", margin: "auto" }}>
-        <SimpleGrid cols={6}>
+        <SimpleGrid cols={3}>
+          <DriverFilter
+            fetchData={fetchData}
+            size={size}
+            page={activePage}
+            driver={driver}
+            onCardClick={setDriver}
+          />
           <div>
-            <Select
-              data={[
-                { value: "daily", label: "Daily" },
-                { value: "weekly", label: "Weekly" },
-                { value: "monthly", label: "Monthly" },
-                { value: "annual", label: "Annual" },
-              ]}
-              value={timeRange}
-              onChange={(value) => {
-                setTimeRange(value);
-                if (value === null) {
-                  fetchData(size, activePage);
-                }
-              }}
-              label="Select Period"
-              placeholder="Select Range"
-              withinPortal
-              clearable
-            />
-          </div>
-          <div>
-            <DatePicker
-              value={selectedStartDate}
-              onChange={setSelectedStartDate}
-              placeholder="Pick a date"
-              label="Select Start Date"
-              clearable
-            />
-          </div>
-          <div>
-            <DatePicker
-              value={selectedEndDate}
-              onChange={setSelectedEndDate}
-              placeholder="Pick a date"
-              label="Select End Date"
-              clearable
-            />
-          </div>
-          <div>
-            <RetailerFilter
-              page={activePage}
-              fetchData={fetchData}
-              size={size}
-              retailer={retailer}
-              onCardClick={setRetailer}
-            />
-          </div>
-          <div>
-            <DriverFilter
-              page={activePage}
-              fetchData={fetchData}
-              size={size}
-              driver={driver}
-              onCardClick={setDriver}
-            />
-          </div>
-          <div>
-            <Select
-              data={[
-                { value: "TELEBIRR", label: "TELEBIRR" },
-                { value: "WALLET", label: "WALLET" },
-                { value: "BANK_ADVICE", label: "BANK_ADVICE" },
-                { value: "CASH", label: "CASH" },
-              ]}
-              value={selectedMethod}
-              onChange={setSelectedMethod}
-              label="Select Payment Method"
-              placeholder="Select Method"
-              clearable
-            />
+            <div></div>
+            <Menu shadow="md" trigger="hover" openDelay={100} closeDelay={400}>
+              <Menu.Target>
+                <Button
+                  style={{
+                    width: "80px",
+                    marginTop: "25px",
+                    backgroundColor: "#FF6A00",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  Export
+                </Button>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Item onClick={exportToPDF}>PDF</Menu.Item>
+                <Menu.Item onClick={exportToExcel}>Excel</Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
           </div>
         </SimpleGrid>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginTop: "10px",
-            gap: "10px",
-          }}
-        >
-          {(timeRange ||
-            selectedEndDate ||
-            retailer ||
-            selectedStartDate ||
-            selectedMethod ||
-            driver) && (
-            <>
-              <Button
-                onClick={handleReset}
-                style={{
-                  width: "80px",
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleFilter}
-                style={{
-                  width: "80px",
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-              >
-                Filter
-              </Button>
-            </>
-          )}
-
-          <Menu shadow="md" trigger="hover" openDelay={100} closeDelay={400}>
-            <Menu.Target>
-              <Button
-                style={{
-                  width: "80px",
-                  backgroundColor: "#FF6A00",
-                  color: "#FFFFFF",
-                }}
-              >
-                Export
-              </Button>
-            </Menu.Target>
-
-            <Menu.Dropdown>
-              <Menu.Item onClick={exportToPDF}>PDF</Menu.Item>
-              <Menu.Item onClick={exportToExcel}>Excel</Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </div>
       </div>
       <Card shadow="sm" p="lg">
         <ScrollArea>
@@ -535,8 +387,7 @@ const WalletPaymentReport = () => {
                 fontSize: "15px",
               }}
             >
-              Total Net Amount:{" "}
-              {formatNumber(walletSummary ? walletSummary : 0)}
+              Total Amount: {formatNumber(walletSummary ? walletSummary : 0)}
             </div>
           </Box>
         </ScrollArea>
@@ -545,4 +396,4 @@ const WalletPaymentReport = () => {
   );
 };
 
-export default WalletPaymentReport;
+export default CommissionPaymentReport;

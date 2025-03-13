@@ -227,7 +227,7 @@ const OthersPaymentReport = () => {
     const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
-    doc.text("Payment Report", pageWidth / 2, 20, { align: "center" });
+    doc.text("Delivery Payment", pageWidth / 2, 20, { align: "center" });
 
     let subtitle = "Date: ";
     if (selectedStartDate && selectedEndDate) {
@@ -279,7 +279,7 @@ const OthersPaymentReport = () => {
       { align: "right" }
     );
 
-    doc.save("payment_report.pdf");
+    doc.save("Delivery_Payment.pdf");
   };
 
   const exportToExcel = () => {
@@ -308,7 +308,7 @@ const OthersPaymentReport = () => {
     const worksheet = XLSX.utils.json_to_sheet(bodyData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
-    XLSX.writeFile(workbook, "payment_report.xlsx");
+    XLSX.writeFile(workbook, "Delivery_Payment.xlsx");
   };
   const [modalOpened, setModalOpened] = useState(false);
 
@@ -385,9 +385,7 @@ const OthersPaymentReport = () => {
           <div>
             <Select
               data={[
-                { value: "TELEBIRR", label: "TELEBIRR" },
-                { value: "WALLET", label: "WALLET" },
-                { value: "INVOICE", label: "INVOICE" },
+                { value: "TELEBIRR", label: "P2P TELEBIRR" },
                 { value: "CASH", label: "CASH" },
               ]}
               value={selectedMethod}
@@ -413,10 +411,22 @@ const OthersPaymentReport = () => {
             />
           </div>
           <div>
-            <RetailerFilter fetchData={fetchData} size={size} retailer={retailer} onCardClick={setSetRetailer} />
+            <RetailerFilter
+              fetchData={fetchData}
+              page={activePage}
+              size={size}
+              retailer={retailer}
+              onCardClick={setSetRetailer}
+            />
           </div>
           <div>
-            <DriverFilter fetchData={fetchData} size={size} driver={driver} onCardClick={setSetDriver} />
+            <DriverFilter
+              page={activePage}
+              fetchData={fetchData}
+              size={size}
+              driver={driver}
+              onCardClick={setSetDriver}
+            />
           </div>
           <div
             style={{
