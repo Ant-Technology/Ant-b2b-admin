@@ -32,6 +32,7 @@ import { DatePicker } from "@mantine/dates";
 import { Box } from "@mui/material";
 import OthersPaymentReport from "./othersReport";
 import WalletPaymentReport from "./wallet";
+import CommissionPaymentReport from "./Commission";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -216,7 +217,7 @@ const PaymentReport = () => {
     const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
-    doc.text("Payment Report", pageWidth / 2, 20, { align: "center" });
+    doc.text("Sales Revenue", pageWidth / 2, 20, { align: "center" });
 
     let subtitle = "Date: ";
     if (selectedStartDate && selectedEndDate) {
@@ -270,7 +271,7 @@ const PaymentReport = () => {
       { align: "right" }
     );
 
-    doc.save("payment_report.pdf");
+    doc.save("Sales_Revenue.pdf");
   };
 
   const exportToExcel = () => {
@@ -301,7 +302,7 @@ const PaymentReport = () => {
     const worksheet = XLSX.utils.json_to_sheet(bodyData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
-    XLSX.writeFile(workbook, "payment_report.xlsx");
+    XLSX.writeFile(workbook, "Sales_Revenue.xlsx");
   };
 
   const rows = sortedData?.map((row) => (
@@ -309,7 +310,7 @@ const PaymentReport = () => {
       <tr>
         <td style={{ width: "80px" }}>{row.payment_method}</td>
         <td style={{ width: "120px" }}>{row.payable_type.split("\\").pop()}</td>
-        <td style={{ width: "20px" }}>{row.type}</td>
+        <td style={{ width: "20px" }}>{row.type==="DEPOSIT"?"PAID":null}</td>
         <td style={{ width: "30px" }}>{formatNumber(row.amount)}</td>
         <td style={{ width: "70px" }}>{row.status}</td>
         <td style={{ width: "100px" }}>{row.payable.name}</td>
@@ -349,13 +350,16 @@ const PaymentReport = () => {
       >
         <Tabs.List>
           <Tabs.Tab value="first">
-            <span style={{ color: "#666666", fontWeight: "bold" }}>ANT</span>
+            <span style={{ color: "#666666", fontWeight: "bold" }}>Sales Revenue</span>
           </Tabs.Tab>
           <Tabs.Tab value="three">
             <span style={{ color: "#666666", fontWeight: "bold" }}>Wallet</span>
           </Tabs.Tab>
           <Tabs.Tab value="second">
-            <span style={{ color: "#666666", fontWeight: "bold" }}>Others</span>
+            <span style={{ color: "#666666", fontWeight: "bold" }}>Delivery Payment </span>
+          </Tabs.Tab>
+          <Tabs.Tab value="four">
+            <span style={{ color: "#666666", fontWeight: "bold" }}>Commission Revenue</span>
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="second">
@@ -364,9 +368,12 @@ const PaymentReport = () => {
         <Tabs.Panel value="three">
           <WalletPaymentReport />
         </Tabs.Panel>
+        <Tabs.Panel value="four">
+          <CommissionPaymentReport/>
+        </Tabs.Panel>
 
         <Tabs.Panel value="first">
-          <div style={{ width: "98%", margin: "auto" }}>
+          <div style={{ width: "98%", marginTop: "15px" }}>
             <SimpleGrid cols={5}>
               <Select
                 data={[
@@ -405,7 +412,7 @@ const PaymentReport = () => {
                 data={[
                   { value: "TELEBIRR", label: "TELEBIRR" },
                   { value: "WALLET", label: "WALLET" },
-                  { value: "INVOICE", label: "INVOICE" },
+                  { value: "BANK_ADVICE", label: "BANK_ADVICE" },
                   { value: "CASH", label: "CASH" },
                 ]}
                 value={selectedMethod}
