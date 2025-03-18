@@ -598,6 +598,61 @@ export const GET_RETAILERS = gql`
   }
 `;
 
+export const GET_SUPPLIERS = gql`
+  query ($first: Int!, $search: String, $page: Int) {
+    suppliers(first: $first, search: $search, page: $page) {
+      data {
+        id
+        city
+        user {
+          name
+          phone
+          email
+        }
+        address
+        created_at
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
+export const GET_SUPPLIERS_Commission = gql`
+  query ($first: Int!, $search: String, $page: Int) {
+    supplier_commissions(first: $first, search: $search, page: $page) {
+      data {
+        id
+        commission_rate
+        supplier {
+          city
+          user {
+            name
+            phone
+            email
+          }
+        }
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
 // stock
 export const GET_STOCKS = gql`
   query ($first: Int!, $page: Int) {

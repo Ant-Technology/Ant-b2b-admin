@@ -442,6 +442,59 @@ export const CREATE_RETAILER = gql`
     }
   }
 `;
+export const CREATE_SUPPLIER = gql`
+  mutation createSupplier(
+    $name: String!
+    $address: String!
+    $city: String!
+    $phone: String!
+    $email: String!
+    $password: String!
+    $password_confirmation: String!
+  ) {
+    createSupplier(
+      input: {
+        name: $name
+        address: $address
+        city: $city
+        phone: $phone
+        email: $email
+        password: $password
+        password_confirmation: $password_confirmation
+      }
+    ) {
+      id
+      city
+      address
+      user {
+        name
+        phone
+        email
+      }
+    }
+  }
+`;
+export const CREATE_SUPPLIER_commission = gql`
+  mutation createSupplierCommission(
+    $supplier_id: String!
+    $commission_rate: Float!
+  ) {
+    createSupplierCommission(
+      input: { supplier_id: $supplier_id, commission_rate: $commission_rate }
+    ) {
+      id
+      commission_rate
+      supplier {
+        city
+        address
+        user {
+          name
+          phone
+        }
+      }
+    }
+  }
+`;
 
 export const UPDATE_RETAILER = gql`
   mutation update_retailer(
@@ -476,6 +529,58 @@ export const UPDATE_RETAILER = gql`
     }
   }
 `;
+export const UPDATE_SUPPLIER = gql`
+  mutation update_retailer(
+    $id: ID!
+    $name: String!
+    $address: String!
+    $city: String!
+    $phone: String!
+    $email: String
+  ) {
+    updateSupplier(
+      id: $id
+      input: {
+        name: $name
+        address: $address
+        city: $city
+        phone: $phone
+        email: $email
+      }
+    ) {
+      id
+      user {
+        name
+        phone
+        email
+      }
+      address
+      city
+    }
+  }
+`;
+
+export const UPDATE_SUPPLIER_Commistion = gql`
+  mutation updateSupplierCommission(
+    $id: ID!
+    $commission_rate: Float!
+  ) {
+    updateSupplierCommission(
+      id: $id
+      input: {commission_rate: $commission_rate }
+    ) {
+       id
+    commission_rate
+    supplier{
+        user{
+            name
+            phone
+            email
+        }
+    }
+    }
+  }
+`;
 
 export const DEL_RETAILER = gql`
   mutation DEL_RETAILER($id: ID!) {
@@ -488,6 +593,20 @@ export const DEL_RETAILER = gql`
       }
       city
       contact_name
+    }
+  }
+`;
+export const DEL_SUPPLIER = gql`
+  mutation DEL_SUPPLIER($id: ID!) {
+    deleteSupplier(id: $id) {
+      id
+    }
+  }
+`;
+export const DEL_SUPPLIER_Commission = gql`
+  mutation DEL_SUPPLIER_Commission($id: ID!) {
+    deleteSupplierCommission(id: $id) {
+      id
     }
   }
 `;
