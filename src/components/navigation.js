@@ -16,7 +16,6 @@ import {
   IconWallet,
   IconTruck,
   IconTruckDelivery,
-  IconUser,
   IconUsers,
   IconTruckLoading,
   IconChevronDown,
@@ -165,12 +164,10 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
     };
   }, []); // notification
   const containerRef = useRef(null);
-  const reportSectionRef = useRef(null); // Ref for the Report section's Collapse component
+  const reportSectionRef = useRef(null);
 
-  // Effect to handle scrolling when Report section is opened
   useEffect(() => {
     if (openSection === "Report") {
-      // Use setTimeout to wait for the Collapse animation to complete
       setTimeout(() => {
         if (reportSectionRef.current && containerRef.current) {
           const container = containerRef.current;
@@ -308,6 +305,25 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       data.push({ link: "/sales", label: "Sales Person", icon: IconUserPlus });
     }
 
+    if (
+      permissions.some((perm) => perm.name === "roles-view") ||
+      permissions.some((perm) => perm.name === "configs-view") ||
+      permissions.some((perm) => perm.name === "permissions-view")
+    ) {
+      data.push({
+        label: "Suppliers",
+        icon: IconUsers,
+        initiallyOpened: false,
+        links: [
+          ...(permissions.some((perm) => perm.name === "roles-view")
+            ? [{ link: "/suppliers", label: "Manage Suppliers" }]
+            : []),
+          ...(permissions.some((perm) => perm.name === "configs-view")
+            ? [{ link: "/commission", label: "Supplier Commission" }]
+            : [])
+        ],
+      });
+    }
     if (
       permissions.some((perm) => perm.name === "roles-view") ||
       permissions.some((perm) => perm.name === "configs-view") ||
