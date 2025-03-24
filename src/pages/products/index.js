@@ -15,7 +15,11 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import { showNotification } from "@mantine/notifications";
 import { DEL_PRODUCT } from "apollo/mutuations";
-import { FILTER_PRODUCT_BY_CATEGORY, GET_PRODUCTS } from "apollo/queries";
+import {
+  FILTER_PRODUCT_BY_CATEGORY,
+  GET_MY_PRODUCTS,
+  GET_PRODUCTS,
+} from "apollo/queries";
 import ProductDetailModal from "components/Product/ProductDetail";
 import ProductAddModal from "components/Product/productAddModal";
 import ProductEditModal from "components/Product/productEditModal";
@@ -40,37 +44,32 @@ const Products = () => {
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
-
+  const roles = JSON.parse(localStorage.getItem("roles")) || [];
+  const hasAdminPermission = roles.some((permission) => permission === "admin");
   const theme = useMantineTheme();
   const handleManageProduct = (id) => {
     setEditId(id);
     setOpenedDetail(true);
   };
   const { data, loading, fetchMore, refetch } = useQuery(
-    categoryId ? FILTER_PRODUCT_BY_CATEGORY : GET_PRODUCTS,
+    !hasAdminPermission ? GET_MY_PRODUCTS : GET_PRODUCTS,
     {
-      variables: categoryId
-        ? {
-            category_id: categoryId, // Ensure this matches exactly with backend
-            first: parseInt(size), // Pass size dynamically
-            page: activePage,
-            ordered_by: [
-              {
-                column: "CREATED_AT",
-                order: "DESC",
-              },
-            ],
-            search: searchValue,
-          }
-        : {
-            first: parseInt(size),
-            page: activePage,
-            search: searchValue,
+      variables: {
+        category_id: categoryId,
+        first: parseInt(size),
+        page: activePage,
+        ordered_by: [
+          {
+            column: "CREATED_AT",
+            order: "DESC",
           },
+        ],
+        search: searchValue,
+      },
 
       onCompleted: (data) => {
-        if (data?.filterProducts) {
-          setTotal(data?.filterProducts?.paginatorInfo.lastPage);
+        if (!hasAdminPermission) {
+          setTotal(data?.myProducts.paginatorInfo.lastPage);
         } else {
           setTotal(data?.products.paginatorInfo.lastPage);
         }
@@ -91,27 +90,44 @@ const Products = () => {
     update(cache, { data: { deleteProduct } }) {
       cache.updateQuery(
         {
-          query: GET_PRODUCTS,
+          query: hasAdminPermission ? GET_PRODUCTS : GET_MY_PRODUCTS,
           variables: {
             first: 10,
             page: activePage,
-            search:""
+            search: "",
           },
         },
         (data) => {
-          if (data.products.data.length === 1) {
-            setTotal(total - 1);
-            setActivePage(activePage - 1);
+          if (hasAdminPermission) {
+            if (data.products.data.length === 1) {
+              setTotal(total - 1);
+              setActivePage(activePage - 1);
+            } else {
+              return {
+                products: {
+                  data: [
+                    ...data.products.data.filter(
+                      (product) => product.id !== deleteProduct.id
+                    ),
+                  ],
+                },
+              };
+            }
           } else {
-            return {
-              products: {
-                data: [
-                  ...data.products.data.filter(
-                    (product) => product.id !== deleteProduct.id
-                  ),
-                ],
-              },
-            };
+            if (data.myProducts.data.length === 1) {
+              setTotal(total - 1);
+              setActivePage(activePage - 1);
+            } else {
+              return {
+                myProducts: {
+                  data: [
+                    ...data.myProducts.data.filter(
+                      (product) => product.id !== deleteProduct.id
+                    ),
+                  ],
+                },
+              };
+            }
           }
         }
       );
@@ -375,9 +391,16 @@ const Products = () => {
             optionsData={optionsData}
             loading={loading}
             filterData={({ onCardClick }) => (
-              <CategoryFilter category={categoryId} onCardClick={setCategoryId} />
+              <CategoryFilter
+                category={categoryId}
+                onCardClick={setCategoryId}
+              />
             )}
-            data={data?.products?.data || data?.filterProducts?.data || []}
+            data={
+              !hasAdminPermission
+                ? data.myProducts.data
+                : data?.products?.data ||[]
+            }
             size={size}
             handlePageSizeChange={handlePageSizeChange}
           />

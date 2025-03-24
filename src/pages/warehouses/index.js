@@ -12,7 +12,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 import { customLoader } from "components/utilities/loader";
-import { GET_WARE_HOUSE, GET_WARE_HOUSES } from "apollo/queries";
+import {
+  GET_MY_WARE_HOUSES,
+  GET_WARE_HOUSE,
+  GET_WARE_HOUSES,
+} from "apollo/queries";
 import { CHANGE_WAREHOUSE_STATUS, DEL_WAREHOUSE } from "apollo/mutuations";
 import B2bTable from "components/reusable/b2bTable";
 import ShowWarehouseLocation from "components/Warehouse/showWarehouseLocation";
@@ -28,18 +32,27 @@ const Warehouses = () => {
   const [openedLocation, setOpenedLocation] = useState(false);
   const [location, setLocation] = useState({});
 
-  //pagination states
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
   const [searchValue, setSearchValue] = useState("");
+  const roles = JSON.parse(localStorage.getItem("roles")) || [];
+  const hasAdminPermission = roles.some((permission) => permission === "admin");
 
-  const { data, loading, refetch } = useQuery(GET_WARE_HOUSES, {
-    variables: {
-      first: parseInt(size),
-      page: activePage,
-      search: searchValue,
-    },
-  });
+  const { data, loading, refetch } = useQuery(
+    hasAdminPermission ? GET_WARE_HOUSES : GET_MY_WARE_HOUSES,
+    {
+      variables: hasAdminPermission
+        ? {
+            first: parseInt(size),
+            page: activePage,
+            search: searchValue,
+          }
+        : {
+            first: parseInt(size),
+            page: activePage,
+          },
+    }
+  );
 
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
@@ -47,7 +60,11 @@ const Warehouses = () => {
   };
   useEffect(() => {
     if (data) {
-      setTotal(data.warehouses.paginatorInfo.lastPage);
+      setTotal(
+        hasAdminPermission
+          ? data.warehouses.paginatorInfo.lastPage
+          : data.myWarehouses.paginatorInfo.lastPage
+      );
     }
   }, [data, size]);
 
@@ -61,34 +78,48 @@ const Warehouses = () => {
     });
     setOpenedLocation(true);
   };
-  const [getWarehouse, { loading: singleWarehouseLoading }] =
-    useLazyQuery(GET_WARE_HOUSE);
-
   const [delWarehouse] = useMutation(DEL_WAREHOUSE, {
     update(cache, { data: { deleteWarehouse } }) {
       cache.updateQuery(
         {
-          query: GET_WARE_HOUSES,
+          query: hasAdminPermission ? GET_WARE_HOUSES : GET_MY_WARE_HOUSES,
           variables: {
             first: parseInt(size),
             page: activePage,
-            search:""
+            search: "",
           },
         },
         (data) => {
-          if (data.warehouses.data.length === 1) {
-            setTotal(total - 1);
-            setActivePage(activePage - 1);
+          if (hasAdminPermission) {
+            if (data.warehouses.data.length === 1) {
+              setTotal(total - 1);
+              setActivePage(activePage - 1);
+            } else {
+              return {
+                warehouses: {
+                  data: [
+                    ...data.warehouses.data.filter(
+                      (warehouse) => warehouse.id !== deleteWarehouse.id
+                    ),
+                  ],
+                },
+              };
+            }
           } else {
-            return {
-              warehouses: {
-                data: [
-                  ...data.warehouses.data.filter(
-                    (warehouse) => warehouse.id !== deleteWarehouse.id
-                  ),
-                ],
-              },
-            };
+            if (data.myWarehouses.data.length === 1) {
+              setTotal(total - 1);
+              setActivePage(activePage - 1);
+            } else {
+              return {
+                myWarehouses: {
+                  data: [
+                    ...data.myWarehouses.data.filter(
+                      (warehouse) => warehouse.id !== deleteWarehouse.id
+                    ),
+                  ],
+                },
+              };
+            }
           }
         }
       );
@@ -125,7 +156,7 @@ const Warehouses = () => {
   const [changeWarehouseStatus] = useMutation(CHANGE_WAREHOUSE_STATUS, {
     refetchQueries: [
       {
-        query: GET_WARE_HOUSES,
+        query: hasAdminPermission ? GET_WARE_HOUSES : GET_MY_WARE_HOUSES,
         variables: {
           first: 10,
           page: activePage,
@@ -257,7 +288,7 @@ const Warehouses = () => {
             <Controls.ActionButton
               color="primary"
               title="Update"
-              onClick={() => handleEditCategory(`${rowData.id}`)}
+              onClick={() => handleEditCategory(rowData)}
             >
               <EditIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>
@@ -277,8 +308,7 @@ const Warehouses = () => {
                 handleWarehouseStatusChange(rowData.id, rowData.status)
               }
             >
-            
-               {rowData.status === "ACTIVE" ? (
+              {rowData.status === "ACTIVE" ? (
                 <PersonOffIcon size={17} />
               ) : (
                 <HowToRegIcon size={17} />
@@ -332,8 +362,6 @@ const Warehouses = () => {
         <WarehouseEditModal
           openedEdit={openedEdit}
           setOpenedEdit={setOpenedEdit}
-          loading={singleWarehouseLoading}
-          getWarehouse={getWarehouse}
           editId={editId}
         />
       </Drawer>
@@ -391,7 +419,9 @@ const Warehouses = () => {
             searchValue={confirmedSearch}
             onSearchChange={setConfirmedSearch}
             header={headerData}
-            data={data.warehouses.data}
+            data={
+              hasAdminPermission ? data.warehouses.data : data.myWarehouses.data
+            }
             loading={loading}
             optionsData={optionsData}
             size={size}

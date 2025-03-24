@@ -44,7 +44,6 @@ const libraries = ["places"];
 const CategoryEditModal = ({
   setOpenedEdit,
   editId,
-  getWarehouse,
   loading,
 }) => {
   const [location, setLocation] = useState({});
@@ -118,21 +117,14 @@ const CategoryEditModal = ({
   });
   useEffect(() => {
     if (editId) {
-      getWarehouse({
-        variables: { id: editId },
-
-        onCompleted(data) {
-          console.log(data);
-          form.setValues({
-            name: data.warehouse?.name,
-            specific_area: data.warehouse?.specific_area,
-            region: { connect: data.warehouse?.region?.id },
-          });
-          setLocation({ ...data.warehouse?._geo });
-        },
+      form.setValues({
+        name: editId?.name,
+        specific_area: editId?.specific_area,
+        region: { connect: editId.region?.id },
       });
+      setLocation(editId?._geo);
     }
-  }, []);
+  }, [editId]);
   // Mutation
   const [editWarehouse] = useMutation(UPDATE_WARE_HOUSE);
 
@@ -141,7 +133,7 @@ const CategoryEditModal = ({
   const submit = () => {
     editWarehouse({
       variables: {
-        id: editId,
+        id: editId.id,
         name: form.values.name,
         _geo: {
           lat: +location.lat,

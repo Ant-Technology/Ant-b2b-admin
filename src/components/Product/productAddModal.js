@@ -33,7 +33,12 @@ import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import { customLoader } from "components/utilities/loader";
 import { tabList } from "components/utilities/tablist";
 import { CREATE_PRODUCT } from "apollo/mutuations";
-import { GET_PRODUCTS, NON_PAGINATED_CATEGORIES } from "apollo/queries";
+import {
+  GET_MY_PRODUCTS,
+  GET_PRODUCTS,
+  GET_SUPPLIERS,
+  NON_PAGINATED_CATEGORIES,
+} from "apollo/queries";
 
 const ProductAddModal = ({
   setOpened,
@@ -43,11 +48,33 @@ const ProductAddModal = ({
   setActivePage,
 }) => {
   const theme = useMantineTheme();
+  const roles = JSON.parse(localStorage.getItem("roles")) || [];
+  const [suppliers, setSuppliers] = useState([]);
+
+  const hasAdminPermission = roles.some((permission) => permission === "admin");
+  const { loading: supplierLoading } = useQuery(GET_SUPPLIERS, {
+    variables: {
+      first: parseInt(1000),
+      page: 1,
+      search: "",
+    },
+
+    onCompleted(data) {
+      const arr = data.suppliers.data.map((item) => ({
+        label: item.user?.name,
+        value: item.id,
+      }));
+
+      setSuppliers(arr);
+    },
+  });
   const [addProduct, { loading, error }] = useMutation(CREATE_PRODUCT, {
     update(cache, { data: { createProduct } }) {
+      const query = hasAdminPermission ? GET_PRODUCTS : GET_MY_PRODUCTS;
+
       cache.updateQuery(
         {
-          query: GET_PRODUCTS,
+          query: query,
           variables: {
             first: 10,
             page: activePage,
@@ -55,16 +82,27 @@ const ProductAddModal = ({
           },
         },
         (data) => {
-          return {
-            products: {
-              ...data.products,
-              data: [createProduct, ...data.products.data],
-            },
-          };
+          console.log(data)
+          if (hasAdminPermission) {
+            return {
+              products: {
+                ...data.products,
+                data: [createProduct, ...data.products.data],
+              },
+            };
+          } else {
+            return {
+              myProducts: {
+                ...data.myProducts,
+                data: [createProduct, ...data.myProducts.data],
+              },
+            };
+          }
         }
       );
     },
     onError(err) {
+      console.log(err)
       console.error("Error creating product:", err);
       showNotification({
         color: "red",
@@ -106,6 +144,7 @@ const ProductAddModal = ({
       category: { connect: 10 },
       subcategory: { connect: "" },
       images: [],
+      supplier_id: 2,
       is_active: true,
       attributes: {
         create: [
@@ -117,6 +156,9 @@ const ProductAddModal = ({
       },
     },
   });
+  const handleSupplierChange = (val) => {
+    form.setFieldValue("supplier_id", val);
+  };
   const handleAttributeCards = () => {
     return form.values.attributes.create.map((item, index) => (
       <Card key={index} shadow="sm" p="lg" radius="md" withBorder mt="xl">
@@ -217,18 +259,20 @@ const ProductAddModal = ({
   };
 
   const submit = () => {
-    console.log("Rrr");
+    let variables = {
+      name: form.getInputProps("name").value,
+      short_description: form.getInputProps("short_description").value,
+      description: form.getInputProps("description").value,
+      is_active: form.getInputProps("is_active").value,
+      attributes: form.getInputProps("attributes").value,
+      images: [...files],
+      category: form.getInputProps("subcategory").value,
+    };
+    if (hasAdminPermission) {
+      variables.supplier_id = form.getInputProps("supplier_id").value;
+    }
     addProduct({
-      variables: {
-        name: form.getInputProps("name").value,
-        short_description: form.getInputProps("short_description").value,
-        description: form.getInputProps("description").value,
-        is_active: form.getInputProps("is_active").value,
-        attributes: form.getInputProps("attributes").value,
-        images: [...files],
-        //category: form.getInputProps("category").value,
-        category: form.getInputProps("subcategory").value,
-      },
+      variables,
       onCompleted() {
         showNotification({
           color: "green",
@@ -390,20 +434,17 @@ const ProductAddModal = ({
                 />
               </Grid.Col>
               <Grid.Col span={6}>
-                <Group position="left">
-                  <Checkbox
-                    color="blue"
-                    size="lg"
-                    checked={form.values.is_active}
-                    label="Is active"
-                    onChange={(event) => {
-                      form.setFieldValue(
-                        "is_active",
-                        event.currentTarget.checked
-                      );
-                    }}
+                {hasAdminPermission && (
+                  <Select
+                    searchable
+                    required
+                    data={suppliers}
+                    value={form.getInputProps("supplier_id").value.toString()}
+                    onChange={handleSupplierChange}
+                    label="Supplier"
+                    placeholder="Pick a supplier this belongs to"
                   />
-                </Group>
+                )}
               </Grid.Col>
               <Grid.Col span={6}>
                 <Button
@@ -429,6 +470,23 @@ const ProductAddModal = ({
                 >
                   {previews}
                 </SimpleGrid>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Group position="left">
+                  <Checkbox
+                    color="blue"
+                    size="lg"
+                    checked={form.values.is_active}
+                    label="Is active"
+                    onChange={(event) => {
+                      form.setFieldValue(
+                        "is_active",
+                        event.currentTarget.checked
+                      );
+                    }}
+                  />
+                </Group>
               </Grid.Col>
             </Grid>
 

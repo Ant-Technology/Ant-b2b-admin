@@ -211,7 +211,36 @@ export const GET_WARE_HOUSES = gql`
     }
   }
 `;
-
+export const GET_MY_WARE_HOUSES = gql`
+  query GET_MY_WARE_HOUSES($first: Int!, $page: Int!) {
+    myWarehouses(first: $first, page: $page) {
+      data {
+        id
+        name
+        status
+        specific_area
+        region {
+          id
+          name
+        }
+        stocks {
+          id
+          quantity
+        }
+        _geo {
+          lat
+          lng
+        }
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastPage
+      }
+    }
+  }
+`;
 export const GET_WARE_HOUSE = gql`
   query GET_WARE_HOUSE($id: ID!) {
     warehouse(id: $id) {
@@ -290,9 +319,7 @@ export const GET_REGIONS = gql`
           am
         }
         retailersCount
-        driversCount
         warehousesCount
-        distributorsCount
       }
       paginatorInfo {
         count
@@ -357,8 +384,67 @@ export const GET_ACTIVITY_LOGS = gql`
 //products query
 
 export const GET_PRODUCTS = gql`
-  query GET_PRODUCTS($first: Int!, $search: String, $page: Int) {
-    products(search: $search, first: $first, page: $page) {
+  query GET_PRODUCTS(
+    $first: Int!
+    $category_id: String
+    $search: String
+    $page: Int
+  ) {
+    products(
+      search: $search
+      category_id: $category_id
+      first: $first
+      page: $page
+    ) {
+      data {
+        id
+        name
+        description
+        category {
+          id
+          name
+        }
+        productSkusCount
+        short_description
+        images {
+          id
+          original_url
+        }
+        attributes {
+          id
+          name
+          values {
+            id
+            value
+          }
+        }
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
+export const GET_MY_PRODUCTS = gql`
+  query GET_MY_PRODUCTS(
+    $first: Int!
+    $category_id: String
+    $search: String
+    $page: Int
+  ) {
+    myProducts(
+      search: $search
+      first: $first
+      category_id: $category_id
+      page: $page
+    ) {
       data {
         id
         name
