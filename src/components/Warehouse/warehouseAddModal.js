@@ -14,7 +14,12 @@ import { showNotification } from "@mantine/notifications";
 import Map from "components/utilities/Map";
 import { customLoader } from "components/utilities/loader";
 import { CREATE_WARE_HOUSE } from "../../apollo/mutuations";
-import { GET_REGIONS, GET_WARE_HOUSES } from "../../apollo/queries";
+import {
+  GET_MY_WARE_HOUSES,
+  GET_REGIONS,
+  GET_SUPPLIERS,
+  GET_WARE_HOUSES,
+} from "../../apollo/queries";
 import {
   useLoadScript,
   GoogleMap,
@@ -44,14 +49,7 @@ const containerStyle = {
 const GOOGLE_API_KEY = "AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk";
 const libraries = ["places"];
 
-export default function WarehouseAddModal({
-  trigger,
-  total,
-  setTotal,
-  setOpened,
-  activePage,
-  setActivePage,
-}) {
+export default function WarehouseAddModal({ setOpened, activePage }) {
   const [location, setLocation] = useState({});
   const [center, setCenter] = useState({ lat: 8.9999645, lng: 38.7700539 });
   const [autocomplete, setAutocomplete] = useState();
@@ -103,12 +101,32 @@ export default function WarehouseAddModal({
       location: "",
       regionId: "", // Provide the default region ID here
       specific_area: "",
+      supplier_id: 1,
     },
   });
   const [regionsDropDownData, setRegionsDropDownData] = useState([]);
   const [regions, setRegions] = useState([]);
   const [areasDropDownData, setAreasDropDownData] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const roles = JSON.parse(localStorage.getItem("roles")) || [];
+  const hasAdminPermission = roles.some((permission) => permission === "admin");
 
+  const { loading: supplierLoading } = useQuery(GET_SUPPLIERS, {
+    variables: {
+      first: parseInt(1000),
+      page: 1,
+      search: "",
+    },
+
+    onCompleted(data) {
+      const arr = data.suppliers.data.map((item) => ({
+        label: item.user?.name,
+        value: item.id,
+      }));
+
+      setSuppliers(arr);
+    },
+  });
   // graphql queries
   const { loading: regionsLoading } = useQuery(GET_REGIONS, {
     variables: {
@@ -142,9 +160,10 @@ export default function WarehouseAddModal({
 
   const [createWarehouse, { loading }] = useMutation(CREATE_WARE_HOUSE, {
     update(cache, { data: { createWarehouse } }) {
+      const query = hasAdminPermission ? GET_WARE_HOUSES : GET_MY_WARE_HOUSES;
       cache.updateQuery(
         {
-          query: GET_WARE_HOUSES,
+          query: query,
           variables: {
             first: parseInt(10),
             page: activePage,
@@ -152,12 +171,21 @@ export default function WarehouseAddModal({
           },
         },
         (data) => {
-          return {
-            warehouses: {
-              ...data.warehouses,
-              data: [createWarehouse, ...data.warehouses.data],
-            },
-          };
+          if (hasAdminPermission) {
+            return {
+              warehouses: {
+                ...data.warehouses,
+                data: [createWarehouse, ...data.warehouses.data],
+              },
+            };
+          } else {
+            return {
+              myWarehouses: {
+                ...data.myWarehouses,
+                data: [createWarehouse, ...data.myWarehouses.data],
+              },
+            };
+          }
         }
       );
     },
@@ -165,15 +193,26 @@ export default function WarehouseAddModal({
 
   const submit = () => {
     createWarehouse({
-      variables: {
-        name: form.getInputProps("name").value,
-        regionId: form.getInputProps("regionId").value, // Provide the regionId variable
-        _geo: {
-          lat: +location.lat,
-          lng: +location.lng,
-        },
-        specific_area: form.getInputProps("specific_area").value,
-      },
+      variables: hasAdminPermission
+        ? {
+            name: form.getInputProps("name").value,
+            regionId: form.getInputProps("regionId").value,
+            _geo: {
+              lat: +location.lat,
+              lng: +location.lng,
+            },
+            specific_area: form.getInputProps("specific_area").value,
+            supplier_id: form.getInputProps("supplier_id").value,
+          }
+        : {
+            name: form.getInputProps("name").value,
+            regionId: form.getInputProps("regionId").value,
+            _geo: {
+              lat: +location.lat,
+              lng: +location.lng,
+            },
+            specific_area: form.getInputProps("specific_area").value,
+          },
       onCompleted(data) {
         showNotification({
           color: "green",
@@ -204,6 +243,9 @@ export default function WarehouseAddModal({
     form.setFieldValue("specific_area", val);
     form.setFieldValue("location", val);
   };
+  const handleSupplierChange = (val) => {
+    form.setFieldValue("supplier_id", val);
+  };
   return (
     <>
       <LoadingOverlay
@@ -222,6 +264,15 @@ export default function WarehouseAddModal({
                 placeholder="Name"
                 {...form.getInputProps("name")}
               />
+              <Select
+                required
+                searchable
+                data={regionsDropDownData}
+                value={form.getInputProps("regionId")?.value}
+                onChange={setRegionDropDownValue}
+                label="Region"
+                placeholder="Pick a region this Warehouse belongs to"
+              />
               {isLoaded && (
                 <Autocomplete
                   onLoad={autocompleteLoadHandler}
@@ -238,15 +289,16 @@ export default function WarehouseAddModal({
             </Grid.Col>
 
             <Grid.Col span={6}>
-              <Select
-                required
-                searchable
-                data={regionsDropDownData}
-                value={form.getInputProps("regionId")?.value}
-                onChange={setRegionDropDownValue}
-                label="Region"
-                placeholder="Pick a region this Warehouse belongs to"
-              />
+              {hasAdminPermission && (
+                <Select
+                  searchable
+                  data={suppliers}
+                  value={form.getInputProps("supplier_id").value.toString()}
+                  onChange={handleSupplierChange}
+                  label="Supplier"
+                  placeholder="Pick a supplier this belongs to"
+                />
+              )}
               <Select
                 required
                 data={areasDropDownData}

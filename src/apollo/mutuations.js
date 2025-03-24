@@ -4,6 +4,7 @@ export const LOGIN = gql`
   mutation ($email: String!, $password: String!) {
     login(input: { email: $email, password: $password }) {
       token
+      roles
       permissions {
         name
       }
@@ -70,6 +71,7 @@ export const CREATE_WARE_HOUSE = gql`
     $_geo: GeoInput
     $regionId: ID!
     $specific_area: String
+    $supplier_id: String
   ) {
     createWarehouse(
       input: {
@@ -77,6 +79,7 @@ export const CREATE_WARE_HOUSE = gql`
         _geo: $_geo
         region: { connect: $regionId }
         specific_area: $specific_area
+        supplier_id: $supplier_id
       }
     ) {
       id
@@ -256,6 +259,7 @@ export const CREATE_PRODUCT = gql`
     $is_active: Boolean
     $images: [Upload]
     $category: CreateCategoryHasOne!
+    $supplier_id: String
     $attributes: CreateAttributeHasMany
   ) {
     createProduct(
@@ -263,6 +267,7 @@ export const CREATE_PRODUCT = gql`
         name: $name
         short_description: $short_description
         description: $description
+        supplier_id: $supplier_id
         is_active: $is_active
         images: $images
         category: $category
@@ -561,23 +566,20 @@ export const UPDATE_SUPPLIER = gql`
 `;
 
 export const UPDATE_SUPPLIER_Commistion = gql`
-  mutation updateSupplierCommission(
-    $id: ID!
-    $commission_rate: Float!
-  ) {
+  mutation updateSupplierCommission($id: ID!, $commission_rate: Float!) {
     updateSupplierCommission(
       id: $id
-      input: {commission_rate: $commission_rate }
+      input: { commission_rate: $commission_rate }
     ) {
-       id
-    commission_rate
-    supplier{
-        user{
-            name
-            phone
-            email
+      id
+      commission_rate
+      supplier {
+        user {
+          name
+          phone
+          email
         }
-    }
+      }
     }
   }
 `;
