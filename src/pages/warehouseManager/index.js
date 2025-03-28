@@ -16,16 +16,16 @@ import { FiEdit, FiEye } from "react-icons/fi";
 import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
 import EditIcon from "@mui/icons-material/Edit";
 import { showNotification } from "@mantine/notifications";
-import { DEL_SUPPLIER, DEL_SUPPLIER_Commission } from "apollo/mutuations";
-import { GET_SUPPLIERS, GET_SUPPLIERS_Commission } from "apollo/queries";
+import { DEL_MANAGER, DEL_SUPPLIER } from "apollo/mutuations";
+import { GET_SUPPLIERS, GET_WARE_HOUSE_MANAGERS } from "apollo/queries";
 import B2bTable from "components/reusable/b2bTable";
 
-import RetailerDetailModal from "components/Retailer/RetailerDetail";
+import SupplierAddModal from "components/Supplier/SupplierAddModal";
+import SupplierEditModal from "components/Supplier/SupplierEditModal";
+import WarehouseManagerAddModal from "components/WarehouseManager/WarehouseManagerAdd";
+import WarehouseManagerEditModal from "components/WarehouseManager/WarehouseEditModal";
 
-import CommissionAddModal from "components/SupplierCommission/CommistionAddModal";
-import CommissionEditModal from "components/SupplierCommission/CommistionEditModal";
-
-const SupplierCommission = () => {
+const WarehouseManagers = () => {
   const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
@@ -39,11 +39,17 @@ const SupplierCommission = () => {
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const { data, loading } = useQuery(GET_SUPPLIERS_Commission, {
+  const { data, loading,refetch } = useQuery(GET_WARE_HOUSE_MANAGERS, {
     variables: {
       first: parseInt(size),
       page: activePage,
       search: searchValue,
+      ordered_by: [
+        {
+          column: "CREATED_AT",
+          order: "DESC",
+        },
+      ],
     },
   });
 
@@ -53,30 +59,38 @@ const SupplierCommission = () => {
   };
   useEffect(() => {
     if (data) {
-      setTotal(data.supplier_commissions.paginatorInfo.lastPage);
+      setTotal(data.warehouseManagers.paginatorInfo.lastPage);
     }
   }, [data, size]);
-
-  const [delRetailer] = useMutation(DEL_SUPPLIER_Commission, {
-    update(cache, { data: { deleteSupplier } }) {
+  useEffect(() => {
+  refetch()
+  }, []);
+  const [delRetailer] = useMutation(DEL_MANAGER, {
+    update(cache, { data: { deleteWarehouseManager } }) {
       cache.updateQuery(
         {
-          query: GET_SUPPLIERS_Commission,
+          query: GET_WARE_HOUSE_MANAGERS,
           variables: {
             first: parseInt(size),
             page: activePage,
             search: "",
+            ordered_by: [
+              {
+                column: "CREATED_AT",
+                order: "DESC",
+              },
+            ],
           },
         },
         (data) => {
-          if (data.supplier_commissions.data.length === 1) {
+          if (data.warehouseManagers.data.length === 1) {
             setTotal(total - 1);
             setActivePage(activePage - 1);
           } else {
             return {
-              supplier_commissions: {
+              warehouseManagers: {
                 data: [
-                  ...data.supplier_commissions.data.filter(
+                  ...data.warehouseManagers.data.filter(
                     (supplier) => supplier.id !== deleteRetailer.id
                   ),
                 ],
@@ -98,10 +112,16 @@ const SupplierCommission = () => {
       variables: { id: deleteID },
       refetchQueries: [
         {
-          query: GET_SUPPLIERS_Commission,
+          query: GET_WARE_HOUSE_MANAGERS,
           variables: {
             first: 10,
             page: 1,
+            ordered_by: [
+              {
+                column: "CREATED_AT",
+                order: "DESC",
+              },
+            ],
           },
         },
       ],
@@ -111,7 +131,7 @@ const SupplierCommission = () => {
         showNotification({
           color: "green",
           title: "Success",
-          message: "Commission Deleted Successfully",
+          message: "Manager Deleted Successfully",
         });
       },
       onError(error) {
@@ -155,7 +175,7 @@ const SupplierCommission = () => {
       sortable: false,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData.supplier.user?.name}</span>;
+        return <span>{rowData.user?.name}</span>;
       },
     },
     {
@@ -164,25 +184,16 @@ const SupplierCommission = () => {
       sortable: false,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData.supplier.user?.email}</span>;
+        return <span>{rowData.user?.email}</span>;
       },
     },
     {
-      label: "City",
-      key: "city",
+      label: "Warehouse",
+      key: "warehouse",
       sortable: false,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData.supplier.city}</span>;
-      },
-    },
-    {
-      label: "Commission Rate",
-      key: "commission_rate",
-      sortable: true,
-      searchable: true,
-      render: (rowData) => {
-        return <span>{rowData.commission_rate}</span>;
+        return <span>{rowData.warehouse.name}</span>;
       },
     },
     {
@@ -200,15 +211,6 @@ const SupplierCommission = () => {
             >
               <EditIcon style={{ fontSize: "1rem" }} />
             </Controls.ActionButton>
-            <span style={{ marginLeft: "1px" }}>
-              <Controls.ActionButton
-                color="primary"
-                title="View Detail"
-             //   onClick={() => handleManageRetailer(`${rowData.id}`)}
-              >
-                <FiEye fontSize="medium" />
-              </Controls.ActionButton>
-            </span>
             <Controls.ActionButton
               color="primary"
               title="Delete"
@@ -223,7 +225,7 @@ const SupplierCommission = () => {
   ];
 
   const optionsData = {
-    actionLabel: "Add Commission",
+    actionLabel: "Add Warhouse Manager",
     setAddModal: setOpened,
   };
   const [confirmedSearch, setConfirmedSearch] = useState("");
@@ -254,44 +256,13 @@ const SupplierCommission = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Editing a Commission"
+        title="Editing a Manager"
+        padding="xl"
         onClose={() => setOpenedEdit(false)}
-        styles={{
-          closeButton: {
-            color: "black",
-            marginTop: "50px",
-          },
-        }}
-        padding="xl"
-        position="right"
-        size="40%"
-      >
-        <CommissionEditModal commistion={editId} setOpenedEdit={setOpenedEdit} />
-      </Drawer>
-
-      <Drawer
-        opened={openedDetail}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Commission Detail"
-        padding="xl"
-        onClose={() => setOpenedDetail(false)}
         position="bottom"
         size="80%"
       >
-        <RetailerDetailModal
-          total={total}
-          setTotal={setTotal}
-          activePage={activePage}
-          setActivePage={setActivePage}
-          setOpenedDetail={setOpenedDetail}
-          Id={editId}
-        />
+        <WarehouseManagerEditModal manager={editId} setOpenedEdit={setOpenedEdit} />
       </Drawer>
 
       <Modal
@@ -300,7 +271,7 @@ const SupplierCommission = () => {
         title="Warning"
         centered
       >
-        <p>Are you sure do you want to delete this Commission?</p>
+        <p>Are you sure do you want to delete this user?</p>
         <Group position="right">
           <Button onClick={() => deleteRetailer()} color="red">
             Delete
@@ -310,17 +281,12 @@ const SupplierCommission = () => {
       <Drawer
         opened={opened}
         onClose={() => setOpened(false)}
-        styles={{
-          closeButton: {
-            color: "black",
-            marginTop: "50px",
-          },
-        }}
+        title="Adding a Manager"
         padding="xl"
-        position="right"
-        size="40%"
+        size="80%"
+        position="bottom"
       >
-        <CommissionAddModal
+        <WarehouseManagerAddModal
           total={total}
           setTotal={setTotal}
           activePage={activePage}
@@ -343,7 +309,7 @@ const SupplierCommission = () => {
             header={headerData}
             optionsData={optionsData}
             loading={loading}
-            data={data ? data.supplier_commissions.data : []}
+            data={data ? data.warehouseManagers.data : []}
             size={size}
             handlePageSizeChange={handlePageSizeChange}
           />
@@ -353,4 +319,4 @@ const SupplierCommission = () => {
   );
 };
 
-export default SupplierCommission;
+export default WarehouseManagers;

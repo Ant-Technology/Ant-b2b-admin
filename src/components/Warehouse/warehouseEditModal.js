@@ -20,7 +20,11 @@ import {
   MarkerF,
   Autocomplete,
 } from "@react-google-maps/api";
-import { GET_REGIONS } from "apollo/queries";
+import {
+  GET_MY_SUPPLIERS_Business,
+  GET_REGIONS,
+  GET_SUPPLIERS,
+} from "apollo/queries";
 
 const Loader = () => (
   <ContentLoader
@@ -41,16 +45,57 @@ const containerStyle = {
 const GOOGLE_API_KEY = "AIzaSyARVREQA1z13d_alpkPt_LW_ajP_VfFiGk"; // Your Google API Key
 const libraries = ["places"];
 
-const CategoryEditModal = ({
-  setOpenedEdit,
-  editId,
-  loading,
-}) => {
+const CategoryEditModal = ({ setOpenedEdit, editId, loading }) => {
   const [location, setLocation] = useState({});
   const [center, setCenter] = useState({ lat: 8.9999645, lng: 38.7700539 });
   const [autocomplete, setAutocomplete] = useState();
   const [mapRef, setMapRef] = useState(null);
+  const [areasDropDownData, setAreasDropDownData] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const roles = JSON.parse(localStorage.getItem("roles")) || [];
+  const hasAdminPermission = roles.some((permission) => permission === "admin");
+  const [regions, setRegions] = useState([]);
+  const [business, setBusiness] = useState([]);
 
+  const { loading: supplierLoading } = useQuery(GET_SUPPLIERS, {
+    variables: {
+      first: parseInt(1000),
+      page: 1,
+      search: "",
+    },
+
+    onCompleted(data) {
+      const arr = data.suppliers.data.map((item) => ({
+        label: item.user?.name,
+        value: item.id,
+      }));
+
+      setSuppliers(arr);
+    },
+  });
+
+  const { loading: businessLoading } = useQuery(GET_MY_SUPPLIERS_Business, {
+    variables: {
+      first: parseInt(1000),
+      page: 1,
+      search: "",
+      ordered_by: [
+        {
+          column: "CREATED_AT",
+          order: "DESC",
+        },
+      ],
+    },
+
+    onCompleted(data) {
+      const arr = data.myBusinesses.data.map((item) => ({
+        label: item.business_name,
+        value: item.id,
+      }));
+
+      setBusiness(arr);
+    },
+  });
   useEffect(() => {
     if (location && Object.keys(location).length > 0) {
       setCenter({ lat: location.lat, lng: location.lng });
@@ -89,6 +134,7 @@ const CategoryEditModal = ({
       name: "",
       region: { connect: "1" }, // Initialized correctly
       specific_area: "",
+      supplier_id: 1,
     },
   });
 
@@ -106,6 +152,7 @@ const CategoryEditModal = ({
         value: region?.id,
       }));
       setRegionsDropDownData(regions);
+      setRegions(data.regions.data);
     },
     onError(err) {
       showNotification({
@@ -121,6 +168,7 @@ const CategoryEditModal = ({
         name: editId?.name,
         specific_area: editId?.specific_area,
         region: { connect: editId.region?.id },
+        supplier_id:editId.supplier?.id
       });
       setLocation(editId?._geo);
     }
@@ -131,17 +179,22 @@ const CategoryEditModal = ({
   const { height } = useViewportSize();
 
   const submit = () => {
-    editWarehouse({
-      variables: {
-        id: editId.id,
-        name: form.values.name,
-        _geo: {
-          lat: +location.lat,
-          lng: +location.lng,
-        },
-        region: { connect: form.values.region.connect }, // Accessing the region value correctly
-        specific_area: form.values.specific_area,
+    let variables = {
+      id: editId.id,
+      name: form.values.name,
+      _geo: {
+        lat: +location.lat,
+        lng: +location.lng,
       },
+      region: { connect: form.values.region.connect }, // Accessing the region value correctly
+      specific_area: form.values.specific_area,
+      supplier_id :form
+        .getInputProps("supplier_id")
+        .value.toString()
+    };
+    
+    editWarehouse({
+      variables,
       onCompleted() {
         showNotification({
           color: "green",
@@ -163,9 +216,19 @@ const CategoryEditModal = ({
   };
 
   const setRegionDropDownValue = (val) => {
-    form.setFieldValue("region.connect", val); // Correctly set the path
+    form.setFieldValue("region.connect", val);
+    const region = regions.find((item) => item.id === val);
+    const parsedSpecificAreas = JSON.parse(region.specific_areas);
+    setAreasDropDownData(parsedSpecificAreas); // Correctly set the path
   };
-
+  const setAreasDropDownValue = (val) => {
+    //
+    form.setFieldValue("specific_area", val);
+    form.setFieldValue("location", val);
+  };
+  const handleSupplierChange = (val) => {
+    form.setFieldValue("supplier_id", val);
+  };
   return (
     <>
       <LoadingOverlay
@@ -185,6 +248,16 @@ const CategoryEditModal = ({
                 {...form.getInputProps("name")}
               />
             </Grid.Col>
+            <Grid.Col span={6}>
+              <Select
+                searchable
+                data={business}
+                value={form.getInputProps("supplier_id").value.toString()}
+                onChange={handleSupplierChange}
+                label="Supplier"
+                placeholder="Pick a supplier business this belongs to"
+              />
+            </Grid.Col>
           </Grid>
           <Grid>
             <Grid.Col span={6}>
@@ -196,6 +269,18 @@ const CategoryEditModal = ({
                 placeholder="Pick a region this retailer belongs to"
               />
             </Grid.Col>
+            <Grid.Col span={6}>
+              <Select
+                required
+                data={areasDropDownData}
+                value={form.getInputProps("specific_area")?.value}
+                onChange={setAreasDropDownValue}
+                label="Specific Area"
+                placeholder="Pick a Specific Area this Warehouse belongs to"
+              />
+            </Grid.Col>
+          </Grid>
+          <Grid>
             {isLoaded && (
               <Grid.Col span={6}>
                 <Autocomplete

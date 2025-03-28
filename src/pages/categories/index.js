@@ -48,7 +48,7 @@ const Categories = () => {
     setSearchValue("");
     setConfirmedSearch("");
   };
-  const { data, loading, fetchMore } = useQuery(GET_CATEGORIES, {
+  const { data, loading, fetchMore,refetch } = useQuery(GET_CATEGORIES, {
     // fetchPolicy: "no-cache",
     variables: {
       first: parseInt(size), // Pass size dynamically
@@ -135,7 +135,9 @@ const Categories = () => {
       setTotal(data.categories.paginatorInfo.lastPage);
     }
   }, [data, size]);
-
+ useEffect(() => {
+   refetch()
+  }, []);
   const handleChange = (currentPage) => {
     fetchMore({
       variables: {

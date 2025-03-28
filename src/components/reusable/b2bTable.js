@@ -173,6 +173,7 @@ const B2bTable = ({
   clearInput,
   searchValue, // Receive search value from parent
   onSearchChange,
+  layout,
 }) => {
   const { classes } = useStyles();
   const [localSearch, setLocalSearch] = useState("");
@@ -287,7 +288,10 @@ const B2bTable = ({
         highlightOnHover
         horizontalSpacing="md"
         verticalSpacing="xs"
-        sx={{ tableLayout: "fixed", minWidth: 700 }}
+        sx={{
+          ...(layout ? { tableLayout: layout } : { tableLayout: "fixed" }),
+          minWidth: 700,
+        }}
       >
         <LoadingOverlay
           visible={loading}

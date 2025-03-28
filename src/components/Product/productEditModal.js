@@ -22,7 +22,7 @@ import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { customLoader } from "components/utilities/loader";
 import { UPDATE_PRODUCT } from "apollo/mutuations";
-import { GET_PRODUCT, NON_PAGINATED_CATEGORIES } from "apollo/queries";
+import { GET_PRODUCT, GET_SUPPLIERS, NON_PAGINATED_CATEGORIES } from "apollo/queries";
 
 const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
   const theme = useMantineTheme();
@@ -30,7 +30,26 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
     useMutation(UPDATE_PRODUCT);
   const { height } = useViewportSize();
   const [dropDownData, setDropDownData] = useState({ enArr: [], amArr: [] });
+  const roles = JSON.parse(localStorage.getItem("roles")) || [];
+  const [suppliers, setSuppliers] = useState([]);
 
+  const hasAdminPermission = roles.some((permission) => permission === "admin");
+  const { loading: supplierLoading } = useQuery(GET_SUPPLIERS, {
+    variables: {
+      first: parseInt(1000),
+      page: 1,
+      search: "",
+    },
+
+    onCompleted(data) {
+      const arr = data.suppliers.data.map((item) => ({
+        label: item.user?.name,
+        value: item.id,
+      }));
+
+      setSuppliers(arr);
+    },
+  });
   const form = useForm({
     initialValues: {
       images: {
@@ -43,6 +62,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
       description: { am: "", en: "" },
       category: { connect: 10 },
       subcategory: { connect: "" },
+      supplier_id: 2,
       is_active: true,
       attributes: {
         update: [],
@@ -51,33 +71,34 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
       },
     },
   });
-  const { loading: categoryLoading, data: categoriesData } = useQuery(NON_PAGINATED_CATEGORIES, {
-    onCompleted(data) {
-      const enArr = data.categoryNonPaginated.map((item) => ({
-        label: item.name,
-        value: item.id,
-        children: item.children,
-      }));
-      const amArr = data.categoryNonPaginated.map((item) => ({
-        label: item.name,
-        value: item.id,
-        children: item.children,
-      }));
-      setDropDownData({ enArr, amArr });
-    },
-  });
-  
+  const { loading: categoryLoading, data: categoriesData } = useQuery(
+    NON_PAGINATED_CATEGORIES,
+    {
+      onCompleted(data) {
+        const enArr = data.categoryNonPaginated.map((item) => ({
+          label: item.name,
+          value: item.id,
+          children: item.children,
+        }));
+        const amArr = data.categoryNonPaginated.map((item) => ({
+          label: item.name,
+          value: item.id,
+          children: item.children,
+        }));
+        setDropDownData({ enArr, amArr });
+      },
+    }
+  );
+
   const { loading } = useQuery(GET_PRODUCT, {
     variables: { id: editId },
     skip: !categoriesData,
     onCompleted(data) {
       const product = data.product;
       const productCategoryId = product.category.id;
-      const parentCategory = categoriesData.categoryNonPaginated.find(cat =>
-        cat.children.some(child => child.id === productCategoryId)
+      const parentCategory = categoriesData.categoryNonPaginated.find((cat) =>
+        cat.children.some((child) => child.id === productCategoryId)
       );
-  
-      // Prepare attributes data
       const forUpdate = product.attributes.map((item) => ({
         id: item.id,
         name: {
@@ -96,7 +117,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
           delete: [],
         },
       }));
-        form.setValues({
+      form.setValues({
         name: {
           am: product.name_translations.am,
           en: product.name_translations.en,
@@ -110,7 +131,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
           en: product.description_translations.en,
         },
         category: { connect: parentCategory?.id || "" },
-        subcategory: { connect: productCategoryId }, 
+        subcategory: { connect: productCategoryId },
         images: {
           delete: [],
           existing: product.images,
@@ -123,11 +144,14 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
           delete: [],
         },
       });
-        if (parentCategory) {
+      if (parentCategory) {
         setSubcategories(parentCategory.children);
       }
     },
   });
+  const handleSupplierChange = (val) => {
+    form.setFieldValue("supplier_id", val);
+  };
   const handleAttributeCards = () => {
     return [
       ...form.values.attributes?.update,
@@ -281,20 +305,24 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
     });
   };
   const submit = () => {
-    updateProduct({
-      variables: {
-        id: editId,
-        name: form.getInputProps("name").value,
-        short_description: form.getInputProps("short_description").value,
-        description: form.getInputProps("description").value,
-        is_active: form.getInputProps("is_active").value,
-        attributes: form.getInputProps("attributes").value,
-        images: {
-          create: [...files],
-          delete: [...form.getInputProps("images.delete").value],
-        },
-        category: form.getInputProps("subcategory").value,
+    let variables = {
+      id: editId,
+      name: form.getInputProps("name").value,
+      short_description: form.getInputProps("short_description").value,
+      description: form.getInputProps("description").value,
+      is_active: form.getInputProps("is_active").value,
+      attributes: form.getInputProps("attributes").value,
+      images: {
+        create: [...files],
+        delete: [...form.getInputProps("images.delete").value],
       },
+      category: form.getInputProps("subcategory").value,
+    }
+    if (hasAdminPermission) {
+      variables.supplier_id = form.getInputProps("supplier_id").value.toString();
+    }
+    updateProduct({
+      variables,
       onCompleted() {
         showNotification({
           color: "green",
@@ -311,7 +339,7 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
         });
       },
     });
-   };
+  };
 
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -371,7 +399,9 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
 
   const handleCategoryChange = (val) => {
     form.setFieldValue("category.connect", val);
-    const selectedCategory = dropDownData.enArr.find((cat) => cat.value === val);
+    const selectedCategory = dropDownData.enArr.find(
+      (cat) => cat.value === val
+    );
     setSubcategories(selectedCategory ? selectedCategory.children : []);
     form.setFieldValue("subcategory.connect", ""); // Reset subcategory on parent change
   };
@@ -462,6 +492,19 @@ const ProductEditModal = ({ editId, openedEdit, setOpenedEdit }) => {
                 disabled={subcategories.length === 0}
               />
             </Grid.Col>
+            {hasAdminPermission && (
+              <Grid.Col span={6}>
+                <Select
+                  searchable
+                  required
+                  data={suppliers}
+                  value={form.getInputProps("supplier_id").value.toString()}
+                  onChange={handleSupplierChange}
+                  label="Supplier"
+                  placeholder="Pick a supplier this belongs to"
+                />
+              </Grid.Col>
+            )}
             <Grid.Col span={6}>
               <Button
                 onClick={() => fileInputRef.current.click()} // Trigger file input on button click

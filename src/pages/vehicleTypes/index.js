@@ -43,7 +43,7 @@ const VehicleTypes = () => {
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const { data, loading } = useQuery(GET_VEHICLE_TYPES, {
+  const { data, loading,refetch } = useQuery(GET_VEHICLE_TYPES, {
     variables: {
       first: parseInt(size),
       page: activePage,
@@ -178,7 +178,9 @@ const VehicleTypes = () => {
     setOpenedEdit(true);
     setEditId(id);
   };
-
+ useEffect(() => {
+   refetch()
+  }, []);
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
   };

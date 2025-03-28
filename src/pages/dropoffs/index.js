@@ -49,7 +49,9 @@ const DropOffs = () => {
   const handleChange = (currentPage) => {
     setActivePage(currentPage);
   };
-
+ useEffect(() => {
+   refetch()
+  }, []);
   const handleGeoLocationClick = (id) => {
     setOpenedLocation(true);
     setEditId(id);

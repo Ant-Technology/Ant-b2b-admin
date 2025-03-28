@@ -36,7 +36,7 @@ const Regions = () => {
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const { data, loading } = useQuery(GET_REGIONS, {
+  const { data, loading ,refetch} = useQuery(GET_REGIONS, {
     variables: {
       first: parseInt(size),
       page: activePage,
@@ -126,7 +126,9 @@ const Regions = () => {
       },
     });
   };
-
+ useEffect(() => {
+   refetch()
+  }, []);
   const handleEditRegion = (id) => {
     setOpenedEdit(true);
     setEditId(id);

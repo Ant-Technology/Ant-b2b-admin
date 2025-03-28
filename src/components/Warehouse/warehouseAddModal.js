@@ -15,6 +15,7 @@ import Map from "components/utilities/Map";
 import { customLoader } from "components/utilities/loader";
 import { CREATE_WARE_HOUSE } from "../../apollo/mutuations";
 import {
+  GET_MY_SUPPLIERS_Business,
   GET_MY_WARE_HOUSES,
   GET_REGIONS,
   GET_SUPPLIERS,
@@ -108,6 +109,8 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
   const [regions, setRegions] = useState([]);
   const [areasDropDownData, setAreasDropDownData] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [business, setBusiness] = useState([]);
+
   const roles = JSON.parse(localStorage.getItem("roles")) || [];
   const hasAdminPermission = roles.some((permission) => permission === "admin");
 
@@ -125,6 +128,29 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
       }));
 
       setSuppliers(arr);
+    },
+  });
+
+  const { loading: businessLoading } = useQuery(GET_MY_SUPPLIERS_Business, {
+    variables: {
+      first: parseInt(1000),
+      page: 1,
+      search: "",
+      ordered_by: [
+        {
+          column: "CREATED_AT",
+          order: "DESC",
+        },
+      ],
+    },
+
+    onCompleted(data) {
+      const arr = data.myBusinesses.data.map((item) => ({
+        label: item.business_name,
+        value: item.id,
+      }));
+
+      setBusiness(arr);
     },
   });
   // graphql queries
@@ -193,26 +219,16 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
 
   const submit = () => {
     createWarehouse({
-      variables: hasAdminPermission
-        ? {
-            name: form.getInputProps("name").value,
-            regionId: form.getInputProps("regionId").value,
-            _geo: {
-              lat: +location.lat,
-              lng: +location.lng,
-            },
-            specific_area: form.getInputProps("specific_area").value,
-            supplier_id: form.getInputProps("supplier_id").value,
-          }
-        : {
-            name: form.getInputProps("name").value,
-            regionId: form.getInputProps("regionId").value,
-            _geo: {
-              lat: +location.lat,
-              lng: +location.lng,
-            },
-            specific_area: form.getInputProps("specific_area").value,
-          },
+      variables: {
+        name: form.getInputProps("name").value,
+        regionId: form.getInputProps("regionId").value,
+        _geo: {
+          lat: +location.lat,
+          lng: +location.lng,
+        },
+        specific_area: form.getInputProps("specific_area").value,
+        supplier_id: form.getInputProps("supplier_id").value.toString(),
+      },
       onCompleted(data) {
         showNotification({
           color: "green",
@@ -249,7 +265,7 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
   return (
     <>
       <LoadingOverlay
-        visible={loading || regionsLoading}
+        visible={loading || regionsLoading|| businessLoading}
         color="blue"
         overlayBlur={2}
         loader={customLoader}
@@ -289,16 +305,14 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
             </Grid.Col>
 
             <Grid.Col span={6}>
-              {hasAdminPermission && (
-                <Select
-                  searchable
-                  data={suppliers}
-                  value={form.getInputProps("supplier_id").value.toString()}
-                  onChange={handleSupplierChange}
-                  label="Supplier"
-                  placeholder="Pick a supplier this belongs to"
-                />
-              )}
+              <Select
+                searchable
+                data={business}
+                value={form.getInputProps("supplier_id").value.toString()}
+                onChange={handleSupplierChange}
+                label="Supplier"
+                placeholder="Pick a supplier business this belongs to"
+              />
               <Select
                 required
                 data={areasDropDownData}

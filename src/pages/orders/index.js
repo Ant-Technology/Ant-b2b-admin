@@ -73,7 +73,9 @@ const Orders = () => {
     setSize(newSize);
     setActivePage(1);
   };
-
+ useEffect(() => {
+   refetch()
+  }, []);
   useEffect(() => {
     const pusher = new Pusher("83f49852817c6b52294f", {
       cluster: "mt1",
