@@ -1,50 +1,50 @@
-import { useEffect, useState } from "react";
-import { customLoader } from "components/utilities/loader";
 import { useMutation, useQuery } from "@apollo/client";
-import Controls from "../../components/controls/Controls";
 import {
-  Card,
+  Avatar,
+  Badge,
   Button,
-  ScrollArea,
-  useMantineTheme,
-  LoadingOverlay,
+  Card,
   Drawer,
   Group,
+  LoadingOverlay,
   Modal,
+  ScrollArea,
+  useMantineTheme,
 } from "@mantine/core";
-import { FiEdit, FiEye } from "react-icons/fi";
-import { Edit, ManualGearbox, Trash } from "tabler-icons-react";
-import EditIcon from "@mui/icons-material/Edit";
 import { showNotification } from "@mantine/notifications";
-import {DEL_SUPPLIER } from "apollo/mutuations";
-import {GET_SUPPLIERS } from "apollo/queries";
+import { CHANGE_USER_STATUS, DEL_USER } from "apollo/mutuations";
+import { FiEdit, FiEye } from "react-icons/fi";
+import { ManualGearbox, Trash } from "tabler-icons-react";
+import EditIcon from "@mui/icons-material/Edit";
+import { GET_ALL_USERS } from "apollo/queries";
+import Controls from "components/controls/Controls";
 import B2bTable from "components/reusable/b2bTable";
-
-import RetailerEditModal from "components/Retailer/RetailerEditModal";
-import RetailerDetailModal from "components/Retailer/RetailerDetail";
-
-import SupplierAddModal from "components/Supplier/SupplierAddModal";
-import SupplierEditModal from "components/Supplier/SupplierEditModal";
-
-const Suppliers = () => {
+import UserAddModal from "components/User/UserAddModal";
+import UserEditModal from "components/User/UserEditModal";
+import { customLoader } from "components/utilities/loader";
+import React, { useEffect } from "react";
+import { useState } from "react";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import PersonOffIcon from "@mui/icons-material/PersonOff";
+const Users = () => {
   const [size, setSize] = useState("10");
   const [opened, setOpened] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
+  const [openedStatusChange, setStatusChange] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
   const [deleteID, setDeleteID] = useState(false);
-  const [openedDetail, setOpenedDetail] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-
-  //pagination states
   const [activePage, setActivePage] = useState(1);
+  const [status, setStatus] = useState(null);
   const [total, setTotal] = useState(0);
 
-  const { data, loading } = useQuery(GET_SUPPLIERS, {
+  const { data, loading, refetch } = useQuery(GET_ALL_USERS, {
     variables: {
       first: parseInt(size),
       page: activePage,
-      search: searchValue
+      search: searchValue,
+      role: "supplier",
     },
   });
 
@@ -54,31 +54,33 @@ const Suppliers = () => {
   };
   useEffect(() => {
     if (data) {
-      setTotal(data.suppliers.paginatorInfo.lastPage);
+      setTotal(data.users.paginatorInfo.lastPage);
     }
   }, [data, size]);
-
-  const [delRetailer] = useMutation(DEL_SUPPLIER, {
-    update(cache, { data: { deleteSupplier } }) {
+  useEffect(() => {
+    refetch();
+  }, []);
+  const [delUser] = useMutation(DEL_USER, {
+    update(cache, { data: { deleteUser } }) {
       cache.updateQuery(
         {
-          query: GET_SUPPLIERS,
+          query: GET_ALL_USERS,
           variables: {
-            first: parseInt(size),
+            first: 10,
             page: activePage,
-            search:""
+            search: "",
           },
         },
         (data) => {
-          if (data.suppliers.data.length === 1) {
+          if (data.users.data.length === 1) {
             setTotal(total - 1);
             setActivePage(activePage - 1);
           } else {
             return {
-              suppliers: {
+              users: {
                 data: [
-                  ...data.suppliers.data.filter(
-                    (supplier) => supplier.id !== deleteRetailer.id
+                  ...data.users.data.filter(
+                    (user) => user.id !== deleteUser.id
                   ),
                 ],
               },
@@ -89,17 +91,183 @@ const Suppliers = () => {
     },
   });
 
+  const theme = useMantineTheme();
+
+  const headerData = [
+    {
+      label: "Avatar",
+      key: "avatar",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return <Avatar src={rowData.profile_image} />;
+      },
+    },
+    {
+      label: "Name",
+      key: "name",
+      sortable: true,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.name}</span>;
+      },
+    },
+    {
+      label: "Phone",
+      key: "Phone",
+      sortable: false,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.phone}</span>;
+      },
+    },
+    {
+      label: "Email",
+      key: "Email",
+      sortable: false,
+      searchable: true,
+      render: (rowData) => {
+        return <span>{rowData.email}</span>;
+      },
+    },
+    {
+      label: "Status",
+      key: "account",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return (
+          <span>
+            {rowData.status === "ACTIVE" ? (
+              <Badge variant="light" color="green">
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="light" color="red">
+                Not Active
+              </Badge>
+            )}
+          </span>
+        );
+      },
+    },
+    {
+      label: "Roles",
+      key: "roles",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return rowData.roles.map((data) => (
+          <Badge key={data.id}>{data.name}</Badge>
+        ));
+      },
+    },
+    {
+      label: "Actions",
+      key: "actions",
+      sortable: false,
+      searchable: false,
+      render: (rowData) => {
+        return (
+          <div style={{ display: "flex" }}>
+            <Controls.ActionButton
+              color="primary"
+              title="Update"
+              onClick={() => handleEditUser(`${rowData.id}`)}
+            >
+              <EditIcon style={{ fontSize: "1rem" }} />
+            </Controls.ActionButton>
+            <Controls.ActionButton
+              color="primary"
+              title="Delete"
+              onClick={() => handleDelete(`${rowData.id}`)}
+            >
+              <Trash size={17} />
+            </Controls.ActionButton>
+            <Controls.ActionButton
+              color="primary"
+              title={rowData.status === "ACTIVE" ? "Deactivate" : "Activate"}
+              onClick={() =>
+                handleStatus(
+                  rowData.id,
+                  rowData.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE"
+                )
+              }
+            >
+              {rowData.status === "ACTIVE" ? (
+                <PersonOffIcon size={17} />
+              ) : (
+                <HowToRegIcon size={17} />
+              )}
+            </Controls.ActionButton>
+          </div>
+        );
+      },
+    },
+  ];
+  const [changeUserStatus] = useMutation(CHANGE_USER_STATUS, {
+    refetchQueries: [
+      {
+        query: GET_ALL_USERS,
+        variables: {
+          first: 10,
+          page: activePage,
+        },
+      },
+    ],
+    onCompleted(data) {
+      const action =
+        data.changeUserStatus.status === "ACTIVE" ? "Activated" : "Deactivated";
+      showNotification({
+        color: "green",
+        title: "Success",
+        message: `User ${action} successfully`,
+      });
+      setStatusChange(false);
+    },
+    onError(error) {
+      showNotification({
+        color: "red",
+        title: "Error",
+        message: `${error.message}`,
+      });
+    },
+  });
+
+  const handleUserStatusChange = () => {
+    changeUserStatus({
+      variables: {
+        id: deleteID, // Ensure id is an integer
+        status: status, // Toggle the status
+      },
+    });
+  };
+
   const handleDelete = (id) => {
     setOpenedDelete(true);
     setDeleteID(id);
   };
+  const handleStatus = (id, status) => {
+    setStatusChange(true);
+    setDeleteID(id);
+    setStatus(status);
+  };
 
-  const deleteRetailer = () => {
-    delRetailer({
+  const handleEditUser = (id) => {
+    setOpenedEdit(true);
+    setEditId(id);
+  };
+
+  const handleChange = (currentPage) => {
+    setActivePage(currentPage);
+  };
+
+  const deleteUser = () => {
+    delUser({
       variables: { id: deleteID },
       refetchQueries: [
         {
-          query: GET_SUPPLIERS,
+          query: GET_ALL_USERS,
           variables: {
             first: 10,
             page: 1,
@@ -112,7 +280,7 @@ const Suppliers = () => {
         showNotification({
           color: "green",
           title: "Success",
-          message: "Supplier Deleted Successfully",
+          message: "User Deleted Successfully",
         });
       },
       onError(error) {
@@ -126,117 +294,15 @@ const Suppliers = () => {
       },
     });
   };
+  const [confirmedSearch, setConfirmedSearch] = useState("");
 
-  const handleEditRetailer = (id) => {
-    setOpenedEdit(true);
-    setEditId(id);
+  const handleManualSearch = (searchTerm) => {
+    setSearchValue(searchTerm);
   };
-
-  const handleChange = (currentPage) => {
-    setActivePage(currentPage);
+  const clearInput = () => {
+    setSearchValue("");
+    setConfirmedSearch("");
   };
-  const theme = useMantineTheme();
-  const handleManageRetailer = (id) => {
-    setEditId(id);
-    setOpenedDetail(true);
-  };
-  const headerData = [
-    {
-      label: "id",
-      key: "id",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return <span>{rowData.id}</span>;
-      },
-    },
-    {
-      label: "Name",
-      key: "name",
-      sortable: false,
-      searchable: true,
-      render: (rowData) => {
-        return <span>{rowData.user?.name}</span>;
-      },
-    },
-    {
-      label: "Email",
-      key: "email",
-      sortable: false,
-      searchable: true,
-      render: (rowData) => {
-        return <span>{rowData.user?.email}</span>;
-      },
-    },
-    {
-      label: "City",
-      key: "city",
-      sortable: false,
-      searchable: true,
-      render: (rowData) => {
-        return <span>{rowData.city}</span>;
-      },
-    },
-    {
-      label: "Address",
-      key: "address",
-      sortable: true,
-      searchable: true,
-      render: (rowData) => {
-        return <span>{rowData.address}</span>;
-      },
-    },
-    {
-      label: "Actions",
-      key: "actions",
-      sortable: false,
-      searchable: false,
-      render: (rowData) => {
-        return (
-          <>
-            <Controls.ActionButton
-              color="primary"
-              title="Update"
-              onClick={() => handleEditRetailer(rowData)}
-            >
-              <EditIcon style={{ fontSize: "1rem" }} />
-            </Controls.ActionButton>
-            <span style={{ marginLeft: "1px" }}>
-              <Controls.ActionButton
-                color="primary"
-                title="View Detail"
-               // onClick={() => handleManageRetailer(`${rowData.id}`)}
-              >
-                <FiEye fontSize="medium" />
-              </Controls.ActionButton>
-            </span>
-            <Controls.ActionButton
-              color="primary"
-              title="Delete"
-              onClick={() => handleDelete(`${rowData.id}`)}
-            >
-              <Trash size={17} />
-            </Controls.ActionButton>
-          </>
-        );
-      },
-    },
-  ];
-
-  const optionsData = {
-    actionLabel: "Add Supplier",
-    setAddModal: setOpened,
-  };
-   const [confirmedSearch, setConfirmedSearch] = useState("");
-  
-    const handleManualSearch = (searchTerm) => {
-      setSearchValue(searchTerm);
-    };
-    const clearInput = () => {
-      setSearchValue("");
-      setConfirmedSearch("");
-    };
-
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -255,85 +321,64 @@ const Suppliers = () => {
         }
         overlayOpacity={0.55}
         overlayBlur={3}
-        title="Editing a Supplier"
+        styles={{
+          closeButton: {
+            color: "black",
+            marginTop: "50px",
+          },
+        }}
         padding="xl"
         onClose={() => setOpenedEdit(false)}
-        position="bottom"
-        size="80%"
+        position="right"
+        size="40%"
       >
-        <SupplierEditModal supplier={editId} setOpenedEdit={setOpenedEdit} />
-      </Drawer>
-
-      <Drawer
-        opened={openedDetail}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Supplier Detail"
-        padding="xl"
-        onClose={() => setOpenedDetail(false)}
-        position="bottom"
-        size="80%"
-      >
-        <RetailerDetailModal
-          total={total}
-          setTotal={setTotal}
-          activePage={activePage}
-          setActivePage={setActivePage}
-          setOpenedDetail={setOpenedDetail}
-          Id={editId}
+        <UserEditModal
+          setOpenedEdit={setOpenedEdit}
+          editId={editId}
+          data={data ? data.users.data : []}
         />
       </Drawer>
-
       <Modal
         opened={openedDelete}
         onClose={() => setOpenedDelete(false)}
         title="Warning"
         centered
       >
-        <p>Are you sure do you want to delete this supplier?</p>
+        <p>Are you sure do you want to delete this user?</p>
         <Group position="right">
-          <Button onClick={() => deleteRetailer()} color="red">
+          <Button onClick={() => deleteUser()} color="red">
             Delete
           </Button>
         </Group>
       </Modal>
-      <Drawer
-        opened={opened}
-        onClose={() => setOpened(false)}
-        title="Adding a Supplier"
-        padding="xl"
-        size="80%"
-        position="bottom"
+      <Modal
+        opened={openedStatusChange}
+        onClose={() => setStatusChange(false)}
+        title="Warning"
+        centered
       >
-        <SupplierAddModal
-          total={total}
-          setTotal={setTotal}
-          activePage={activePage}
-          setActivePage={setActivePage}
-          setOpened={setOpened}
-          size={size}
-        />
-      </Drawer>
-
+        <p>{`Are you sure do you want ${
+          status === "ACTIVE" ? "Activat" : "Deactivat"
+        } this  user?`}</p>
+        <Group position="right">
+          <Button onClick={() => handleUserStatusChange()} color="red">
+            {status === "ACTIVE" ? "Activat" : "Deactivat"}
+          </Button>
+        </Group>
+      </Modal>
       <Card shadow="sm" p="lg">
         <ScrollArea>
           <B2bTable
             total={total}
             activePage={activePage}
             handleChange={handleChange}
+            header={headerData}
             clearInput={clearInput}
             handelSearch={handleManualSearch}
             searchValue={confirmedSearch}
             onSearchChange={setConfirmedSearch}
-            header={headerData}
-            optionsData={optionsData}
             loading={loading}
-            data={data ? data.suppliers.data : []}
+            data={data ? data.users.data : []}
             size={size}
             handlePageSizeChange={handlePageSizeChange}
           />
@@ -343,4 +388,4 @@ const Suppliers = () => {
   );
 };
 
-export default Suppliers;
+export default Users;

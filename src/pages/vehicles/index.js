@@ -38,7 +38,7 @@ const Vehicles = () => {
 
   const theme = useMantineTheme();
 
-  const { data, loading, fetchMore } = useQuery(GET_VEHICLES, {
+  const { data, loading, fetchMore,refetch } = useQuery(GET_VEHICLES, {
     // fetchPolicy: "no-cache",
     variables: {
       first: parseInt(size),
@@ -103,7 +103,9 @@ const Vehicles = () => {
       setTotal(data.vehicles.paginatorInfo.lastPage);
     }
   }, [data, size]);
-
+ useEffect(() => {
+   refetch()
+  }, []);
   const handleChange = (currentPage) => {
     fetchMore({
       variables: {

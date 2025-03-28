@@ -80,7 +80,9 @@ const Products = () => {
       },
     }
   );
-
+  useEffect(() => {
+    refetch();
+  }, []);
   const handlePageSizeChange = (newSize) => {
     setSize(newSize);
     setActivePage(1);
@@ -399,7 +401,7 @@ const Products = () => {
             data={
               !hasAdminPermission
                 ? data.myProducts.data
-                : data?.products?.data ||[]
+                : data?.products?.data || []
             }
             size={size}
             handlePageSizeChange={handlePageSizeChange}

@@ -316,7 +316,10 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         initiallyOpened: false,
         links: [
           ...(permissions.some((perm) => perm.name === "roles-view")
-            ? [{ link: "/suppliers", label: "Manage Suppliers" }]
+            ? [{ link: "/suppliers", label: "Supplier" }]
+            : []),
+            ...(permissions.some((perm) => perm.name === "roles-view")
+            ? [{ link: "/supplier-business", label: "Supplier business" }]
             : []),
           ...(permissions.some((perm) => perm.name === "configs-view")
             ? [{ link: "/commission", label: "Supplier Commission" }]
@@ -364,7 +367,11 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         ],
       });
     }
-
+    const roles = JSON.parse(localStorage.getItem("roles")) || [];
+    const hasSupplierPermission = roles.some((permission) => permission === "supplier");
+    if(hasSupplierPermission) {
+      data.push({ link: "/warehouse-managers", label: "Warehouse Manager", icon: IconUsers });
+    }
     data.push({
       label: "Report",
       icon: IconReport,

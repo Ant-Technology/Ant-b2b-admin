@@ -67,6 +67,9 @@ const Warehouses = () => {
       );
     }
   }, [data, size]);
+  useEffect(() => {
+    refetch()
+  }, []);
 
   const handleChange = (currentPage) => {
     setActivePage(currentPage);

@@ -82,7 +82,7 @@ const ProductAddModal = ({
           },
         },
         (data) => {
-          console.log(data)
+          console.log(data);
           if (hasAdminPermission) {
             return {
               products: {
@@ -102,7 +102,7 @@ const ProductAddModal = ({
       );
     },
     onError(err) {
-      console.log(err)
+      console.log(err);
       console.error("Error creating product:", err);
       showNotification({
         color: "red",
@@ -433,8 +433,8 @@ const ProductAddModal = ({
                   disabled={subcategories.length === 0}
                 />
               </Grid.Col>
-              <Grid.Col span={6}>
-                {hasAdminPermission && (
+              {hasAdminPermission && (
+                <Grid.Col span={6}>
                   <Select
                     searchable
                     required
@@ -444,8 +444,8 @@ const ProductAddModal = ({
                     label="Supplier"
                     placeholder="Pick a supplier this belongs to"
                   />
-                )}
-              </Grid.Col>
+                </Grid.Col>
+              )}
               <Grid.Col span={6}>
                 <Button
                   onClick={() => fileInputRef.current.click()} // Trigger file input on button click

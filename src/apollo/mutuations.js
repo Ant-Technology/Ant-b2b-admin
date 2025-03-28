@@ -71,7 +71,7 @@ export const CREATE_WARE_HOUSE = gql`
     $_geo: GeoInput
     $regionId: ID!
     $specific_area: String
-    $supplier_id: String
+    $supplier_id: String!
   ) {
     createWarehouse(
       input: {
@@ -94,6 +94,7 @@ export const UPDATE_WARE_HOUSE = gql`
     $_geo: GeoInput!
     $specific_area: String!
     $region: UpdateRegionBelongsTo!
+    $supplier_id: String!
   ) {
     updateWarehouse(
       id: $id
@@ -101,6 +102,7 @@ export const UPDATE_WARE_HOUSE = gql`
       _geo: $_geo
       specific_area: $specific_area
       region: $region
+      supplier_id: $supplier_id
     ) {
       id
       name
@@ -285,6 +287,7 @@ export const UPDATE_PRODUCT = gql`
     $name: TranslatableInput!
     $short_description: TranslatableInput!
     $description: TranslatableInput!
+    $supplier_id: String
     $images: UpdateProductImagesInput
     $category: CreateCategoryHasOne!
     $is_active: Boolean
@@ -299,6 +302,7 @@ export const UPDATE_PRODUCT = gql`
         is_active: $is_active
         images: $images
         category: $category
+        supplier_id: $supplier_id
         attributes: $attributes
       }
     ) {
@@ -447,6 +451,37 @@ export const CREATE_RETAILER = gql`
     }
   }
 `;
+export const CREATE_WAREHOUSE_MANAGER = gql`
+  mutation createWarehouseManager(
+    $name: String!
+    $phone: String!
+    $email: String!
+    $password: String!
+    $password_confirmation: String!
+    $warehouse_id: String!
+  ) {
+    createWarehouseManager(
+      input: {
+        name: $name
+        phone: $phone
+        email: $email
+        password: $password
+        password_confirmation: $password_confirmation
+        warehouse_id: $warehouse_id
+      }
+    ) {
+      id
+      warehouse {
+        name
+      }
+      user {
+        name
+        phone
+        email
+      }
+    }
+  }
+`;
 export const CREATE_SUPPLIER = gql`
   mutation createSupplier(
     $name: String!
@@ -564,6 +599,35 @@ export const UPDATE_SUPPLIER = gql`
     }
   }
 `;
+export const UPDATE_Manager = gql`
+  mutation update_manager(
+    $id: ID!
+    $name: String!
+    $phone: String!
+    $email: String
+    $warehouse_id: String!
+  ) {
+    updateWarehouseManager(
+      id: $id
+      input: {
+        name: $name
+        phone: $phone
+        email: $email
+        warehouse_id: $warehouse_id
+      }
+    ) {
+      id
+      warehouse {
+        name
+      }
+      user {
+        name
+        phone
+        email
+      }
+    }
+  }
+`;
 
 export const UPDATE_SUPPLIER_Commistion = gql`
   mutation updateSupplierCommission($id: ID!, $commission_rate: Float!) {
@@ -601,6 +665,13 @@ export const DEL_RETAILER = gql`
 export const DEL_SUPPLIER = gql`
   mutation DEL_SUPPLIER($id: ID!) {
     deleteSupplier(id: $id) {
+      id
+    }
+  }
+`;
+export const DEL_MANAGER = gql`
+  mutation DEL_MANAGER($id: ID!) {
+    deleteWarehouseManager(id: $id) {
       id
     }
   }
@@ -1019,6 +1090,14 @@ export const CHANGE_USER_STATUS = gql`
     changeUserStatus(id: $id, status: $status) {
       id
       name
+      status
+    }
+  }
+`;
+export const Change_Supplier_BusinessStatus = gql`
+  mutation ChangeUserStatus($id: ID!, $status: String!) {
+    changeSupplierBusinessStatus(id: $id, status: $status) {
+      id
       status
     }
   }

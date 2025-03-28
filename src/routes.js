@@ -30,6 +30,8 @@ import RetailerReport from "pages/report/retailerReport";
 import PaymentReport from "pages/report/payment";
 import Suppliers from "pages/supplier";
 import SupplierCommission from "pages/supplier/supplier_commissions";
+import SupplierBusiness from "pages/supplier/supplier_business";
+import WarehouseManagers from "pages/warehouseManager";
 const RoutesComp = () => {
   return (
     <Routes>
@@ -64,7 +66,8 @@ const RoutesComp = () => {
       <Route path="/payment-report" element={<PaymentReport />} />
       <Route path="/suppliers" element={<Suppliers />} />
       <Route path="/commission" element={<SupplierCommission />} />
-
+      <Route path="/supplier-business" element={<SupplierBusiness />} />
+      <Route path="/warehouse-managers" element={<WarehouseManagers/>}/>
     </Routes>
   );
 };

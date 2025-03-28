@@ -223,6 +223,10 @@ export const GET_MY_WARE_HOUSES = gql`
           id
           name
         }
+        supplier {
+          id
+          business_name
+        }
         stocks {
           id
           quantity
@@ -380,8 +384,6 @@ export const GET_ACTIVITY_LOGS = gql`
     }
   }
 `;
-
-//products query
 
 export const GET_PRODUCTS = gql`
   query GET_PRODUCTS(
@@ -724,6 +726,123 @@ export const GET_SUPPLIERS_Commission = gql`
             phone
             email
           }
+        }
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+export const GET_SUPPLIERS_Business = gql`
+  query (
+    $search: String
+    $supplier_id: String
+    $status: String
+    $first: Int!
+    $page: Int
+    $ordered_by: [OrderByInput]!
+  ) {
+    suppliersBusinesses(
+      search: $search
+      supplier_id: $supplier_id
+      status: $status
+      first: $first
+      page: $page
+      orderBy: $ordered_by
+    ) {
+      data {
+        id
+        supplier_code
+        business_name
+        business_email
+        business_website
+        business_phone_number
+        business_type
+        address
+        city
+        number_of_warehouses
+        tin
+        buisness_registration_number
+        moa_document
+        trade_license_document
+        tin_certification_document
+        status
+        created_at
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
+export const GET_MY_SUPPLIERS_Business = gql`
+  query (
+    $search: String
+    $first: Int!
+    $page: Int
+    $ordered_by: [OrderByInput]!
+  ) {
+    myBusinesses(
+      search: $search
+      first: $first
+      page: $page
+      orderBy: $ordered_by
+    ) {
+      data {
+        id
+        business_name
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
+export const GET_WARE_HOUSE_MANAGERS = gql`
+  query (
+    $search: String
+    $first: Int
+    $page: Int
+    $ordered_by: [OrderByInput]!
+  ) {
+    warehouseManagers(
+      search: $search
+      first: $first
+      page: $page
+      orderBy: $ordered_by
+    ) {
+      data {
+        id
+        warehouse {
+          id
+          name
+        }
+        user {
+          id
+          name
+          phone
+          email
         }
       }
       paginatorInfo {
