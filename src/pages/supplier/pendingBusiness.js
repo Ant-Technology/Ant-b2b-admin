@@ -36,7 +36,6 @@ const PendingSupplierBusiness = ({activeTab}) => {
   const [openedStatusChange, setStatusChange] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
   const [editId, setEditId] = useState();
-  const [activeTab, setActiveTab] = useState("first");
   const [deleteID, setDeleteID] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activePage, setActivePage] = useState(1);
