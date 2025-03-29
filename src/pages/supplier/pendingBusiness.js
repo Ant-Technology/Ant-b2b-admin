@@ -31,7 +31,7 @@ import HowToRegIcon from "@mui/icons-material/HowToReg";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 import SupplierFilter from "./supplierFilter";
 
-const PendingSupplierBusiness = () => {
+const PendingSupplierBusiness = ({activeTab}) => {
   const [size, setSize] = useState("10");
   const [openedStatusChange, setStatusChange] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -69,10 +69,11 @@ const PendingSupplierBusiness = () => {
       setTotal(data.suppliersBusinesses.paginatorInfo.lastPage);
     }
   }, [data, size]);
-  useEffect(() => {
-    refetch();
-  }, []);
 
+  useEffect(() => {
+    if(activeTab ==='second')
+    refetch();
+  }, [activeTab]);
 
   const theme = useMantineTheme();
 
