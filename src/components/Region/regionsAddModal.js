@@ -53,43 +53,16 @@ const RegionsAddModal = ({
   // form state
   const form = useForm({
     initialValues: {
-      name: { en: "", am: "" },
-      children: [], // This will store an array of strings for specific areas
+      name: ""
     },
   });
 
   const { height } = useViewportSize();
-
-  const handleFields = () => {
-    return form.values.children.map((item, index) => (
-      <Grid key={index}>
-        <Grid.Col span={6}>
-          <TextInput
-            required
-            label={`Specific Area ${index + 1}`}
-            sx={{ flex: 1 }}
-            {...form.getInputProps(`children.${index}`)} // Directly bind to the string
-          />
-        </Grid.Col>
-        <Grid.Col span={6}>
-          <ActionIcon
-            color="#ed522f"
-            onClick={() => form.removeListItem("children", index)}
-            style={{ marginTop: "30px", padding: "2px" }}
-          >
-            <Trash size={24} />
-          </ActionIcon>
-        </Grid.Col>
-      </Grid>
-    ));
-  };
-
   const submit = () => {
     console.log(form.values);
     addRegion({
       variables: {
         name: form.values.name,
-        specific_areas: form.values.children, // Send specific areas as an array of strings
       },
       onCompleted(data) {
         showNotification({
@@ -123,47 +96,17 @@ const RegionsAddModal = ({
             <Grid.Col span={6}>
               <TextInput
                 required
-                label="Region Name (English)"
-                placeholder="Enter region name in English"
-                {...form.getInputProps("name.en")}
+                label="Region Name"
+                placeholder="Enter region name "
+                {...form.getInputProps("name")}
               />
             </Grid.Col>
-            <Grid.Col span={6}>
-              <TextInput
-                required
-                label="Region Name (Amharic)"
-                placeholder="Enter region name in Amharic"
-                {...form.getInputProps("name.am")}
-              />
-            </Grid.Col>
+          
           </Grid>
-          {handleFields().length > 0 ? (
-            handleFields()
-          ) : (
-            <Text color="dimmed" align="center">
-              No specific areas added yet...
-            </Text>
-          )}
-          <Group position="start" mt="md">
-            <Button
-              color="blue"
-              variant="outline"
-              fullWidth
-              style={{
-                width: "200px", // Set a specific width for the button
-              }}
-              onClick={
-                () => form.insertListItem("children", "") // Insert an empty string for new specific area
-              }
-            >
-              Add New Specific Area
-            </Button>
-          </Group>
           <Grid>
-            <Grid.Col span={4}>
+            <Grid.Col span={8}>
               <Button
                 style={{
-                  width: "25%",
                   marginTop: "15px",
                   backgroundColor: "#FF6A00",
                   color: "#FFFFFF",

@@ -66,6 +66,44 @@ export const GET_CATEGORIES = gql`
     }
   }
 `;
+export const GET_Product_CATEGORIES = gql`
+  query GET_PRODUCT_CATEGORIES(
+    $supplier_id: String
+    $search: String
+    $first: Int!
+    $page: Int
+    $ordered_by: [OrderByInput]!
+  ) {
+    supplierProductCategories(
+      supplier_id: $supplier_id
+      search: $search
+      first: $first
+      page: $page
+      orderBy: $ordered_by
+    ) {
+      data {
+        id
+        category {
+          name
+        }
+        supplier {
+          business_name
+          business_type
+          business_phone_number
+        }
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
 //TODO: remove pagination to get all data
 export const GET_CATEGORIES_ALL = gql`
   query GET_CATEGORIES($first: Int!, $page: Int) {
@@ -317,11 +355,6 @@ export const GET_REGIONS = gql`
       data {
         id
         name
-        specific_areas
-        name_translations {
-          en
-          am
-        }
         retailersCount
         warehousesCount
       }
@@ -437,6 +470,7 @@ export const GET_PRODUCTS = gql`
 export const GET_MY_PRODUCTS = gql`
   query GET_MY_PRODUCTS(
     $first: Int!
+    $supplier_business_id: String
     $category_id: String
     $search: String
     $page: Int
@@ -444,6 +478,7 @@ export const GET_MY_PRODUCTS = gql`
     myProducts(
       search: $search
       first: $first
+      supplier_business_id: $supplier_business_id
       category_id: $category_id
       page: $page
     ) {
@@ -764,12 +799,9 @@ export const GET_SUPPLIERS_Business = gql`
         business_email
         business_website
         business_phone_number
-        business_type
-        address
-        city
+        business_type        
         number_of_warehouses
         tin
-        buisness_registration_number
         moa_document
         trade_license_document
         tin_certification_document
@@ -804,7 +836,19 @@ export const GET_MY_SUPPLIERS_Business = gql`
     ) {
       data {
         id
+        supplier_code
         business_name
+        business_email
+        business_website
+        business_phone_number
+        business_type
+        number_of_warehouses
+        tin
+
+        moa_document
+        trade_license_document
+        tin_certification_document
+        status
       }
       paginatorInfo {
         count

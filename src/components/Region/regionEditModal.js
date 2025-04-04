@@ -24,56 +24,26 @@ const RegionEditModal = ({ editId, setOpenedEdit }) => {
 
   const form = useForm({
     initialValues: {
-      name: { en: "", am: "" },
-      children: [],
+      name: "",
     },
   });
 
-   useEffect(() => {
-      if (editId) {
-        console.log(editId)
-        form.setValues({
-          name: {
-            am: editId.name_translations.am,
-            en: editId.name_translations.en,
-          },
-          children: JSON.parse(editId.specific_areas) || [], // Parse the specific areas
-        });
-      }
-    }, [editId]);
+  useEffect(() => {
+    if (editId) {
+      console.log(editId);
+      form.setValues({
+        name: editId.name,
+      });
+    }
+  }, [editId]);
 
   const { height } = useViewportSize();
   const [updateRegion, { loading: regionLoading }] = useMutation(UPDATE_REGION);
-
-  const handleFields = () => {
-    return form.values.children.map((item, index) => (
-      <Grid key={index} gutter="md">
-        <Grid.Col span={4}>
-          <TextInput
-            required
-            label={`Specific Area ${index + 1}`}
-            {...form.getInputProps(`children.${index}`)} // Bind to the string
-          />
-        </Grid.Col>
-        <Grid.Col span={1}>
-          <ActionIcon
-            color="#ed522f"
-            onClick={() => form.removeListItem("children", index)}
-            style={{ marginTop: "30px", padding: "2px" }}
-          >
-            <Trash size={24} />
-          </ActionIcon>
-        </Grid.Col>
-      </Grid>
-    ));
-  };
-
   const submit = () => {
     updateRegion({
       variables: {
         id: editId.id,
         name: form.values.name,
-        specific_areas: form.values.children, // Send specific areas as an array of strings
       },
       onCompleted(data) {
         showNotification({
@@ -104,64 +74,36 @@ const RegionEditModal = ({ editId, setOpenedEdit }) => {
       />
 
       <ScrollArea style={{ height: height / 1.5 }} type="auto" offsetScrollbars>
-        <form onSubmit={form.onSubmit(() => submit())} noValidate>
-          <Stack>
-            <Grid>
-              <Grid.Col span={6}>
-                <TextInput
-                  required
-                  label="Region Name (English)"
-                  placeholder="Enter region name in English"
-                  {...form.getInputProps("name.en")}
-                />
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <TextInput
-                  required
-                  label="Region Name (Amharic)"
-                  placeholder="Enter region name in Amharic"
-                  {...form.getInputProps("name.am")}
-                />
-              </Grid.Col>
-            </Grid>
-            {handleFields().length > 0 ? (
-              handleFields()
-            ) : (
-              <Text color="dimmed" align="center">
-                No specific areas added yet...
-              </Text>
-            )}
-            <Group position="start" mt="md">
+      <form onSubmit={form.onSubmit(() => submit())} noValidate>
+        <Stack>
+          <Grid grow>
+            <Grid.Col span={6}>
+              <TextInput
+                required
+                label="Region Name"
+                placeholder="Enter region name "
+                {...form.getInputProps("name")}
+              />
+            </Grid.Col>
+          
+          </Grid>
+          <Grid>
+            <Grid.Col span={8}>
               <Button
-                color="blue"
-                variant="outline"
-                fullWidth
                 style={{
-                  width: "200px", // Set a specific width for the button
+                  marginTop: "15px",
+                  backgroundColor: "#FF6A00",
+                  color: "#FFFFFF",
                 }}
-                onClick={() => form.insertListItem("children", "")} // Insert an empty string for new specific area
+                type="submit"
+                fullWidth
               >
-                Add New Specific Area
+                Submit
               </Button>
-            </Group>
-            <Grid>
-              <Grid.Col span={4}>
-                <Button
-                  style={{
-                    width: "25%",
-                    marginTop: "15px",
-                    backgroundColor: "#FF6A00",
-                    color: "#FFFFFF",
-                  }}
-                  type="submit"
-                  fullWidth
-                >
-                  Submit
-                </Button>
-              </Grid.Col>
-            </Grid>
-          </Stack>
-        </form>
+            </Grid.Col>
+          </Grid>
+        </Stack>
+      </form>
       </ScrollArea>
     </>
   );

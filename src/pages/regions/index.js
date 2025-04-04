@@ -36,7 +36,7 @@ const Regions = () => {
   const [activePage, setActivePage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const { data, loading ,refetch} = useQuery(GET_REGIONS, {
+  const { data, loading, refetch } = useQuery(GET_REGIONS, {
     variables: {
       first: parseInt(size),
       page: activePage,
@@ -126,16 +126,12 @@ const Regions = () => {
       },
     });
   };
- useEffect(() => {
-   refetch()
+  useEffect(() => {
+    refetch();
   }, []);
   const handleEditRegion = (id) => {
     setOpenedEdit(true);
     setEditId(id);
-  };
-  const handleManageRegion = (item) => {
-    setRegion(item);
-    setOpenedDetail(true);
   };
 
   const headerData = [
@@ -146,17 +142,6 @@ const Regions = () => {
       searchable: false,
       render: (rowData) => {
         return <span style={{ width: "20px" }}>{rowData.name}</span>;
-      },
-    },
-    {
-      label: "Specific Areas",
-      key: "specific_areas",
-      sortable: false,
-      searchable: false,
-
-      render: (rowData) => {
-        const specificAreas = JSON.parse(rowData.specific_areas);
-        return <span>{specificAreas[0]}</span>;
       },
     },
     {
@@ -250,18 +235,17 @@ const Regions = () => {
     <div style={{ width: "98%", margin: "auto" }}>
       <Drawer
         opened={openedEdit}
-        overlayColor={
-          theme.colorScheme === "dark"
-            ? theme.colors.dark[9]
-            : theme.colors.gray[2]
-        }
-        overlayOpacity={0.55}
-        overlayBlur={3}
-        title="Editing a Region"
+
         padding="xl"
         onClose={() => setOpenedEdit(false)}
-        position="bottom"
-        size="80%"
+        size="40%"
+        position="right"
+        styles={{
+          closeButton: {
+            color: "black",
+            marginTop: "50px",
+          },
+        }}
       >
         <RegionEditModal
           setOpenedEdit={setOpenedEdit}
@@ -306,10 +290,15 @@ const Regions = () => {
       <Drawer
         opened={opened}
         onClose={() => setOpened(false)}
-        title="Adding a Region"
         padding="xl"
-        size="80%"
-        position="bottom"
+        size="40%"
+        position="right"
+        styles={{
+          closeButton: {
+            color: "black",
+            marginTop: "50px",
+          },
+        }}
       >
         <RegionsAddModal
           total={total}

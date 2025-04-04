@@ -19,9 +19,6 @@ import { showNotification } from "@mantine/notifications";
 import { DEL_MANAGER, DEL_SUPPLIER } from "apollo/mutuations";
 import { GET_SUPPLIERS, GET_WARE_HOUSE_MANAGERS } from "apollo/queries";
 import B2bTable from "components/reusable/b2bTable";
-
-import SupplierAddModal from "components/Supplier/SupplierAddModal";
-import SupplierEditModal from "components/Supplier/SupplierEditModal";
 import WarehouseManagerAddModal from "components/WarehouseManager/WarehouseManagerAdd";
 import WarehouseManagerEditModal from "components/WarehouseManager/WarehouseEditModal";
 

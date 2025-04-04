@@ -45,41 +45,41 @@ const Products = () => {
   const [deleteID, setDeleteID] = useState(false);
   const [openedDelete, setOpenedDelete] = useState(false);
   const roles = JSON.parse(localStorage.getItem("roles")) || [];
-  const hasAdminPermission = roles.some((permission) => permission === "admin");
+  const hasSupplierPermission = roles.some(
+    (permission) =>
+      permission === "supplier" || permission === "warehouse_manager"
+  );
   const theme = useMantineTheme();
   const handleManageProduct = (id) => {
     setEditId(id);
     setOpenedDetail(true);
   };
-  const { data, loading, fetchMore, refetch } = useQuery(
-    !hasAdminPermission ? GET_MY_PRODUCTS : GET_PRODUCTS,
-    {
-      variables: {
-        category_id: categoryId,
-        first: parseInt(size),
-        page: activePage,
-        ordered_by: [
-          {
-            column: "CREATED_AT",
-            order: "DESC",
-          },
-        ],
-        search: searchValue,
-      },
+  const { data, loading, fetchMore, refetch } = useQuery(GET_MY_PRODUCTS, {
+    variables: {
+      category_id: categoryId,
+      first: parseInt(size),
+      page: activePage,
+      ordered_by: [
+        {
+          column: "CREATED_AT",
+          order: "DESC",
+        },
+      ],
+      search: searchValue,
+    },
 
-      onCompleted: (data) => {
-        if (!hasAdminPermission) {
-          setTotal(data?.myProducts.paginatorInfo.lastPage);
-        } else {
-          setTotal(data?.products.paginatorInfo.lastPage);
-        }
-      },
+    onCompleted: (data) => {
+      if (hasSupplierPermission) {
+        setTotal(data?.myProducts.paginatorInfo.lastPage);
+      } else {
+        setTotal(data?.products.paginatorInfo.lastPage);
+      }
+    },
 
-      onError: (error) => {
-        console.error("Query encountered an error:", error);
-      },
-    }
-  );
+    onError: (error) => {
+      console.error("Query encountered an error:", error);
+    },
+  });
   useEffect(() => {
     refetch();
   }, []);
@@ -92,15 +92,22 @@ const Products = () => {
     update(cache, { data: { deleteProduct } }) {
       cache.updateQuery(
         {
-          query: hasAdminPermission ? GET_PRODUCTS : GET_MY_PRODUCTS,
+          query: !hasSupplierPermission ? GET_PRODUCTS : GET_MY_PRODUCTS,
           variables: {
-            first: 10,
+            category_id: categoryId,
+            first: parseInt(size),
             page: activePage,
-            search: "",
+            ordered_by: [
+              {
+                column: "CREATED_AT",
+                order: "DESC",
+              },
+            ],
+            search: searchValue,
           },
         },
         (data) => {
-          if (hasAdminPermission) {
+          if (!hasSupplierPermission) {
             if (data.products.data.length === 1) {
               setTotal(total - 1);
               setActivePage(activePage - 1);
@@ -356,6 +363,7 @@ const Products = () => {
           activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}
+          category_id={categoryId}
         />
       </Drawer>
       <Drawer
@@ -399,7 +407,7 @@ const Products = () => {
               />
             )}
             data={
-              !hasAdminPermission
+              hasSupplierPermission
                 ? data.myProducts.data
                 : data?.products?.data || []
             }
