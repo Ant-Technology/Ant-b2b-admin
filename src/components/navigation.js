@@ -371,6 +371,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
     const hasSupplierPermission = roles.some((permission) => permission === "supplier");
     if(hasSupplierPermission) {
       data.push({ link: "/warehouse-managers", label: "Warehouse Manager", icon: IconUsers });
+      data.push({ link: "/business-managment", label: "Business Managment", icon: IconUsers });
     }
     data.push({
       label: "Report",

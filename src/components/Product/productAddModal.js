@@ -35,6 +35,7 @@ import { tabList } from "components/utilities/tablist";
 import { CREATE_PRODUCT } from "apollo/mutuations";
 import {
   GET_MY_PRODUCTS,
+  GET_MY_SUPPLIERS_Business,
   GET_PRODUCTS,
   GET_SUPPLIERS,
   NON_PAGINATED_CATEGORIES,
@@ -46,44 +47,66 @@ const ProductAddModal = ({
   setTotal,
   activePage,
   setActivePage,
+  category_id,
 }) => {
   const theme = useMantineTheme();
-  const roles = JSON.parse(localStorage.getItem("roles")) || [];
-  const [suppliers, setSuppliers] = useState([]);
+  const [business, setBusiness] = useState([]);
 
-  const hasAdminPermission = roles.some((permission) => permission === "admin");
-  const { loading: supplierLoading } = useQuery(GET_SUPPLIERS, {
+  const roles = JSON.parse(localStorage.getItem("roles")) || [];
+  const hasAdminorManagerPermission = roles.some(
+    (permission) => permission === "admin" || permission === "warehouse_manager"
+  );
+  const hasSupplierOrManagerPermission = roles.some(
+    (permission) =>
+      permission === "supplier" || permission === "warehouse_manager"
+  );
+  const hasOnlySupplierPermission = roles.some(
+    (permission) => permission === "supplier"
+  );
+  const { loading: businessLoading } = useQuery(GET_MY_SUPPLIERS_Business, {
     variables: {
       first: parseInt(1000),
       page: 1,
       search: "",
+      ordered_by: [
+        {
+          column: "CREATED_AT",
+          order: "DESC",
+        },
+      ],
     },
 
     onCompleted(data) {
-      const arr = data.suppliers.data.map((item) => ({
-        label: item.user?.name,
+      const arr = data.myBusinesses.data.map((item) => ({
+        label: item.business_name,
         value: item.id,
       }));
 
-      setSuppliers(arr);
+      setBusiness(arr);
     },
   });
   const [addProduct, { loading, error }] = useMutation(CREATE_PRODUCT, {
     update(cache, { data: { createProduct } }) {
-      const query = hasAdminPermission ? GET_PRODUCTS : GET_MY_PRODUCTS;
+      const query = !hasSupplierOrManagerPermission ? GET_PRODUCTS : GET_MY_PRODUCTS;
 
       cache.updateQuery(
         {
           query: query,
           variables: {
-            first: 10,
+            category_id: category_id,
+            first: parseInt(10),
             page: activePage,
+            ordered_by: [
+              {
+                column: "CREATED_AT",
+                order: "DESC",
+              },
+            ],
             search: "",
           },
         },
         (data) => {
-          console.log(data);
-          if (hasAdminPermission) {
+          if (!hasSupplierOrManagerPermission) {
             return {
               products: {
                 ...data.products,
@@ -102,8 +125,6 @@ const ProductAddModal = ({
       );
     },
     onError(err) {
-      console.log(err);
-      console.error("Error creating product:", err);
       showNotification({
         color: "red",
         title: "Error",
@@ -268,8 +289,8 @@ const ProductAddModal = ({
       images: [...files],
       category: form.getInputProps("subcategory").value,
     };
-    if (hasAdminPermission) {
-      variables.supplier_id = form.getInputProps("supplier_id").value;
+    if (hasOnlySupplierPermission) {
+      variables.supplier_business_id = form.getInputProps("supplier_id").value;
     }
     addProduct({
       variables,
@@ -316,7 +337,7 @@ const ProductAddModal = ({
             objectFit: "cover",
             borderRadius: "8px",
           }}
-          onLoad={() => URL.revokeObjectURL(imageUrl)} // Revoke the URL once the image is loaded
+          onLoad={() => URL.revokeObjectURL(imageUrl)}
         />
         <ActionIcon
           color="red"
@@ -335,7 +356,7 @@ const ProductAddModal = ({
       </div>
     );
   });
-  const fileInputRef = useRef(null); // Create a reference for the file input
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
@@ -433,12 +454,12 @@ const ProductAddModal = ({
                   disabled={subcategories.length === 0}
                 />
               </Grid.Col>
-              {hasAdminPermission && (
+              {hasOnlySupplierPermission && (
                 <Grid.Col span={6}>
                   <Select
                     searchable
                     required
-                    data={suppliers}
+                    data={business}
                     value={form.getInputProps("supplier_id").value.toString()}
                     onChange={handleSupplierChange}
                     label="Supplier"
@@ -446,9 +467,9 @@ const ProductAddModal = ({
                   />
                 </Grid.Col>
               )}
-              <Grid.Col span={6}>
+              <Grid.Col style={{ marginTop: "23px" }} span={6}>
                 <Button
-                  onClick={() => fileInputRef.current.click()} // Trigger file input on button click
+                  onClick={() => fileInputRef.current.click()}
                   variant="outline"
                   color="blue"
                   fullWidth

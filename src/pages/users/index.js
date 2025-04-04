@@ -67,9 +67,10 @@ const Users = () => {
         {
           query: GET_ALL_USERS,
           variables: {
-            first: 10,
+            first: parseInt(size),
             page: activePage,
             search: "",
+            role: roleId
           },
         },
         (data) => {
@@ -270,15 +271,6 @@ const Users = () => {
   const deleteUser = () => {
     delUser({
       variables: { id: deleteID },
-      refetchQueries: [
-        {
-          query: GET_ALL_USERS,
-          variables: {
-            first: 10,
-            page: 1,
-          },
-        },
-      ],
       onCompleted(data) {
         setOpenedDelete(false);
         setDeleteID(null);
@@ -343,6 +335,8 @@ const Users = () => {
           activePage={activePage}
           setActivePage={setActivePage}
           setOpened={setOpened}
+          size={size}
+          roleId={roleId}
         />
       </Drawer>
       <Drawer

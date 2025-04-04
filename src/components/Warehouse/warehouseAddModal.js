@@ -91,7 +91,6 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
   const autocompleteLoadHandler = (autocomplete) => {
     setAutocomplete(autocomplete);
   };
-  //form initialization and validation
   const form = useForm({
     initialValues: {
       name: "",
@@ -108,52 +107,38 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
   const [regionsDropDownData, setRegionsDropDownData] = useState([]);
   const [regions, setRegions] = useState([]);
   const [areasDropDownData, setAreasDropDownData] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
   const [business, setBusiness] = useState([]);
 
   const roles = JSON.parse(localStorage.getItem("roles")) || [];
-  const hasAdminPermission = roles.some((permission) => permission === "admin");
+  const hasAdminPermission = roles.some(
+    (permission) => permission === "supplier"
+  );
 
-  const { loading: supplierLoading } = useQuery(GET_SUPPLIERS, {
-    variables: {
-      first: parseInt(1000),
-      page: 1,
-      search: "",
-    },
+  const { loading: businessLoading, refetch } = useQuery(
+    GET_MY_SUPPLIERS_Business,
+    {
+      variables: {
+        first: parseInt(1000),
+        page: 1,
+        search: "",
+        ordered_by: [
+          {
+            column: "CREATED_AT",
+            order: "DESC",
+          },
+        ],
+      },
 
-    onCompleted(data) {
-      const arr = data.suppliers.data.map((item) => ({
-        label: item.user?.name,
-        value: item.id,
-      }));
+      onCompleted(data) {
+        const arr = data.myBusinesses.data.map((item) => ({
+          label: item.business_name,
+          value: item.id,
+        }));
 
-      setSuppliers(arr);
-    },
-  });
-
-  const { loading: businessLoading } = useQuery(GET_MY_SUPPLIERS_Business, {
-    variables: {
-      first: parseInt(1000),
-      page: 1,
-      search: "",
-      ordered_by: [
-        {
-          column: "CREATED_AT",
-          order: "DESC",
-        },
-      ],
-    },
-
-    onCompleted(data) {
-      const arr = data.myBusinesses.data.map((item) => ({
-        label: item.business_name,
-        value: item.id,
-      }));
-
-      setBusiness(arr);
-    },
-  });
-  // graphql queries
+        setBusiness(arr);
+      },
+    }
+  );
   const { loading: regionsLoading } = useQuery(GET_REGIONS, {
     variables: {
       first: 100000,
@@ -162,16 +147,12 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
     onCompleted(data) {
       let regions = data.regions;
       let regionsArray = [];
-
-      // loop over regions data to structure the data for the use of drop down
       regions.data.forEach((region, index) => {
         regionsArray.push({
           label: region?.name,
           value: region?.id,
         });
       });
-
-      // put it on the state
       setRegionsDropDownData([...regionsArray]);
       setRegions(regions.data);
     },
@@ -183,32 +164,40 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
       });
     },
   });
+  useEffect(() => {
+    refetch();
+  }, []);
 
   const [createWarehouse, { loading }] = useMutation(CREATE_WARE_HOUSE, {
     update(cache, { data: { createWarehouse } }) {
-      const query = hasAdminPermission ? GET_WARE_HOUSES : GET_MY_WARE_HOUSES;
+      const query = hasAdminPermission ? GET_MY_WARE_HOUSES : GET_WARE_HOUSES;
       cache.updateQuery(
         {
           query: query,
-          variables: {
-            first: parseInt(10),
-            page: activePage,
-            search: "",
-          },
+          variables: hasAdminPermission
+            ? {
+                first: parseInt(10),
+                page: activePage,
+              }
+            : {
+                first: parseInt(10),
+                page: activePage,
+                search: "",
+              },
         },
         (data) => {
           if (hasAdminPermission) {
             return {
-              warehouses: {
-                ...data.warehouses,
-                data: [createWarehouse, ...data.warehouses.data],
+              myWarehouses: {
+                ...data.myWarehouses,
+                data: [createWarehouse, ...data.myWarehouses.data],
               },
             };
           } else {
             return {
-              myWarehouses: {
-                ...data.myWarehouses,
-                data: [createWarehouse, ...data.myWarehouses.data],
+              warehouses: {
+                ...data.warehouses,
+                data: [createWarehouse, ...data.warehouses.data],
               },
             };
           }
@@ -218,17 +207,22 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
   });
 
   const submit = () => {
-    createWarehouse({
-      variables: {
-        name: form.getInputProps("name").value,
-        regionId: form.getInputProps("regionId").value,
-        _geo: {
-          lat: +location.lat,
-          lng: +location.lng,
-        },
-        specific_area: form.getInputProps("specific_area").value,
-        supplier_id: form.getInputProps("supplier_id").value.toString(),
+    let variables = {
+      name: form.getInputProps("name").value,
+      regionId: form.getInputProps("regionId").value,
+      _geo: {
+        lat: +location.lat,
+        lng: +location.lng,
       },
+      specific_area: form.getInputProps("specific_area").value,
+    };
+    if (hasAdminPermission) {
+      variables.supplier_id = form
+        .getInputProps("supplier_id")
+        .value.toString();
+    }
+    createWarehouse({
+      variables,
       onCompleted(data) {
         showNotification({
           color: "green",
@@ -250,22 +244,15 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
   const { height } = useViewportSize();
   const setRegionDropDownValue = (val) => {
     form.setFieldValue("regionId", val);
-    const region = regions.find((item) => item.id === val);
-    const parsedSpecificAreas = JSON.parse(region.specific_areas);
-    setAreasDropDownData(parsedSpecificAreas);
   };
-  const setAreasDropDownValue = (val) => {
-    //
-    form.setFieldValue("specific_area", val);
-    form.setFieldValue("location", val);
-  };
+
   const handleSupplierChange = (val) => {
     form.setFieldValue("supplier_id", val);
   };
   return (
     <>
       <LoadingOverlay
-        visible={loading || regionsLoading|| businessLoading}
+        visible={loading || regionsLoading || businessLoading}
         color="blue"
         overlayBlur={2}
         loader={customLoader}
@@ -305,22 +292,16 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
             </Grid.Col>
 
             <Grid.Col span={6}>
-              <Select
-                searchable
-                data={business}
-                value={form.getInputProps("supplier_id").value.toString()}
-                onChange={handleSupplierChange}
-                label="Supplier"
-                placeholder="Pick a supplier business this belongs to"
-              />
-              <Select
-                required
-                data={areasDropDownData}
-                value={form.getInputProps("specific_area")?.value}
-                onChange={setAreasDropDownValue}
-                label="Specific Area"
-                placeholder="Pick a Specific Area this Warehouse belongs to"
-              />
+              {hasAdminPermission && (
+                <Select
+                  searchable
+                  data={business}
+                  value={form.getInputProps("supplier_id").value.toString()}
+                  onChange={handleSupplierChange}
+                  label="Supplier"
+                  placeholder="Pick a supplier business this belongs to"
+                />
+              )}
             </Grid.Col>
           </Grid>
           <Grid style={{ marginTop: "10px" }}>

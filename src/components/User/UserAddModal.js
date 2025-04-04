@@ -25,7 +25,9 @@ const UserAddModal = ({
   total,
   setTotal,
   activePage,
+  size,
   setActivePage,
+  roleId
 }) => {
   // roles
   const [roles, setRoles] = useState([]);
@@ -64,12 +66,14 @@ const UserAddModal = ({
         {
           query: GET_ALL_USERS,
           variables: {
-            first: 10,
+            first: parseInt(size),
             page: activePage,
             search: "",
+            role: roleId
           },
         },
         (data) => {
+          console.log("rrr",data)
           // Add the new user to the start of the existing users array
           return {
             users: {

@@ -27,9 +27,17 @@ export const CREATE_CATEGORY = gql`
     }
   }
 `;
+
 export const DEL_CATEGORY = gql`
   mutation DEL_CATEGORY($id: ID!) {
     deleteCategory(id: $id) {
+      id
+    }
+  }
+`;
+export const DEL_Product_CATEGORY = gql`
+  mutation DEL_PRODUCT_CATEGORY($id: ID!) {
+    deleteSupplierProductCategory(id: $id) {
       id
     }
   }
@@ -207,38 +215,19 @@ export const DEL_DISTRIBUTOR = gql`
 
 // region related mutation retailer
 export const CREATE_REGIONS = gql`
-  mutation create_regions(
-    $name: TranslatableInput!
-    $specific_areas: [String]
-  ) {
-    createRegion(input: { name: $name, specific_areas: $specific_areas }) {
+  mutation create_regions($name: String!) {
+    createRegion(input: { name: $name }) {
       id
       name
-      name_translations {
-        en
-        am
-      }
     }
   }
 `;
 
 export const UPDATE_REGION = gql`
-  mutation update_region(
-    $id: ID!
-    $name: TranslatableInput!
-    $specific_areas: [String]
-  ) {
-    updateRegion(
-      id: $id
-      input: { name: $name, specific_areas: $specific_areas }
-    ) {
+  mutation update_region($id: ID!, $name: String!) {
+    updateRegion(id: $id, input: { name: $name }) {
       id
       name
-      specific_areas
-      name_translations {
-        en
-        am
-      }
     }
   }
 `;
@@ -261,7 +250,7 @@ export const CREATE_PRODUCT = gql`
     $is_active: Boolean
     $images: [Upload]
     $category: CreateCategoryHasOne!
-    $supplier_id: String
+    $supplier_business_id: String
     $attributes: CreateAttributeHasMany
   ) {
     createProduct(
@@ -269,7 +258,7 @@ export const CREATE_PRODUCT = gql`
         name: $name
         short_description: $short_description
         description: $description
-        supplier_id: $supplier_id
+        supplier_business_id: $supplier_business_id
         is_active: $is_active
         images: $images
         category: $category
@@ -514,6 +503,59 @@ export const CREATE_SUPPLIER = gql`
     }
   }
 `;
+export const CREATE_SUPPLIER_Business = gql`
+  mutation createSupplierBusiness(
+    $business_name: String!
+    $business_email: String
+    $business_phone_number: String!
+    $business_website: String
+    $business_type: String!
+    $business_region_id: String!
+    $business_zone: String!
+    $business_woreda: String!
+    $business_kebele: String!
+    $business_geo_location: GeoInput!
+    $owner_firstname: String!
+    $owner_middlename: String!
+    $owner_lastname: String!
+    $owner_phone_number: String!
+    $owner_id_type: String!
+    $tin: String!
+    $number_of_warehouses: Int!
+    $business_registration_number: String!
+    $trade_license_document: Upload!
+    $tin_certification_document: Upload!
+    $owner_id: Upload!
+  ) {
+    createSupplierBusiness(
+      input: {
+        business_name: $business_name
+        business_email: $business_email
+        business_phone_number: $business_phone_number
+        business_website: $business_website
+        business_type: $business_type
+        business_region_id: $business_region_id
+        business_zone: $business_zone
+        business_woreda: $business_woreda
+        business_kebele: $business_kebele
+        business_geo_location: $business_geo_location
+        owner_firstname: $owner_firstname
+        owner_middlename: $owner_middlename
+        owner_phone_number: $owner_phone_number
+        owner_id_type: $owner_id_type
+        tin: $tin
+        owner_lastname: $owner_lastname
+        number_of_warehouses: $number_of_warehouses
+        business_registration_number: $business_registration_number
+        trade_license_document: $trade_license_document
+        tin_certification_document: $tin_certification_document
+        owner_id: $owner_id
+      }
+    ) {
+      id
+    }
+  }
+`;
 export const CREATE_SUPPLIER_commission = gql`
   mutation createSupplierCommission(
     $supplier_id: String!
@@ -531,6 +573,28 @@ export const CREATE_SUPPLIER_commission = gql`
           name
           phone
         }
+      }
+    }
+  }
+`;
+export const CREATE_PRODUCT_CATEGORIES = gql`
+  mutation createSupplierProductCategory(
+    $supplier_business_id: String!
+    $category_ids: [String!]
+  ) {
+    createSupplierProductCategory(
+      input: {
+        supplier_business_id: $supplier_business_id
+        category_ids: $category_ids
+      }
+    ) {
+      category {
+        name
+      }
+      supplier {
+        business_name
+        business_type
+        business_phone_number
       }
     }
   }
@@ -665,6 +729,13 @@ export const DEL_RETAILER = gql`
 export const DEL_SUPPLIER = gql`
   mutation DEL_SUPPLIER($id: ID!) {
     deleteSupplier(id: $id) {
+      id
+    }
+  }
+`;
+export const DEL_BUSINESS = gql`
+  mutation DEL_BUSINESS($id: ID!) {
+    deleteSupplierBusiness(id: $id) {
       id
     }
   }
