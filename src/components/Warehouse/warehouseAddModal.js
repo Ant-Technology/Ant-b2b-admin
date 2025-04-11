@@ -15,7 +15,7 @@ import Map from "components/utilities/Map";
 import { customLoader } from "components/utilities/loader";
 import { CREATE_WARE_HOUSE } from "../../apollo/mutuations";
 import {
-  GET_MY_SUPPLIERS_Business,
+  NON_PAGINATED_GET_MY_SUPPLIERS_Business,
   GET_MY_WARE_HOUSES,
   GET_REGIONS,
   GET_SUPPLIERS,
@@ -99,7 +99,7 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
         lng: "",
       },
       location: "",
-      regionId: "", // Provide the default region ID here
+      regionId: "",
       specific_area: "",
       supplier_id: 1,
     },
@@ -115,7 +115,7 @@ export default function WarehouseAddModal({ setOpened, activePage }) {
   );
 
   const { loading: businessLoading, refetch } = useQuery(
-    GET_MY_SUPPLIERS_Business,
+    NON_PAGINATED_GET_MY_SUPPLIERS_Business,
     {
       variables: {
         first: parseInt(1000),

@@ -23,7 +23,6 @@ const WarehouseManagerEditModal = ({ manager, setOpenedEdit }) => {
 
   const [updateManager, { loading: supplierLoading }] =
     useMutation(UPDATE_Manager);
-  console.log(manager);
 
   useEffect(() => {
     if (manager) {

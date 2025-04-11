@@ -599,6 +599,27 @@ export const CREATE_PRODUCT_CATEGORIES = gql`
     }
   }
 `;
+export const CREATE_Shipping = gql`
+  mutation createWarehouseShippingEstimation(
+    $warehouse_id: String!
+    $category_id: String!
+    $days: Int
+    $hours: Int
+    $minutes: Int
+  ) {
+    createWarehouseShippingEstimation(
+      input: {
+        warehouse_id: $warehouse_id
+        category_id: $category_id
+        days: $days
+        hours: $hours
+        minutes: $minutes
+      }
+    ) {
+      id
+    }
+  }
+`;
 
 export const UPDATE_RETAILER = gql`
   mutation update_retailer(
@@ -693,6 +714,37 @@ export const UPDATE_Manager = gql`
   }
 `;
 
+export const UPDATE_SHIPPING = gql`
+  mutation update_shipping(
+    $id: ID!
+    $category_id: String
+    $days: Int
+    $hours: Int
+    $minutes: Int
+  ) {
+    updateWarehouseShippingEstimation(
+      id: $id
+      input: {
+        category_id: $category_id
+        days: $days
+        hours: $hours
+        minutes: $minutes
+      }
+    ) {
+      id
+      category {
+        name
+      }
+      warehouse {
+        name
+      }
+      days
+      hours
+      minutes
+    }
+  }
+`;
+
 export const UPDATE_SUPPLIER_Commistion = gql`
   mutation updateSupplierCommission($id: ID!, $commission_rate: Float!) {
     updateSupplierCommission(
@@ -743,6 +795,13 @@ export const DEL_BUSINESS = gql`
 export const DEL_MANAGER = gql`
   mutation DEL_MANAGER($id: ID!) {
     deleteWarehouseManager(id: $id) {
+      id
+    }
+  }
+`;
+export const DEL_Shipping = gql`
+  mutation DEL_SHIPPING($id: ID!) {
+    deleteWarehouseShippingEstimation(id: $id) {
       id
     }
   }

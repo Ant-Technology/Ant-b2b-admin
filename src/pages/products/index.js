@@ -54,7 +54,7 @@ const Products = () => {
     setEditId(id);
     setOpenedDetail(true);
   };
-  const { data, loading, fetchMore, refetch } = useQuery(GET_MY_PRODUCTS, {
+  const { data, loading, fetchMore, refetch } = useQuery(hasSupplierPermission?GET_MY_PRODUCTS:GET_PRODUCTS, {
     variables: {
       category_id: categoryId,
       first: parseInt(size),

@@ -317,7 +317,6 @@ const SupplierBusinessAddModal = ({ setOpened, size, activePage }) => {
       tin_certification_document: files.tin_certification_document[0],
       trade_license_document: files.trade_license_document[0],
     };
-    console.log(variables);
     createSupplierBusiness({
       variables,
       onCompleted(data) {

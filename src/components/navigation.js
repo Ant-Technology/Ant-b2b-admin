@@ -25,6 +25,8 @@ import {
   IconBox,
   IconSteeringWheel,
   IconUserPlus,
+  IconClock,
+  IconBriefcase,
 } from "@tabler/icons";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -208,7 +210,33 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         icon: IconTruckLoading,
       });
     }
+    const roles = JSON.parse(localStorage.getItem("roles")) || [];
+    const hasSupplierPermission = roles.some(
+      (permission) => permission === "supplier"
+    );
+    if (hasSupplierPermission) {
+      data.push({
+        link: "/business-managment",
+        label: "Business Managment",
+        icon: IconBriefcase,
+      });
+      data.push({
+        link: "/warehouses",
+        label: "Warehouse",
+        icon: IconBuildingWarehouse,
+      });
 
+      data.push({
+        link: "/warehouse-managers",
+        label: "Warehouse Manager",
+        icon: IconUsers,
+      });
+      data.push({
+        link: "/warehouse-shipping",
+        label: "Warehouse Shipping",
+        icon: IconClock,
+      });
+    }
     if (permissions.some((perm) => perm.name === "orders-view")) {
       data.push({ link: "/orders", label: "Orders", icon: IconShoppingCart });
     }
@@ -241,7 +269,10 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
       });
     }
 
-    if (permissions.some((perm) => perm.name === "warehouses-view")) {
+    if (
+      permissions.some((perm) => perm.name === "warehouses-view") &&
+      !hasSupplierPermission
+    ) {
       data.push({
         link: "/warehouses",
         label: "Warehouse",
@@ -318,12 +349,12 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
           ...(permissions.some((perm) => perm.name === "roles-view")
             ? [{ link: "/suppliers", label: "Supplier" }]
             : []),
-            ...(permissions.some((perm) => perm.name === "roles-view")
+          ...(permissions.some((perm) => perm.name === "roles-view")
             ? [{ link: "/supplier-business", label: "Supplier business" }]
             : []),
           ...(permissions.some((perm) => perm.name === "configs-view")
             ? [{ link: "/commission", label: "Supplier Commission" }]
-            : [])
+            : []),
         ],
       });
     }
@@ -367,12 +398,7 @@ const NavbarSimple = ({ opened, setOpened, setPosition }) => {
         ],
       });
     }
-    const roles = JSON.parse(localStorage.getItem("roles")) || [];
-    const hasSupplierPermission = roles.some((permission) => permission === "supplier");
-    if(hasSupplierPermission) {
-      data.push({ link: "/warehouse-managers", label: "Warehouse Manager", icon: IconUsers });
-      data.push({ link: "/business-managment", label: "Business Managment", icon: IconUsers });
-    }
+
     data.push({
       label: "Report",
       icon: IconReport,

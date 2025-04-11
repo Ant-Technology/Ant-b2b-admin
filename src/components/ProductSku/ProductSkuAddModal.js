@@ -13,7 +13,7 @@ import { showNotification } from "@mantine/notifications";
 import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_PRODUCTS, GET_PRODUCT_SKUS } from "apollo/queries";
+import { GET_MY_PRODUCTS, GET_PRODUCTS, GET_PRODUCT_SKUS } from "apollo/queries";
 import { CREATE_PRODUCT_SKUS } from "apollo/mutuations";
 import { customLoader } from "components/utilities/loader";
 
@@ -68,14 +68,14 @@ const ProductSkuAddModal = ({
   });
 
   // graphql queries
-  const { data, loading: productskuLoading } = useQuery(GET_PRODUCTS, {
+  const { data, loading: productskuLoading } = useQuery(GET_MY_PRODUCTS, {
     variables: {
       first: 10000,
       page: 1,
     },
     onCompleted(data) {
       const productArr = [];
-      data.products.data.forEach((item) => {
+      data.myProducts.data.forEach((item) => {
         productArr.push({ label: item.name, value: item.id });
       });
       setDropDownData(productArr);

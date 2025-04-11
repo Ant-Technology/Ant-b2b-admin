@@ -799,7 +799,7 @@ export const GET_SUPPLIERS_Business = gql`
         business_email
         business_website
         business_phone_number
-        business_type        
+        business_type
         number_of_warehouses
         tin
         moa_document
@@ -820,7 +820,6 @@ export const GET_SUPPLIERS_Business = gql`
     }
   }
 `;
-
 export const GET_MY_SUPPLIERS_Business = gql`
   query (
     $search: String
@@ -863,6 +862,46 @@ export const GET_MY_SUPPLIERS_Business = gql`
   }
 `;
 
+export const NON_PAGINATED_GET_MY_SUPPLIERS_Business = gql`
+  query (
+    $search: String
+    $first: Int!
+    $page: Int
+    $ordered_by: [OrderByInput]!
+  ) {
+    myBusinesses(
+      search: $search
+      first: $first
+      page: $page
+      orderBy: $ordered_by
+    ) {
+      data {
+        id
+        business_name
+        categories {
+          category {
+            id
+            name
+            children {
+              id
+              name
+            }
+          }
+        }
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
 export const GET_WARE_HOUSE_MANAGERS = gql`
   query (
     $search: String
@@ -888,6 +927,45 @@ export const GET_WARE_HOUSE_MANAGERS = gql`
           phone
           email
         }
+      }
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+export const GET_WARE_HOUSE_SHIPPING = gql`
+  query (
+    $warehouse_id: String
+    $search: String
+    $first: Int!
+    $page: Int
+    $ordered_by: [OrderByInput]!
+  ) {
+    myWarehouseShippingEstimations(
+      warehouse_id: $warehouse_id
+      search: $search
+      first: $first
+      page: $page
+      orderBy: $ordered_by
+    ) {
+      data {
+        id
+        category {
+          name
+        }
+        warehouse {
+          name
+        }
+        days
+        hours
+        minutes
       }
       paginatorInfo {
         count

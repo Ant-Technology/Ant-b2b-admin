@@ -13,15 +13,11 @@ import { showNotification } from "@mantine/notifications";
 import { useForm } from "@mantine/form";
 import { useViewportSize } from "@mantine/hooks";
 import { CREATE_STOCK } from "apollo/mutuations";
-import { GET_PRODUCT_SKUS, GET_STOCKS, GET_WARE_HOUSES } from "apollo/queries";
+import { GET_MY_WARE_HOUSES, GET_PRODUCT_SKUS } from "apollo/queries";
 import { customLoader } from "components/utilities/loader";
 
 const StockAddModal = ({
   setOpened,
-  total,
-  setTotal,
-  activePage,
-  setActivePage,
   fetchData,
   size,
   totalPages,
@@ -29,8 +25,11 @@ const StockAddModal = ({
   // state variables
   const [productSkusDropDownData, setProductSkusDropDownData] = useState([]);
   const [warehousesDropDownData, setWarehousesDropDownData] = useState([]);
-  console.log(totalPages);
-  // form state
+  const roles = JSON.parse(localStorage.getItem("roles")) || [];
+
+  const hasOnlySupplierPermission = roles.some(
+    (permission) => permission === "supplier"
+  );  // form state
   const form = useForm({
     initialValues: {
       quantity: null,
@@ -78,13 +77,13 @@ const StockAddModal = ({
     },
   });
 
-  const { loading: warehouseLoading } = useQuery(GET_WARE_HOUSES, {
+  const { loading: warehouseLoading } = useQuery(GET_MY_WARE_HOUSES, {
     variables: {
       first: 100000,
       page: 1,
     },
     onCompleted(data) {
-      let warehouses = data.warehouses;
+      let warehouses = data.myWarehouses;
       let warehousesArray = [];
 
       // loop over productSkus data to structure the data for the use of drop down
@@ -112,13 +111,17 @@ const StockAddModal = ({
   const { height } = useViewportSize();
 
   const submit = () => {
+    let  variables= {
+      quantity: parseInt(form.values.quantity),
+      product_sku: parseInt(form.values.product_sku.connect),
+      minimum_stock_level: parseInt(form.values.minimum_stock_level),
+    }
+    if(hasOnlySupplierPermission){
+      variables.warehouse= parseInt(form.values.warehouse.connect)
+
+    }
     addStock({
-      variables: {
-        quantity: parseInt(form.values.quantity),
-        product_sku: parseInt(form.values.product_sku.connect),
-        warehouse: parseInt(form.values.warehouse.connect),
-        minimum_stock_level: parseInt(form.values.minimum_stock_level),
-      },
+      variables,
       onCompleted(data) {
         showNotification({
           color: "green",
@@ -145,7 +148,6 @@ const StockAddModal = ({
         });
       },
     });
-    // e.preventDefault();
   };
 
   // set the selected value to the form state
@@ -202,6 +204,7 @@ const StockAddModal = ({
                     },
                   }}
                 />
+                {hasOnlySupplierPermission &&
                 <Select
                   data={warehousesDropDownData}
                   value={form
@@ -212,6 +215,7 @@ const StockAddModal = ({
                   placeholder="Pick a warehouse"
                   searchable
                 />
+                  }
               </Grid.Col>
             </Grid>
 

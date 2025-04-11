@@ -35,7 +35,7 @@ import { tabList } from "components/utilities/tablist";
 import { CREATE_PRODUCT } from "apollo/mutuations";
 import {
   GET_MY_PRODUCTS,
-  GET_MY_SUPPLIERS_Business,
+  NON_PAGINATED_GET_MY_SUPPLIERS_Business,
   GET_PRODUCTS,
   GET_SUPPLIERS,
   NON_PAGINATED_CATEGORIES,
@@ -63,7 +63,7 @@ const ProductAddModal = ({
   const hasOnlySupplierPermission = roles.some(
     (permission) => permission === "supplier"
   );
-  const { loading: businessLoading } = useQuery(GET_MY_SUPPLIERS_Business, {
+  const { loading: businessLoading } = useQuery(NON_PAGINATED_GET_MY_SUPPLIERS_Business, {
     variables: {
       first: parseInt(1000),
       page: 1,

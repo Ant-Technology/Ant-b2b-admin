@@ -97,12 +97,12 @@ const PendingSupplierBusiness = ({activeTab}) => {
     },
 
     {
-      label: "City",
-      key: "city",
+      label: "Type",
+      key: "business_type",
       sortable: false,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData.city}</span>;
+        return <span>{rowData.business_type}</span>;
       },
     },
     {

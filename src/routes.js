@@ -33,6 +33,7 @@ import SupplierCommission from "pages/supplier/supplier_commissions";
 import SupplierBusiness from "pages/supplier/supplier_business";
 import WarehouseManagers from "pages/warehouseManager";
 import BusinessManagment from "pages/business";
+import WarehouseShipping from "pages/warehouseShipping";
 const RoutesComp = () => {
   return (
     <Routes>
@@ -70,6 +71,7 @@ const RoutesComp = () => {
       <Route path="/supplier-business" element={<SupplierBusiness />} />
       <Route path="/warehouse-managers" element={<WarehouseManagers/>}/>
       <Route path="/business-managment" element={<BusinessManagment/>}/>
+      <Route path="/warehouse-shipping" element={<WarehouseShipping/>}/>
     </Routes>
   );
 };

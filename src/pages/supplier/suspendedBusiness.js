@@ -33,7 +33,7 @@ import HowToRegIcon from "@mui/icons-material/HowToReg";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 import SupplierFilter from "./supplierFilter";
 
-const SuspendedSupplierBusiness = ({activeTab}) => {
+const SuspendedSupplierBusiness = ({ activeTab }) => {
   const [size, setSize] = useState("10");
   const [openedStatusChange, setStatusChange] = useState(false);
   const [openedEdit, setOpenedEdit] = useState(false);
@@ -49,7 +49,7 @@ const SuspendedSupplierBusiness = ({activeTab}) => {
     variables: {
       first: parseInt(size),
       page: activePage,
-      status:"SUSPENDED",
+      status: "SUSPENDED",
       supplier_id: supplier,
       search: searchValue,
       ordered_by: [
@@ -71,10 +71,8 @@ const SuspendedSupplierBusiness = ({activeTab}) => {
     }
   }, [data, size]);
   useEffect(() => {
-    if(activeTab ==='third')
-    refetch();
+    if (activeTab === "third") refetch();
   }, [activeTab]);
-
 
   const theme = useMantineTheme();
 
@@ -99,12 +97,12 @@ const SuspendedSupplierBusiness = ({activeTab}) => {
     },
 
     {
-      label: "City",
-      key: "city",
+      label: "Type",
+      key: "business_type",
       sortable: false,
       searchable: true,
       render: (rowData) => {
-        return <span>{rowData.city}</span>;
+        return <span>{rowData.business_type}</span>;
       },
     },
     {
@@ -211,7 +209,7 @@ const SuspendedSupplierBusiness = ({activeTab}) => {
         variables: {
           first: parseInt(size),
           page: activePage,
-          status:"SUSPENDED",
+          status: "SUSPENDED",
           supplier_id: supplier,
           search: searchValue,
           ordered_by: [
@@ -277,7 +275,7 @@ const SuspendedSupplierBusiness = ({activeTab}) => {
     setSearchValue("");
     setConfirmedSearch("");
   };
- 
+
   return loading ? (
     <LoadingOverlay
       visible={loading}
@@ -286,48 +284,45 @@ const SuspendedSupplierBusiness = ({activeTab}) => {
       loader={customLoader}
     />
   ) : (
-        <div style={{ width: "98%", margin: "auto" }}>
-          <Modal
-            opened={openedStatusChange}
-            onClose={() => setStatusChange(false)}
-            title="Warning"
-            centered
-          >
-            <p>{`Are you sure do you want ${
-              status === "ACTIVE" ? "Activat" : "Deactivat"
-            } this  user?`}</p>
-            <Group position="right">
-              <Button onClick={() => handleUserStatusChange()} color="red">
-                {status === "ACTIVE" ? "Activat" : "Deactivat"}
-              </Button>
-            </Group>
-          </Modal>
-          <Card shadow="sm" p="lg">
-            <ScrollArea>
-              <B2bTable
-                total={total}
-                activePage={activePage}
-                handleChange={handleChange}
-                header={headerData}
-                clearInput={clearInput}
-                handelSearch={handleManualSearch}
-                searchValue={confirmedSearch}
-                onSearchChange={setConfirmedSearch}
-                loading={loading}
-                layout={{ minWidth: 700 }}
-                data={data ? data.suppliersBusinesses.data : []}
-                size={size}
-                filterData={({ onCardClick }) => (
-                  <SupplierFilter
-                    supplier={supplier}
-                    onCardClick={setSupplier}
-                  />
-                )}
-                handlePageSizeChange={handlePageSizeChange}
-              />
-            </ScrollArea>
-          </Card>
-        </div>
+    <div style={{ width: "98%", margin: "auto" }}>
+      <Modal
+        opened={openedStatusChange}
+        onClose={() => setStatusChange(false)}
+        title="Warning"
+        centered
+      >
+        <p>{`Are you sure do you want ${
+          status === "ACTIVE" ? "Activat" : "Deactivat"
+        } this  user?`}</p>
+        <Group position="right">
+          <Button onClick={() => handleUserStatusChange()} color="red">
+            {status === "ACTIVE" ? "Activat" : "Deactivat"}
+          </Button>
+        </Group>
+      </Modal>
+      <Card shadow="sm" p="lg">
+        <ScrollArea>
+          <B2bTable
+            total={total}
+            activePage={activePage}
+            handleChange={handleChange}
+            header={headerData}
+            clearInput={clearInput}
+            handelSearch={handleManualSearch}
+            searchValue={confirmedSearch}
+            onSearchChange={setConfirmedSearch}
+            loading={loading}
+            layout={{ minWidth: 700 }}
+            data={data ? data.suppliersBusinesses.data : []}
+            size={size}
+            filterData={({ onCardClick }) => (
+              <SupplierFilter supplier={supplier} onCardClick={setSupplier} />
+            )}
+            handlePageSizeChange={handlePageSizeChange}
+          />
+        </ScrollArea>
+      </Card>
+    </div>
   );
 };
 
